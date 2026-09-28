@@ -1,0 +1,12 @@
+# .NET
+bin/
+obj/
+*.user
+.vs/
+.idea/
+
+# Environnement
+.env
+
+# Données locales
+data/

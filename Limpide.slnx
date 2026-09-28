@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Limpide.Core/Limpide.Core.csproj" />
+    <Project Path="src/Limpide.Ingestion/Limpide.Ingestion.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Limpide.Core.Tests/Limpide.Core.Tests.csproj" />
+  </Folder>
+</Solution>
