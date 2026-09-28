@@ -1,0 +1,41 @@
+{
+  // Documents collectés par `fetch`. Toute source doit d'abord être vérifiée dans docs/sources.md.
+  // url : identifiant du document et lien cité aux utilisateurs.
+  // fetchUrl (facultatif) : adresse de téléchargement quand la page publique bloque les scripts.
+  "sources": [
+    {
+      "name": "EUR-Lex",
+      "baseUrl": "https://eur-lex.europa.eu",
+      "reuseTerms": "Décision 2011/833/UE : réutilisation autorisée avec mention de la source, sans dénaturer le sens.",
+      "documents": [
+        {
+          "title": "Règlement (UE) 2024/1689 (AI Act)",
+          "url": "https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689",
+          "format": "html",
+          // eur-lex.europa.eu impose un défi JavaScript (AWS WAF) aux scripts : on passe par
+          // l'API CELLAR de l'Office des publications, qui sert le même texte officiel.
+          "fetchUrl": "http://publications.europa.eu/resource/celex/32024R1689",
+          "accept": "application/xhtml+xml",
+          "acceptLanguage": "fra"
+        }
+      ]
+    },
+    {
+      "name": "CNIL",
+      "baseUrl": "https://www.cnil.fr",
+      "reuseTerms": "CC-BY-ND 4.0 FR : attribution, aucune modification. Images exclues (CC-BY-NC-ND).",
+      "documents": [
+        {
+          "title": "IA : Annoter les données",
+          "url": "https://www.cnil.fr/fr/ia-annoter-les-donnees",
+          "format": "html"
+        },
+        {
+          "title": "IA : Informer les personnes concernées",
+          "url": "https://www.cnil.fr/fr/ia-informer-les-personnes-concernees",
+          "format": "html"
+        }
+      ]
+    }
+  ]
+}

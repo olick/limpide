@@ -13,11 +13,16 @@
     <PackageReference Include="Pgvector" Version="0.3.2" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <UserSecretsId>f2dc7aaa-1b80-470f-a62b-ebae01422188</UserSecretsId>
   </PropertyGroup>
 
 </Project>

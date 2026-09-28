@@ -27,7 +27,23 @@ cp .env.example .env
 docker compose up -d
 docker compose exec ollama ollama pull bge-m3
 docker compose exec postgres psql -U rag -d rag -c "\dx"   # doit lister l'extension vector
+
+# Chaîne de connexion de l'ingestion (le mot de passe reste hors du dépôt)
+dotnet user-secrets set "ConnectionStrings:Rag" \
+  "Host=localhost;Port=5432;Database=rag;Username=rag;Password=<mot de passe du .env>" \
+  --project src/Limpide.Ingestion
 ```
+
+## Ingestion
+
+Commandes à lancer depuis la racine du dépôt. Chacune est idempotente : la relancer ne fait rien de plus.
+
+```bash
+dotnet run --project src/Limpide.Ingestion -- fetch   # télécharge corpus.json dans data/raw, versionne en base
+```
+
+Hors poste de développement (conteneur, Airflow), la chaîne de connexion passe par la variable
+d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document n'a pas pu être collecté.
 
 ## Structure
 

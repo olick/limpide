@@ -82,9 +82,17 @@ Planning : phase 1 (S1–S3) POC de bout en bout et démo en ligne ; phase 2 (S4
 Plan détaillé de la semaine en cours : `docs/plan/semaine-01.md`.
 
 - [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
-- [ ] Session 2 : corpus (`corpus.json`) et commande `fetch` — **prochaine tâche**
-- [ ] Session 3 : extraction et découpage structurel, avec tests
+- [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
+- [ ] Session 3 : extraction et découpage structurel, avec tests — **prochaine tâche**
 - [ ] Session 4 : commande `embed`, mesures de durée
 - [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README
 
-Critère de fin de la session 2 : lancer `fetch` deux fois de suite ne crée qu'une seule version par document.
+Critère de fin de la session 3 : tests du découpeur verts, et 20 passages tirés au hasard sans passage vide,
+article coupé en pleine phrase ni menu de navigation.
+
+Notes de la session 2 :
+- EUR-Lex bloque les scripts (défi AWS WAF, `202` vide) : l'AI Act est téléchargé via l'API CELLAR
+  (`fetchUrl` dans `corpus.json`). Le fichier brut est du XHTML Formex/CONVEX, pas la page EUR-Lex :
+  en tenir compte pour l'extraction.
+- `fetch` exige un `200` non vide et le bon type de contenu : un blocage ne crée jamais de version.
+- Mot de passe PostgreSQL local dans `dotnet user-secrets` (projet Ingestion), jamais dans `appsettings.json`.
