@@ -1,0 +1,1494 @@
+<!-- Page « IA : Annoter les données », CNIL, https://www.cnil.fr/fr/ia-annoter-les-donnees, licence CC-BY-ND 4.0 FR. Reproduite sans modification. -->
+<!DOCTYPE html>
+<html  lang="fr" dir="ltr" prefix="content: http://purl.org/rss/1.0/modules/content/  dc: http://purl.org/dc/terms/  foaf: http://xmlns.com/foaf/0.1/  og: http://ogp.me/ns#  rdfs: http://www.w3.org/2000/01/rdf-schema#  schema: http://schema.org/  sioc: http://rdfs.org/sioc/ns#  sioct: http://rdfs.org/sioc/types#  skos: http://www.w3.org/2004/02/skos/core#  xsd: http://www.w3.org/2001/XMLSchema# ">
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+<script>var _paq = _paq || [];(function(){var u=(("https:" == document.location.protocol) ? "https://piwik.cnil.fr/" : "http://piwik.cnil.fr/");_paq.push(["setSiteId", "1"]);_paq.push(["setTrackerUrl", u+"matomo.php"]);_paq.push(["setDoNotTrack", 1]);if (!window.matomo_search_results_active) {_paq.push(["trackPageView"]);}_paq.push(["setIgnoreClasses", ["no-tracking","colorbox"]]);_paq.push(["enableLinkTracking"]);var d=document,g=d.createElement("script"),s=d.getElementsByTagName("script")[0];g.type="text/javascript";g.defer=true;g.async=true;g.src=u+"matomo.js";s.parentNode.insertBefore(g,s);})();</script>
+<meta name="description" content="La phase d’annotation des données est une étape déterminante dans le développement d’un modèle d’IA de qualité, tant pour des enjeux de performance que pour le respect des droits des personnes." />
+<link rel="canonical" href="https://www.cnil.fr/fr/ia-annoter-les-donnees" />
+<meta property="og:title" content="IA : Annoter les données" />
+<meta property="og:description" content="La phase d’annotation des données est une étape déterminante dans le développement d’un modèle d’IA de qualité, tant pour des enjeux de performance que pour le respect des droits des personnes." />
+<meta name="MobileOptimized" content="width" />
+<meta name="HandheldFriendly" content="true" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="/themes/custom/bootstrap_cnil/favicon.ico" type="image/vnd.microsoft.icon" />
+<link rel="alternate" hreflang="fr" href="https://www.cnil.fr/fr/ia-annoter-les-donnees" />
+
+    <title>IA : Annoter les données | CNIL</title>
+    <link rel="stylesheet" media="all" href="/core/modules/system/css/components/align.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/fieldgroup.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/container-inline.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/clearfix.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/details.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/hidden.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/item-list.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/js.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/nowrap.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/position-container.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/reset-appearance.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/resize.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/system-status-counter.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/system-status-report-counters.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/system-status-report-general-info.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/core/modules/system/css/components/tablesort.module.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/modules/commons/cnil_libraries/css/typography.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/modules/contrib/paragraphs/css/paragraphs.unpublished.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/modules/contrib/tacjs/assets/vendor/tarteaucitron.js/css/tarteaucitron.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/modules/contrib/webform/modules/webform_bootstrap/css/webform_bootstrap.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/overrides.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/search.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/navigation.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/webform.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/page_liste.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/views.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/timeline.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/auteur.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_base/css/node_only_body.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_cnil/css/base/content.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_cnil/css/jquery.mCustomScrollbar.min.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_cnil/css/style.css?tjllrb" />
+<link rel="stylesheet" media="all" href="/themes/custom/bootstrap_cnil/css/mode-view-grid.css?tjllrb" />
+<link rel="stylesheet" media="print" href="/themes/custom/bootstrap_base/css/print.css?tjllrb" />
+<link rel="stylesheet" media="print" href="/themes/custom/bootstrap_cnil/css/print.css?tjllrb" />
+
+    
+</head>
+<body data-page-type="Pro" class="path-node page-node-type-contenu-generique has-glyphicons">
+
+  <div class="dialog-off-canvas-main-canvas" data-off-canvas-main-canvas>
+    <a href="#main-content" class="visually-hidden focusable skip-link">
+    Aller au contenu principal
+</a>
+<header class="page--header notsticky" role="banner">
+  
+  
+  <div class="mobile-navbar">
+    <button type="button" class="navbar-toggle js-navbar-toggle" data-toggle="collapse" data-target="#navbar-main" aria-expanded="false">
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <p class="sr-only">Menu de navigation</p>
+    </button>
+    <a href="https://www.cnil.fr/fr">
+      <picture>
+        <source srcset="/themes/custom/bootstrap_cnil/logo.png" media="(min-width: 601px)" />
+        <source srcset="/themes/custom/bootstrap_cnil/logo-cnil-mini.png" media="(max-width: 600px)" />
+        <img src="/themes/custom/bootstrap_cnil/logo.png" alt="Accueil - CNIL - Protéger
+          les données personnelles, Accompagner l'innovation, Préserver les libertés
+          individuelles"
+        >
+      </picture>
+    </a>
+    <div class="search">
+      <button class="search-btn js-search-btn" aria-expanded="false">
+        <p class="sr-only">Rechercher</p>
+      </button>
+    </div>
+  </div>
+  <div class="custom-collapse navbar-collapse js-navbar-collapse">
+    <div class="region region-header">
+      <div class="inner">
+        <div class="sticky-large-screen-only">
+            <div class="user-space-switcher"><a href="/fr/particulier" class="particulier" data-value="Part">Particuliers</a><a href="/fr/professionnel" class="professionnel active" data-value="Pro">Professionnels</a><a href="/fr/espace-presse" class="presse" data-value="presse">Presse</a></div>
+
+
+            <div class="nav--top-nav"><a href="/fr" class="fr is-active" hreflang="fr">Fr</a><a href="/en" class="en" hreflang="en">En</a><a href="/fr/gestion-des-cookies" class="cookies">Gestionnaire de cookies</a></div>
+
+
+        </div>
+                  
+      <div class="site-logo">
+      <a href="/fr" rel="home">
+        <img src="/themes/custom/bootstrap_cnil/logo.png" alt="Accueil - CNIL - Protéger
+          les données personnelles, Accompagner l'innovation, Préserver les libertés
+          individuelles"/>
+      </a>
+    </div>
+    
+          <div class="user-space-switcher"><a href="/fr/particulier" class="particulier" data-value="Part">Particuliers</a><a href="/fr/professionnel" class="professionnel active" data-value="Pro">Professionnels</a><a href="/fr/espace-presse" class="presse" data-value="presse">Presse</a></div>
+
+
+        
+        
+        
+        
+  
+
+      <nav role="navigation" aria-label="Navigation principal">
+<ul data-region="header" block="header_menu_pro_fr" class="js-dropdown-wrapper nav menu--menu-menu-header">
+                        <li class="menu-item menu-item-0">
+                          <button type="button" id="menu-toggler-11350780" rel="11350780" aria-expanded="false"
+                  aria-controls="menu-level-11350780"
+                  class="menu-link menu-link-0 js-dropdown-toggle">Ma conformité au RGPD</button>
+                                  <ul class="menu-level-1">
+                          <li class="menu-item menu-item-1">
+                                    <a href="/fr/comprendre-le-rgpd" class="menu-link menu-link-1" data-drupal-link-system-path="node/163964">Comprendre le RGPD</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/rgpd-de-quoi-parle-t-on" class="menu-link menu-link-2" data-drupal-link-system-path="node/1183">Qu&#039;est-ce que le RGPD ?</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/comprendre-le-rgpd/les-six-grands-principes-du-rgpd" class="menu-link menu-link-2" data-drupal-link-system-path="node/902">Les six grands principes du RGPD</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/qualification-juridique-des-acteurs" class="menu-link menu-link-2" data-drupal-link-system-path="node/167205">Rôles et responsabilités des acteurs</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/comprendre-le-rgpd/le-mooc-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/9187">MOOC - L&#039;atelier RGPD</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/passer-laction/la-cnil-publie-sa-charte-daccompagnement-des-professionnels" class="menu-link menu-link-2" data-drupal-link-system-path="node/412">L&#039;accompagnement de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://www.cnil.fr/fr/journees-rgpd" class="menu-link menu-link-2">Les journées RGPD</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-webinaires-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/165294">Les webinaires de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/comprendre-le-rgpd/le-controle-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/1100">Le contrôle de la CNIL</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/ma-conformite-au-rgpd/me-mettre-en-conformite" class="menu-link menu-link-1" data-drupal-link-system-path="node/163970">Me mettre en conformité</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/me-mettre-en-conformite/rgpd-par-ou-commencer" class="menu-link menu-link-2" data-drupal-link-system-path="node/163967">Par où commencer ?</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/RGPD-le-registre-des-activites-de-traitement" class="menu-link menu-link-2" data-drupal-link-system-path="node/498">Créer un registre des traitements</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-bases-legales" class="menu-link menu-link-2" data-drupal-link-system-path="node/1075">Choisir une base légale</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/passer-laction/les-durees-de-conservation-des-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/525">Choisir une durée de conservation</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/passer-laction/le-delegue-la-protection-des-donnees-dpo" class="menu-link menu-link-2" data-drupal-link-system-path="node/524">Mettre en place un délégué (DPO)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/sous-traitant" class="menu-link menu-link-2" data-drupal-link-system-path="node/1054">Travailler avec un sous-traitant</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/lanonymisation-de-donnees-personnelles" class="menu-link menu-link-2" data-drupal-link-system-path="node/704">Anonymiser les données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/securite-des-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1107">Sécuriser les données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-outils-de-la-conformite/transferer-des-donnees-hors-de-lue" class="menu-link menu-link-2" data-drupal-link-system-path="node/526">Transférer des données hors UE</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-outils-de-la-conformite/tiers-autorises-la-cnil-publie-un-guide-pratique-et-un-recueil-de-procedures" class="menu-link menu-link-2" data-drupal-link-system-path="node/646">La transmission de données aux tiers autorisés</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/respecter-les-droits-des-personnes" class="menu-link menu-link-1" data-drupal-link-system-path="node/163976">Respecter les droits des personnes</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/respecter-les-droits-des-personnes" class="menu-link menu-link-2" data-drupal-link-system-path="node/163976">Quelles sont les règles ?</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/passer-laction/les-droits-des-personnes-sur-leurs-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/512">Les droits des personnes sur leurs données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/conformite-rgpd-information-des-personnes-et-transparence" class="menu-link menu-link-2" data-drupal-link-system-path="node/489">Informer les personnes</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/passer-laction/rgpd-exemples-de-mentions-dinformation" class="menu-link menu-link-2" data-drupal-link-system-path="node/490">Exemples de mentions d&#039;information</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/respecter-les-droits-des-personnes/repondre-aux-demandes-dexercice-des-droits" class="menu-link menu-link-2" data-drupal-link-system-path="node/163973">Répondre aux demandes d&#039;exercice des droits</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/outils" class="menu-link menu-link-1" data-drupal-link-system-path="node/163979">Outils spécifiques</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/RGPD-analyse-impact-protection-des-donnees-aipd" class="menu-link menu-link-2" data-drupal-link-system-path="node/507">L&#039;analyse d&#039;impact (AIPD)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-cadres-de-reference" class="menu-link menu-link-2">Les cadres de référence</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-outils-de-la-conformite/les-regles-dentreprise-contraignantes-bcr" class="menu-link menu-link-2" data-drupal-link-system-path="node/1069">Les règles d&#039;entreprise contraignantes (BCR)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-outils-de-la-conformite/le-code-de-conduite" class="menu-link menu-link-2" data-drupal-link-system-path="node/1071">Le code de conduite</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/la-certification" class="menu-link menu-link-2" data-drupal-link-system-path="node/402">La certification</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/ma-conformite-au-rgpd/services-en-ligne" class="menu-link menu-link-1" data-drupal-link-system-path="node/1179">Services en ligne</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/saisir-la-cnil/nous-contacter" class="menu-link menu-link-2" data-drupal-link-system-path="node/745">Poser une question à la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/designation-dpo" class="menu-link menu-link-2" data-drupal-link-system-path="node/472">Désigner un délégué (DPO)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/notifier-une-violation-de-donnees-personnelles" class="menu-link menu-link-2" data-drupal-link-system-path="node/969">Notifier une violation de données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/declarer-un-fichier" class="menu-link menu-link-2" data-drupal-link-system-path="node/1116">Déclarer un fichier</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/soumettre-une-analyse-dimpact-relative-la-protection-des-donnees-aipd-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/1178">Soumettre une analyse d&#039;impact (AIPD)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/quand-et-comment-soumettre-son-projet-de-bcr-aux-autorites-de-protection-des-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/774">Soumettre un projet de BCR</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/soumettre-un-code-de-conduite-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/630">Soumettre un code de conduite</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/services-en-ligne/soumettre-une-demande-dagrement-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/629">Soumettre une demande d&#039;agrément</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://www.cnil.fr/fr/services-en-ligne/comment-faire-approuver-un-mecanisme-de-certification" class="menu-link menu-link-2">Soumettre un mécanisme de certification</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="https://www.cnil.fr/fr/cnil-direct?visiteur=pro" class="menu-link menu-link-1">Questions-réponses</a>
+                      </li>
+              <li class="action">
+        <button type="button" class="js-dropdown-close dropdown-close">Fermer</button>
+      </li>
+          </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-0">
+                          <button type="button" id="menu-toggler-1395816543" rel="1395816543" aria-expanded="false"
+                  aria-controls="menu-level-1395816543"
+                  class="menu-link menu-link-0 js-dropdown-toggle">Ressources</button>
+                                  <ul class="menu-level-1">
+                          <li class="menu-item menu-item-1">
+                                    <a href="/fr/ressources/acteurs-et-secteurs" class="menu-link menu-link-1" data-drupal-link-system-path="node/163985">Acteurs et secteurs</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/acteurs-et-secteurs/affaires-publiques" class="menu-link menu-link-2" data-drupal-link-system-path="node/165113">Affaires publiques</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/mon-quotidien/associations" class="menu-link menu-link-2" data-drupal-link-system-path="node/164606">Associations</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/assurance" class="menu-link menu-link-2" data-drupal-link-system-path="node/903">Assurances</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/acteurs-et-secteurs/banque-moyens-de-paiement" class="menu-link menu-link-2" data-drupal-link-system-path="node/164168">Banque</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/collectivites-territoriales" class="menu-link menu-link-2" data-drupal-link-system-path="node/1082">Collectivités locales</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/education-pro" class="menu-link menu-link-2" data-drupal-link-system-path="node/864">Éducation</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/logement" class="menu-link menu-link-2" data-drupal-link-system-path="node/1048">Logement</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/partis-politiques-et-candidats" class="menu-link menu-link-2" data-drupal-link-system-path="node/1141">Partis politiques</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/recherche-scientifique-hors-sante" class="menu-link menu-link-2" data-drupal-link-system-path="node/899">Recherche scientifique</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/sante" class="menu-link menu-link-2" data-drupal-link-system-path="node/1121">Santé</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematique/services-publics" class="menu-link menu-link-2" data-drupal-link-system-path="taxonomy/term/257">Services publics</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/acteurs-et-secteurs/laccompagnement-social-et-medico-social" class="menu-link menu-link-2" data-drupal-link-system-path="node/1060">Social</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/acteurs-et-secteurs/sport-amateur-professionnel-et-de-haut-niveau" class="menu-link menu-link-2" data-drupal-link-system-path="node/164534">Sport amateur et professionnel</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/startup-comment-faire-de-votre-conformite-rgpd-un-avantage-concurrentiel" class="menu-link menu-link-2" data-drupal-link-system-path="node/1040">Startup</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/tpe-pme" class="menu-link menu-link-2" data-drupal-link-system-path="node/1014">TPE et PME</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/transports-et-mobilite" class="menu-link menu-link-2">Transports et mobilité</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/ressources/thematiques" class="menu-link menu-link-1" data-drupal-link-system-path="node/163988">Thématiques communes</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/cameras" class="menu-link menu-link-2" data-drupal-link-system-path="node/1114">Caméras et autres dispositifs vidéo</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques/commerce-et-publicite" class="menu-link menu-link-2" data-drupal-link-system-path="node/890">Commerce et publicité</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cookies-et-autres-traceurs" class="menu-link menu-link-2" data-drupal-link-system-path="node/1072">Cookies et autres traceurs</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/developpement-informatique" class="menu-link menu-link-2" data-drupal-link-system-path="node/165291">Développement informatique</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques-communes/economie-de-la-donnee" class="menu-link menu-link-2" data-drupal-link-system-path="node/164990">Économie de la donnée</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/ouverture-reutilisation-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1078">Ouverture et réutilisation de données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/smartphones-et-applications-professionnels" class="menu-link menu-link-2" data-drupal-link-system-path="node/860">Smartphones et applications</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematiques-communes/travail" class="menu-link menu-link-2" data-drupal-link-system-path="node/164045">Travail</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/ressources/les-grands-enjeux-numeriques" class="menu-link menu-link-1" data-drupal-link-system-path="node/163991">Enjeux numériques</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/laltruisme-en-matiere-de-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/168268">Altruisme en matière de données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/biometrie" class="menu-link menu-link-2" data-drupal-link-system-path="node/1113">Biométrie</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/blockchain-et-rgpd-quelles-solutions-pour-un-usage-responsable-en-presence-de-donnees-personnelles" class="menu-link menu-link-2" data-drupal-link-system-path="node/1301">Chaîne de blocs</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/civic-tech" class="menu-link menu-link-2" data-drupal-link-system-path="node/1052">Civic tech</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/enjeux-numeriques/les-droits-numeriques-des-mineurs" class="menu-link menu-link-2" data-drupal-link-system-path="node/911">Droits des mineurs</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/intelligence-artificielle-ia" class="menu-link menu-link-2" data-drupal-link-system-path="node/879">Intelligence artificielle (IA)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/technologies/objets-connectes" class="menu-link menu-link-2" data-drupal-link-system-path="node/1128">Objets connectés</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/technologies/cybersecurite" class="menu-link menu-link-1" data-drupal-link-system-path="node/616">Cybersécurité</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="https://www.cnil.fr/fr/recommandation-mfa" class="menu-link menu-link-2">Authentification multifacteur</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/comprendre-les-grands-principes-de-la-cryptologie-et-du-chiffrement" class="menu-link menu-link-2" data-drupal-link-system-path="node/618">Cryptologie et chiffrement</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/informatique-en-nuage-cloud" class="menu-link menu-link-2" data-drupal-link-system-path="node/164837">Informatique en nuage - Cloud</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/mots-de-passe" class="menu-link menu-link-2" data-drupal-link-system-path="node/163994">Mots de passe</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/multiplication-des-attaques-par-rancongiciel-comment-limiter-les-risques" class="menu-link menu-link-2" data-drupal-link-system-path="node/361">Rançongiciels</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/securite-des-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1107">Sécurité des données</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/cybersecurite/les-violations-de-donnees-personnelles" class="menu-link menu-link-2" data-drupal-link-system-path="node/164780">Violations de données</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="https://www.cnil.fr/fr/tag/consultation" class="menu-link menu-link-1">Consultations</a>
+                      </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="https://www.cnil.fr/fr/mediatheque" class="menu-link menu-link-1">Médiathèque</a>
+                      </li>
+              <li class="action">
+        <button type="button" class="js-dropdown-close dropdown-close">Fermer</button>
+      </li>
+          </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-0">
+                          <button type="button" id="menu-toggler-854016473" rel="854016473" aria-expanded="false"
+                  aria-controls="menu-level-854016473"
+                  class="menu-link menu-link-0 js-dropdown-toggle">Textes officiels</button>
+                                  <ul class="menu-level-1">
+                          <li class="menu-item menu-item-1">
+                                    <a href="/fr/cadre-europeen" class="menu-link menu-link-1" data-drupal-link-system-path="node/1097">Cadre européen</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/reglement-europeen-protection-donnees" class="menu-link menu-link-2" data-drupal-link-system-path="node/1095">Le règlement général sur la protection des données (RGPD)</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:32016L0680&amp;from=FR" class="menu-link menu-link-2">La directive Police-Justice</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX%3A32002L0058" class="menu-link menu-link-2">La directive ePrivacy</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://www.edpb.europa.eu/documents_fr" class="menu-link menu-link-2">Les lignes directrices du CEPD</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/cadre-national" class="menu-link menu-link-1" data-drupal-link-system-path="node/1094">Cadre national</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/le-cadre-national/la-loi-informatique-et-libertes" class="menu-link menu-link-2" data-drupal-link-system-path="node/1091">La loi Informatique et Libertés</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="https://www.legifrance.gouv.fr/eli/decret/2019/5/29/JUSC1911425D/jo/texte" class="menu-link menu-link-2">Le décret d&#039;application de la loi</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-sanctions-penales" class="menu-link menu-link-2" data-drupal-link-system-path="node/1093">Les sanctions pénales</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/le-cadre-national/reglement-interieur-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/1092">Le règlement intérieur de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/delegations-signature" class="menu-link menu-link-2" data-drupal-link-system-path="delegations-signature">Les délégations de signature</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/le-cadre-national/charte-de-deontologie" class="menu-link menu-link-2" data-drupal-link-system-path="node/251">La charte de déontologie</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/textes-officiels/les-decisions-de-la-cnil" class="menu-link menu-link-1" data-drupal-link-system-path="node/900">Décisions de la CNIL</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/deliberations" class="menu-link menu-link-2" data-drupal-link-system-path="deliberations">Toutes les délibérations de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/tables-informatique-et-libertes-cahiers-decisions-2024" class="menu-link menu-link-2" data-drupal-link-system-path="node/166764">Les Tables Informatique et Libertés</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/decisions/lignes-directrices-recommandations-CNIL" class="menu-link menu-link-2" data-drupal-link-system-path="decisions/lignes-directrices-recommandations-CNIL">Les lignes directrices et recommandations de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/thematique/cnil/sanctions" class="menu-link menu-link-2" data-drupal-link-system-path="taxonomy/term/106">Les sanctions</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/les-decisions-de-la-cnil/les-cadres-de-reference" class="menu-link menu-link-2" data-drupal-link-system-path="node/1087">Les cadres de référence</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                      
+            <div class="field-menu-push-visuel"><div>
+  
+  
+            <div class="field-media-image">  
+<img loading="lazy" src="/sites/default/files/styles/menu_header_thumbnail/public/2023-02/legifrance-cnil.jpg?itok=X_yplOLA" width="200" height="130" alt="" typeof="foaf:Image" class="img-responsive" />
+
+
+</div>
+      
+</div>
+</div>
+      
+                    <a href="https://www.legifrance.gouv.fr/search/cnil?tab_selection=cnil&amp;searchField=ALL&amp;query=&amp;page=1&amp;init=true&amp;timeInterval=" class="menu-link menu-link-1">Les décisions de la CNIL sur Légifrance</a>
+                      </li>
+              <li class="action">
+        <button type="button" class="js-dropdown-close dropdown-close">Fermer</button>
+      </li>
+          </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-0">
+                          <button type="button" id="menu-toggler-1085651250" rel="1085651250" aria-expanded="false"
+                  aria-controls="menu-level-1085651250"
+                  class="menu-link menu-link-0 js-dropdown-toggle">La CNIL</button>
+                                  <ul class="menu-level-1">
+                          <li class="menu-item menu-item-1">
+                                    <a href="/fr/la-cnil/les-missions-de-la-cnil" class="menu-link menu-link-1" data-drupal-link-system-path="node/1190">Missions</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/missions/mission-1-informer-proteger-les-droits" class="menu-link menu-link-2" data-drupal-link-system-path="node/1186">Informer et protéger</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/missions/mission-2-accompagner-la-conformite-conseiller" class="menu-link menu-link-2" data-drupal-link-system-path="node/1187">Accompagner la conformité et conseiller</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/mission-de-la-CNIL-anticiper-innovation" class="menu-link menu-link-2" data-drupal-link-system-path="node/1188">Anticiper et innover</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/missions/mission-4-controler-et-sanctionner" class="menu-link menu-link-2" data-drupal-link-system-path="node/1189">Contrôler et sanctionner</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/missions/air-avenirs-innovations-revolutions-la-mission-ethique-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/1053">La mission éthique de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/evenements" class="menu-link menu-link-2" data-drupal-link-system-path="evenements">Les évènements</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/la-cnil/fonctionnement-de-la-cnil" class="menu-link menu-link-1" data-drupal-link-system-path="node/1101">Fonctionnement</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/tag/ODJ" class="menu-link menu-link-2" data-drupal-link-system-path="taxonomy/term/76">Ordres du jour des séances</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/fonctionnement/statut-et-organisation-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/589">Statut et organisation</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/actualites/agenda" class="menu-link menu-link-2" data-drupal-link-system-path="actualites/agenda">Agenda</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/fonctionnement/les-avis-de-la-cnil" class="menu-link menu-link-2" data-drupal-link-system-path="node/379">Avis de la CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/la-cnil/interregulation-et-partenariats" class="menu-link menu-link-2" data-drupal-link-system-path="la-cnil/interregulation-et-partenariats">Interrégulation et partenariats</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/la-cnil/en-europe-et-dans-le-monde" class="menu-link menu-link-1" data-drupal-link-system-path="node/1176">En Europe et dans le monde</a>
+                                  <ul class="menu-level-2">
+                          <li class="menu-item menu-item-2">
+                                    <a href="/fr/en-europe-et-dans-le-monde/la-cnil-en-europe" class="menu-link menu-link-2" data-drupal-link-system-path="node/168034">La CNIL en Europe</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/la-cnil-dans-le-monde" class="menu-link menu-link-2" data-drupal-link-system-path="node/168037">La CNIL dans le monde</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/la-protection-des-donnees-dans-le-monde" class="menu-link menu-link-2" data-drupal-link-system-path="node/163814">La carte de la protection des données dans le monde</a>
+                      </li>
+                      <li class="menu-item menu-item-2">
+                                    <a href="/fr/la-cnil-publie-sa-strategie-europeenne-et-internationale-pour-2025-2028" class="menu-link menu-link-2" data-drupal-link-system-path="node/167037">La stratégie européenne et internationale de la CNIL</a>
+                      </li>
+              </ul>
+    
+              </li>
+                      <li class="menu-item menu-item-1">
+                                      
+            <div class="field-menu-push-visuel"><div>
+  
+  
+            <div class="field-media-image">  
+<img loading="lazy" src="/sites/default/files/styles/menu_header_thumbnail/public/2023-02/push_cnil.jpg?itok=0PwAX_DI" width="200" height="130" alt="" typeof="foaf:Image" class="img-responsive" />
+
+
+</div>
+      
+</div>
+</div>
+      
+                    <a href="/fr/lhistoire-de-la-cnil-en-video" class="menu-link menu-link-1" data-drupal-link-system-path="node/163534">L&#039;histoire de la CNIL en vidéo</a>
+                      </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="https://www.cnil.fr/fr/marches-publics" class="menu-link menu-link-1">Marchés publics</a>
+                      </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/opendata" class="menu-link menu-link-1" data-drupal-link-system-path="opendata">Open CNIL</a>
+                      </li>
+                      <li class="menu-item menu-item-1">
+                                    <a href="/fr/la-cnil/travailler-la-cnil" class="menu-link menu-link-1" data-drupal-link-system-path="node/871">Travailler à la CNIL</a>
+                      </li>
+              <li class="action">
+        <button type="button" class="js-dropdown-close dropdown-close">Fermer</button>
+      </li>
+          </ul>
+    
+              </li>
+                  <li class="search-button">
+        <button type="button" aria-expanded="false" aria-controls="cnil-search-form" class="search-btn js-search-btn">
+          <span class="sr-only">Rechercher</span>
+        </button>
+      </li>
+        </nav>
+      </ul>
+    
+
+
+        
+          <div class="nav--top-nav"><a href="/fr" class="fr is-active" hreflang="fr">Fr</a><a href="/en" class="en" hreflang="en">En</a><a href="/fr/gestion-des-cookies" class="cookies">Gestionnaire de cookies</a></div>
+
+
+      </div>
+    </div>
+  </div>
+  <div class="block-search-wrapper js-block-search-wrapper" role="search">
+    <div class="cnil-search-form block block-cnil-search block-cnil-search-form-block" data-drupal-selector="cnil-search-form" id="block-search">
+  
+      <h2 class="visually-hidden">CNIL : Formulaire de recherche</h2>
+    
+      <form action="/fr/ia-annoter-les-donnees" method="post" id="cnil-search-form" accept-charset="UTF-8">
+  
+
+
+
+
+
+
+
+<div class="form-item js-form-item form-type-textfield js-form-type-textfield form-item-keyword js-form-item-keyword form-group">
+      
+  <label for="edit-keyword" class="control-label">Poser une question ou rechercher un article, une délibération... </label>
+  
+  
+  <input data-drupal-selector="edit-keyword" class="form-text form-control" type="text" id="edit-keyword" name="keyword" value="" size="60" maxlength="128" />
+
+  
+  
+  </div>
+<button data-drupal-selector="edit-submit" class="button js-form-submit form-submit btn-default btn" type="submit" id="edit-submit" name="op" value="Rechercher">Rechercher</button><input autocomplete="off" data-drupal-selector="form-pyqyfyqrco4lksrxdskqc46-pdvrrnuew8vchq0i2ac" type="hidden" name="form_build_id" value="form-PYqyFYQRcO4lksRXdsKqc46_pdVRRNuEW8VCHQ0I2ac" /><input data-drupal-selector="edit-cnil-search-form" type="hidden" name="form_id" value="cnil_search_form" />
+</form>
+
+  </div>
+
+  </div>
+
+</header>
+
+
+
+<main class="main-wrapper" id="main-content" role="main">
+  <div class="">
+
+    <div class="page">
+
+      
+      <section>
+        <div class="container">
+                  </div>
+
+                    <div class="region region-breadcrumb container">
+        <ol class="breadcrumb">
+          <li >
+                  <a href="/fr">Accueil</a>
+              </li>
+          <li  class="active" aria-current="page">
+                  IA : Annoter les données
+              </li>
+      </ol>
+
+
+  </div>
+
+        
+        
+
+                  <div class="container">
+            
+          </div>
+        
+        <div class="container">
+                  </div>
+        <div class="container">
+                  </div>
+
+<div class="container">
+  <div class="layout--page-content">
+    <div class="layout-inner">
+        <div class="region region-content">
+    <div data-drupal-messages-fallback class="hidden"></div>  <div class="ctn-gen">
+    <div class='ctn-gen-titre js-zoom-wrapper zoom-wrapper'><h1> 
+<span>IA : Annoter les données</span>
+ </h1></div>
+      <p class='ctn-gen-auteur'>22 juillet 2025</p>
+  
+    <hr class="separator" />
+        <div class="page-introduction js-zoom-wrapper zoom-wrapper clearfix"><p>La phase d’annotation des données est cruciale pour garantir la qualité du modèle entraîné. Cet enjeu de performance peut être atteint au moyen d’une méthodologie rigoureuse garantissant le respect de la protection des données personnelles.</p>
+</div>
+  
+    <div class="page--tools generic-no-image"><div class="social"><ul><li><button class="icon-print print-btn print" onClick="#" type="button"><span class="sr-only">Imprimer l’article</span></button>
+</li><li><button class="icon-share-email email" onClick="#" type="button"><span class="sr-only">Partager cette page par courriel</span></button>
+</li></ul></div><div class="tools"><ul><li><button class="js-zoom-link decrease" data-zoom="-2" type="button"><span class="sr-only">Diminuer la taille de la police</span></button>
+</li><li><button class="js-zoom-link increase" data-zoom="-2" type="button"><span class="sr-only">Augmenter la taille de la police</span></button>
+</li></ul></div></div>
+
+
+
+  
+            <div class='ctn-gen-body js-zoom-wrapper zoom-wrapper'><p>La phase d’annotation des données est une étape déterminante dans le développement d’un modèle d’IA de qualité, tant pour des enjeux de performance que pour le respect des droits des personnes. Cette étape est centrale en <a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="52933b9b-64ab-4e9b-ae7f-32c7772bb5dd" href="/fr/definition/apprentissage-supervise" rel=" noopener" target="_blank" title="Définition : apprentissage supervisé - Nouvelle fenêtre">apprentissage supervisé</a>, mais peut également permettre d’obtenir un jeu de validation en apprentissage non-supervisé. Elle consiste à attribuer une description, appelée «&nbsp;label&nbsp;» ou «&nbsp;étiquette&nbsp;», à chacune des données qui servira de «&nbsp;vérité de terrain&nbsp;» (<em>ground truth</em>) pour le modèle qui doit apprendre à traiter, classer, ou encore discriminer les données en fonction de ces informations.</p>
+
+<p>L’annotation peut porter sur tous types de données, personnelles ou non, et contenir tous types d’informations, personnelles ou non. L’annotation peut être humaine, semi-automatique, ou automatique. Elle peut être un procédé à part entière, ou résulter de processus existants lors desquels une caractérisation des données a déjà été réalisée pour un certain besoin, puis réutilisée pour l’entraînement de modèles d’IA (comme dans le cas du diagnostic médical décrit ci-dessous). Dans certains cas, l'entraînement de l'IA reposera sur des données et annotations existantes.</p>
+
+<p>Cette fiche, ainsi que celles sur la protection des données lors du <a href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-conception-du-systeme" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la conception du système - Nouvelle fenêtre">développement du système</a> et de <a href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-collecte-et-la-gestion-des-donnees" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la collecte et la gestion des données - Nouvelle fenêtre">la collecte des données</a>, devront alors être appliquées. Le périmètre de cette fiche vise l’ensemble des cas évoqués ci-dessus où l’annotation porte sur ou contient des données personnelles.</p>
+
+<p><strong>Exemples d’annotations&nbsp;:</strong></p>
+
+<ul>
+	<li>Afin d’entraîner un modèle d’IA de reconnaissance du locuteur intégré dans un assistant vocal, des enregistrements vocaux sont annotés avec l’identité du locuteur&nbsp;;<br>
+	&nbsp;</li>
+	<li>Afin d’entraîner un modèle d’IA de détection de chutes intégré dans le système de <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="vidéosurveillance"><span class="glossary-tooltips-title">vidéosurveillance</span></button> d’un EHPAD, des images sont annotées avec la position des personnes représentées selon plusieurs labels tels que «&nbsp;debout&nbsp;» ou « couché&nbsp;»&nbsp;;<br>
+	&nbsp;</li>
+	<li>Afin d’entraîner un modèle d’IA de reconnaissance des plaques minéralogiques intégré dans une barrière d’accès à un espace privé, des images sont annotées avec la position des pixels contenant une plaque minéralogique&nbsp;;<br>
+	&nbsp;</li>
+	<li>Afin d’entraîner un modèle d’IA de prédiction du risque d’une certaine pathologie, ayant vocation à être utilisé comme une aide au diagnostic par le personnel soignant d’un établissement hospitalier, les résultats sanguins de patients sont annotés avec le diagnostic réalisé par un médecin sur la pathologie en question.</li>
+</ul>
+</div>
+        <div class="ctn-gen-after js-zoom-wrapper zoom-wrapper">
+      <div class='ctn-gen-ascenseur'>
+  <div>
+    <h2>
+              <span id="ascenseur-titre-12540" class='ctn-gen-ascenseur-titre'>Les enjeux de l’annotation pour les droits et libertés des personnes</span>
+      
+      <button class='ctn-gen-ascenseur-collapse' aria-labelledby='ascenseur-btn-txt-12540 ascenseur-titre-12540' aria-expanded='false' aria-controls='12540'>
+        <span id="ascenseur-btn-txt-12540">Déplier</span>
+      </button>
+    </h2>
+
+    <div class='ctn-gen-ascenseur-toCollapse' id="12540" style='display: none;'>
+              <div class='ctn-gen-ascenseur-texte'><p>Si elle porte sur des données personnelles, l’annotation doit se faire dans le respect du règlement général sur la protection des données (RGPD). Elle s’inscrit généralement dans la <a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="5df26dda-b240-419e-b6af-16d74f55b0fa" href="/fr/definir-une-finalite-0" rel=" noopener" target="_blank" title="Définir une finalité - Nouvelle fenêtre">finalité </a>plus globale définie en amont du traitement et doit respecter les principes posés par le RGPD. Au regard des risques pour les individus tant en phase de développement que de déploiement, la CNIL souhaite attirer l’attention des acteurs ayant recours à l’annotation sur les principes de <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="minimisation"><span class="glossary-tooltips-title">minimisation</span></button>, d’exactitude et de loyauté.</p>
+
+<h3>Le principe de minimisation</h3>
+
+<p>La minimisation consiste à ne traiter que les données «&nbsp;<em>adéquates, pertinentes et limitées à ce qui est nécessaire au regard des finalités pour lesquelles elles sont traitées</em>&nbsp;» (article 5.1.c du RGPD). En pratique, cela signifie que les annotations, autant que les données d’apprentissage à annoter, doivent se limiter à ce qui est nécessaire à l’entraînement du modèle, comme décrit dans la fiche&nbsp;<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="1344f0d8-5810-4bcd-8d87-019100c91271" href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-collecte-et-la-gestion-des-donnees" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la collecte et la gestion des données - Nouvelle fenêtre">«&nbsp;Tenir compte de la protection des données dans la collecte et la gestion des données&nbsp;»</a>.</p>
+
+<p><strong>Les annotations contenant des informations non pertinentes avec la fonctionnalité prévue ne respectent pas le principe de minimisation</strong>. Dans certains cas, une information indirectement liée à la fonctionnalité peut être utile pour améliorer les performances du modèle (comme par exemple des images de panneaux publicitaires pour l’entraînement d’un modèle d’identification des panneaux de signalisation, cet ajout lui permettant d’éviter certains faux positifs). Une information est pertinente dès lors que son lien avec les performances du modèle est prouvé (théoriquement, ou empiriquement, notamment dans des publications scientifiques) ou suffisamment plausible.</p>
+
+<p>Les jeux annotés de données utilisées par le développeur d’un <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="système d’ia"><span class="glossary-tooltips-title">système d’IA</span></button> à l’issue d’une collecte antérieure, d’un achat ou d’un téléchargement depuis une source ouverte ou non ne devraient contenir que des annotations pertinentes au regard des fonctionnalités du système qu’il développe. Lorsque cela n’est pas techniquement possible, le responsable du traitement doit être en mesure de le justifier et s’être efforcé de recourir au jeu annoté le plus pertinent. Un tri dans les données doit alors être réalisé pour limiter les annotations conservées à celles qui sont pertinentes.</p>
+
+<div class="apparte">Exemple&nbsp;: Annoter une image avec la profession de l’individu représenté ne sera pas utile pour un <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="algorithme"><span class="glossary-tooltips-title">algorithme</span></button> visant à détecter la présence d’une personne. En revanche, annoter la position de ses membres peut être une indication utile pour le modèle qui pourrait être en mesure de détecter des personnes partiellement occultées.</div>
+
+<p>Lorsque l’activité d’un organisme consiste à constituer des jeux de données d’entraînement au service de tiers, deux situations doivent être distinguées&nbsp;:</p>
+
+<ul>
+	<li>soit, ce qui est recommandé, le jeu d’entraînement est créé ou configuré spécialement pour les besoins du client&nbsp;; le fournisseur du jeu d’entraînement est alors <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="sous\-traitant"><span class="glossary-tooltips-title">sous-traitant</span></button> de son client pour l’application du RGPD&nbsp;; le sous-traitant doit s’assurer que le jeu de données ne contient que des annotations pertinentes&nbsp;;<br>
+	&nbsp;</li>
+	<li>soit le fournisseur met à disposition des jeux d’entraînement déjà constitués&nbsp;; il doit alors avoir conçu son produit de façon à permettre le respect du principe de minimisation&nbsp;; une solution peut être de prévoir plusieurs catégories d’annotations, séparables ou cumulables, ou de proposer plusieurs jeux distincts en fonction des types d’annotation.</li>
+</ul>
+
+<p>Dans tous les cas, les jeux d’entraînement doivent avoir été constitués et être mis à disposition dans le respect du RGPD.</p>
+
+<p>Les recommandations de la CNIL sur la minimisation des données formulées au sein des fiches <a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="5cb9c6a6-eff8-4e90-a99f-eff0f911faed" href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-conception-du-systeme" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la conception du système - Nouvelle fenêtre">«&nbsp;Tenir compte de la protection des données dès les choix de conception du système pour respecter la minimisation&nbsp;»</a> et «&nbsp;<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="1344f0d8-5810-4bcd-8d87-019100c91271" href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-collecte-et-la-gestion-des-donnees" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la collecte et la gestion des données - Nouvelle fenêtre">Tenir compte de la protection des données dans la collecte et la gestion des données</a>&nbsp;»&nbsp;sont applicables. &nbsp;</p>
+
+<p><strong>Les annotations peuvent inclure des éléments de contexte utiles pour la mesure et la correction des erreurs et des biais. </strong>Dans le cas de systèmes probabilistes comme le sont la majorité des systèmes d’IA, la gestion de la performance repose sur la capacité à mesurer et corriger les erreurs et les biais les plus à même d’impacter l’efficacité du système. Il peut donc être pertinent d’annoter les données d’entraînement, de test ou de validation avec des éléments de contexte (date et heure, météo, etc.), notamment pour mesurer d’éventuels écarts de performance selon les situations. En revanche, une attention particulière doit être portée à l’annotation avec des données personnelles telles que le nom d’une personne ou des données sensibles (religion, couleur de peau, etc.).</p>
+
+<div class="apparte">Exemple&nbsp;: un système d’analyse automatique d’image est entraîné à partir de données issues de caméras dans différents lieux à des horaires où des personnes les visitent. Afin de mesurer sa performance, le concepteur annote les données avec les informations suivantes&nbsp;: jour/nuit, type d’habitat filmé, météo.</div>
+
+<h3>Le principe d’exactitude</h3>
+
+<p>L’exactitude impose que les données traitées soient exactes et, si nécessaire, tenues à jour. Ce principe implique que l’annotation ne doit contenir que des informations exactes à propos de la personne à qui correspondent les données. <strong>Une annotation inexacte ou fondée sur des critères inadaptés ou arbitraires ne respectera pas le principe d’exactitude.</strong> En pratique, cela signifie que le développeur devra prendre les mesures adéquates afin de s’assurer que les critères d’annotation sont objectifs. Cet enjeu apparaît d’autant plus important en raison du fait que l’annotation se concrétise généralement par un unique mot, ou par une expression courte, qui ne suffit pas à décrire une personne. Cette annotation possède un risque d’être perçue comme dégradante par les personnes qu’il convient de ne pas négliger, d’autant plus que <strong>le système pourrait reproduire les inexactitudes de l’annotation plus tard, lors du déploiement du système et conduire à des sorties inexactes, voire dégradantes ou discriminantes.</strong></p>
+
+<div class="apparte">Exemple&nbsp;: Annoter un jeu d’images avec la profession des personnes représentées pourrait conduire à des annotations inexactes si les catégories d’emploi utilisées dans l’annotation sont trop spécifiques. Ainsi une image sur laquelle une personne en blouse blanche est représentée sans davantage d’informations pourrait tout aussi bien être médecin ou infirmier et lui attribuer l’annotation «&nbsp;personnel soignant&nbsp;» pourrait lui permettre de respecter le principe d’exactitude.</div>
+
+<p>D’autres principes moins spécifiques à l’annotation, tels que <strong>la loyauté, la transparence, la confidentialité ou encore l’intégrité, </strong>s’appliquent également.</p>
+</div>
+          </div>
+  </div>
+  <hr />
+</div>
+
+  <div class='ctn-gen-ascenseur'>
+  <div>
+    <h2>
+              <span id="ascenseur-titre-12543" class='ctn-gen-ascenseur-titre'>Garantir la qualité de l’annotation</span>
+      
+      <button class='ctn-gen-ascenseur-collapse' aria-labelledby='ascenseur-btn-txt-12543 ascenseur-titre-12543' aria-expanded='false' aria-controls='12543'>
+        <span id="ascenseur-btn-txt-12543">Déplier</span>
+      </button>
+    </h2>
+
+    <div class='ctn-gen-ascenseur-toCollapse' id="12543" style='display: none;'>
+              <div class='ctn-gen-ascenseur-texte'><p>La CNIL invite les acteurs à mettre en œuvre les mesures qui suivent&nbsp;:</p>
+
+<p><strong>La définition d’une procédure de vérification continue</strong>. Cette procédure visant à contrôler la qualité de l’annotation devrait être mise en œuvre peu après le début de l’annotation, puis perdurer au moyen de contrôles réguliers ou continus au cours de l’annotation. Elle devrait être documentée et pourra par exemple reposer sur&nbsp;:</p>
+
+<ul>
+	<li><strong>Définir un protocole d’annotation</strong>, en application des principes d’exactitude et de <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="minimisation"><span class="glossary-tooltips-title">minimisation</span></button>. La CNIL recommande de suivre les étapes suivantes&nbsp;:
+
+	<ul>
+		<li><strong>Le choix des labels d’annotation</strong>. Ils devront être adaptés à la finalité visée pour le déploiement du système, et limités aux informations utiles pour l’apprentissage. Bien que cette finalité ne soit pas toujours précisément connue lors de la conception du modèle, notamment pour les <a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="e1738ddd-05e1-43da-b9db-2af34e4a42e1" href="/fr/definition/modele-de-fondation" rel=" noopener" target="_blank" title="Définition : modèle de fondation - Nouvelle fenêtre">modèles de fondation</a>, les labels choisis devraient correspondre aux fonctionnalités attendues à l’issue de l’apprentissage. Pour plus d’informations sur la finalité des modèles de fondation et systèmes à usage général, se référer à la fiche <a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="5df26dda-b240-419e-b6af-16d74f55b0fa" href="/fr/definir-une-finalite-0" rel=" noopener" target="_blank" title="Définir une finalité - Nouvelle fenêtre">«&nbsp;Définir une finalité&nbsp;»</a>. De plus, ils devront permettre une annotation aussi objective et dénuée d’ambiguïté que possible. Ces labels servant à caractériser les données d’une personne, leur choix devra se faire de manière loyale envers les personnes dont les données sont annotées et notamment exclure tout terme dégradant, dépréciatif ou relevant d’un jugement de valeur pouvant porter atteinte à la réputation des personnes. Les annotations pouvant servir de valeurs de substitution, ou <em>proxy</em>, pour d’autres informations concernant la personne, telles que des informations sensibles, une attention particulière doit être portée à ce que ceux-ci ne conduisent pas à l’introduction involontaire de biais, et éventuellement de discriminations, dans le système. Dans le cas où l’annotation résulte d’un processus métier, une phase de tri ou de requalification des labels peut être recommandée afin de limiter les annotations à ce qui est nécessaire et pertinent pour l’entraînement du modèle d’IA.&nbsp;Enfin, lorsqu’on cherche à anonymiser les données à annoter, il peut être pertinent d’étudier le rôle des labels sur l’anonymisation. En effet, ceux-ci peuvent faciliter un recoupement des données entre elles et ainsi permettre une réidentification.<br>
+		&nbsp;</li>
+		<li><strong>La définition d’une procédure d’annotation</strong>. Elle devrait&nbsp;:
+		<ul>
+			<li>être documentée&nbsp;;<br>
+			&nbsp;</li>
+			<li>prévoir une attribution des tâches claires,&nbsp;limitant ainsi l’accès aux données aux seules personnes habilitées&nbsp;;<br>
+			&nbsp;</li>
+			<li>permettre aux personnes réalisant l’annotation d’effectuer des retours sur le protocole d’annotation, et en particulier sur les labels et sur les données, afin d’identifier quand le protocole est améliorable ou inadapté&nbsp;;<br>
+			&nbsp;</li>
+			<li>inclure une phase de validation visant à confirmer le choix des labels et le fonctionnement de la procédure, au cours de laquelle l’accord inter-annotateurs sera par exemple évalué lorsque plusieurs personnes réalisent l’annotation. Une analyse approfondie portant sur un échantillon aléatoire de données annotées permettra de déceler certaines erreurs, imprécisions, ou inexactitudes récurrentes lors de cette phase ;<br>
+			&nbsp;</li>
+			<li>être suivie au moyen d’une journalisation des modifications apportées, ou grâce à un outil de gestion des versions&nbsp;;<br>
+			&nbsp;</li>
+			<li>reposer sur un outil d’annotation fiable, robuste et maîtrisé. De nombreux outils d’annotations, souvent spécifiques à certaines typologies de données (images, texte, son, données tabulaires) existent&nbsp;; il est recommandé de vérifier leur sécurité et leur pertinence avec la finalité visée, notamment lorsqu’ils intègrent une fonctionnalité d’<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="35ecb0bd-9510-43d1-9eda-18d9414eb9ab" href="/fr/definition/annotation-ia" rel=" noopener" target="_blank" title="Définition : Annotation - Nouvelle fenêtre">annotation semi-automatique</a>.<br>
+			<br>
+			Dans le cas où l’annotation résulte d’un processus métier, ce dernier doit intégrer les recommandations précédentes et faire de l’annotation des données un objectif à part entière.</li>
+		</ul>
+		</li>
+		<li><strong>La définition d’une procédure de vérification continue.</strong> Cette procédure visant à contrôler la qualité de l’annotation devrait être mise en œuvre peu après le début de l’annotation, puis perdurer au moyen de contrôle réguliers ou continus au cours de l’annotation. Elle devrait être documentée et pourra par exemple reposer sur&nbsp;:
+		<ul>
+			<li>des panels de discussion incluant l’équipe d’annotation, l’équipe en charge du développement du système, et les utilisateurs du système lorsqu’ils sont connus&nbsp;;<br>
+			&nbsp;</li>
+			<li>l’analyse d’échantillons aléatoires de données annotées&nbsp;;<br>
+			&nbsp;</li>
+			<li>un audit interne ou externe&nbsp;;<br>
+			&nbsp;</li>
+			<li>une analyse de la pertinence des annotations pour chaque nouveau cas d’usage nécessitant un apprentissage sur les données (un jeu d’images constitué pour entraîner un <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="algorithme"><span class="glossary-tooltips-title">algorithme</span></button> de reconnaissance de véhicules devrait être revu avant d’être utilisé pour la détection de piétons par exemple)&nbsp;;<br>
+			&nbsp;</li>
+			<li>une procédure de prise en compte des retours des utilisateurs du jeu de données ou du modèle entraîné sur la qualité de l’annotation et sur les corrections à apporter&nbsp;;<br>
+			&nbsp;</li>
+			<li>la procédure de contrôle qualité prévue dans le cadre des processus métier, qui devra être adaptée afin d’inclure la qualité de l’annotation comme objectif à part entière.</li>
+		</ul>
+		</li>
+	</ul>
+	</li>
+	<li><strong>Impliquer un référent ou un comité éthique</strong>, à titre de bonne pratique, en amont puis tout au long de la phase d’annotation. Le caractère pluridisciplinaire et indépendant de ce comité permettra&nbsp;:
+	<ul>
+		<li>De choisir la meilleure option pour l’annotation des données, qu’il s’agisse d’un traitement en interne, d’une sous-traitance (et du choix du sous-traitant), ou du recours à une solution ne nécessitant pas d’annotation (utilisation d’un jeu existant ou de données synthétiques)&nbsp;;<br>
+		&nbsp;</li>
+		<li>D’établir un protocole d’annotation, et notamment de choisir et de définir les labels utilisés pour l’annotation&nbsp;;<br>
+		&nbsp;</li>
+		<li>De vérifier l’application du protocole d’annotation&nbsp;;<br>
+		&nbsp;</li>
+		<li>De contrôler la qualité des annotations et leur adéquation à la tâche visée en phase de déploiement.<br>
+		<br>
+		Dans chacune de ces tâches, les recommandations détaillées suivantes devraient être prises en compte par le comité éthique. Les bonnes pratiques concernant les objectifs et la composition de ce comité sont à retrouver dans la fiche «&nbsp;<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="5cb9c6a6-eff8-4e90-a99f-eff0f911faed" href="/fr/tenir-compte-de-la-protection-des-donnees-dans-la-conception-du-systeme" rel=" noopener" target="_blank" title="Tenir compte de la protection des données dans la conception du système - Nouvelle fenêtre">Tenir compte de la protection des données dans les choix de conception du système&nbsp;</a>». Il est à noter que la constitution d’un comité éthique doit être adaptée aux contraintes structurelles de l’organisme. Pour les structures moins dotées en ressources, un référent «&nbsp;éthique&nbsp;» pourra tenir le rôle du comité.</li>
+	</ul>
+	</li>
+</ul>
+
+<p>Dans le cas d’une annotation résultant d’un processus métier, ces mesures doivent être intégrées dans ce processus (par exemple, si une information collectée dans le cadre de la procédure métier, comme un diagnostic médical, est réutilisée par la suite pour l’entraînement).</p>
+</div>
+          </div>
+  </div>
+  <hr />
+</div>
+
+  <div class='ctn-gen-ascenseur'>
+  <div>
+    <h2>
+              <span id="ascenseur-titre-12546" class='ctn-gen-ascenseur-titre'>L’information et l’exercice des droits</span>
+      
+      <button class='ctn-gen-ascenseur-collapse' aria-labelledby='ascenseur-btn-txt-12546 ascenseur-titre-12546' aria-expanded='false' aria-controls='12546'>
+        <span id="ascenseur-btn-txt-12546">Déplier</span>
+      </button>
+    </h2>
+
+    <div class='ctn-gen-ascenseur-toCollapse' id="12546" style='display: none;'>
+              <div class='ctn-gen-ascenseur-texte'><h3>Les personnes doivent être informées des opérations d’annotation</h3>
+
+<p><strong><a href="/fr/ia-informer-les-personnes-concernees" rel=" noopener" target="_blank" title="IA : Informer les personnes concernées - Nouvelle fenêtre">L’information des personnes</a> dont les données sont collectées, qu’elle soit individuelle ou collective, doit faire mention de la phase d’annotation des données</strong>. En complément des informations qui doivent être fournies conformément au RGPD, il est recommandé, à titre de bonne pratique, de renforcer la transparence en communiquant les informations suivantes :</p>
+
+<ul>
+	<li>l’objectif de l’annotation, comme par exemple d’identifier les personnes dans une image, ou de faire correspondre le diagnostic médical d’un patient à ses courriers médicaux.<br>
+	&nbsp;</li>
+	<li>l’organisme en charge de l’annotation, qu’il s’agisse d’une équipe constituée par le responsable de traitement, d’un sous-traitant, ou d’une communauté de collaborateurs. Dans le cas du recours à un sous-traitant dont les équipes sont situées hors de l’Union européenne, l’information devra préciser l’existence de transferts en dehors de l’UE. Le recours à un sous-traitant doit également faire l’objet de clauses contractuelles telles que celles proposées sur la page web «&nbsp;<a href="/fr/clauses-contractuelles-types-entre-responsable-de-traitement-et-sous-traitant" rel=" noopener" target="_blank" title="Clauses contractuelles types entre responsable de traitement et sous-traitant - Nouvelle fenêtre">Clauses contractuelles types entre responsable de traitement et sous-traitant&nbsp;</a>» de la CNIL.<br>
+	&nbsp;</li>
+	<li>les critères de responsabilité sociale des entreprises respectés dans le cadre du contrat liant les personnes en charge de l’annotation au <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="responsable de traitement"><span class="glossary-tooltips-title">responsable de traitement</span></button>, tels que les garanties apportées concernant les conditions de travail, la rémunération, ou le soutien psychologique lorsque l’annotation porte sur des données pouvant choquer.<br>
+	&nbsp;</li>
+	<li>les mesures de sécurité prises, et en particulier celles concernant la phase d’annotation.</li>
+</ul>
+
+<p>Une fois l’annotation réalisée, et lorsqu’il est possible d’informer <em>a posteriori </em>les personnes concernées, celles-ci peuvent être informées des résultats de l’annotation et notamment du label qui est attribué à leurs données dans un objectif de transparence. Cela peut-être une bonne pratique dans certains cas assez rares, et notamment lorsque&nbsp;:</p>
+
+<ul>
+	<li>l’annotation est susceptible d’entraîner des conséquences pour les personnes, ce qui peut être le cas lorsque leurs données représentent l’ensemble ou une part importante du jeu de données d’entraînement. Cela peut être le cas lorsque les données d’une personne sont utilisées afin d’<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="5467b38e-098f-4c0a-8d02-719ab87efa80" href="/fr/definition/ajustement-fine-tuning" rel=" noopener" target="_blank" title="Définition : Ajustement d'un modèle - Nouvelle fenêtre">ajuster un modèle</a>&nbsp;(<em>fine-tuning</em>) pour son usage particulier sur la base d’un échantillon annoté.</li>
+</ul>
+
+<div class="apparte">Exemple&nbsp;: Pour le paramétrage d’un outil visant à aider un foyer à réduire sa consommation de gaz par une analyse automatisée, confirmer auprès des utilisateurs de l’outil que les installations (comme le chauffage, le chauffe-eau ou le four à gaz) détectées sont les bonnes peut permettre une analyse de meilleure qualité.</div>
+
+<ul>
+	<li>l'annotation est susceptible d’entraîner des conséquences pour les personnes, par exemple lorsqu’une divulgation involontaire des données pourrait porter une atteinte à la réputation des personnes.</li>
+</ul>
+
+<h3>Les personnes doivent pouvoir exercer leurs droits sur les annotations</h3>
+
+<p>Les droits&nbsp;peuvent être exercés aux labels associés aux données d’une personne lorsque les dérogations prévues par les textes (le RGPD et la loi Informatique et Libertés) ne s’appliquent pas, comme décrit dans<a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="88792aa9-54cf-476b-9926-d37ac03bc1a0" href="/fr/ia-respecter-lexercice-des-droits-des-personnes" rel=" noopener" target="_blank" title="IA : Respecter et faciliter l’exercice des droits des personnes concernées - Nouvelle fenêtre"> la fiche dédiée à l’exercice des droits</a>. En effet, l’annotation attribuée à une <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="donnée personnelle"><span class="glossary-tooltips-title">donnée personnelle</span></button> pourra être considérée dans de nombreux cas comme une donnée personnelle. Il en découle que&nbsp;:</p>
+
+<ul>
+	<li><strong>le droit d’accès</strong> s’applique à l’annotation&nbsp;: les informations fournies suite à une demande de droit d’accès devront contenir les annotations attribuées aux données de la personne&nbsp;;<br>
+	&nbsp;</li>
+	<li><strong>les droits à la rectification, à l’effacement</strong> (notamment suite au retrait du consentement), d’opposition, et à la limitation s’appliquent aux annotations. Lorsque ces droits sont exercés, le même traitement doit être appliqué aux données concernées et à leur annotation.<br>
+	&nbsp;</li>
+	<li><strong>le droit à la portabilité</strong> ne s’applique à l’annotation que lorsque celle-ci a été fournie par la personne&nbsp;et que le traitement est fondé sur la <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="base légale"><span class="glossary-tooltips-title">base légale</span></button> du consentement ou sur celle du contrat ;</li>
+</ul>
+
+<div class="apparte">Exemples&nbsp;:</div>
+
+<div class="apparte">Dans le cas de résultats médicaux obtenus après une prise de sang et collectés suite au recueil du consentement du patient, les mesures (comme la glycémie) peuvent être des données d’entraînement et les résultats (comme le diagnostic du diabète) des annotations. Dans ce scénario, le droit à la portabilité s’applique aux mesures et résultats, si l’ensemble a été spécifiquement fourni par le patient à des fins de recherche.<br>
+&nbsp;</div>
+
+<div class="apparte">Dans le cas d’enregistrements sonores obtenus lors de l’utilisation d’un outil tel qu’un assistant vocal où les personnes ont consenti à partager leurs données avec le responsable de traitement pour l’amélioration de son <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="algorithme"><span class="glossary-tooltips-title">algorithme</span></button> de compréhension du langage, les annotations (contenant par exemple l’analyse du contenu de l’enregistrement) sont apportées par les équipes du responsable de traitement. Dans ce scénario, le droit à la portabilité ne s’applique pas.</div>
+
+<p>&nbsp;</p>
+
+<div class="chiffre">
+<p class="text-align-center"><strong>Distinguer annotation, profilage et prise de décision automatisée</strong></p>
+
+<p>Bien que l’annotation consiste à attribuer une ou plusieurs caractéristiques aux données de la personne pouvant ainsi constituer un profil, il ne s’agit généralement pas d’un profilage défini à l’article 4 du RGPD, ni d’une décision automatisée au sens de l’article 22 du RGPD.</p>
+
+<p>En effet, le profilage visé par la définition du paragraphe 4 de l’article 4 doit résulter d’un traitement automatisé dont l’objectif est d’évaluer des aspects personnels, en particulier pour analyser ou faire des prédictions sur les personnes concernées. L’utilisation du mot « évaluer » suggère que le profilage implique une certaine forme d’appréciation ou de jugement à l’égard d’une personne. Dans la grande majorité des cas, l’annotation consiste en une classification afin de servir de « vérité terrain » pour le modèle qui devra apprendre à traiter, classer, ou encore discriminer les données en fonction de ces informations. Le but n’est généralement pas d’évaluer par une appréciation ou un jugement les caractéristiques individuelles et cela ne constitue donc pas du profilage.</p>
+
+<p>Par ailleurs, les décisions automatisées visées à l’article 22 du RGPD, qui peuvent inclure le profilage, doivent avoir des effets juridiques concernant la personne ou l’affecter de manière significative. L’annotation des données d’une personne pour l’apprentissage n’aura généralement pas d’impact pour la personne concernée à ce stade du traitement de données.</p>
+
+<p>Ainsi, l’annotation ne sera que rarement considérée comme un profilage, et elle n’entrera généralement pas dans le périmètre de l’article 22 du RGPD, à l’inverse des sorties du <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="système d’ia"><span class="glossary-tooltips-title">système d’IA</span></button> en phase de déploiement, qui pourront fréquemment être considérées comme des prises de décision exclusivement automatisées.</p>
+</div>
+</div>
+          </div>
+  </div>
+  <hr />
+</div>
+
+  <div class='ctn-gen-ascenseur'>
+  <div>
+    <h2>
+              <span id="ascenseur-titre-12549" class='ctn-gen-ascenseur-titre'>L’annotation à partir de données sensibles</span>
+      
+      <button class='ctn-gen-ascenseur-collapse' aria-labelledby='ascenseur-btn-txt-12549 ascenseur-titre-12549' aria-expanded='false' aria-controls='12549'>
+        <span id="ascenseur-btn-txt-12549">Déplier</span>
+      </button>
+    </h2>
+
+    <div class='ctn-gen-ascenseur-toCollapse' id="12549" style='display: none;'>
+              <div class='ctn-gen-ascenseur-texte'><p>L’annotation peut parfois révéler des données sensibles (origine ethnique, données concernant la santé des personnes concernées, opinion politique ou syndicale, etc.)<strong> sans que la donnée source soit elle-même une <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="donnée sensible"><span class="glossary-tooltips-title">donnée sensible</span></button>. Le traitement de données sensibles est interdit par principe par l’article 9 du RGPD&nbsp;; toutefois, certaines exceptions existent. L’organisme responsable du traitement d’annotation devra identifier l’une de ces exceptions pour pouvoir le mettre en œuvre légalement.</strong></p>
+
+<div class="apparte">Exemple&nbsp;: dans le cadre d’une étude sur la propagation de la désinformation en ligne, des chercheurs collectent des publications publiquement accessibles sur les réseaux sociaux. Le rôle de certains utilisateurs ayant manifestement rendu public leur appartenance politique sur leur profil public est étudié dans le cadre de cette étude, et cette appartenance est utilisée pour annoter les publications et entraîner un modèle d’IA. Les opinions politiques sont des données sensibles couvertes par l’article 9 du RGPD, dans la mesure où ces données ont été manifestement rendues publiques, ce traitement n’est pas interdit.&nbsp;</div>
+
+<p>L’annotation «&nbsp;sensible&nbsp;» n’est donc pas impossible mais fait l’objet de dispositions particulières qui doivent être respectées. Dans le cas de projets de recherche en santé sur des données collectées lors de soins par exemple, les exceptions prévues par les article 44-3 de la Loi Informatique et Libertés &nbsp;et 9.2.j du RGPD peuvent s'appliquer. La mobilisation de ces exceptions et la réalisation de l'une des formalités prévues à l'article 66 de la LIL, comme un engagement de conformité à une méthodologie de référence, ou une demande d’autorisation accordée par la CNIL, permettront de traiter les données de santé annotées pour le développement d’un <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="système d’ia"><span class="glossary-tooltips-title">système d’IA</span></button>.</p>
+
+<p>Au regard des risques que le traitement de ces données comporte pour les personnes, tels que le risque de discrimination, la CNIL recommande de recourir autant que possible à d’autres catégories de données, telles que des données de synthèse.</p>
+
+<p>Lorsque les dispositions applicables sont remplies et que le traitement est licite, des mesures particulières doivent néanmoins être prises au regard du risque accru pour les personnes. La CNIL recommande notamment les mesures suivantes&nbsp;:</p>
+
+<ul>
+	<li><strong>Annoter selon des critères objectifs et factuels </strong>(comme la mesure de la couleur de peau selon le système RGB plutôt que l’annotation de l’origine ethnique de la personne représentée dans une image), ce qui peut être permis par l’utilisation d’outils techniques d’annotation ne laissant pas de marge à l’interprétation de l’annotateur&nbsp;;<br>
+	&nbsp;</li>
+	<li><strong>Limiter l’annotation au contexte des données</strong> en évitant de tirer des conclusions dépassant les informations présentes dans les données&nbsp;;<br>
+	&nbsp;</li>
+	<li><strong>Renforcer l’étape de vérification des annotations</strong> notamment en ce qui concerne leur régularité (par une fréquence plus élevée par exemple), leur exhaustivité (par une analyse d’un volume de données plus important par exemple), ou encore le contrôle de leur efficacité (par une journalisation des résultats des vérifications, ou par un audit externe de la procédure par exemple). Cette étape de vérification semble notamment cruciale quand des outils d’annotation automatiques ou semi-automatiques sont utilisés&nbsp;;<br>
+	&nbsp;</li>
+	<li><strong>Augmenter la sécurité les données annotées</strong>, en réalisant le traitement d’annotation en interne, en traitant les données localement, et en garantissant leur sécurité par le chiffrement, la journalisation, et par des restrictions d’accès plus fortes&nbsp;;<br>
+	&nbsp;</li>
+	<li><strong>S’interroger sur le risque de <button type="button" class="glossary-tooltips" aria-describedby="tooltip_content" data-definition="régurgitation"><span class="glossary-tooltips-title">régurgitation</span></button> et d’inférence</strong> des données sensibles sur les modèles entraînés à partir de celles-ci. Lorsque le responsable du traitement d’annotation du jeu de données n’entraîne pas de modèle mais se contente de mettre les données à disposition d’autres organismes, il est recommandé à titre de bonne pratique de les inciter à conduire cette réflexion sur les modèles qu’ils développent en leur fournissant par exemple des informations sur la distribution des données (comme la présence de données aberrantes ou de doublons).</li>
+</ul>
+</div>
+          </div>
+  </div>
+  <hr />
+</div>
+
+  <div class='ctn-gen-push-3'>
+      <div class='col-xs-12 col-md-4 col-sm-4 col-lg-4'>
+      
+      
+              <div class='ctn-gen-push-3-texte'> <p>&nbsp;</p>
+
+<p>&nbsp;</p>
+
+<p><a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="88792aa9-54cf-476b-9926-d37ac03bc1a0" href="/fr/ia-respecter-lexercice-des-droits-des-personnes" title="IA : Respecter et faciliter l’exercice des droits des personnes concernées - Nouvelle fenêtre">&lt; Fiche précédente :&nbsp;Respecter et faciliter l’exercice des droits des personnes concernées</a></p>
+</div>
+      
+      
+    </div>
+      <div class='col-xs-12 col-md-4 col-sm-4 col-lg-4'>
+      
+      
+              <div class='ctn-gen-push-3-texte'> <p class="text-align-center">&nbsp;</p>
+
+<p class="text-align-center">&nbsp;</p>
+
+<p class="text-align-center"><a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="a086d390-9c9b-413f-ab30-7aacacba5443" href="/fr/les-fiches-pratiques-ia" title="Les fiches pratiques IA - Nouvelle fenêtre">Sommaire</a></p>
+</div>
+      
+      
+    </div>
+      <div class='col-xs-12 col-md-4 col-sm-4 col-lg-4'>
+      
+      
+              <div class='ctn-gen-push-3-texte'> <p class="text-align-right">&nbsp;</p>
+
+<p class="text-align-right">&nbsp;</p>
+
+<p class="text-align-right"><a data-entity-substitution="canonical" data-entity-type="node" data-entity-uuid="415170b8-f819-4919-aeac-1ce1b67aeeb8" href="/fr/ia-garantir-la-securite-du-developpement" title="IA : Garantir la sécurité du développement d’un système d’IA - Nouvelle fenêtre">Fiche suivante :&nbsp;Garantir la sécurité du développement d’un système d’IA&nbsp;&gt;&nbsp;</a></p>
+</div>
+      
+      
+    </div>
+  </div>
+
+
+<div class="general-tags"><ul><li><a href="/fr/tag/Intelligence%2Bartificielle%2B%28IA%29" hreflang="fr">#Intelligence artificielle (IA)</a></li></ul></div>
+      <div class="nav--hub-nav"></div>
+
+
+      </div>
+</div>
+
+
+  </div>
+
+    </div>
+  </div>
+</div>
+
+    <div class="interest">
+    <div class="container">
+      <div class="row">
+        <h4>Ceci peut également vous intéresser ...</h4>
+<div class="col-xs-12 col-sm-12 col-md-4 interest-block">
+  <a href="/fr/sensibiliser-les-eleves-de-cm2-la-protection-des-donnees" class="element">
+    <div class="interest-wrapper">
+            
+<img alt="Photographie d&#039;une salle de classe, face au professeur, les élèves de dos" src="/sites/default/files/styles/interest_image/public/2026-08/bilan_actions_oise_et_ressources_pour_cm2.jpg?itok=HiQl34Nw" width="385" height="246" loading="lazy" typeof="foaf:Image" class="img-responsive" />
+
+
+      <div class="element-bg">
+                  <div class="titre">
+            Sensibiliser les élèves de CM2 à la protection des données
+          </div>
+                                <p class="date">27 août 2026</p>
+                  </div>
+      </div>
+  </a>
+      <span class="element-htag"><a href="/fr/tag/%C3%89ducation">Éducation</a></span>
+  </div>
+<div class="col-xs-12 col-sm-12 col-md-4 interest-block">
+  <a href="/fr/ia-la-cnil-met-jour-son-outil-de-tracabilite-des-modeles-publies-en-source-ouverte" class="element">
+    <div class="interest-wrapper">
+            
+<img alt="Illustration d&#039;un arbre généalogique" src="/sites/default/files/styles/interest_image/public/2026-08/genealogie-ia-mise-a-jour_1.png?itok=ngsqchVF" width="385" height="246" loading="lazy" typeof="foaf:Image" class="img-responsive" />
+
+
+      <div class="element-bg">
+                  <div class="titre">
+            IA : la CNIL met à jour son outil de traçabilité des modèles publiés en source ouverte
+          </div>
+                                <p class="date">26 août 2026</p>
+                  </div>
+      </div>
+  </a>
+      <span class="element-htag"><a href="/fr/tag/Intelligence%2Bartificielle%2B%28IA%29">Intelligence artificielle (IA)</a></span>
+  </div>
+<div class="col-xs-12 col-sm-12 col-md-4 interest-block">
+  <a href="/fr/ia-agentique-cnil-cianum-note" class="element">
+    <div class="interest-wrapper">
+            
+<img alt="" src="/sites/default/files/styles/interest_image/public/2026-07/ia-generative.png?itok=IDWmPExO" width="385" height="246" loading="lazy" typeof="foaf:Image" class="img-responsive" />
+
+
+      <div class="element-bg">
+                  <div class="titre">
+            IA agentique et données personnelles : la CNIL et le Conseil de l’IA et du Numérique publient ...
+          </div>
+                                <p class="date">20 juillet 2026</p>
+                  </div>
+      </div>
+  </a>
+      <span class="element-htag"><a href="/fr/tag/Intelligence%2Bartificielle%2B%28IA%29">Intelligence artificielle (IA)</a></span>
+  </div>
+
+      </div>
+    </div>
+  </div>
+
+
+</section>
+</div>
+</div>
+</main>
+<footer class="footer" role="contentinfo">
+  <div class="container">
+    <div class="cnildirect"><a href="/fr/cnil-direct" class="direct" title="Besoin d&#039;aide">Besoin d'aide</a></div>
+
+    
+
+          <nav role="navigation" aria-label="Navigation secondaire">
+
+  <div class="row">
+    <div class="col-sm-4 col-12">
+        <div class="site-branding">
+<img src="/themes/custom/bootstrap_cnil/logo-footer.png" alt="CNIL" typeof="foaf:Image" class="img-responsive" />
+<p class="baseline">Commission Nationale de l’Informatique et des Libertés</p>
+</div>
+
+
+    </div>
+
+    <div class="col-sm-8 col-12 pull-right" style="min-height: 68px">
+      <div class="menu-footer-sitemap">
+        <div class="row">
+          
+          
+          
+          
+  
+  <div class="well col-sm-4 col-md-4 col-lg-4 menuControl">
+
+                
+                              <div class="item">
+              <span class='menu-footer-sitemap-title'>Ma conformité au RGPD</span>
+                                          
+                  <ul>
+                                        <li>
+                                  <a href="/fr/comprendre-le-rgpd" data-drupal-link-system-path="node/163964">Comprendre le RGPD</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/ma-conformite-au-rgpd/me-mettre-en-conformite" data-drupal-link-system-path="node/163970">Me mettre en conformité</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/respecter-les-droits-des-personnes" data-drupal-link-system-path="node/163976">Respecter les droits des personnes</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/outils" data-drupal-link-system-path="node/163979">Outils spécifiques</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/ma-conformite-au-rgpd/services-en-ligne" data-drupal-link-system-path="node/1179">Services en ligne</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="https://www.cnil.fr/fr/cnil-direct?visiteur=pro">Questions-réponses</a>
+                
+                              </li>
+                      </ul>
+        
+          
+              
+               <hr class='menu-footer-sitemap-hr'>             </div>
+                      <div class="item">
+              <span class='menu-footer-sitemap-title'>La CNIL</span>
+                                          
+                  <ul>
+                                        <li>
+                                  <a href="/fr/la-cnil/les-missions-de-la-cnil" data-drupal-link-system-path="node/1190">Missions</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/la-cnil/fonctionnement-de-la-cnil" data-drupal-link-system-path="node/1101">Fonctionnement</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/la-cnil/en-europe-et-dans-le-monde" data-drupal-link-system-path="node/1176">En Europe et dans le monde</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/lhistoire-de-la-cnil-en-video" data-drupal-link-system-path="node/163534">L&#039;histoire de la CNIL en vidéo</a>
+                
+                              </li>
+                                        <li>
+                                  <a href="https://www.cnil.fr/fr/marches-publics">Marchés publics</a>
+                
+                              </li>
+                                        <li>
+                                  <a href="/fr/opendata" data-drupal-link-system-path="opendata">Open CNIL</a>
+                
+                              </li>
+                                        <li>
+                                  <a href="/fr/la-cnil/travailler-la-cnil" data-drupal-link-system-path="node/871">Travailler à la CNIL</a>
+                
+                              </li>
+                      </ul>
+        
+          
+              
+                          </div>
+          
+        
+          
+
+      </div>
+  <div class="well col-sm-4 col-md-4 col-lg-4 menuControl">
+
+                
+                              <div class="item">
+              <span class='menu-footer-sitemap-title'>Ressources</span>
+                                          
+                  <ul>
+                                        <li>
+                                  <a href="/fr/ressources/acteurs-et-secteurs" data-drupal-link-system-path="node/163985">Acteurs et secteurs</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/ressources/thematiques" data-drupal-link-system-path="node/163988">Thématiques communes</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/ressources/les-grands-enjeux-numeriques" data-drupal-link-system-path="node/163991">Enjeux numériques</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/technologies/cybersecurite" data-drupal-link-system-path="node/616">Cybersécurité</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="https://www.cnil.fr/fr/tag/consultation">Consultations</a>
+                
+                              </li>
+                                        <li>
+                                  <a href="https://www.cnil.fr/fr/mediatheque">Médiathèque</a>
+                
+                              </li>
+                      </ul>
+        
+          
+              
+                          </div>
+          
+        
+          
+
+      </div>
+  <div class="well col-sm-4 col-md-4 col-lg-4 menuControl">
+
+                
+                              <div class="item">
+              <span class='menu-footer-sitemap-title'>Textes officiels</span>
+                                          
+                  <ul>
+                                        <li>
+                                  <a href="/fr/cadre-europeen" data-drupal-link-system-path="node/1097">Cadre européen</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/cadre-national" data-drupal-link-system-path="node/1094">Cadre national</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="/fr/textes-officiels/les-decisions-de-la-cnil" data-drupal-link-system-path="node/900">Décisions de la CNIL</a>
+                
+                                              
+        
+          
+                              </li>
+                                        <li>
+                                  <a href="https://www.legifrance.gouv.fr/search/cnil?tab_selection=cnil&amp;searchField=ALL&amp;query=&amp;page=1&amp;init=true&amp;timeInterval=">Les décisions de la CNIL sur Légifrance</a>
+                
+                              </li>
+                      </ul>
+        
+          
+              
+                          </div>
+          
+        
+          
+
+      </div>
+
+
+          
+        </div>
+      </div>
+    </div>
+
+    <div class="col-sm-4 col-12 custom_column">
+      <div class="menu-footer-policy">
+          <div class="social-links"><div class="title">Suivez-nous</div><ul><li><a href="http://twitter.com/cnil" class="twitter" title="twitter - CNIL" target="_blank">twitter</a></li><li><a href="https://fr.linkedin.com/company/cnil---commission-nationale-de-l%27informatique-et-des-libert-s" class="linkedin" title="linkedin - CNIL" target="_blank">linkedin</a></li></ul></div>
+
+        
+  
+        <ul>
+                <li>
+                  <a href="/fr/mediatheque" data-drupal-link-system-path="mediatheque">Médiathèque</a>
+                      </li>
+                <li>
+                  <a href="/fr/glossaire" data-drupal-link-system-path="glossaire">Glossaire</a>
+                      </li>
+                <li>
+                  <a href="/fr/lexique-francais-anglais-sur-la-protection-des-donnees" data-drupal-link-system-path="node/84640">Lexique FR-EN</a>
+                      </li>
+                <li>
+                  <a href="/fr/cnil-direct" data-drupal-link-system-path="cnil-direct">Besoin d&#039;aide</a>
+                      </li>
+                <li>
+                  <a href="/fr/espace-presse" data-drupal-link-system-path="node/1180">Presse</a>
+                      </li>
+                <li>
+                  <span class="item-languages">Langue</span>
+                                  <ul>
+                <li>
+                  <a href="/fr" data-drupal-link-system-path="&lt;front&gt;">Fr</a>
+                      </li>
+                <li>
+                  <a href="https://www.cnil.fr/en/home">En</a>
+                      </li>
+        </ul>
+  
+              </li>
+                <li>
+                  <a href="/fr/gestion-des-cookies" data-drupal-link-system-path="gestion-des-cookies">Gestion des cookies</a>
+                      </li>
+                <li>
+                  <a href="https://forms.information.cnil.fr/603cfc32b95cee69378a54cd/4fR4m1PsT-W5cBQRkjVMmA/gNAvYERSS_Sl9nJsDCCU2Q/form.html" target="_blank">S&#039;inscrire à la lettre d&#039;information </a>
+                      </li>
+                <li>
+                  <a href="https://linc.cnil.fr/">Le Laboratoire d&#039;Innovation Numérique de la CNIL (LINC)</a>
+                      </li>
+        </ul>
+  
+
+
+
+        
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+      <div class="menu-footer">
+        
+  
+
+                    <a href="/fr/mentions-legales" data-drupal-link-system-path="node/84679">Mentions légales</a>
+       |                       <a href="/fr/donnees-personnelles" data-drupal-link-system-path="node/84677">Données personnelles</a>
+       |                       <a href="/fr/accessibilite" data-drupal-link-system-path="node/9573">Accessibilité : partiellement conforme</a>
+       |                       <a href="/fr/informations-publiques" data-drupal-link-system-path="node/84655">Informations publiques</a>
+       |                       <a href="/fr/recrutement/offres" data-drupal-link-system-path="recrutement/offres">Recrutement</a>
+       |                       <a href="https://services.cnil.fr/">Mon compte</a>
+       |                       <a href="/fr/saisir-la-cnil/nous-contacter" data-drupal-link-system-path="node/745">Nous contacter</a>
+                  
+
+
+
+        
+      </div>
+    </div>
+  </div>
+  </nav>
+
+
+    
+  </div>
+</footer>
+
+
+  </div>
+
+<script>window.dataLayer = window.dataLayer || []; window.dataLayer.push({"drupalLanguage":"fr","drupalCountry":"FR","siteName":"CNIL","entityCreated":"1753166454","entityLangcode":"fr","entityStatus":"1","entityUid":"3815","entityUuid":"dd2057d3-1885-4c7a-aa73-ff30fd807d34","entityVid":"166107","entityName":"ctisseyre","entityType":"node","entityBundle":"contenu_generique","entityId":"165774","entityTitle":"IA : Annoter les données","entityTaxonomy":{"mots_cles":{"188":"Intelligence artificielle (IA)"},"thematique":{"190":"Intelligence artificielle"},"type_article":{"46":"Fiches pratiques"}},"userUid":0});</script>
+
+<script type="application/json" data-drupal-selector="drupal-settings-json">{"path":{"baseUrl":"\/","pathPrefix":"fr\/","currentPath":"node\/165774","currentPathIsAdmin":false,"isFront":false,"currentLanguage":"fr"},"pluralDelimiter":"\u0003","suppressDeprecationErrors":true,"tacjs":{"dialog":{"privacyUrl":"","bodyPosition":"bottom","hashtag":"#tarteaucitron","cookieName":"tarteaucitron","orientation":"bottom","groupServices":false,"serviceDefaultState":"wait","showAlertSmall":false,"cookieslist":false,"showIcon":false,"iconSrc":"","iconPosition":"BottomRight","adblocker":false,"DenyAllCta":true,"AcceptAllCta":true,"highPrivacy":true,"handleBrowserDNTRequest":false,"removeCredit":true,"moreInfoLink":true,"useExternalCss":true,"useExternalJs":true,"cookieDomain":"","readmoreLink":"","mandatory":true,"mandatoryCta":false,"closePopup":false,"customCloserId":"","showDialog":0},"services":{"amplitude":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"abtasty":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"metrica":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"addthis":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"addtoanyfeed":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"addtoanyshare":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"aduptech_ads":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"aduptech_conversion":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"aduptech_retargeting":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"alexa":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"amazon":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"calameo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"clicky":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"clicmanager":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"contentsquare":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"crazyegg":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"clarity":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"criteo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"dailymotion":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"datingaffiliation":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"datingaffiliationpopup":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"disqus":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"ekomi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"etracker":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebook":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebooklikebox":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebookcomment":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"ferank":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"simpleanalytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"ferankpub":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"getplus":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gplus":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gplusbadge":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adsense":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":true},"googlepartners":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adsensesearchform":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adsensesearchresult":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googleadwordsconversion":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googleadwordsremarketing":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gajs":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"analytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gtag":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googlemaps":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googlemapssearch":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googletagmanager":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"multiplegoogletagmanager":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googlefonts":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"hubspot":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"jsapi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twitterwidgetsapi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"recaptcha":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"linkedin":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"mautic":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"microsoftcampaignanalytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"pinterest":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"prelinker":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"prezi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"pubdirecte":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"purechat":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"shareaholic":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"shareasale":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"sharethis":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"slideshare":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"soundcloud":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"statcounter":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"timelinejs":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"tagcommander":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"typekit":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twenga":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twitter":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twitterembed":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twittertimeline":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"twitteruwt":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"uservoice":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"vimeo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"visualrevenue":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"verizondottag":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"vshop":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"wysistat":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"xiti":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"atinternet":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"youtube":{"status":false,"languages":[],"readMore":"test","readmoreLink":"","needConsent":false},"zopim":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"kameleoon":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"linkedininsighttag":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebookpixel":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"issuu":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"webmecanik":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"multiplegtag":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"koban":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"matomo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"matomohightrack":{"status":true,"languages":{"fr":"fr"},"readMore":"","readmoreLink":"","needConsent":false},"hotjar":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"bingads":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adform":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"activecampaign":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":true},"tawkto":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"getquanty":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"youtubeapi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"faciliti":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"userlike":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adobeanalytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"woopra":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"compteur":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"onesignal":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"stonly":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"serviceperso":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"artetv":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"affilae":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"criteoonetag":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"outbrain":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"pinterestpixel":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"xandr":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"xandrconversion":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"xandrsegment":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"firebase":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"matomocloud":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"openwebanalytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"pardot":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"plezi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"sharpspring":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"visiblee":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"genially":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"helloasso":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"m6meteo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"marketomunchkin":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"meteofrance":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"mtcaptcha":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"pingdom":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gagenda":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gallica":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gdocs":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gforms":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"goptimize":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gsheets":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"gslides":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"hcaptcha":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"maps_noapi":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"studizz":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"discord":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebookpost":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"instagram":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"elfsight":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"intercomChat":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"smartsupp":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"acast":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"archive":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"ausha":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"bandcamp":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"canalu":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"deezer":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"fculture":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"mixcloud":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"podcloud":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"spotify":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"webtvnu":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adsenseauto":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"adsensesearch":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"antvoice":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"doubleclick":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"googleads":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"klaviyo":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"kwanko":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"leadforensics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"microanalytics":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"piwikpro":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"plausible":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"snapchat":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"tiktok":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"userpilot":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"weborama":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"wysistathightrack":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"arcio":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"geoportail":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"matomotm":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"myfeelback":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"openstreetmap":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"crisp":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"robofabrica":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"trustpilot":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"ubib":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"facebookcustomerchat":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false},"videas":{"status":false,"languages":[],"readMore":"","readmoreLink":"","needConsent":false}},"user":[],"texts":{"title":"Gestion de vos pr\u00e9f\u00e9rences sur les cookies (t\u00e9moins de connexion)"},"expire":180},"dataLayer":{"defaultLang":"fr","languages":{"fr":{"id":"fr","name":"French","direction":"ltr","weight":-10},"en":{"id":"en","name":"English","direction":"ltr","weight":-9}}},"matomo":{"disableCookies":false,"trackMailto":true},"cnil_config":{"tarteaucitron":"facebook,twitter,youtube,dailymotion"},"bootstrap":{"forms_has_error_value_toggle":1,"tooltip_enabled":1,"tooltip_animation":1,"tooltip_container":"body","tooltip_delay":"0","tooltip_html":0,"tooltip_placement":"auto left","tooltip_selector":"","tooltip_trigger":"hover","modal_animation":1,"modal_backdrop":"true","modal_focus_input":1,"modal_keyboard":1,"modal_select_text":1,"modal_show":1,"modal_size":"","popover_enabled":1,"popover_animation":1,"popover_auto_close":1,"popover_container":"body","popover_content":"","popover_delay":"0","popover_html":0,"popover_placement":"right","popover_selector":"","popover_title":"","popover_trigger":"click"},"glossary":{"donn\u00e9e sensible":{"description":"\u003Cp\u003ELes donn\u00e9es sensibles forment une cat\u00e9gorie particuli\u00e8re des donn\u00e9es personnelles.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ECe sont des informations qui r\u00e9v\u00e8lent la pr\u00e9tendue origine raciale ou ethnique, les opinions politiques, les convictions religieuses ou philosophiques ou l\u0027appartenance syndicale, ainsi que le traitement des donn\u00e9es g\u00e9n\u00e9tiques, des donn\u00e9es biom\u00e9triques aux fins d\u0027identifier une personne physique de mani\u00e8re unique, des donn\u00e9es concernant la sant\u00e9 ou des donn\u00e9es concernant la vie sexuelle ou l\u0027orientation sexuelle d\u0027une personne physique.\u0026nbsp;\u003C\/p\u003E\r\n\r\n\u003Cp\u003ELe r\u00e8glement europ\u00e9en interdit de recueillir ou d\u2019utiliser ces donn\u00e9es, sauf, notamment, dans les cas suivants\u0026nbsp;:\u003C\/p\u003E\r\n\r\n\u003Cul class=\u0022rteindent1\u0022\u003E\r\n\t\u003Cli\u003Esi la personne concern\u00e9e\u0026nbsp;a donn\u00e9 son\u0026nbsp;consentement expr\u00e8s\u0026nbsp;(d\u00e9marche active, explicite et de pr\u00e9f\u00e9rence \u00e9crite, qui doit \u00eatre libre, sp\u00e9cifique, et inform\u00e9e)\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Esi les informations sont manifestement rendues publiques par la personne concern\u00e9e\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Esi elles sont n\u00e9cessaires \u00e0 la sauvegarde de la vie humaine\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Esi elles concernent les membres ou adh\u00e9rents d\u0027une association ou d\u0027une organisation politique, religieuse, philosophique ou syndicale, et sont trait\u00e9es par cette organisation\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Esi le traitement comporte notamment des donn\u00e9es de sant\u00e9, est justifi\u00e9 par l\u2019int\u00e9r\u00eat public et respecte les dispositions de la loi Informatique et libert\u00e9s applicables aux traitements dans le domaine de la sant\u00e9.\u003C\/li\u003E\r\n\u003C\/ul\u003E\r\n","url":"\/fr\/definition\/donnee-sensible"},"syst\u00e8me d\u2019ia":{"description":"\u003Cp\u003ELe r\u00e8glement IA les d\u00e9finit comme suit\u0026nbsp;: \u00ab\u0026nbsp;un syst\u00e8me automatis\u00e9 con\u00e7u pour fonctionner \u00e0 diff\u00e9rents niveaux d\u0027autonomie, qui peut faire preuve d\u0027une capacit\u00e9 d\u0027adaptation apr\u00e8s son d\u00e9ploiement et qui, pour des objectifs explicites ou implicites, d\u00e9duit, \u00e0 partir des donn\u00e9es d\u0027entr\u00e9e qu\u0027il re\u00e7oit, la mani\u00e8re de g\u00e9n\u00e9rer des r\u00e9sultats tels que des pr\u00e9dictions, du contenu, des recommandations ou des d\u00e9cisions qui peuvent influencer les environnements physiques ou virtuels\u0026nbsp;\u00bb (article 3).\u003C\/p\u003E\r\n\r\n\u003Cp\u003EAinsi, comme mentionn\u00e9 au consid\u00e9rant 97 du RIA\u0026nbsp;: \u00ab bien que les mod\u00e8les d\u0027IA soient des composants essentiels des syst\u00e8mes d\u0027IA, ils ne constituent pas des syst\u00e8mes d\u0027IA \u00e0 eux seuls. Les mod\u00e8les d\u0027IA n\u00e9cessitent l\u0027ajout d\u0027autres composants, comme par exemple une interface utilisateur, pour devenir des syst\u00e8mes d\u0027IA. Les mod\u00e8les d\u0027IA sont g\u00e9n\u00e9ralement int\u00e9gr\u00e9s dans les syst\u00e8mes d\u0027IA et en font partie.\u0026nbsp;\u00bb\u0026nbsp;\u003C\/p\u003E\r\n","url":"\/fr\/definition\/systeme-dia"},"r\u00e9gurgitation":{"description":"\u003Cp\u003EDans le domaine de l\u2019IA g\u00e9n\u00e9rative,\u0026nbsp;la r\u00e9gurgitation est la situation dans laquelle un mod\u00e8le g\u00e9n\u00e8re des donn\u00e9es tr\u00e8s proches de ses donn\u00e9es d\u2019entra\u00eenement, de mani\u00e8re attendue (lorsque le mod\u00e8le d\u2019IA est con\u00e7u \u00e0 cette fin), \u0026nbsp;inattendue ou suite \u00e0 une attaque (on parle alors d\u2019attaque en r\u00e9gurgitation).\u003C\/p\u003E\r\n","url":"\/fr\/definition\/regurgitation"},"responsable de traitement":{"description":"\u003Cp\u003ELe responsable de traitement est la personne morale (entreprise, commune, etc.) ou physique qui d\u00e9termine les finalit\u00e9s et les moyens d\u2019un traitement, c\u2019est \u00e0 dire l\u2019objectif et la fa\u00e7on de le r\u00e9aliser. En pratique et en g\u00e9n\u00e9ral, il s\u2019agit de la personne morale incarn\u00e9e par son repr\u00e9sentant l\u00e9gal.\u003C\/p\u003E\r\n\r\n\u003Cp class=\u0022rtecenter\u0022\u003E\u003Ca class=\u0022cta\u0022 href=\u0022\/rgpd-passer-a-laction\u0022 target=\u0022_blank\u0022 title=\u0022RGPD : passer \u00e0 l\u0027action - Nouvelle fen\u00eatre\u0022\u003ERGPD : passer \u00e0 l\u0027action\u003C\/a\u003E\u003C\/p\u003E\r\n","url":"\/fr\/definition\/responsable-de-traitement"},"donn\u00e9e personnelle":{"description":"\u003Cp\u003EUne donn\u00e9e personnelle est toute information se rapportant \u00e0 une personne physique identifi\u00e9e ou identifiable. Mais, parce qu\u2019elles concernent des personnes, celles-ci doivent en conserver la ma\u00eetrise.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EUne personne physique peut \u00eatre identifi\u00e9e\u0026nbsp;:\u003C\/p\u003E\r\n\r\n\u003Cul class=\u0022rteindent1\u0022\u003E\r\n\t\u003Cli\u003Edirectement (exemple\u0026nbsp;: nom et pr\u00e9nom)\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Eindirectement (exemple\u0026nbsp;: par un num\u00e9ro de t\u00e9l\u00e9phone ou de plaque d\u2019immatriculation, un identifiant tel que le num\u00e9ro de s\u00e9curit\u00e9 sociale, une adresse postale ou courriel, mais aussi la voix ou l\u2019image).\u003C\/li\u003E\r\n\u003C\/ul\u003E\r\n\r\n\u003Cp\u003EL\u2019identification d\u2019une personne physique peut \u00eatre r\u00e9alis\u00e9e\u0026nbsp;:\u003C\/p\u003E\r\n\r\n\u003Cul class=\u0022rteindent1\u0022\u003E\r\n\t\u003Cli\u003E\u00e0 partir d\u2019une seule donn\u00e9e (exemple\u0026nbsp;: nom)\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003E\u00e0 partir du croisement d\u2019un ensemble de donn\u00e9es (exemple\u0026nbsp;: une femme vivant \u00e0 telle adresse, n\u00e9e tel jour et membre dans telle association).\u003C\/li\u003E\r\n\u003C\/ul\u003E\r\n\r\n\u003Cp\u003EPar contre, des coordonn\u00e9es d\u2019entreprises (par exemple, l\u2019entreprise \u00ab\u0026nbsp;Compagnie A\u0026nbsp;\u00bb avec son adresse postale, le num\u00e9ro de t\u00e9l\u00e9phone de son standard et un courriel de contact g\u00e9n\u00e9rique \u00ab\u0026nbsp;compagnie1[@]email.fr\u0026nbsp;\u00bb) ne sont pas, en principe, des donn\u00e9es personnelles.\u003C\/p\u003E\r\n\r\n\u003Chr \/\u003E\r\n\u003Cdiv style=\u0022position: relative; padding-top: 56.25%;\u0022\u003E\u003Ciframe allowfullscreen=\u0022\u0022 frameborder=\u00220\u0022 height=\u0022100%\u0022 sandbox=\u0022allow-same-origin allow-scripts allow-popups\u0022 src=\u0022https:\/\/video.cnil.fr\/videos\/embed\/c51db885-bd8d-4bee-a9b1-b57fa6d4a2ce\u0022 style=\u0022position: absolute; inset: 0px;\u0022 title=\u0022Qu\u0027est-ce qu\u0027une donn\u00e9e personnelle ?\u0022 width=\u0022100%\u0022\u003E\u003C\/iframe\u003E\u003C\/div\u003E\r\n\r\n\u003Cp class=\u0022text-align-center\u0022\u003E\u003Cbutton aria-controls=\u0022transcription\u0022 aria-expanded=\u0022false\u0022 id=\u0022btn-transcription\u0022\u003E\ud83d\udcc4 Accessibilit\u00e9 : cliquer pour acc\u00e9der au texte de la vid\u00e9o\u003C\/button\u003E\u003C\/p\u003E\r\n\r\n\u003Cdiv aria-labelledby=\u0022btn-transcription\u0022 hidden=\u0022\u0022 id=\u0022transcription\u0022 role=\u0022region\u0022\u003E\r\n\u003Cp\u003EUne donn\u00e9e personnelle, c\u0027est quoi ?\u003C\/p\u003E\r\n\r\n\u003Cp\u003EUne donn\u00e9e personnelle, c\u0027est une information qui permet de vous identifier directement ou indirectement.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EPrenons l\u0027exemple de L\u00e9o. Son pr\u00e9nom et son nom. Mais aussi son \u00e2ge, son genre, son num\u00e9ro de t\u00e9l\u00e9phone, ses adresses postales et \u00e9lectroniques, sa voix ou encore son image sont des donn\u00e9es personnelles.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EParmi ces donn\u00e9es, certaines sont dites sensibles, telles que sa religion, c\u0027est la sexualit\u00e9, son dossier m\u00e9dical ou encore ses opinions politiques. On y pense moins souvent, mais son adresse IP, sa signature ou encore ses empreintes digitales sont aussi des donn\u00e9es personnelles.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ELes donn\u00e9es personnelles sont pr\u00e9cieuses. Prot\u00e9ger les.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ERetrouvez tous nos conseils sur cnil.fr\u003C\/p\u003E\r\n\u003C\/div\u003E\r\n\u003Cscript\u003E\r\n  const btn = document.getElementById(\u0027btn-transcription\u0027);\r\n  const panel = document.getElementById(\u0027transcription\u0027);\r\n\r\n  btn.addEventListener(\u0027click\u0027, () =\u003E {\r\n    const expanded = btn.getAttribute(\u0027aria-expanded\u0027) === \u0027true\u0027;\r\n    btn.setAttribute(\u0027aria-expanded\u0027, String(!expanded));\r\n    panel.hidden = expanded;\r\n  });\r\n\u003C\/script\u003E","url":"\/fr\/definition\/donnee-personnelle"},"base l\u00e9gale":{"description":"\u003Cp\u003ELa base l\u00e9gale\u0026nbsp;d\u2019un traitement est ce qui autorise l\u00e9galement sa mise en \u0153uvre, ce qui donne le droit \u00e0 un organisme de collecter ou d\u0027utiliser des donn\u00e9es personnelles.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EOn peut \u00e9galement parler de \u00ab\u0026nbsp;fondement juridique\u0026nbsp;\u00bb ou de \u00ab\u0026nbsp;base juridique\u0026nbsp;\u00bb du traitement.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ESix bases l\u00e9gales sont pr\u00e9vues par le RGPD\u0026nbsp;:\u003C\/p\u003E\r\n\r\n\u003Cul\u003E\r\n\t\u003Cli\u003Ele consentement\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Ele contrat\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003El\u2019obligation l\u00e9gale\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Ela sauvegarde des int\u00e9r\u00eats vitaux\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003El\u2019int\u00e9r\u00eat public\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Eles int\u00e9r\u00eats l\u00e9gitimes.\u003C\/li\u003E\r\n\u003C\/ul\u003E\r\n\r\n\u003Cp class=\u0022rtecenter\u0022\u003E\u003Ca class=\u0022cta\u0022 href=\u0022\/les-bases-legales\/\u0022 target=\u0022_blank\u0022 title=\u0022Les bases l\u00e9gales - Nouvelle fen\u00eatre\u0022\u003EEn savoir plus sur les bases l\u00e9gales\u003C\/a\u003E\u003C\/p\u003E\r\n","url":"\/fr\/definition\/base-legale"},"algorithme":{"description":"\u003Cp\u003EUn algorithme est la description d\u0027une suite d\u0027\u00e9tapes permettant d\u0027obtenir un r\u00e9sultat \u00e0 partir d\u0027\u00e9l\u00e9ments fournis en entr\u00e9e. Par exemple, une recette de cuisine est un algorithme permettant d\u0027obtenir un plat \u00e0 partir de ses ingr\u00e9dients! Dans le monde de plus en plus num\u00e9rique dans lequel nous vivons, les algorithmes math\u00e9matiques permettent de combiner les informations les plus diverses pour produire une grande vari\u00e9t\u00e9 de r\u00e9sultats : simuler l\u0027\u00e9volution de la propagation de la grippe en hiver, recommander des livres \u00e0 des clients sur la base des choix d\u00e9j\u00e0 effectu\u00e9s par d\u0027autres clients, comparer des images num\u00e9riques de visages ou d\u0027empreintes digitales, piloter de fa\u00e7on autonome des automobiles ou des sondes spatiales, etc.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EPour qu\u0027un algorithme puisse \u00eatre mis en \u0153uvre par un ordinateur, il faut qu\u0027il soit exprim\u00e9 dans un langage informatique, sous la forme d\u0027un logiciel (souvent aussi appel\u00e9 \u00ab application \u00bb). Un logiciel combine en g\u00e9n\u00e9ral de nombreux algorithmes : pour la saisie des donn\u00e9es, le calcul du r\u00e9sultat, leur affichage, la communication avec d\u0027autres logiciels, etc.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ECertains algorithmes ont \u00e9t\u00e9 con\u00e7us de sorte que leur comportement \u00e9volue dans le temps, en fonction des donn\u00e9es qui leur ont \u00e9t\u00e9 fournies. Ces algorithmes \u00ab auto-apprenants \u00bb rel\u00e8vent du domaine de recherche des syst\u00e8mes experts et de l\u0027\u00ab intelligence artificielle \u00bb. Ils sont utilis\u00e9s dans un nombre croissant de domaines, allant de la pr\u00e9diction du trafic routier \u00e0 l\u0027analyse d\u0027images m\u00e9dicales.\u0026nbsp;\u003C\/p\u003E\r\n","url":"\/fr\/definition\/algorithme"},"minimisation":{"description":"\u003Cp\u003ELe principe de minimisation pr\u00e9voit que les donn\u00e9es \u00e0 caract\u00e8re personnel doivent \u00eatre \u003Cstrong\u003Ead\u00e9quates\u003C\/strong\u003E, \u003Cstrong\u003Epertinentes\u003C\/strong\u003E et \u003Cstrong\u003Elimit\u00e9es\u003C\/strong\u003E \u00e0 ce qui est n\u00e9cessaire au regard des finalit\u00e9s pour lesquelles elles sont trait\u00e9es.\u003C\/p\u003E\r\n\r\n\u003Cp\u003EExemple :\u003Cem\u003E\u0026nbsp;Collecter et conserver le statut marital d\u2019un salari\u00e9 n\u2019appara\u00eet pas n\u00e9cessaire \u00e0 l\u2019activit\u00e9 RH.\u003C\/em\u003E\u003C\/p\u003E\r\n\r\n\u003Cp\u003E\u0026nbsp;\u003C\/p\u003E\r\n\r\n\u003Cp\u003E\u0026nbsp;\u003C\/p\u003E\r\n","url":"\/fr\/definition\/minimisation"},"sous\\-traitant":{"description":"\u003Cp\u003ELe sous-traitant est la personne physique ou morale (entreprise ou organisme public) qui traite des donn\u00e9es pour le compte d\u2019un autre organisme (\u00ab\u0026nbsp;le responsable de traitement\u0026nbsp;\u00bb), dans le cadre d\u2019un service ou d\u2019une prestation.\u003C\/p\u003E\r\n\r\n\u003Cp\u003ELes sous-traitants ont des obligations concernant les donn\u00e9es personnelles, qui doivent \u00eatre pr\u00e9sentes dans le contrat\u0026nbsp;:\u003C\/p\u003E\r\n\r\n\u003Cul\u003E\r\n\t\u003Cli\u003Eune obligation de transparence et de tra\u00e7abilit\u00e9\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Ela prise en compte des principes de protection des donn\u00e9es d\u00e8s la conception et par d\u00e9faut\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Eune obligation de garantir la s\u00e9curit\u00e9 des donn\u00e9es trait\u00e9es\u0026nbsp;;\u003C\/li\u003E\r\n\t\u003Cli\u003Eune obligation d\u2019assistance, d\u2019alerte et de conseil (par exemple, une proc\u00e9dure de notification des violations de donn\u00e9es personnelles doit \u00eatre notifi\u00e9e).\u003C\/li\u003E\r\n\u003C\/ul\u003E\r\n\r\n\u003Cp class=\u0022rtecenter\u0022\u003E\u003Ca class=\u0022cta\u0022 data-entity-substitution=\u0022canonical\u0022 data-entity-type=\u0022node\u0022 data-entity-uuid=\u0022398eead2-2db0-47ff-8f2e-ca57030208a8\u0022 href=\u0022\/fr\/sous-traitant\u0022 target=\u0022_blank\u0022 title=\u0022Travailler avec un sous-traitant - Nouvelle fen\u00eatre\u0022\u003ETravailler avec un sous-traitant\u003C\/a\u003E\u003C\/p\u003E\r\n","url":"\/fr\/definition\/sous-traitant"},"vid\u00e9osurveillance":{"description":"\u003Cp\u003ELes dispositifs dits de \u00ab vid\u00e9osurveillance \u00bb concernent des lieux non ouverts au public (locaux professionnels non ouverts au public comme les bureaux ou les r\u00e9serves des magasins) et sont soumis aux dispositions de la loi \u00ab Informatique et Libert\u00e9s \u00bb.\u003C\/p\u003E\r\n","url":"\/fr\/definition\/videosurveillance"}},"ajaxTrustedUrl":{"form_action_p_pvdeGsVG5zNF_XLGPTvYSKCf43t8qZYSwcfZl2uzM":true},"send_mail_settings":{"title":"CNIL.fr \u003E IA : Annoter les donn\u00e9es","body":"IA : Annoter les donn\u00e9es\n\rLa phase d\u2019annotation des donn\u00e9es est cruciale pour garantir la qualit\u00e9 du mod\u00e8le entra\u00een\u00e9. Cet enjeu de performance peut \u00eatre atteint au moyen d\u2019une m\u00e9thodologie rigoureuse garantissant le respect de la protection des donn\u00e9es personnelles."},"user":{"uid":0,"permissionsHash":"e91320d4ba65c28343200be970ecf156d2f8f2531d36c481286fb5898cc60dbd"}}</script>
+<script src="/core/assets/vendor/jquery/jquery.min.js?v=3.7.1"></script>
+<script src="/core/assets/vendor/underscore/underscore-min.js?v=1.13.8"></script>
+<script src="/core/assets/vendor/once/once.min.js?v=1.0.1"></script>
+<script src="/sites/default/files/languages/fr_WDxFA2r49JBSRCFKQxTY_ogFWB4ieLusK-3KRukSnqU.js?tjllrb"></script>
+<script src="/core/misc/drupalSettingsLoader.js?v=10.6.11"></script>
+<script src="/core/misc/drupal.js?v=10.6.11"></script>
+<script src="/core/misc/drupal.init.js?v=10.6.11"></script>
+<script src="/themes/contrib/bootstrap/js/bootstrap-pre-init.js?tjllrb"></script>
+<script src="/themes/contrib/bootstrap/js/drupal.bootstrap.js?tjllrb"></script>
+<script src="/themes/contrib/bootstrap/js/attributes.js?tjllrb"></script>
+<script src="/themes/contrib/bootstrap/js/theme.js?tjllrb"></script>
+<script src="/themes/contrib/bootstrap/js/popover.js?tjllrb"></script>
+<script src="/themes/contrib/bootstrap/js/tooltip.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/js/html5shiv.min.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/alert.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/carousel.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/collapse.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/dropdown.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/modal.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/tooltip.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/popover.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/tab.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/bootstrap/js/onglets.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/js/respond.min.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/js/page.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_base/js/bef-buttons.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/alert.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/carousel.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/collapse.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/dropdown.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/modal.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tooltip.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/popover.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/bootstrap/js/tab.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/slick.min.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/jquery.mousewheel.min.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/respond.min.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/jquery.mCustomScrollbar.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/page.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/header.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/accessibility.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/main.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/display_cookies.js?tjllrb"></script>
+<script src="/themes/custom/bootstrap_cnil/js/matomo.js?tjllrb"></script>
+<script src="/core/misc/debounce.js?v=10.6.11"></script>
+<script src="/core/misc/announce.js?v=10.6.11"></script>
+<script src="/modules/commons/cnil_libraries/library/openlayers/OpenLayers.js?v=10.6.11"></script>
+<script src="/modules/commons/cnil_contenu_generique/js/cnil_contenu_generique.js?v=10.6.11"></script>
+<script src="/modules/custom/cnil_global/js/user-space-switcher.js?v=10.6.11"></script>
+<script src="/modules/commons/cnil_glossary/js/tooltips.js?v=1.x"></script>
+<script src="/modules/commons/cnil_libraries/library/zeroclipboard/dist/ZeroClipboard.js?v=10.6.11"></script>
+<script src="/modules/commons/cnil_site/assets/js/video.js?v=10.6.11"></script>
+<script src="/modules/contrib/tacjs/assets/vendor/tarteaucitron.js/tarteaucitron.js?v=1.20.0"></script>
+<script src="/modules/contrib/tacjs/assets/vendor/tarteaucitron.js/tarteaucitron.services.js?v=1.20.0"></script>
+<script src="/modules/contrib/tacjs/js/main.js?tjllrb"></script>
+<script src="/modules/commons/cnil_tacjs_page/js/tarteaucitron.services.js?tjllrb"></script>
+<script src="/modules/commons/cnil_tacjs_page/js/main.js?tjllrb"></script>
+<script src="/modules/commons/cnil_utilities/js/social.js?v=10.6.11"></script>
+<script src="/modules/contrib/datalayer/js/datalayer.js?v=1.x"></script>
+<script src="/modules/contrib/matomo/js/matomo.js?v=10.6.11"></script>
+<script src="/modules/commons/cnil_tacjs_page/js/lang/tarteaucitron.fr.js?tjllrb"></script>
+<script src="/modules/contrib/webform/js/webform.behaviors.js?v=10.6.11"></script>
+<script src="/core/misc/states.js?v=10.6.11"></script>
+<script src="/themes/contrib/bootstrap/js/misc/states.js?tjllrb"></script>
+<script src="/modules/contrib/webform/js/webform.states.js?v=10.6.11"></script>
+<script src="/modules/contrib/webform/modules/webform_bootstrap/js/webform_bootstrap.states.js?v=10.6.11"></script>
+
+</body>
+</html>

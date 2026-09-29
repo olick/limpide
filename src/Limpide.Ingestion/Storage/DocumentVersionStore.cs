@@ -1,7 +1,7 @@
 using Limpide.Core.Corpus;
 using Npgsql;
 
-namespace Limpide.Ingestion.Fetch;
+namespace Limpide.Ingestion.Storage;
 
 public enum VersionOutcome
 {
@@ -15,9 +15,34 @@ public enum VersionOutcome
     Restored,
 }
 
+/// <summary>Version courante d'un document, telle que la lisent les étapes après la collecte.</summary>
+public sealed record CurrentVersion(Guid Id, string SourceName, string DocumentTitle, string ContentHash, string RawPath);
+
 /// <summary>Enregistre sources, documents et versions dans PostgreSQL.</summary>
 public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
 {
+    public async Task<IReadOnlyList<CurrentVersion>> ListCurrentAsync(CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand("""
+            SELECT v.id, s.name, coalesce(d.title, d.url), v.content_hash, v.raw_path
+            FROM document_versions v
+            JOIN documents d ON d.id = v.document_id
+            JOIN sources s ON s.id = d.source_id
+            WHERE v.is_current
+            ORDER BY s.name, d.title
+            """);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+
+        var versions = new List<CurrentVersion>();
+        while (await reader.ReadAsync(ct))
+        {
+            versions.Add(new CurrentVersion(
+                reader.GetGuid(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4)));
+        }
+
+        return versions;
+    }
+
     public async Task<VersionOutcome> SaveAsync(
         SourceDefinition source,
         DocumentDefinition document,

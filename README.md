@@ -39,8 +39,12 @@ dotnet user-secrets set "ConnectionStrings:Rag" \
 Commandes à lancer depuis la racine du dépôt. Chacune est idempotente : la relancer ne fait rien de plus.
 
 ```bash
-dotnet run --project src/Limpide.Ingestion -- fetch   # télécharge corpus.json dans data/raw, versionne en base
+dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.json dans data/raw, versionne en base
+dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
 ```
+
+`data/extracted/<source>/<sha256>.json` porte le même nom que le fichier brut dont il est issu et indique la
+version de l'extracteur : une nouvelle version d'extracteur relance l'extraction, sinon rien n'est refait.
 
 Hors poste de développement (conteneur, Airflow), la chaîne de connexion passe par la variable
 d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document n'a pas pu être collecté.

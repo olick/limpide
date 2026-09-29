@@ -1,5 +1,6 @@
 using System.Net;
 using Limpide.Core.Corpus;
+using Limpide.Ingestion.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Limpide.Ingestion.Fetch;
