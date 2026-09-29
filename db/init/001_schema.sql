@@ -48,10 +48,11 @@ CREATE TABLE chunks (
     document_version_id uuid NOT NULL REFERENCES document_versions(id) ON DELETE CASCADE,
     ordinal             int  NOT NULL,      -- position dans le document
     heading             text,               -- titre ou article d'origine (ex. « Article 6 »)
-    content             text NOT NULL,
+    anchor              text,               -- subdivision d'origine quand la source en a (ex. « art_6 »)
+    content             text NOT NULL,      -- texte de la source, reproduit sans modification
     char_count          int  NOT NULL,
-    chunker_version     text NOT NULL,      -- découpeur qui a produit le passage (ex. « ai-act/1 ») :
-                                            -- une autre version impose de redécouper
+    extractor_version   text NOT NULL,      -- extracteur et découpeur qui ont produit le passage
+    chunker_version     text NOT NULL,      -- (ex. « eur-lex-xhtml/1 », « ai-act/1 ») : si l'un change, on redécoupe
     embedding           vector(1024),       -- dimension du modèle bge-m3
     embedding_model     text,
     created_at          timestamptz NOT NULL DEFAULT now(),

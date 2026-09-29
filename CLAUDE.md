@@ -99,14 +99,13 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 
 - [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
 - [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
-- [ ] Session 3 : extraction et découpage structurel, avec tests — **en cours**
-  - [x] commande `extract` (data/raw → data/extracted, blocs JSON), extracteurs EUR-Lex et CNIL testés
-  - [ ] commande `chunk` (data/extracted → table `chunks`), colonne `chunker_version` — **prochaine tâche**
-- [ ] Session 4 : commande `embed`, mesures de durée
+- [x] Session 3 : commandes `extract` et `chunk`, extracteurs et découpeurs AI Act / CNIL testés
+- [ ] Session 4 : commande `embed`, mesures de durée — **prochaine tâche**
 - [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README
 
-Critère de fin de la session 3 : tests du découpeur verts, et 20 passages tirés au hasard sans passage vide,
-article coupé en pleine phrase ni menu de navigation.
+Critère de fin de la session 4 : `SELECT count(*) FROM chunks WHERE embedding IS NULL;` renvoie 0,
+durées notées (nombre de passages, durée totale, durée par passage).
+Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
 
 Choix de la session 3 (voir la discussion du 2026-09-29) :
 
@@ -118,7 +117,18 @@ Choix de la session 3 (voir la discussion du 2026-09-29) :
   dans la source ; seuls les espaces sont normalisés. Blocs : titre (niveau), paragraphe, élément de liste
   (profondeur), avec l'ancre ELI pour l'AI Act (`art_5`, `005.001`, `rct_1`, `anx_III`).
 - AI Act : titre, en-tête et pied du JO, notes, formule finale et signatures écartés ; considérants gardés.
+- Découpeurs (`ai-act/1`, `cnil-sections/1`) : unités article / considérant / annexe / préambule pour l'AI Act,
+  section pour la CNIL ; `Packer` commun (500 à 1 500 caractères, coupe entre groupes, puis blocs, puis phrases,
+  jamais dans une phrase). Modifier `Packer` impose d'incrémenter la version des deux découpeurs.
+- Table `chunks` : `anchor` (`art_5`, `rct_12`, `anx_III`, clé des questions de test), `extractor_version`
+  et `chunker_version` ; `chunk` remplace tous les passages d'une version dans une transaction (COPY binaire).
+- Pour recréer la base sans perdre bge-m3 : `docker compose rm -sf postgres && docker volume rm limpide_pgdata`,
+  jamais `docker compose down -v` (efface aussi le volume Ollama).
 - La fiche CNIL « Annoter les données » contient un paragraphe en double dans la page elle-même : laissé tel quel.
+- **Fausses nouvelles versions CNIL** (constaté le 2026-09-29) : le HTML brut contient des identifiants aléatoires
+  (menu, jeton `form_build_id`) qui changent d'un jour à l'autre ; chaque `fetch` crée une version dont le texte
+  extrait est identique. Sans gravité tant que la collecte est manuelle ; à traiter en S5 avec le cycle de vie
+  des versions : ne publier une version que si son texte extrait diffère de la version publiée.
 
 Notes de la session 2 :
 

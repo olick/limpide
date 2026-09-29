@@ -88,7 +88,13 @@ ni passage vide, ni article coupé au milieu d'une phrase, ni menu de navigation
    (ex. « Quelles pratiques d'IA sont interdites ? » → Article 5).
    C'est l'amorce du jeu d'évaluation de la semaine 7.
 3. Compter combien de questions ramènent le bon passage dans les 5 premiers résultats.
-4. Compléter l'ADR-002 avec les mesures (temps d'ingestion, qualité observée).
+4. **Mesure complémentaire, une fois le score de référence noté** : vectoriser le titre de rattachement avec le texte
+   (`heading + "\n" + content`), sans changer le texte stocké ni affiché. Un passage qui n'est pas le premier de
+   son article perd la phrase qui introduit sa liste (ex. « h) l'utilisation de systèmes… » sans
+   « 1. Les pratiques suivantes sont interdites: ») ; le titre (« Article 5 — Pratiques interdites… ») peut compenser.
+   Recalculer les embeddings, repasser les 10 questions, comparer les deux scores. On ne garde la variante que si
+   elle améliore le résultat, et on note la mesure dans `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
+5. Compléter l'ADR-002 avec les mesures (temps d'ingestion, qualité observée).
 
 **Terminé quand** : le score est noté dans le README, même s'il est mauvais. C'est le point de référence.
 

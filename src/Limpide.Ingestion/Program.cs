@@ -1,4 +1,5 @@
 ﻿using Limpide.Ingestion;
+using Limpide.Ingestion.Chunking;
 using Limpide.Ingestion.Extract;
 using Limpide.Ingestion.Fetch;
 using Limpide.Ingestion.Storage;
@@ -10,7 +11,7 @@ using Npgsql;
 // Usage : dotnet run --project src/Limpide.Ingestion -- <commande>
 // À lancer depuis la racine du dépôt : les chemins de la configuration sont relatifs au répertoire courant.
 var command = args.FirstOrDefault();
-if (command is not ("fetch" or "extract"))
+if (command is not ("fetch" or "extract" or "chunk"))
 {
     Console.Error.WriteLine("""
         Usage : Limpide.Ingestion <commande>
@@ -18,6 +19,7 @@ if (command is not ("fetch" or "extract"))
         Commandes, dans l'ordre :
           fetch     télécharge le corpus et enregistre les nouvelles versions
           extract   extrait le texte structuré des versions courantes (data/extracted)
+          chunk     découpe le texte extrait en passages (table chunks)
         """);
     return 2;
 }
@@ -39,6 +41,8 @@ builder.Services.AddSingleton(_ => FetchCommand.CreateHttpClient(options));
 builder.Services.AddSingleton<DocumentVersionStore>();
 builder.Services.AddSingleton<FetchCommand>();
 builder.Services.AddSingleton<ExtractCommand>();
+builder.Services.AddSingleton<ChunkStore>();
+builder.Services.AddSingleton<ChunkCommand>();
 
 using var host = builder.Build();
 
@@ -52,5 +56,6 @@ Console.CancelKeyPress += (_, e) =>
 return command switch
 {
     "fetch" => await host.Services.GetRequiredService<FetchCommand>().RunAsync(cts.Token),
-    _ => await host.Services.GetRequiredService<ExtractCommand>().RunAsync(cts.Token),
+    "extract" => await host.Services.GetRequiredService<ExtractCommand>().RunAsync(cts.Token),
+    _ => await host.Services.GetRequiredService<ChunkCommand>().RunAsync(cts.Token),
 };

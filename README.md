@@ -41,10 +41,19 @@ Commandes à lancer depuis la racine du dépôt. Chacune est idempotente : la re
 ```bash
 dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.json dans data/raw, versionne en base
 dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
+dotnet run --project src/Limpide.Ingestion -- chunk     # passages dans la table chunks
 ```
 
 `data/extracted/<source>/<sha256>.json` porte le même nom que le fichier brut dont il est issu et indique la
 version de l'extracteur : une nouvelle version d'extracteur relance l'extraction, sinon rien n'est refait.
+De même, `chunk` redécoupe une version quand l'extracteur ou le découpeur a changé de version.
+
+Relire 20 passages au hasard :
+
+```bash
+docker compose exec postgres psql -U rag -d rag -c \
+  "SELECT char_count, heading, content FROM chunks ORDER BY random() LIMIT 20"
+```
 
 Hors poste de développement (conteneur, Airflow), la chaîne de connexion passe par la variable
 d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document n'a pas pu être collecté.
@@ -56,6 +65,7 @@ d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document 
 ├── db/init/            Scripts SQL exécutés au premier démarrage de PostgreSQL
 ├── docs/
 │   ├── adr/            Décisions d'architecture (une par fichier)
+│   ├── notes/          Observations en cours, matière des futurs ADR
 │   ├── plan/           Plans hebdomadaires
 │   └── sources.md      Inventaire du corpus et conditions de réutilisation
 ├── scripts/            Scripts utilitaires (création de la solution .NET)
