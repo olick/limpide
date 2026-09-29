@@ -100,11 +100,12 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
 - [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
 - [x] Session 3 : commandes `extract` et `chunk`, extracteurs et découpeurs AI Act / CNIL testés
-- [ ] Session 4 : commande `embed`, mesures de durée — **prochaine tâche**
-- [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README
+- [x] Session 4 : commande `embed`, mesures dans l'ADR-002 (691 passages, 9 min 31 s sur CPU, 816 ms par passage)
+- [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README — **prochaine tâche**
 
-Critère de fin de la session 4 : `SELECT count(*) FROM chunks WHERE embedding IS NULL;` renvoie 0,
-durées notées (nombre de passages, durée totale, durée par passage).
+Critère de fin de la session 5 : le score (bon passage dans le top 5 sur 10 questions) est noté dans le README,
+même mauvais. Les questions désignent le passage attendu par son `anchor` (`art_5`, `rct_29`...).
+Puis mesure complémentaire : titre + texte vectorisés (voir `semaine-01.md`, session 5, étape 4).
 Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
 
 Choix de la session 3 (voir la discussion du 2026-09-29) :
@@ -129,6 +130,16 @@ Choix de la session 3 (voir la discussion du 2026-09-29) :
   (menu, jeton `form_build_id`) qui changent d'un jour à l'autre ; chaque `fetch` crée une version dont le texte
   extrait est identique. Sans gravité tant que la collecte est manuelle ; à traiter en S5 avec le cycle de vie
   des versions : ne publier une version que si son texte extrait diffère de la version publiée.
+
+Choix de la session 4 :
+
+- `embed` traite les passages des versions courantes sans embedding **ou** calculés avec un autre modèle que
+  `Embedding:Model` : changer de modèle en configuration relance le calcul. Lots enregistrés un par un
+  (reprise après interruption). Configuration : section `Embedding` d'`appsettings.json`
+  (`--Embedding:BatchSize=32` en ligne de commande pour essayer une autre taille de lot).
+- Ollama tourne sur CPU : le GPU du poste n'est pas exposé au conteneur (pas de NVIDIA Container Toolkit).
+  Volontaire : c'est la configuration la plus proche de l'hébergement probable. Question ouverte dans l'ADR-002 :
+  où tourne le modèle qui vectorise les questions en ligne, et combien il coûte au repos (ADR-006, 012).
 
 Notes de la session 2 :
 

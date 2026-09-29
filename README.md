@@ -42,6 +42,7 @@ Commandes à lancer depuis la racine du dépôt. Chacune est idempotente : la re
 dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.json dans data/raw, versionne en base
 dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
 dotnet run --project src/Limpide.Ingestion -- chunk     # passages dans la table chunks
+dotnet run --project src/Limpide.Ingestion -- embed     # embeddings bge-m3 des passages qui n'en ont pas
 ```
 
 `data/extracted/<source>/<sha256>.json` porte le même nom que le fichier brut dont il est issu et indique la
