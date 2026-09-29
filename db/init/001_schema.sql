@@ -1,6 +1,8 @@
 -- Schéma initial du corpus.
 -- Exécuté automatiquement au premier démarrage du conteneur PostgreSQL
--- (volume vide). Pour le rejouer : docker compose down -v && docker compose up -d
+-- (volume vide). Pour le rejouer sans perdre le modèle Ollama :
+--   docker compose rm -sf postgres && docker volume rm limpide_pgdata && docker compose up -d --wait
+-- puis relancer fetch et extract. Un outil de migrations remplacera ce mécanisme en semaine 5.
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -48,6 +50,8 @@ CREATE TABLE chunks (
     heading             text,               -- titre ou article d'origine (ex. « Article 6 »)
     content             text NOT NULL,
     char_count          int  NOT NULL,
+    chunker_version     text NOT NULL,      -- découpeur qui a produit le passage (ex. « ai-act/1 ») :
+                                            -- une autre version impose de redécouper
     embedding           vector(1024),       -- dimension du modèle bge-m3
     embedding_model     text,
     created_at          timestamptz NOT NULL DEFAULT now(),

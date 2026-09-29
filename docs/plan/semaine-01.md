@@ -44,6 +44,10 @@ avec une requête de recherche qui ramène des passages pertinents. Pas encore d
 
 ## Session 3 : extraction et découpage (≈ 2 h 30) — la session la plus importante
 
+Deux commandes séparées : `extract` (fichier brut → `data/extracted/<source>/<sha256>.json`)
+puis `chunk` (texte extrait → table `chunks`). Le texte extrait se relit à l'œil, et on peut comparer
+plusieurs découpages sans réextraire.
+
 1. Extraction :
    - HTML (AngleSharp) : ne garder que le contenu principal, retirer menus, pieds de page, bandeaux cookies ;
    - PDF (PdfPig) : texte page par page, repérer en-têtes et pieds de page répétés et les retirer.

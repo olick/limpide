@@ -8,6 +8,7 @@ passages cités avec leur score, stratégie de recherche, latence, tokens, coût
 Une page publique affiche les résultats d'évaluation.
 
 Objectifs, par ordre de priorité :
+
 1. Une démo publique en ligne, montrable en rendez-vous client et en entretien (positionnement architecte IA / FDE).
 2. Un passage documenté du POC à la production : c'est le cœur du portfolio.
 3. Des preuves pour les 4 blocs de la certification RNCP41993 « Architecte en intelligence artificielle » (Jedha) :
@@ -20,6 +21,7 @@ Ne pas ajouter de fonctionnalités (multimodal, GraphRAG…) qui éloignent de c
 ## Auteur
 
 Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
+
 - Maîtrise : .NET, architecture, PostgreSQL, Docker, Kubernetes.
 - **N'a jamais utilisé Terraform ni Airflow** : les introduire en expliquant les concepts, pas en boîte noire.
 - Poste : Debian 13 (trixie).
@@ -28,14 +30,16 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
 ## Stack
 
-- .NET 10, solution `Limpide` : `src/Limpide.Core` (domaine, découpage, interfaces, sans dépendance d'infra),
-  `src/Limpide.Ingestion` (console : collecte, extraction, embeddings, stockage), `tests/Limpide.Core.Tests` (xUnit).
+- .NET 10, solution `Limpide` : `src/Limpide.Core` (domaine, extraction, découpage, interfaces, sans dépendance
+  d'infra ni E/S), `src/Limpide.Ingestion` (console : commandes et stockage), `tests/Limpide.Core.Tests` (xUnit).
+  Prévu en S2 : `src/Limpide.Infrastructure` (code Npgsql sorti d'Ingestion) et `src/Limpide.Web` (Blazor).
 - PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma dans `db/init/001_schema.sql`.
 - Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
-- Paquets : Npgsql, Pgvector, AngleSharp (HTML), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
-- Phase 2 (plus tard) : Airflow, Terraform sur Azure (Container Apps, PostgreSQL managé, Key Vault,
-  identités managées), CI/CD avec évaluation automatique, OpenTelemetry, suivi des coûts.
+- Paquets : Npgsql, Pgvector, AngleSharp (HTML, dans Core), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
+- Génération (S2) : LLM hébergé derrière `IChatClient` (Microsoft.Extensions.AI), Ollama en développement.
+- Phase 2 : Airflow (S4), migrations SQL (S5), Terraform sur Azure (S6 : Container Apps, PostgreSQL managé,
+  Blob Storage, Key Vault, identités managées), CI/CD avec évaluation (S7), OpenTelemetry et coûts (S8).
 
 ## Décisions déjà prises (voir `docs/adr/`)
 
@@ -47,7 +51,7 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
 ## Règles à respecter dans le code
 
-- **Chaque commande d'ingestion est séparée et idempotente** (`fetch`, `extract`, `embed`, `search`).
+- **Chaque commande d'ingestion est séparée et idempotente** (`fetch`, `extract`, `chunk`, `embed`, `search`).
   Les étapes échangent via le stockage (fichiers bruts, base), jamais en mémoire.
 - **Versionnement** : empreinte SHA-256 du contenu brut. Même empreinte = rien à faire.
   Passer l'ancienne version à `is_current = false` **avant** d'insérer la nouvelle (index unique partiel).
@@ -71,6 +75,7 @@ dotnet build
 ```
 
 Pièges déjà rencontrés :
+
 - Pas de `$` dans les valeurs de `.env` : Docker Compose les interprète comme des variables.
 - Ports Docker toujours liés à `127.0.0.1` (Docker contourne le pare-feu, Ollama n'a pas d'authentification).
 - Ne jamais lancer les scripts avec `sudo` (ils l'appellent eux-mêmes si besoin).
@@ -78,19 +83,45 @@ Pièges déjà rencontrés :
 
 ## Où on en est
 
-Planning : phase 1 (S1–S3) POC de bout en bout et démo en ligne ; phase 2 (S4–S9) industrialisation.
-Plan détaillé de la semaine en cours : `docs/plan/semaine-01.md`.
+Plan global (10 semaines, ADR prévus, correspondance RNCP) : `docs/plan/plan-global.md`.
+Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la semaine en cours.
+
+| Phase | Semaines | Résultat |
+|---|---|---|
+| 1 — POC de bout en bout | S1 à S3 | Démo publique en ligne (S2 : RAG + interface « sous le capot », S3 : mise en ligne) |
+| 2 — Industrialisation | S4 à S9 | Airflow, qualité et quarantaine, Terraform, évaluation en CI, observabilité, gouvernance |
+| Marge | S10 | Rattrapage, finitions, soutenance |
+
+En cas de retard, sacrifier dans cet ordre : recherche hybride (S2), élargissement du corpus (S5),
+garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
+
+**Semaine en cours : S1** (`docs/plan/semaine-01.md`)
 
 - [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
 - [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
-- [ ] Session 3 : extraction et découpage structurel, avec tests — **prochaine tâche**
+- [ ] Session 3 : extraction et découpage structurel, avec tests — **en cours**
+  - [x] commande `extract` (data/raw → data/extracted, blocs JSON), extracteurs EUR-Lex et CNIL testés
+  - [ ] commande `chunk` (data/extracted → table `chunks`), colonne `chunker_version` — **prochaine tâche**
 - [ ] Session 4 : commande `embed`, mesures de durée
 - [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README
 
 Critère de fin de la session 3 : tests du découpeur verts, et 20 passages tirés au hasard sans passage vide,
 article coupé en pleine phrase ni menu de navigation.
 
+Choix de la session 3 (voir la discussion du 2026-09-29) :
+
+- Deux commandes `extract` puis `chunk`, qui échangent via `data/extracted/<source>/<sha256>.json` :
+  le texte extrait se relit à l'œil, et on peut comparer des découpages sans réextraire (futur ADR).
+- Chaque extracteur et découpeur a une version (`cnil-html/1`...) enregistrée avec son résultat :
+  la changer relance l'étape, sinon la commande ne refait rien.
+- Extracteurs dans Core (AngleSharp, sans E/S), choisis selon la source. Ils ne produisent que du texte présent
+  dans la source ; seuls les espaces sont normalisés. Blocs : titre (niveau), paragraphe, élément de liste
+  (profondeur), avec l'ancre ELI pour l'AI Act (`art_5`, `005.001`, `rct_1`, `anx_III`).
+- AI Act : titre, en-tête et pied du JO, notes, formule finale et signatures écartés ; considérants gardés.
+- La fiche CNIL « Annoter les données » contient un paragraphe en double dans la page elle-même : laissé tel quel.
+
 Notes de la session 2 :
+
 - EUR-Lex bloque les scripts (défi AWS WAF, `202` vide) : l'AI Act est téléchargé via l'API CELLAR
   (`fetchUrl` dans `corpus.json`). Le fichier brut est du XHTML Formex/CONVEX, pas la page EUR-Lex :
   en tenir compte pour l'extraction.
