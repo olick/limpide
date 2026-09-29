@@ -101,11 +101,15 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
 - [x] Session 3 : commandes `extract` et `chunk`, extracteurs et découpeurs AI Act / CNIL testés
 - [x] Session 4 : commande `embed`, mesures dans l'ADR-002 (691 passages, 9 min 31 s sur CPU, 816 ms par passage)
-- [ ] Session 5 : commande `search`, 10 questions de test, score de référence dans le README — **prochaine tâche**
+- [x] Session 5 : `search`, `evaluate`, 10 questions (`eval/questions.json`), score dans le README :
+  top 5 = 5/10 (texte seul) puis **8/10 (titre + texte, retenu)**
 
-Critère de fin de la session 5 : le score (bon passage dans le top 5 sur 10 questions) est noté dans le README,
-même mauvais. Les questions désignent le passage attendu par son `anchor` (`art_5`, `rct_29`...).
-Puis mesure complémentaire : titre + texte vectorisés (voir `semaine-01.md`, session 5, étape 4).
+**Semaine 1 terminée. Prochaine : S2** (`docs/plan/semaine-02.md`), session 1 : `Limpide.Infrastructure`, ADR-004 (LLM).
+
+Constats de la semaine 1 à reprendre en S2 (détail : `docs/notes/observations-decoupage.md`) :
+les considérants évincent les articles en tête des résultats (recherche hybride, ADR-005) ; le vocabulaire
+des utilisateurs diffère de celui du règlement (« grands modèles de langage » contre « modèles d'IA à usage général »).
+`evaluate` donne le score à chaque modification de la recherche : le relancer avant/après, noter dans le README.
 Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
 
 Choix de la session 3 (voir la discussion du 2026-09-29) :
@@ -130,6 +134,19 @@ Choix de la session 3 (voir la discussion du 2026-09-29) :
   (menu, jeton `form_build_id`) qui changent d'un jour à l'autre ; chaque `fetch` crée une version dont le texte
   extrait est identique. Sans gravité tant que la collecte est manuelle ; à traiter en S5 avec le cycle de vie
   des versions : ne publier une version que si son texte extrait diffère de la version publiée.
+
+Console (`src/Limpide.Ingestion/Cli/`) : sans argument, mode interactif (`limpide>`, `help`, `exit`) ;
+avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à préserver). La liste des
+commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
+Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
+VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la session 5 :
+
+- `evaluate` : rang du premier bon passage sur 10 résultats ; top 1, top 5, MRR. Passage attendu par `anchor`
+  (AI Act) ou morceau du titre de rattachement (CNIL, sans ancre). Questions formulées sans reprendre les mots du titre.
+- `Embedding:IncludeHeading = true` : on vectorise « titre + texte » ; `embedding_model = bge-m3+titre`.
+  La recherche ne compare que des vecteurs de même libellé.
 
 Choix de la session 4 :
 

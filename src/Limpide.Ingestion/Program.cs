@@ -1,78 +1,81 @@
-﻿using Limpide.Ingestion;
-using Limpide.Ingestion.Chunking;
-using Limpide.Ingestion.Embed;
-using Limpide.Ingestion.Extract;
-using Limpide.Ingestion.Fetch;
-using Limpide.Ingestion.Storage;
-using Microsoft.Extensions.AI;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Npgsql;
-using OllamaSharp;
-using Pgvector.Npgsql;
+using Limpide.Ingestion.Cli;
 
-// Usage : dotnet run --project src/Limpide.Ingestion -- <commande>
+// Avec une commande : l'exécute puis s'arrête, avec un code de sortie (mode utilisé par Airflow en semaine 4).
+// Sans argument : mode interactif, jusqu'à « exit ». Voir « help ».
 // À lancer depuis la racine du dépôt : les chemins de la configuration sont relatifs au répertoire courant.
-var command = args.FirstOrDefault();
-if (command is not ("fetch" or "extract" or "chunk" or "embed"))
-{
-    Console.Error.WriteLine("""
-        Usage : Limpide.Ingestion <commande>
 
-        Commandes, dans l'ordre :
-          fetch     télécharge le corpus et enregistre les nouvelles versions
-          extract   extrait le texte structuré des versions courantes (data/extracted)
-          chunk     découpe le texte extrait en passages (table chunks)
-          embed     calcule les embeddings des passages qui n'en ont pas
-        """);
-    return 2;
-}
-
-var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
-{
-    Args = args[1..],
-    // appsettings.json est à côté de l'exécutable, pas dans le répertoire courant.
-    ContentRootPath = AppContext.BaseDirectory,
-});
-
-var options = builder.Configuration.GetSection("Ingestion").Get<IngestionOptions>() ?? new IngestionOptions();
-var embedding = builder.Configuration.GetSection("Embedding").Get<EmbeddingOptions>() ?? new EmbeddingOptions();
-var connectionString = builder.Configuration.GetConnectionString("Rag")
-    ?? throw new InvalidOperationException("Chaîne de connexion « ConnectionStrings:Rag » absente.");
-
-builder.Services.AddSingleton(options);
-builder.Services.AddSingleton(embedding);
-builder.Services.AddSingleton(_ =>
-{
-    var dataSource = new NpgsqlDataSourceBuilder(connectionString);
-    dataSource.UseVector();
-    return dataSource.Build();
-});
-// Changer de fournisseur d'embeddings = remplacer cette ligne par une autre implémentation d'IEmbeddingGenerator.
-builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(embedding.Endpoint, embedding.Model));
-builder.Services.AddSingleton(_ => FetchCommand.CreateHttpClient(options));
-builder.Services.AddSingleton<DocumentVersionStore>();
-builder.Services.AddSingleton<FetchCommand>();
-builder.Services.AddSingleton<ExtractCommand>();
-builder.Services.AddSingleton<ChunkStore>();
-builder.Services.AddSingleton<ChunkCommand>();
-builder.Services.AddSingleton<EmbeddingStore>();
-builder.Services.AddSingleton<EmbedCommand>();
-
-using var host = builder.Build();
-
-using var cts = new CancellationTokenSource();
+CancellationTokenSource? running = null;
 Console.CancelKeyPress += (_, e) =>
 {
-    e.Cancel = true;
-    cts.Cancel();
+    // Ctrl+C interrompt la commande en cours ; à l'invite, il quitte.
+    if (running is not null)
+    {
+        e.Cancel = true;
+        running.Cancel();
+    }
 };
 
-return command switch
+if (CommandLine.FromArgs(args) is { } oneShot)
+    return await ExecuteAsync(oneShot);
+
+Console.WriteLine("Limpide — mode interactif. « help » pour la liste des commandes, « exit » pour quitter.");
+while (true)
 {
-    "fetch" => await host.Services.GetRequiredService<FetchCommand>().RunAsync(cts.Token),
-    "extract" => await host.Services.GetRequiredService<ExtractCommand>().RunAsync(cts.Token),
-    "chunk" => await host.Services.GetRequiredService<ChunkCommand>().RunAsync(cts.Token),
-    _ => await host.Services.GetRequiredService<EmbedCommand>().RunAsync(cts.Token),
-};
+    Console.Write("\nlimpide> ");
+    var input = Console.ReadLine();
+    if (input is null) // Ctrl+D
+        return 0;
+
+    if (CommandLine.Parse(input) is not { } line)
+        continue;
+    if (line.Name is "exit" or "quit")
+        return 0;
+
+    var code = await ExecuteAsync(line);
+    if (code != 0)
+        Console.WriteLine($"(code de sortie {code})");
+}
+
+async Task<int> ExecuteAsync(CommandLine line)
+{
+    var command = CommandCatalog.Find(line.Name);
+    if (command is null)
+    {
+        Console.Error.WriteLine($"Commande inconnue : {line.Name} (« help » pour la liste des commandes)");
+        return 2;
+    }
+
+    if (command.Name == "help")
+    {
+        Console.WriteLine(CommandCatalog.Help());
+        return 0;
+    }
+
+    if (command.RequiresText && string.IsNullOrWhiteSpace(line.Text))
+    {
+        Console.Error.WriteLine($"Usage : {command.Usage}");
+        return 2;
+    }
+
+    running = new CancellationTokenSource();
+    try
+    {
+        return await CommandRunner.RunAsync(line, running.Token);
+    }
+    catch (OperationCanceledException) when (running.IsCancellationRequested)
+    {
+        Console.Error.WriteLine("Commande interrompue.");
+        return 130;
+    }
+    catch (Exception ex) when (ex is not OutOfMemoryException)
+    {
+        // En mode interactif, une erreur (base arrêtée, Ollama injoignable...) ne doit pas fermer la session.
+        Console.Error.WriteLine($"Erreur ({ex.GetType().Name}) : {ex.Message}");
+        return 1;
+    }
+    finally
+    {
+        running.Dispose();
+        running = null;
+    }
+}

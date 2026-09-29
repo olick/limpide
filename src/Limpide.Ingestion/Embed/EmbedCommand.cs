@@ -10,7 +10,7 @@ namespace Limpide.Ingestion.Embed;
 /// par lots. Chaque lot est enregistré dès qu'il est calculé : une interruption ne perd que le lot en cours,
 /// et une relance reprend là où on s'était arrêté.
 /// </summary>
-/// <remarks>Texte vectorisé : le contenu du passage seul (mesure de référence de la semaine 1).</remarks>
+/// <remarks>Texte vectorisé : le contenu seul, ou « titre + contenu » avec <see cref="EmbeddingOptions.IncludeHeading"/>.</remarks>
 public sealed class EmbedCommand(
     IEmbeddingGenerator<string, Embedding<float>> generator,
     EmbeddingStore store,
@@ -19,24 +19,24 @@ public sealed class EmbedCommand(
 {
     public async Task<int> RunAsync(CancellationToken ct)
     {
-        var total = await store.CountPendingAsync(options.Model, ct);
+        var total = await store.CountPendingAsync(options.Label, ct);
         if (total == 0)
         {
-            logger.LogInformation("Aucun passage à vectoriser ({Model})", options.Model);
+            logger.LogInformation("Aucun passage à vectoriser ({Model})", options.Label);
             return 0;
         }
 
         logger.LogInformation("{Total} passage(s) à vectoriser avec {Model}, par lots de {BatchSize}",
-            total, options.Model, options.BatchSize);
+            total, options.Label, options.BatchSize);
 
         var overall = Stopwatch.StartNew();
         TimeSpan? firstBatch = null;
         int done = 0, characters = 0;
 
-        while (await store.NextBatchAsync(options.Model, options.BatchSize, ct) is { Count: > 0 } batch)
+        while (await store.NextBatchAsync(options.Label, options.BatchSize, ct) is { Count: > 0 } batch)
         {
             var watch = Stopwatch.StartNew();
-            var embeddings = await generator.GenerateAsync(batch.Select(c => c.Content), cancellationToken: ct);
+            var embeddings = await generator.GenerateAsync(batch.Select(c => options.TextToEmbed(c.Heading, c.Content)), cancellationToken: ct);
 
             if (embeddings.Count != batch.Count)
                 throw new InvalidOperationException($"{embeddings.Count} embedding(s) reçus pour {batch.Count} passage(s)");
@@ -44,7 +44,7 @@ public sealed class EmbedCommand(
                 throw new InvalidOperationException(
                     $"{options.Model} produit {embeddings[0].Vector.Length} dimensions, la base en attend {options.Dimensions}");
 
-            await store.SaveAsync(batch.Select((c, i) => (c.Id, embeddings[i].Vector)).ToList(), options.Model, ct);
+            await store.SaveAsync(batch.Select((c, i) => (c.Id, embeddings[i].Vector)).ToList(), options.Label, ct);
 
             firstBatch ??= watch.Elapsed;
             done += batch.Count;

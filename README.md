@@ -37,12 +37,18 @@ dotnet user-secrets set "ConnectionStrings:Rag" \
 ## Ingestion
 
 Commandes à lancer depuis la racine du dépôt. Chacune est idempotente : la relancer ne fait rien de plus.
+Sans argument, la console passe en mode interactif (invite `limpide>`, `help` pour la liste des commandes,
+`exit` pour quitter) ; avec une commande, elle l'exécute puis s'arrête avec un code de sortie.
+Dans VS Code : profils `Debug` et `Release` (F5), qui ouvrent le mode interactif.
 
 ```bash
 dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.json dans data/raw, versionne en base
 dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
 dotnet run --project src/Limpide.Ingestion -- chunk     # passages dans la table chunks
 dotnet run --project src/Limpide.Ingestion -- embed     # embeddings bge-m3 des passages qui n'en ont pas
+dotnet run --project src/Limpide.Ingestion -- search Quelles pratiques d\'IA sont interdites \?
+dotnet run --project src/Limpide.Ingestion -- evaluate  # score de la recherche sur eval/questions.json
+dotnet run --project src/Limpide.Ingestion              # mode interactif
 ```
 
 `data/extracted/<source>/<sha256>.json` porte le même nom que le fichier brut dont il est issu et indique la
@@ -58,6 +64,18 @@ docker compose exec postgres psql -U rag -d rag -c \
 
 Hors poste de développement (conteneur, Airflow), la chaîne de connexion passe par la variable
 d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document n'a pas pu être collecté.
+
+## Score de recherche
+
+Recherche vectorielle seule (sans LLM), sur les 10 questions de [`eval/questions.json`](eval/questions.json) :
+le passage attendu figure-t-il dans les 5 premiers résultats ? Mesuré par `evaluate`.
+
+| Date | Texte vectorisé | 1er résultat | Top 5 | MRR |
+|---|---|---|---|---|
+| 2026-09-29 | texte du passage (référence) | 4/10 | 5/10 | 0,45 |
+| 2026-09-29 | titre de rattachement + texte (**retenu**) | 4/10 | 8/10 | 0,55 |
+
+Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/notes/observations-decoupage.md).
 
 ## Structure
 

@@ -1,0 +1,31 @@
+{
+  // Console Limpide en mode interactif (invite « limpide> », « help » pour les commandes, « exit » pour quitter).
+  // - cwd = racine du dépôt : les chemins de appsettings.json (corpus.json, data/, eval/) en dépendent.
+  // - DOTNET_ENVIRONMENT=Development dans les deux profils : c'est ce qui charge dotnet user-secrets
+  //   (mot de passe PostgreSQL local), sans rapport avec Debug / Release.
+  // - Mesures de durée (embed) : profil Release, lancé sans débogueur (Ctrl+F5).
+  // Les tests se déboguent depuis l'explorateur de tests, sans configuration.
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Limpide.Ingestion/bin/Debug/net10.0/Limpide.Ingestion.dll",
+      "cwd": "${workspaceFolder}",
+      "env": { "DOTNET_ENVIRONMENT": "Development" },
+      "console": "integratedTerminal"
+    },
+    {
+      "name": "Release",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-release",
+      "program": "${workspaceFolder}/src/Limpide.Ingestion/bin/Release/net10.0/Limpide.Ingestion.dll",
+      "cwd": "${workspaceFolder}",
+      "env": { "DOTNET_ENVIRONMENT": "Development" },
+      "console": "integratedTerminal"
+    }
+  ]
+}

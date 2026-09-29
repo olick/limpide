@@ -1,0 +1,63 @@
+{
+  // Questions de test de la recherche (semaine 1) : amorce du jeu d'évaluation de la semaine 7.
+  // Formulées comme un utilisateur les poserait, sans reprendre les mots du titre du passage attendu.
+  // expected.anchors : ancres de l'AI Act (art_N, rct_N, anx_X) ; expected.headings : morceau du titre
+  // de rattachement, pour les fiches CNIL qui n'ont pas d'ancre. Un seul critère satisfait suffit.
+  "questions": [
+    {
+      "id": "q01",
+      "question": "Quelles utilisations de l'IA sont purement et simplement interdites en Europe ?",
+      "expected": { "anchors": ["art_5"] }
+    },
+    {
+      "id": "q02",
+      "question": "Comment le règlement définit-il un système d'intelligence artificielle ?",
+      "expected": { "anchors": ["art_3"] },
+      "note": "Définition 1) de l'article 3 ; l'article compte 68 définitions réparties sur 14 passages."
+    },
+    {
+      "id": "q03",
+      "question": "Mon logiciel qui trie automatiquement les CV des candidats est-il un système à haut risque ?",
+      "expected": { "anchors": ["art_6", "anx_III"] },
+      "note": "Annexe III, point 4 (emploi) ; l'article 6 renvoie à l'annexe III."
+    },
+    {
+      "id": "q04",
+      "question": "Dois-je prévenir les utilisateurs qu'ils discutent avec un chatbot et pas avec un humain ?",
+      "expected": { "anchors": ["art_50"] }
+    },
+    {
+      "id": "q05",
+      "question": "À partir de quelle date les obligations du règlement s'appliquent-elles ?",
+      "expected": { "anchors": ["art_113"] }
+    },
+    {
+      "id": "q06",
+      "question": "Quel est le montant maximal des amendes en cas de non-respect des règles ?",
+      "expected": { "anchors": ["art_99"] }
+    },
+    {
+      "id": "q07",
+      "question": "Quelles obligations s'imposent aux entreprises qui développent de grands modèles de langage ?",
+      "expected": { "anchors": ["art_53"] },
+      "note": "Le règlement parle de « modèles d'IA à usage général », pas de « grands modèles de langage » : teste le vocabulaire."
+    },
+    {
+      "id": "q08",
+      "question": "Une banque qui utilise l'IA pour évaluer la solvabilité de ses clients doit-elle mesurer l'impact sur leurs droits ?",
+      "expected": { "anchors": ["art_27"] }
+    },
+    {
+      "id": "q09",
+      "question": "Comment informer les personnes quand on entraîne un modèle sur des données collectées par webscraping ?",
+      "expected": { "headings": ["moissonnage", "Situation n° 2"] },
+      "note": "Fiche CNIL « Informer les personnes concernées » : notice générale, dérogation pour efforts disproportionnés."
+    },
+    {
+      "id": "q10",
+      "question": "Comment s'assurer que les étiquettes d'un jeu de données d'entraînement sont fiables ?",
+      "expected": { "headings": ["Garantir la qualité de l’annotation"] },
+      "note": "Fiche CNIL « Annoter les données » ; la question dit « étiquettes », la fiche dit « labels » et « annotation »."
+    }
+  ]
+}

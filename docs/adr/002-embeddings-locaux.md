@@ -1,6 +1,6 @@
 # ADR-002 : Embeddings calculés localement avec bge-m3 (Ollama)
 
-- **Statut** : proposé — à confirmer après les mesures de fin de semaine 1
+- **Statut** : accepté (confirmé par les mesures de fin de semaine 1, 2026-09-29)
 - **Date** : 2026-09-28
 
 ## Contexte
@@ -47,7 +47,11 @@ Lecture :
   Un corpus cinq fois plus grand (élargissement en semaine 5) la dépasserait sur un CPU comparable.
 - Contrôle de cohérence : le plus proche voisin d'un passage de l'article 5 (pratiques interdites) est le
   considérant 29, qui porte précisément sur ces pratiques.
-- Qualité de recherche : à compléter en fin de semaine 1 (10 questions de test, session 5).
+- Qualité de recherche (10 questions, recherche vectorielle seule) : bon passage dans le top 5 pour 5/10 questions
+  en vectorisant le texte seul, **8/10 en vectorisant titre de rattachement + texte** (retenu). MRR 0,45 puis 0,55.
+  Détail : `docs/notes/observations-decoupage.md`. Qualité suffisante pour poursuivre : **décision confirmée**
+  pour la phase 1, avec deux réserves : échantillon de 10 questions, et vocabulaire de l'utilisateur
+  (« grands modèles de langage ») éloigné de celui du règlement (« modèles d'IA à usage général »).
 
 ## Question ouverte pour les ADR-006 et 012
 

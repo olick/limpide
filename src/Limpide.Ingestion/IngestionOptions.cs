@@ -5,6 +5,8 @@ public sealed class IngestionOptions
 {
     public string CorpusPath { get; set; } = "corpus.json";
 
+    public string QuestionsPath { get; set; } = "eval/questions.json";
+
     /// <summary>Racine des fichiers bruts. En base, <c>raw_path</c> est relatif à cette racine.</summary>
     public string RawDataPath { get; set; } = "data/raw";
 

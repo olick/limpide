@@ -3,7 +3,7 @@ using Pgvector;
 
 namespace Limpide.Ingestion.Storage;
 
-public sealed record PendingChunk(Guid Id, string Content);
+public sealed record PendingChunk(Guid Id, string Heading, string Content);
 
 /// <summary>
 /// Embeddings des passages des versions courantes. Un passage est « à calculer » s'il n'a pas d'embedding
@@ -26,14 +26,14 @@ public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
 
     public async Task<IReadOnlyList<PendingChunk>> NextBatchAsync(string model, int size, CancellationToken ct)
     {
-        await using var command = dataSource.CreateCommand($"SELECT c.id, c.content {Pending} ORDER BY c.id LIMIT @size");
+        await using var command = dataSource.CreateCommand($"SELECT c.id, coalesce(c.heading, ''), c.content {Pending} ORDER BY c.id LIMIT @size");
         command.Parameters.AddWithValue("model", model);
         command.Parameters.AddWithValue("size", size);
         await using var reader = await command.ExecuteReaderAsync(ct);
 
         var batch = new List<PendingChunk>();
         while (await reader.ReadAsync(ct))
-            batch.Add(new PendingChunk(reader.GetGuid(0), reader.GetString(1)));
+            batch.Add(new PendingChunk(reader.GetGuid(0), reader.GetString(1), reader.GetString(2)));
         return batch;
     }
 
