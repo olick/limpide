@@ -4,11 +4,12 @@
   // - DOTNET_ENVIRONMENT=Development dans les deux profils : c'est ce qui charge dotnet user-secrets
   //   (mot de passe PostgreSQL local), sans rapport avec Debug / Release.
   // - Mesures de durée (embed) : profil Release, lancé sans débogueur (Ctrl+F5).
+  // Application web : profil « Web », ouvre le navigateur sur http://localhost:5181 une fois le serveur prêt.
   // Les tests se déboguent depuis l'explorateur de tests, sans configuration.
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Debug",
+      "name": "Console : Debug",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build",
@@ -18,7 +19,7 @@
       "console": "integratedTerminal"
     },
     {
-      "name": "Release",
+      "name": "Console : Release",
       "type": "coreclr",
       "request": "launch",
       "preLaunchTask": "build-release",
@@ -26,6 +27,25 @@
       "cwd": "${workspaceFolder}",
       "env": { "DOTNET_ENVIRONMENT": "Development" },
       "console": "integratedTerminal"
+    },
+    {
+      // cwd = dossier du projet web : racine de contenu (appsettings.json, fichiers statiques).
+      // ASPNETCORE_ENVIRONMENT=Development : charge les user-secrets (communs avec la console) et les fichiers
+      // statiques de développement.
+      "name": "Web",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build",
+      "program": "${workspaceFolder}/src/Limpide.Web/bin/Debug/net10.0/Limpide.Web.dll",
+      "cwd": "${workspaceFolder}/src/Limpide.Web",
+      "env": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_URLS": "http://localhost:5181"
+      },
+      "serverReadyAction": {
+        "action": "openExternally",
+        "pattern": "\\bNow listening on:\\s+(https?://\\S+)"
+      }
     }
   ]
 }

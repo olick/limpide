@@ -67,6 +67,17 @@ docker compose exec postgres psql -U rag -d rag -c \
 Hors poste de développement (conteneur, Airflow), la chaîne de connexion passe par la variable
 d'environnement `ConnectionStrings__Rag`. Code de sortie non nul si un document n'a pas pu être collecté.
 
+## Application web
+
+```bash
+dotnet run --project src/Limpide.Web --launch-profile http   # puis http://localhost:5181
+```
+
+Une page : la question, la réponse de l'assistant (présentée comme une formulation générée), les textes cités
+reproduits à l'identique avec source, lien, date de collecte et licence, et le panneau « sous le capot »
+(stratégie de recherche, modèle, durées par étape, tokens, coût, garde-fous, passages fournis et leur score).
+Mêmes secrets que la console (user-secrets partagés) et mêmes réglages (`src/appsettings.shared.json`).
+
 ## Score de recherche
 
 Recherche vectorielle seule (sans LLM), sur les 10 questions de [`eval/questions.json`](eval/questions.json) :
@@ -94,7 +105,9 @@ Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/
 ├── src/
 │   ├── Limpide.Core            Domaine : extraction, découpage, évaluation, interfaces (sans infrastructure)
 │   ├── Limpide.Infrastructure  PostgreSQL + pgvector, Ollama
-│   └── Limpide.Ingestion       Console : ingestion, recherche, évaluation
+│   ├── Limpide.Ingestion       Console : ingestion, recherche, évaluation, questions
+│   ├── Limpide.Web             Application web (Blazor, rendu serveur)
+│   └── appsettings.shared.json Réglages communs à la console et au web
 ├── eval/               Questions de test de la recherche
 ├── tests/              Tests unitaires de Limpide.Core
 ├── data/               Documents bruts téléchargés (ignoré par git)

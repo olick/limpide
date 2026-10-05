@@ -1,0 +1,223 @@
+@page "/"
+@using System.Globalization
+@inject AnswerService Answers
+@inject ILogger<Home> Logger
+
+<PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
+
+<header class="hero">
+    <h1>Limpide</h1>
+    <p class="tagline">
+        Interrogez le règlement européen sur l'intelligence artificielle et les fiches pratiques IA de la CNIL.
+        Chaque réponse montre ses sources, et ce qui se passe sous le capot.
+    </p>
+</header>
+
+<aside class="transparency" role="note">
+    <strong>Vous échangez avec une IA.</strong>
+    Les réponses sont rédigées automatiquement à partir des textes cités : elles peuvent contenir des erreurs
+    et ne constituent pas un conseil juridique.
+</aside>
+
+<form class="ask" @onsubmit="AskAsync">
+    <label for="question">Votre question</label>
+    <textarea id="question" rows="3" maxlength="@MaxLength" disabled="@busy"
+              placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
+              @bind="question" @bind:event="oninput"></textarea>
+    <div class="ask-actions">
+        <span class="count">@question.Length / @MaxLength</span>
+        <button type="submit" disabled="@(busy || string.IsNullOrWhiteSpace(question))">
+            @(busy ? "Recherche en cours…" : "Poser la question")
+        </button>
+    </div>
+    <div class="examples">
+        <span>Exemples :</span>
+        @foreach (var example in Examples)
+        {
+            <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
+        }
+    </div>
+</form>
+
+@if (error is not null)
+{
+    <p class="error" role="alert">@error</p>
+}
+
+@if (result is { } r)
+{
+    <section class="answer @(r.Declined ? "declined" : "")" aria-live="polite">
+        <h2>Réponse de l'assistant <span class="label">formulation générée, à vérifier dans les textes cités</span></h2>
+        <div class="answer-text">@((MarkupString)answerHtml)</div>
+        <p class="disclaimer">@r.Disclaimer</p>
+    </section>
+
+    @if (r.CitedPassages.Any())
+    {
+        <section class="sources">
+            <h2>Textes cités <span class="label">reproduits à l'identique</span></h2>
+            @foreach (var (id, p, _) in r.CitedPassages)
+            {
+                <article class="source" id="@id">
+                    <header>
+                        <span class="id">@id</span>
+                        <h3>@p.Heading</h3>
+                    </header>
+                    <blockquote class="verbatim">@p.Content</blockquote>
+                    <footer>
+                        <span>@p.SourceName — @p.DocumentTitle</span>
+                        <a href="@p.Url" target="_blank" rel="noopener noreferrer">Texte officiel</a>
+                        <span>Collecté le @p.FetchedAt.ToString("d MMMM yyyy", French)</span>
+                        <span class="licence">Licence : @p.ReuseTerms</span>
+                    </footer>
+                </article>
+            }
+        </section>
+    }
+
+    <details class="engine" open="@engineOpen">
+        <summary>Sous le capot</summary>
+
+        <dl class="metrics">
+            <div>
+                <dt>Recherche</dt>
+                <dd>@r.SearchStrategy</dd>
+            </div>
+            <div>
+                <dt>Modèle</dt>
+                <dd>@r.Model <span class="muted">· consignes @r.PromptVersion</span></dd>
+            </div>
+            <div>
+                <dt>Tokens</dt>
+                <dd>@Number(r.Usage.InputTokens) en entrée · @Number(r.Usage.OutputTokens) en sortie</dd>
+            </div>
+            <div>
+                <dt>Coût estimé</dt>
+                <dd>
+                    @if (r.Usage.EstimatedCost is { } cost)
+                    {
+                        <span>@cost.ToString("0.000000", French) $</span>
+                        <span class="muted"> · @((cost * 1000).ToString("0.00", French)) $ pour 1 000 questions</span>
+                    }
+                    else
+                    {
+                        <span>inconnu (tarif du modèle non configuré)</span>
+                    }
+                </dd>
+            </div>
+        </dl>
+
+        <h3>Durées</h3>
+        <ul class="timings">
+            @foreach (var (label, duration) in Steps(r.Timings))
+            {
+                <li>
+                    <span class="step">@label</span>
+                    <span class="bar"><span style="width: @Percent(duration, r.Timings.Total)"></span></span>
+                    <span class="ms">@Ms(duration)</span>
+                </li>
+            }
+            <li class="total"><span class="step">Total</span><span></span><span class="ms">@Ms(r.Timings.Total)</span></li>
+        </ul>
+
+        <h3>Garde-fous</h3>
+        @if (r.Guardrails.Count == 0)
+        {
+            <p class="ok">Aucun déclenché.</p>
+        }
+        else
+        {
+            <ul class="guardrails">
+                @foreach (var g in r.Guardrails)
+                {
+                    <li><code>@g.Code</code> @g.Description</li>
+                }
+            </ul>
+        }
+
+        <h3>Passages fournis au modèle</h3>
+        <div class="table-scroll">
+            <table class="passages">
+                <thead>
+                    <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var (id, p, cited) in r.Passages)
+                    {
+                        <tr class="@(cited ? "cited" : "")">
+                            <td>@id</td>
+                            <td>@p.Heading</td>
+                            <td>@(p.Anchor ?? "—")</td>
+                            <td>@p.Score.ToString("0.000", French)</td>
+                            <td>@(cited ? "oui" : "non")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </details>
+}
+
+@code {
+    private const int MaxLength = 500;
+
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    private static readonly string[] Examples =
+    [
+        "Quelles utilisations de l'IA sont interdites en Europe ?",
+        "Dois-je prévenir les utilisateurs qu'ils discutent avec un chatbot ?",
+        "Comment informer les personnes quand on entraîne un modèle sur des données collectées par webscraping ?",
+    ];
+
+    private string question = "";
+    private bool busy;
+    private string? error;
+    private AnswerResult? result;
+    private string answerHtml = "";
+    private bool engineOpen;
+
+    private async Task AskAsync()
+    {
+        if (busy || string.IsNullOrWhiteSpace(question))
+            return;
+
+        busy = true;
+        error = null;
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            result = await Answers.AskAsync(question.Trim(), timeout.Token);
+            var cited = result.CitedPassages.Select(p => p.Id).ToHashSet();
+            answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);
+            // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
+            engineOpen = result.Guardrails.Count > 0;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            Logger.LogError(ex, "Échec de la réponse à la question « {Question} »", question);
+            result = null;
+            error = ex is OperationCanceledException
+                ? "La réponse a pris trop de temps (plus de 60 secondes). Réessayez dans un instant."
+                : "La réponse n'a pas pu être produite (service de recherche ou de génération indisponible). Réessayez dans un instant.";
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private static IEnumerable<(string Label, TimeSpan Duration)> Steps(AnswerTimings t) =>
+    [
+        ("Vectorisation de la question", t.Embedding),
+        ("Recherche des passages", t.Search),
+        ("Génération de la réponse", t.Generation),
+    ];
+
+    private static string Ms(TimeSpan duration) => $"{duration.TotalMilliseconds.ToString("N0", French)} ms";
+
+    private static string Percent(TimeSpan part, TimeSpan total) =>
+        total <= TimeSpan.Zero ? "0%" : $"{Math.Min(100, part / total * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
+
+    private static string Number(long? value) => value?.ToString("N0", French) ?? "?";
+}

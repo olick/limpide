@@ -3,6 +3,7 @@
     <Project Path="src/Limpide.Core/Limpide.Core.csproj" />
     <Project Path="src/Limpide.Infrastructure/Limpide.Infrastructure.csproj" />
     <Project Path="src/Limpide.Ingestion/Limpide.Ingestion.csproj" />
+    <Project Path="src/Limpide.Web/Limpide.Web.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Limpide.Core.Tests/Limpide.Core.Tests.csproj" />

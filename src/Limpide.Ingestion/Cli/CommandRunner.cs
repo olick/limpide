@@ -43,6 +43,7 @@ public static class CommandRunner
             ContentRootPath = AppContext.BaseDirectory,
         });
 
+        builder.Configuration.AddLimpideSharedSettings();
         var options = builder.Configuration.GetSection("Ingestion").Get<IngestionOptions>() ?? new IngestionOptions();
         builder.Services.AddSingleton(options);
         builder.Services.AddLimpideInfrastructure(builder.Configuration);

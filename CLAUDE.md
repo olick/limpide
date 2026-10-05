@@ -38,7 +38,11 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
     (`IChatClient` via Microsoft.Extensions.AI.OpenAI sur `https://api.eu.mistral.ai/v1`) ;
     tout s'enregistre par `services.AddLimpideInfrastructure(configuration)`.
   - `src/Limpide.Ingestion` : console (commandes, mode interactif) ; aucun accès direct à Npgsql ni Ollama.
-  - `tests/Limpide.Core.Tests` (xUnit). Prévu en S2 : `src/Limpide.Web` (Blazor), qui réutilise l'infrastructure.
+  - `src/Limpide.Web` : Blazor Web App, rendu interactif côté serveur ; une page (`Components/Pages/Home.razor`)
+    sur `AnswerService`. Mêmes user-secrets que la console (même `UserSecretsId`).
+  - `src/appsettings.shared.json` : connexion, Embedding, Search, Generation, communs aux deux applications
+    (chargés en premier par `AddLimpideSharedSettings`, donc surchargeables). Ne pas les dupliquer ailleurs.
+  - `tests/Limpide.Core.Tests` (xUnit).
 - PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma dans `db/init/001_schema.sql`.
 - Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
@@ -113,8 +117,10 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 2 : `ask` affiche l'`AnswerResult` complet (réponse, passages cités à l'identique avec source et
   licence, stratégie, durées, tokens, coût, garde-fous). Observations : `docs/notes/observations-generation.md`.
 - [x] Session 3 : recherche hybride mesurée et écartée, seuil de pertinence calibré, avertissement fixe (ADR-005)
-- [ ] Session 4 : interface Blazor — **prochaine tâche**
-- [ ] Session 5 : tests et bilan, dont la comparaison Mistral Small 4 / Medium 3.5 (ADR-004)
+- [x] Session 4 : interface Blazor, testée de bout en bout par Alexandre le 2026-10-05
+  (profil VS Code « Web », ou `dotnet run --project src/Limpide.Web --launch-profile http`, http://localhost:5181)
+- [ ] Session 5 : tests et bilan — **prochaine tâche**
+  Inclut la comparaison Mistral Small 4 / Medium 3.5 (ADR-004)
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 
@@ -160,6 +166,16 @@ avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à
 commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
 Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
 VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la S2, session 4 :
+
+- Réponse du modèle = texte non fiable : rendu Markdown (Markdig) avec HTML brut, liens, images et liens
+  automatiques **désactivés** (un `[x](javascript:...)` passait sinon, constaté au test). Seuls liens : les
+  citations `[P1]`/`[P1a]`, ajoutées après coup vers l'extrait cité (`AnswerMarkdown`).
+- Réponse (encadré bleu, sans-serif) et textes officiels (fond papier, filet doré, serif) visuellement distincts.
+- Panneau « sous le capot » ouvert d'office quand un garde-fou s'est déclenché.
+- Question limitée à 500 caractères ; délai maximal de 60 s par réponse.
+- Pas d'outil d'automatisation de navigateur sur le poste : interaction testée à la main.
 
 Choix de la S2, session 3 :
 
