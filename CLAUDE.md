@@ -31,9 +31,11 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 ## Stack
 
 - .NET 10, solution `Limpide` :
-  - `src/Limpide.Core` : domaine, extraction, découpage, évaluation, interfaces (`IPassageSearch`) ;
+  - `src/Limpide.Core` : domaine, extraction, découpage, évaluation, génération (`AnswerService`, prompt,
+    contrôle des citations), interfaces (`IPassageSearch`) ;
     sans dépendance d'infra ni E/S (seuls paquets : AngleSharp, Microsoft.Extensions.AI.Abstractions).
-  - `src/Limpide.Infrastructure` : PostgreSQL/pgvector (stores, `PgvectorPassageSearch`), Ollama ;
+  - `src/Limpide.Infrastructure` : PostgreSQL/pgvector (stores, `PgvectorPassageSearch`), Ollama, Mistral
+    (`IChatClient` via Microsoft.Extensions.AI.OpenAI sur `https://api.eu.mistral.ai/v1`) ;
     tout s'enregistre par `services.AddLimpideInfrastructure(configuration)`.
   - `src/Limpide.Ingestion` : console (commandes, mode interactif) ; aucun accès direct à Npgsql ni Ollama.
   - `tests/Limpide.Core.Tests` (xUnit). Prévu en S2 : `src/Limpide.Web` (Blazor), qui réutilise l'infrastructure.
@@ -41,15 +43,18 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
 - Paquets : Npgsql, Pgvector, AngleSharp (HTML, dans Core), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
-- Génération (S2) : LLM hébergé derrière `IChatClient` (Microsoft.Extensions.AI), Ollama en développement.
+- Génération (S2) : Mistral via son API, inférence UE, derrière `IChatClient` (Microsoft.Extensions.AI) ;
+  Medium 3.5 pour la démo, Small 4 en développement (pas de LLM local). Voir ADR-004.
 - Phase 2 : Airflow (S4), migrations SQL (S5), Terraform sur Azure (S6 : Container Apps, PostgreSQL managé,
   Blob Storage, Key Vault, identités managées), CI/CD avec évaluation (S7), OpenTelemetry et coûts (S8).
 
 ## Décisions déjà prises (voir `docs/adr/`)
 
 - ADR-001 : PostgreSQL + pgvector plutôt que Qdrant.
-- ADR-002 : embeddings locaux bge-m3 (à confirmer par les mesures de fin de semaine 1).
+- ADR-002 : embeddings locaux bge-m3 (accepté après les mesures de la semaine 1).
 - ADR-003 : ingestion en console .NET en phase 1, reprise par Airflow en phase 2 sans réécriture.
+- ADR-004 : génération par Mistral (API, inférence UE). Démo sur Medium 3.5 par prudence ; passer sur Small 4
+  si la mesure de fin de S2 montre qu'il tient la qualité (citations, « je ne sais pas », fidélité au texte).
 - Licence du dépôt : Apache 2.0.
 - Batch incrémental, pas de streaming : les sources changent rarement. Pas de Kafka.
 
@@ -101,14 +106,13 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 
 **Semaine en cours : S2** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
 
-- [ ] Session 1 : architecture et choix du LLM — **en cours**
-  - [x] `Limpide.Infrastructure` créé, code Npgsql/Ollama déplacé, `IPassageSearch` dans Core
-    (non-régression : `evaluate` identique, 8/10)
-  - [ ] ADR-004 : choix du LLM (qualité en français, coût par requête, hébergement des données) — **prochaine tâche**
-- [ ] Session 2 : génération avec citations (`ask`, `AnswerResult`)
-- [ ] Session 3 : garde-fous v1 et recherche hybride (ADR-005)
+- [x] Session 1 : `Limpide.Infrastructure` (code Npgsql/Ollama déplacé, `IPassageSearch` dans Core,
+  `evaluate` identique), ADR-004 (Mistral, UE)
+- [x] Session 2 : `ask` affiche l'`AnswerResult` complet (réponse, passages cités à l'identique avec source et
+  licence, stratégie, durées, tokens, coût, garde-fous). Observations : `docs/notes/observations-generation.md`.
+- [ ] Session 3 : garde-fous v1 et recherche hybride (ADR-005) — **prochaine tâche**
 - [ ] Session 4 : interface Blazor
-- [ ] Session 5 : tests et bilan
+- [ ] Session 5 : tests et bilan, dont la comparaison Mistral Small 4 / Medium 3.5 (ADR-004)
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 
@@ -154,6 +158,18 @@ avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à
 commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
 Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
 VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la S2, session 2 :
+
+- Modèles épinglés par version datée : `mistral-small-2603` (développement), `mistral-medium-2604` (Medium 3.5,
+  démo). Changer de modèle : `--Generation:Model=mistral-medium-2604` ; le coût suit (tarifs par modèle dans
+  `Generation:Prices`, majoration UE comprise ; tarif absent = coût « inconnu », jamais deviné).
+- Clé `Mistral:ApiKey` (user-secrets), exigée seulement par `ask` : l'ingestion fonctionne sans.
+- Consignes versionnées (`AnswerPrompt.Version`, `answer/2`) et enregistrées avec chaque réponse :
+  toute modification du prompt incrémente la version.
+- Garde-fous déterministes : `citation-inventee`, `sans-citation` (sauf « je ne sais pas »), `reponse-tronquee`,
+  `reponse-vide`. Les modèles citent `[P1a]` malgré la consigne : le contrôle l'accepte comme P1.
+- Température 0 pour des mesures comparables ; 5 passages ; ≈ 1 800 tokens en entrée par question.
 
 Choix de la session 5 :
 

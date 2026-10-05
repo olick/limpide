@@ -22,7 +22,7 @@ public sealed class EvaluateCommand(IPassageSearch search, IngestionOptions opti
 
         foreach (var question in set.Questions)
         {
-            var results = await search.SearchAsync(question.Question, Depth, ct);
+            var results = (await search.SearchAsync(question.Question, Depth, ct)).Passages;
             var rank = RetrievalScore.RankOf(question.Expected, results.Select(r => (r.Anchor, r.Heading)));
             outcomes.Add(new QuestionOutcome(question, rank));
 

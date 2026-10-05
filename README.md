@@ -28,10 +28,11 @@ docker compose up -d
 docker compose exec ollama ollama pull bge-m3
 docker compose exec postgres psql -U rag -d rag -c "\dx"   # doit lister l'extension vector
 
-# Chaîne de connexion de l'ingestion (le mot de passe reste hors du dépôt)
+# Secrets locaux (hors du dépôt) : chaîne de connexion et clé d'API Mistral
 dotnet user-secrets set "ConnectionStrings:Rag" \
   "Host=localhost;Port=5432;Database=rag;Username=rag;Password=<mot de passe du .env>" \
   --project src/Limpide.Ingestion
+dotnet user-secrets set "Mistral:ApiKey" "<clé>" --project src/Limpide.Ingestion
 ```
 
 ## Ingestion
@@ -46,6 +47,7 @@ dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.js
 dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
 dotnet run --project src/Limpide.Ingestion -- chunk     # passages dans la table chunks
 dotnet run --project src/Limpide.Ingestion -- embed     # embeddings bge-m3 des passages qui n'en ont pas
+dotnet run --project src/Limpide.Ingestion -- ask Quelles pratiques d\'IA sont interdites \?
 dotnet run --project src/Limpide.Ingestion -- search Quelles pratiques d\'IA sont interdites \?
 dotnet run --project src/Limpide.Ingestion -- evaluate  # score de la recherche sur eval/questions.json
 dotnet run --project src/Limpide.Ingestion              # mode interactif

@@ -27,6 +27,7 @@ public static class CommandRunner
             "extract" => await services.GetRequiredService<ExtractCommand>().RunAsync(ct),
             "chunk" => await services.GetRequiredService<ChunkCommand>().RunAsync(ct),
             "embed" => await services.GetRequiredService<EmbedCommand>().RunAsync(ct),
+            "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
             "search" => await services.GetRequiredService<SearchCommand>().RunAsync(line.Text, ct),
             "evaluate" => await services.GetRequiredService<EvaluateCommand>().RunAsync(ct),
             _ => throw new ArgumentException($"commande inconnue : {line.Name}"),
@@ -51,6 +52,7 @@ public static class CommandRunner
         builder.Services.AddSingleton<ExtractCommand>();
         builder.Services.AddSingleton<ChunkCommand>();
         builder.Services.AddSingleton<EmbedCommand>();
+        builder.Services.AddSingleton<AskCommand>();
         builder.Services.AddSingleton<SearchCommand>();
         builder.Services.AddSingleton<EvaluateCommand>();
 

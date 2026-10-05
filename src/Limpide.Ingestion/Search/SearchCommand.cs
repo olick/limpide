@@ -9,7 +9,7 @@ public sealed class SearchCommand(IPassageSearch search)
 
     public async Task<int> RunAsync(string question, CancellationToken ct)
     {
-        var results = await search.SearchAsync(question, Limit, ct);
+        var results = (await search.SearchAsync(question, Limit, ct)).Passages;
 
         Console.WriteLine($"Question : {question}");
         Console.WriteLine($"Recherche {search.Strategy}\n");

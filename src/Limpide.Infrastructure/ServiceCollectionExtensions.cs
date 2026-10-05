@@ -1,3 +1,5 @@
+using System.ClientModel;
+using Limpide.Core.Answering;
 using Limpide.Core.Search;
 using Limpide.Infrastructure.Search;
 using Limpide.Infrastructure.Storage;
@@ -6,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
 using OllamaSharp;
+using OpenAI;
+using OpenAI.Chat;
 using Pgvector.Npgsql;
 
 namespace Limpide.Infrastructure;
@@ -13,8 +17,9 @@ namespace Limpide.Infrastructure;
 public static class ServiceCollectionExtensions
 {
     /// <summary>
-    /// Base PostgreSQL (pgvector), générateur d'embeddings et recherche de passages, partagés par la console
-    /// d'ingestion et l'application web. Lit « ConnectionStrings:Rag » et la section « Embedding ».
+    /// Base PostgreSQL (pgvector), embeddings, recherche de passages et génération des réponses, partagés par la
+    /// console et l'application web. Lit « ConnectionStrings:Rag », les sections « Embedding » et « Generation »,
+    /// et la clé « Mistral:ApiKey ».
     /// </summary>
     public static IServiceCollection AddLimpideInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -37,6 +42,20 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ChunkStore>();
         services.AddSingleton<EmbeddingStore>();
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();
+
+        var generation = configuration.GetSection("Generation").Get<GenerationOptions>() ?? new GenerationOptions();
+        services.AddSingleton(generation.ToSettings());
+        // Clé exigée seulement quand on génère une réponse : les commandes d'ingestion s'en passent.
+        services.AddSingleton<IChatClient>(_ =>
+        {
+            var apiKey = configuration["Mistral:ApiKey"];
+            if (string.IsNullOrWhiteSpace(apiKey))
+                throw new InvalidOperationException(
+                    "Clé « Mistral:ApiKey » absente (dotnet user-secrets set \"Mistral:ApiKey\" ... --project src/Limpide.Ingestion).");
+            return new ChatClient(generation.Model, new ApiKeyCredential(apiKey), new OpenAIClientOptions { Endpoint = generation.Endpoint })
+                .AsIChatClient();
+        });
+        services.AddSingleton<AnswerService>();
         return services;
     }
 }

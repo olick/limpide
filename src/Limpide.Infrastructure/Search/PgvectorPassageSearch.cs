@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using Limpide.Core.Search;
 using Microsoft.Extensions.AI;
 using Npgsql;
@@ -16,14 +17,17 @@ public sealed class PgvectorPassageSearch(
 {
     public string Strategy => $"vectorielle ({options.Label})";
 
-    public async Task<IReadOnlyList<RetrievedPassage>> SearchAsync(string question, int limit, CancellationToken ct)
+    public async Task<SearchOutcome> SearchAsync(string question, int limit, CancellationToken ct)
     {
+        var watch = Stopwatch.StartNew();
         var query = await generator.GenerateVectorAsync(question, cancellationToken: ct);
+        var embeddingDuration = watch.Elapsed;
+        watch.Restart();
 
         // Seuls les passages vectorisés avec le même réglage que la question sont comparables.
         await using var command = dataSource.CreateCommand("""
             SELECT c.heading, c.anchor, c.content, 1 - (c.embedding <=> @query) AS score,
-                   s.name, d.title, d.url, v.fetched_at
+                   s.name, d.title, d.url, v.fetched_at, s.reuse_terms
             FROM chunks c
             JOIN document_versions v ON v.id = c.document_version_id AND v.is_current
             JOIN documents d ON d.id = v.document_id
@@ -42,9 +46,10 @@ public sealed class PgvectorPassageSearch(
         {
             results.Add(new RetrievedPassage(
                 reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetString(1), reader.GetString(2), reader.GetDouble(3),
-                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetFieldValue<DateTimeOffset>(7)));
+                reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetFieldValue<DateTimeOffset>(7),
+                reader.GetString(8)));
         }
 
-        return results;
+        return new SearchOutcome(results, embeddingDuration, watch.Elapsed);
     }
 }
