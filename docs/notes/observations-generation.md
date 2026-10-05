@@ -88,3 +88,18 @@ L'hypothèse de l'ADR-004 (2 500 tokens en entrée) était pessimiste : environ 
 - garde-fou déterministe « qualification juridique » (« vous êtes / n'êtes pas en infraction », « votre logiciel
   n'est pas interdit »…) : ce qu'on ne peut pas garantir par la consigne, on peut au moins le détecter ;
 - renforcer la règle 5 des consignes (`answer/3`), puis remesurer.
+
+## Semaine 2, session 5 — après les améliorations (consignes `answer/3`, 2026-10-05)
+
+Rapports : `eval/results/2026-10-05-1929-<modèle>.md` (relecture des réponses sensibles seulement).
+
+- **Medium ne tranche plus** la situation (q03, t05) : « D'après les passages consultés, les systèmes d'IA utilisés
+  pour le recrutement […] sont classés comme étant à haut risque [P3]. Un professionnel du droit peut apprécier si
+  votre logiciel entre dans cette catégorie. » C'est la consigne qui l'a corrigé : le garde-fou `qualification-juridique`
+  ne s'est déclenché sur aucune réponse.
+- **Les deux erreurs de lecture de Small** (q03, q10) ne se reproduisent pas sur cette passe ; rien ne garantit
+  qu'elles ne reviendront pas.
+- Les deux modèles écrivent « D'après les passages consultés » sur la liste incomplète de q01.
+- **Small ajoute encore « Je ne sais pas » après une réponse sur le fond** (q10) : seul échec de la passe
+  (`reponse-ambigue`). Medium : 12/15 vérifiés, 0 échec, passage attendu cité 8/10.
+- Décision (ADR-004) : Medium par défaut.

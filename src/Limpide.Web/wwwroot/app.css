@@ -159,6 +159,15 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     padding: 0 0.2em;
 }
 
+.warning {
+    margin: 1rem 0 0;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 8px;
+    padding: 0.6rem 0.8rem;
+    font-size: 0.9rem;
+}
+
 .disclaimer { margin: 1rem 0 0; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; }
 
 /* Textes officiels : fond papier, filet doré, serif */

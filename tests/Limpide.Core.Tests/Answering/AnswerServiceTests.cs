@@ -78,6 +78,15 @@ public class AnswerServiceTests
     }
 
     [Fact]
+    public async Task An_answer_that_decides_the_persons_situation_triggers_a_guardrail()
+    {
+        var result = await Service(new FakeChatClient("Votre logiciel est à haut risque [P1]."))
+            .AskAsync("Mon logiciel est-il à haut risque ?", CancellationToken.None);
+
+        Assert.Equal(["qualification-juridique"], result.Guardrails.Select(g => g.Code));
+    }
+
+    [Fact]
     public async Task Cost_is_unknown_rather_than_guessed_when_the_price_is_not_configured()
     {
         var service = new AnswerService(new FakeSearch(Article5), new FakeChatClient("[P1]"), Settings with { Price = null });

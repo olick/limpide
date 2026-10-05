@@ -1,6 +1,6 @@
 # ADR-004 : Génération des réponses par Mistral, hébergé en UE
 
-- **Statut** : accepté — Medium 3.5 recommandé après relecture, sous réserve des deux améliorations (voir la fin)
+- **Statut** : accepté — **Medium 3.5** retenu le 2026-10-05, après mesure, relecture et améliorations (voir la fin)
 - **Date** : 2026-10-05
 
 ## Contexte
@@ -116,3 +116,26 @@ Coût : ≈ 0,4 centime par question avec Medium, soit plus de 2 000 questions p
 **Leçon de méthode** : les contrôles automatiques donnaient l'avantage à Small (12/15 contre 11/15) ; la relecture
 renverse la conclusion. La relecture n'est pas une formalité, et en S7 elle devra être outillée (relecture
 assistée par un modèle juge, échantillon relu par un humain).
+
+### Après les deux améliorations (2026-10-05, consignes `answer/3`)
+
+- Consignes `answer/3` : règle 5 explicite (ne jamais écrire que la personne ou son système est ou n'est pas en
+  infraction, conforme, interdit, autorisé, à haut risque ; dire la règle, ses conditions, puis renvoyer vers un
+  professionnel) ; une exception ne vaut que dans son domaine ; signaler une réponse partielle.
+- Garde-fou déterministe `qualification-juridique` (phrase qui s'adresse à la personne et contient un verdict),
+  affiché dans la réponse elle-même dans l'interface. Testé sur les phrases réelles relevées à la relecture.
+
+| | Small 4 | Medium 3.5 |
+|---|---|---|
+| Vérifié automatiquement | 12/15 (1 échec : réponse ambiguë sur q10) | **12/15, 0 échec** |
+| Passage attendu cité | 8/10 | **8/10** (7/10 avant) |
+| Qualification juridique (q03, t05) | non | **non** (oui avant) |
+| Coût des 15 questions | 0,56 centime | 5,83 centimes |
+
+Relecture des réponses sensibles (q01, q03, t05 ; q10 pour Small) : Medium suit désormais la règle 5 (« un
+professionnel du droit peut apprécier si votre logiciel entre dans cette catégorie ») ; les deux erreurs de lecture
+de Small ne se reproduisent pas sur cette passe, mais rien ne garantit qu'elles ne reviendront pas.
+
+**Décision : Mistral Medium 3.5 (`mistral-medium-2604`) pour la démo, et par défaut** (`src/appsettings.shared.json`).
+Small reste utilisable pour des essais (`--Generation:Model=mistral-small-2603`). À remesurer en S7 sur le jeu de
+50 questions, avec une relecture outillée.

@@ -48,7 +48,8 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
 - Paquets : Npgsql, Pgvector, AngleSharp (HTML, dans Core), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
 - Génération (S2) : Mistral via son API, inférence UE, derrière `IChatClient` (Microsoft.Extensions.AI) ;
-  Medium 3.5 pour la démo, Small 4 en développement (pas de LLM local). Voir ADR-004.
+  **Medium 3.5 (`mistral-medium-2604`) par défaut** ; Small 4 pour des essais (`--Generation:Model=mistral-small-2603`).
+  Pas de LLM local. Voir ADR-004.
 - Phase 2 : Airflow (S4), migrations SQL (S5), Terraform sur Azure (S6 : Container Apps, PostgreSQL managé,
   Blob Storage, Key Vault, identités managées), CI/CD avec évaluation (S7), OpenTelemetry et coûts (S8).
 
@@ -59,8 +60,9 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - ADR-003 : ingestion en console .NET en phase 1, reprise par Airflow en phase 2 sans réécriture.
 - ADR-005 : recherche vectorielle seule — l'hybride (plein texte + RRF) mesurée moins bonne (top 5 : 6/10 contre 8/10),
   gardée en option `Search:Strategy=Hybrid` ; seuil de pertinence `Generation:MinScore = 0,50` (pas d'appel au LLM en dessous).
-- ADR-004 : génération par Mistral (API, inférence UE). Démo sur Medium 3.5 par prudence ; passer sur Small 4
-  si la mesure de fin de S2 montre qu'il tient la qualité (citations, « je ne sais pas », fidélité au texte).
+- ADR-004 : génération par Mistral (API, inférence UE), **Medium 3.5** retenu après mesure et relecture : Small
+  déforme des textes sans que rien ne le détecte ; le défaut de Medium (trancher la situation) a été corrigé par les
+  consignes `answer/3` et est surveillé par le garde-fou `qualification-juridique`.
 - Licence du dépôt : Apache 2.0.
 - Batch incrémental, pas de streaming : les sources changent rarement. Pas de Kafka.
 
@@ -119,10 +121,11 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 3 : recherche hybride mesurée et écartée, seuil de pertinence calibré, avertissement fixe (ADR-005)
 - [x] Session 4 : interface Blazor, testée de bout en bout par Alexandre le 2026-10-05
   (profil VS Code « Web », ou `dotnet run --project src/Limpide.Web --launch-profile http`, http://localhost:5181)
-- [ ] Session 5 : 15 questions (10 + 5 pièges) passées par `evaluate-answers`, Small et Medium comparés
-  (rapports `eval/results/`, synthèse `docs/notes/observations-generation.md`). **Reste** : relecture de fidélité
-  faite par Claude ; **reste** : garde-fou « qualification juridique » et consignes `answer/3`, remesure, bascule de la
-  démo sur Medium (`Generation:Model`), capture d'écran du README.
+- [x] Session 5 : 15 questions (10 + 5 pièges) passées par `evaluate-answers`, Small et Medium comparés et relus,
+  garde-fou `qualification-juridique`, consignes `answer/3`, démo basculée sur Medium (ADR-004).
+  **Reste** : capture d'écran d'une réponse pour le README (à faire par Alexandre).
+
+**S2 terminée** (hors capture d'écran). **Prochaine : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo.
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 
@@ -177,9 +180,10 @@ Choix de la S2, session 5 :
   daté par modèle dans `eval/results/` (versionné : preuve et base de comparaison).
 - Citations : renvois précis acceptés (`[P1a]`, `[P5.1.a]`, `[P4.c]`, `[P1, point a]`) ; refus = phrase seule,
   sinon garde-fou `reponse-ambigue`.
-- Relecture complète faite par Claude (Alexandre l'a déléguée) : Small déforme 2 textes sans que rien ne le détecte
-  (q03, q10) ; Medium est plus fidèle mais tranche la situation de l'utilisateur (q03, t05). **Recommandation :
-  Medium**, sous condition des deux améliorations (garde-fou « qualification juridique », consignes `answer/3`).
+- Relecture complète faite par Claude (Alexandre l'a déléguée ; relecture par modèle, pas de juriste) : Small déforme
+  2 textes sans que rien ne le détecte (q03, q10) ; Medium tranchait la situation (q03, t05), corrigé par `answer/3`.
+- Garde-fou `qualification-juridique` (`LegalQualification`) : phrase en « vous/votre » + verdict, hors conditionnel et
+  renvois ; heuristique qui signale sans bloquer ; affichée dans la réponse dans l'interface web.
 - Rapports avec le texte des passages cités sous chaque réponse (relecture sans quitter le fichier), nommés
   `AAAA-MM-JJ-HHmm-<modèle>.md` (les réponses varient d'une passe à l'autre : ne pas écraser).
 

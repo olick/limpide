@@ -105,6 +105,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             triggered.Add(new Guardrail("reponse-ambigue",
                 "La réponse donne des éléments puis déclare ne pas savoir : à lire avec prudence."));
 
+        if (LegalQualification.Find(answer) is { } verdict)
+            triggered.Add(new Guardrail("qualification-juridique",
+                $"La réponse semble trancher la situation de la personne : « {Shorten(verdict, 160)} »"));
+
         if (citations.Invented.Count > 0)
             triggered.Add(new Guardrail("citation-inventee",
                 $"La réponse cite {string.Join(", ", citations.Invented)}, qui ne correspond à aucun passage fourni."));
@@ -122,4 +126,6 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
 
         return triggered;
     }
+
+    private static string Shorten(string text, int max) => text.Length <= max ? text : text[..(max - 1)] + "…";
 }

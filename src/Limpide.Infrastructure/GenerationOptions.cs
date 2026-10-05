@@ -12,7 +12,7 @@ public sealed class GenerationOptions
     public Uri Endpoint { get; set; } = new("https://api.eu.mistral.ai/v1");
 
     /// <summary>Version datée, jamais un alias « -latest » qui changerait de modèle sans prévenir.</summary>
-    public string Model { get; set; } = "mistral-small-2603";
+    public string Model { get; set; } = "mistral-medium-2604";
 
     public int PassageCount { get; set; } = 5;
 

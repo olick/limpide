@@ -49,6 +49,13 @@
     <section class="answer @(r.Declined ? "declined" : "")" aria-live="polite">
         <h2>Réponse de l'assistant <span class="label">formulation générée, à vérifier dans les textes cités</span></h2>
         <div class="answer-text">@((MarkupString)answerHtml)</div>
+        @if (r.Guardrails.Any(g => g.Code == "qualification-juridique"))
+        {
+            <p class="warning" role="alert">
+                Cette réponse semble trancher votre situation, ce que Limpide ne doit pas faire.
+                Fiez-vous aux textes cités ci-dessous, et faites apprécier votre cas par un professionnel du droit.
+            </p>
+        }
         <p class="disclaimer">@r.Disclaimer</p>
     </section>
 
