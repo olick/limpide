@@ -22,7 +22,8 @@ Tout tourne encore en local.
    ```
 2. **Choisir le LLM** et rédiger l'ADR-004. Critères : qualité en français, coût par requête,
    hébergement des données (fournisseur européen ou région UE), disponibilité d'une implémentation `IChatClient`.
-   - En développement : un petit modèle local via Ollama (OllamaSharp implémente aussi `IChatClient`), coût nul.
+   - ~~En développement : un petit modèle local via Ollama~~ — écarté (ADR-004) : trop lent sur CPU ;
+     on développe avec Mistral Small 4, pour moins d'un centime par série de questions.
    - Pour la démo : une API hébergée. Le changement se fait par configuration.
 3. Relever les prix par million de tokens (entrée / sortie) du modèle retenu : ils serviront au calcul du coût.
 

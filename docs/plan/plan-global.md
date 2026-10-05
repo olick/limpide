@@ -181,9 +181,9 @@ Rattrapage du retard accumulé, finitions, préparation d'un support de soutenan
 | N° | Sujet | Semaine |
 |---|---|---|
 | 001 | PostgreSQL + pgvector plutôt que Qdrant | S1 ✔ |
-| 002 | Embeddings locaux bge-m3 | S1 ✔ (à confirmer) |
+| 002 | Embeddings locaux bge-m3 | S1 ✔ |
 | 003 | Ingestion console .NET puis Airflow | S1 ✔ |
-| 004 | Choix du LLM | S2 |
+| 004 | Choix du LLM | S2 ✔ (Mistral, UE) |
 | 005 | Recherche hybride | S2 |
 | 006 | Hébergement de la démo | S3 |
 | 007 | Airflow et tâches .NET conteneurisées | S4 |
