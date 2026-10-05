@@ -123,9 +123,9 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   (profil VS Code « Web », ou `dotnet run --project src/Limpide.Web --launch-profile http`, http://localhost:5181)
 - [x] Session 5 : 15 questions (10 + 5 pièges) passées par `evaluate-answers`, Small et Medium comparés et relus,
   garde-fou `qualification-juridique`, consignes `answer/3`, démo basculée sur Medium (ADR-004).
-  **Reste** : capture d'écran d'une réponse pour le README (à faire par Alexandre).
+  Captures d'écran dans `docs/images/`, intégrées au README.
 
-**S2 terminée** (hors capture d'écran). **Prochaine : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo.
+**S2 terminée. Prochaine : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo.
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 

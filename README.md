@@ -5,6 +5,17 @@ Chaque réponse expose ce qui se passe sous le capot : sources citées, scores, 
 latence, tokens, coût, garde-fous déclenchés. Une page publique affiche les résultats d'évaluation.
 
 
+## Aperçu
+
+Une question, la réponse de l'assistant (formulation générée, distincte des textes), les extraits cités
+reproduits à l'identique avec leur source et leur licence, et le panneau « sous le capot ».
+
+![Question et réponse de l'assistant, avec ses citations](docs/images/reponse.png)
+
+![Textes cités, reproduits à l'identique avec source, date de collecte et licence](docs/images/textes-cites.png)
+
+![Panneau « sous le capot » : recherche, modèle, tokens, coût, durées, garde-fous, passages fournis](docs/images/sous-le-capot.png)
+
 ## Objectifs du projet
 
 1. Une démo publique, en ligne, montrable en rendez-vous et en entretien.
