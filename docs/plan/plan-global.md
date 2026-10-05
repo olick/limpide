@@ -184,7 +184,7 @@ Rattrapage du retard accumulé, finitions, préparation d'un support de soutenan
 | 002 | Embeddings locaux bge-m3 | S1 ✔ |
 | 003 | Ingestion console .NET puis Airflow | S1 ✔ |
 | 004 | Choix du LLM | S2 ✔ (Mistral, UE) |
-| 005 | Recherche hybride | S2 |
+| 005 | Recherche hybride | S2 ✔ (écartée, mesures) |
 | 006 | Hébergement de la démo | S3 |
 | 007 | Airflow et tâches .NET conteneurisées | S4 |
 | 008 | Stratégie de découpage | S5 |

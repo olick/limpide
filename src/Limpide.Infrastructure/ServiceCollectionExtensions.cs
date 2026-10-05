@@ -41,6 +41,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<DocumentVersionStore>();
         services.AddSingleton<ChunkStore>();
         services.AddSingleton<EmbeddingStore>();
+        services.AddSingleton(configuration.GetSection("Search").Get<SearchOptions>() ?? new SearchOptions());
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();
 
         var generation = configuration.GetSection("Generation").Get<GenerationOptions>() ?? new GenerationOptions();

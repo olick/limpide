@@ -53,6 +53,8 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - ADR-001 : PostgreSQL + pgvector plutôt que Qdrant.
 - ADR-002 : embeddings locaux bge-m3 (accepté après les mesures de la semaine 1).
 - ADR-003 : ingestion en console .NET en phase 1, reprise par Airflow en phase 2 sans réécriture.
+- ADR-005 : recherche vectorielle seule — l'hybride (plein texte + RRF) mesurée moins bonne (top 5 : 6/10 contre 8/10),
+  gardée en option `Search:Strategy=Hybrid` ; seuil de pertinence `Generation:MinScore = 0,50` (pas d'appel au LLM en dessous).
 - ADR-004 : génération par Mistral (API, inférence UE). Démo sur Medium 3.5 par prudence ; passer sur Small 4
   si la mesure de fin de S2 montre qu'il tient la qualité (citations, « je ne sais pas », fidélité au texte).
 - Licence du dépôt : Apache 2.0.
@@ -110,8 +112,8 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   `evaluate` identique), ADR-004 (Mistral, UE)
 - [x] Session 2 : `ask` affiche l'`AnswerResult` complet (réponse, passages cités à l'identique avec source et
   licence, stratégie, durées, tokens, coût, garde-fous). Observations : `docs/notes/observations-generation.md`.
-- [ ] Session 3 : garde-fous v1 et recherche hybride (ADR-005) — **prochaine tâche**
-- [ ] Session 4 : interface Blazor
+- [x] Session 3 : recherche hybride mesurée et écartée, seuil de pertinence calibré, avertissement fixe (ADR-005)
+- [ ] Session 4 : interface Blazor — **prochaine tâche**
 - [ ] Session 5 : tests et bilan, dont la comparaison Mistral Small 4 / Medium 3.5 (ADR-004)
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
@@ -158,6 +160,14 @@ avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à
 commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
 Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
 VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la S2, session 3 :
+
+- Garde-fous v1 : seuil de pertinence (`hors-perimetre`, réponse fixe `AnswerPrompt.OutOfScope`, LLM non appelé) ;
+  avertissement juridique fixe (`AnswerPrompt.Disclaimer`), jamais généré, sur toute réponse.
+- Deux lignes de défense : seuil pour le hors sujet ; « je ne sais pas » du LLM pour les questions proches du sujet
+  sans réponse dans le corpus (aucun seuil ne les sépare : « règles sur l'IA aux États-Unis » score 0,655).
+- Le seuil (0,50) est propre à bge-m3+titre : le recalibrer à tout changement d'embedding.
 
 Choix de la S2, session 2 :
 

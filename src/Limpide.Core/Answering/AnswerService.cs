@@ -9,7 +9,17 @@ public sealed record ModelPrice(decimal InputPerMillion, decimal OutputPerMillio
 
 /// <param name="Model">Identifiant du modèle appelé, affiché et enregistré avec la réponse.</param>
 /// <param name="Price">Null si le tarif n'est pas configuré : le coût est alors affiché comme inconnu, jamais deviné.</param>
-public sealed record GenerationSettings(string Model, ModelPrice? Price, int PassageCount = 5, float Temperature = 0f, int MaxOutputTokens = 1000);
+/// <param name="MinScore">
+/// Seuil de pertinence : si le meilleur passage a une similarité plus basse, le modèle n'est pas appelé.
+/// Propre au modèle d'embedding et au texte vectorisé : à recalibrer si l'un change.
+/// </param>
+public sealed record GenerationSettings(
+    string Model,
+    ModelPrice? Price,
+    int PassageCount = 5,
+    float Temperature = 0f,
+    int MaxOutputTokens = 1000,
+    double MinScore = 0);
 
 /// <summary>Question → recherche → génération → contrôles. Ne dépend que d'interfaces.</summary>
 public sealed class AnswerService(IPassageSearch search, IChatClient chat, GenerationSettings settings)
@@ -18,6 +28,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
     {
         var total = Stopwatch.StartNew();
         var found = await search.SearchAsync(question, settings.PassageCount, ct);
+
+        var best = found.Passages.Count == 0 ? 0 : found.Passages.Max(p => p.Score);
+        if (best < settings.MinScore)
+            return OutOfScope(question, found, best, total.Elapsed);
 
         var generation = Stopwatch.StartNew();
         var response = await chat.GetResponseAsync(
@@ -54,6 +68,20 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             Usage(response.Usage),
             Guardrails(answer, declined, citations, response.FinishReason));
     }
+
+    /// <summary>Aucun passage assez proche : réponse fixe, sans appel au modèle (coût nul, aucun risque d'invention).</summary>
+    private AnswerResult OutOfScope(string question, SearchOutcome found, double best, TimeSpan elapsed) => new(
+        question,
+        AnswerPrompt.OutOfScope,
+        Declined: true,
+        found.Passages.Select((p, i) => new SourcePassage(AnswerPrompt.Id(i), p, Cited: false)).ToList(),
+        search.Strategy,
+        Model: "(non appelé)",
+        AnswerPrompt.Version,
+        new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, TimeSpan.Zero, elapsed),
+        new TokenUsage(0, 0, 0m),
+        [new Guardrail("hors-perimetre",
+            $"Meilleur passage à {best:F3}, sous le seuil de pertinence ({settings.MinScore:F2}) : le modèle n'est pas appelé.")]);
 
     private TokenUsage Usage(UsageDetails? usage)
     {

@@ -12,6 +12,21 @@ public static class AnswerPrompt
     /// <summary>Phrase exacte attendue quand les passages ne suffisent pas : permet de la détecter sans ambiguïté.</summary>
     public const string Decline = "Je ne sais pas : les textes consultés ne permettent pas de répondre à cette question.";
 
+    /// <summary>
+    /// Réponse quand aucun passage n'atteint le seuil de pertinence : le modèle n'est pas appelé.
+    /// </summary>
+    public const string OutOfScope =
+        "Je ne sais pas : cette question ne semble pas porter sur les textes consultés "
+        + "(règlement européen sur l'IA, fiches pratiques IA de la CNIL).";
+
+    /// <summary>
+    /// Avertissement affiché avec chaque réponse, quelle qu'elle soit. Texte fixe, jamais généré :
+    /// il doit être présent même si le modèle ne suit pas ses consignes.
+    /// </summary>
+    public const string Disclaimer =
+        "Limpide aide à naviguer dans les textes ; il ne qualifie pas votre situation juridique. "
+        + "Pour l'appréciation de votre cas, adressez-vous à un professionnel du droit.";
+
     /// <summary>Version des consignes, enregistrée avec chaque réponse : la changer peut changer la qualité mesurée.</summary>
     public const string Version = "answer/2";
 

@@ -15,6 +15,7 @@ public sealed class AskCommand(AnswerService service)
         Console.WriteLine($"Question : {result.Question}\n");
         Console.WriteLine("Réponse de l'assistant (formulation générée, à vérifier dans les textes cités) :\n");
         Console.WriteLine(result.Answer);
+        Console.WriteLine($"\n{result.Disclaimer}");
 
         var cited = result.CitedPassages.ToList();
         if (cited.Count > 0)

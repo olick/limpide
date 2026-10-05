@@ -7,7 +7,7 @@ namespace Limpide.Core.Answering;
 /// et ce qui s'est passé sous le capot.
 /// </summary>
 /// <param name="Answer">Formulation de l'assistant, à présenter comme telle, distincte des textes cités.</param>
-/// <param name="Declined">Le modèle a répondu qu'il ne savait pas (phrase <see cref="AnswerPrompt.Decline"/>).</param>
+/// <param name="Declined">Pas de réponse sur le fond : question sous le seuil de pertinence, ou « je ne sais pas » du modèle.</param>
 /// <param name="Passages">Passages fournis au modèle, dans l'ordre de la recherche, avec leur identifiant.</param>
 public sealed record AnswerResult(
     string Question,
@@ -22,6 +22,9 @@ public sealed record AnswerResult(
     IReadOnlyList<Guardrail> Guardrails)
 {
     public IEnumerable<SourcePassage> CitedPassages => Passages.Where(p => p.Cited);
+
+    /// <summary>Avertissement fixe, affiché avec toute réponse (<see cref="AnswerPrompt.Disclaimer"/>).</summary>
+    public string Disclaimer => AnswerPrompt.Disclaimer;
 }
 
 /// <param name="Id">Identifiant dans le prompt et dans la réponse (« P1 »).</param>

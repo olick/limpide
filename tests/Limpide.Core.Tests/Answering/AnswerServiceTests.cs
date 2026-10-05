@@ -78,6 +78,42 @@ public class AnswerServiceTests
         Assert.Equal(1_000, result.Usage.InputTokens);
     }
 
+    [Fact]
+    public async Task Below_the_relevance_threshold_the_model_is_not_called()
+    {
+        var chat = new FakeChatClient("[P1]");
+        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.8 }); // score 0,7
+
+        var result = await service.AskAsync("Quelle est la recette de la tarte tatin ?", CancellationToken.None);
+
+        Assert.Null(chat.LastMessages);
+        Assert.True(result.Declined);
+        Assert.Equal(AnswerPrompt.OutOfScope, result.Answer);
+        Assert.Equal(["hors-perimetre"], result.Guardrails.Select(g => g.Code));
+        Assert.Equal(0m, result.Usage.EstimatedCost);
+        Assert.Empty(result.CitedPassages);
+    }
+
+    [Fact]
+    public async Task At_the_relevance_threshold_the_model_is_called()
+    {
+        var chat = new FakeChatClient("Interdit [P1].");
+        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.7 }); // score 0,7
+
+        var result = await service.AskAsync("?", CancellationToken.None);
+
+        Assert.NotNull(chat.LastMessages);
+        Assert.False(result.Declined);
+    }
+
+    [Fact]
+    public async Task Every_answer_carries_the_fixed_disclaimer()
+    {
+        var result = await Service(new FakeChatClient("Interdit [P1].")).AskAsync("?", CancellationToken.None);
+
+        Assert.Equal(AnswerPrompt.Disclaimer, result.Disclaimer);
+    }
+
     private static AnswerService Service(FakeChatClient chat) => new(new FakeSearch(Article5, Recital29), chat, Settings);
 
     private static RetrievedPassage Passage(string heading, string anchor, string content) =>

@@ -21,9 +21,12 @@ public sealed class GenerationOptions
 
     public int MaxOutputTokens { get; set; } = 1000;
 
+    /// <summary>Seuil de pertinence (similarité cosinus du meilleur passage) ; 0 = désactivé. Calibré dans l'ADR-005.</summary>
+    public double MinScore { get; set; }
+
     /// <summary>Tarif par modèle, en dollars par million de tokens, majoration UE comprise. Relevés dans l'ADR-004.</summary>
     public Dictionary<string, ModelPrice> Prices { get; set; } = [];
 
     public GenerationSettings ToSettings() =>
-        new(Model, Prices.GetValueOrDefault(Model), PassageCount, Temperature, MaxOutputTokens);
+        new(Model, Prices.GetValueOrDefault(Model), PassageCount, Temperature, MaxOutputTokens, MinScore);
 }
