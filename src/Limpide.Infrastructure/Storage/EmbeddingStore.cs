@@ -1,7 +1,7 @@
 using Npgsql;
 using Pgvector;
 
-namespace Limpide.Ingestion.Storage;
+namespace Limpide.Infrastructure.Storage;
 
 public sealed record PendingChunk(Guid Id, string Heading, string Content);
 

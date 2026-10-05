@@ -2,7 +2,7 @@ using Limpide.Core.Chunking;
 using Npgsql;
 using NpgsqlTypes;
 
-namespace Limpide.Ingestion.Storage;
+namespace Limpide.Infrastructure.Storage;
 
 /// <summary>Passages d'une version, dans la table chunks.</summary>
 public sealed class ChunkStore(NpgsqlDataSource dataSource)

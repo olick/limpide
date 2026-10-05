@@ -1,7 +1,7 @@
 using Limpide.Core.Corpus;
 using Npgsql;
 
-namespace Limpide.Ingestion.Storage;
+namespace Limpide.Infrastructure.Storage;
 
 public enum VersionOutcome
 {

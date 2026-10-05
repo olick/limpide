@@ -1,5 +1,6 @@
 using System.Diagnostics;
-using Limpide.Ingestion.Storage;
+using Limpide.Infrastructure;
+using Limpide.Infrastructure.Storage;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 

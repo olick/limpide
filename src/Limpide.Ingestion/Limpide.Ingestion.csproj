@@ -2,14 +2,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Limpide.Core\Limpide.Core.csproj" />
+    <ProjectReference Include="..\Limpide.Infrastructure\Limpide.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.12" />
-    <PackageReference Include="Npgsql" Version="10.0.3" />
-    <PackageReference Include="OllamaSharp" Version="5.4.30" />
     <PackageReference Include="PdfPig" Version="0.1.16" />
-    <PackageReference Include="Pgvector" Version="0.3.2" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,6 +1,5 @@
 using Limpide.Core.Evaluation;
-using Limpide.Ingestion.Storage;
-using Microsoft.Extensions.AI;
+using Limpide.Core.Search;
 
 namespace Limpide.Ingestion.Search;
 
@@ -8,11 +7,7 @@ namespace Limpide.Ingestion.Search;
 /// Passe le jeu de questions dans la recherche et mesure où arrive le passage attendu.
 /// Recherche seule, sans LLM : c'est le score de référence de la semaine 1.
 /// </summary>
-public sealed class EvaluateCommand(
-    IEmbeddingGenerator<string, Embedding<float>> generator,
-    SearchStore store,
-    EmbeddingOptions embedding,
-    IngestionOptions options)
+public sealed class EvaluateCommand(IPassageSearch search, IngestionOptions options)
 {
     /// <summary>Profondeur de recherche : au-delà du top 5 compté, pour voir si un passage manqué est « presque là ».</summary>
     private const int Depth = 10;
@@ -22,13 +17,12 @@ public sealed class EvaluateCommand(
         var set = EvaluationSetLoader.Load(options.QuestionsPath);
         var outcomes = new List<QuestionOutcome>();
 
-        Console.WriteLine($"Jeu : {options.QuestionsPath} — modèle : {embedding.Label}\n");
+        Console.WriteLine($"Jeu : {options.QuestionsPath} — recherche {search.Strategy}\n");
         Console.WriteLine($"{"",-4} {"Rang",-5} Premier résultat");
 
         foreach (var question in set.Questions)
         {
-            var query = await generator.GenerateVectorAsync(question.Question, cancellationToken: ct);
-            var results = await store.SearchAsync(query, embedding.Label, Depth, ct);
+            var results = await search.SearchAsync(question.Question, Depth, ct);
             var rank = RetrievalScore.RankOf(question.Expected, results.Select(r => (r.Anchor, r.Heading)));
             outcomes.Add(new QuestionOutcome(question, rank));
 

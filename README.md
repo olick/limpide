@@ -88,7 +88,12 @@ Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/
 │   ├── plan/           Plans hebdomadaires
 │   └── sources.md      Inventaire du corpus et conditions de réutilisation
 ├── scripts/            Scripts utilitaires (création de la solution .NET)
-├── src/                Code .NET (créé par scripts/bootstrap.sh)
+├── src/
+│   ├── Limpide.Core            Domaine : extraction, découpage, évaluation, interfaces (sans infrastructure)
+│   ├── Limpide.Infrastructure  PostgreSQL + pgvector, Ollama
+│   └── Limpide.Ingestion       Console : ingestion, recherche, évaluation
+├── eval/               Questions de test de la recherche
+├── tests/              Tests unitaires de Limpide.Core
 ├── data/               Documents bruts téléchargés (ignoré par git)
 └── docker-compose.yml  PostgreSQL + pgvector, Ollama
 ```

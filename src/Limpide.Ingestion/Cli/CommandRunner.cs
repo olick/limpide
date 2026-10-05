@@ -1,16 +1,12 @@
+using Limpide.Infrastructure;
 using Limpide.Ingestion.Chunking;
 using Limpide.Ingestion.Embed;
 using Limpide.Ingestion.Extract;
 using Limpide.Ingestion.Fetch;
 using Limpide.Ingestion.Search;
-using Limpide.Ingestion.Storage;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Npgsql;
-using OllamaSharp;
-using Pgvector.Npgsql;
 
 namespace Limpide.Ingestion.Cli;
 
@@ -47,29 +43,14 @@ public static class CommandRunner
         });
 
         var options = builder.Configuration.GetSection("Ingestion").Get<IngestionOptions>() ?? new IngestionOptions();
-        var embedding = builder.Configuration.GetSection("Embedding").Get<EmbeddingOptions>() ?? new EmbeddingOptions();
-        var connectionString = builder.Configuration.GetConnectionString("Rag")
-            ?? throw new InvalidOperationException("Chaîne de connexion « ConnectionStrings:Rag » absente.");
-
         builder.Services.AddSingleton(options);
-        builder.Services.AddSingleton(embedding);
-        builder.Services.AddSingleton(_ =>
-        {
-            var dataSource = new NpgsqlDataSourceBuilder(connectionString);
-            dataSource.UseVector();
-            return dataSource.Build();
-        });
-        // Changer de fournisseur d'embeddings = remplacer cette ligne par une autre implémentation d'IEmbeddingGenerator.
-        builder.Services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(embedding.Endpoint, embedding.Model));
+        builder.Services.AddLimpideInfrastructure(builder.Configuration);
+
         builder.Services.AddSingleton(_ => FetchCommand.CreateHttpClient(options));
-        builder.Services.AddSingleton<DocumentVersionStore>();
         builder.Services.AddSingleton<FetchCommand>();
         builder.Services.AddSingleton<ExtractCommand>();
-        builder.Services.AddSingleton<ChunkStore>();
         builder.Services.AddSingleton<ChunkCommand>();
-        builder.Services.AddSingleton<EmbeddingStore>();
         builder.Services.AddSingleton<EmbedCommand>();
-        builder.Services.AddSingleton<SearchStore>();
         builder.Services.AddSingleton<SearchCommand>();
         builder.Services.AddSingleton<EvaluateCommand>();
 

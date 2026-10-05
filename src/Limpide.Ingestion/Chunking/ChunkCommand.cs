@@ -1,7 +1,7 @@
 using Limpide.Core.Chunking;
 using Limpide.Core.Corpus;
 using Limpide.Core.Extraction;
-using Limpide.Ingestion.Storage;
+using Limpide.Infrastructure.Storage;
 using Microsoft.Extensions.Logging;
 
 namespace Limpide.Ingestion.Chunking;

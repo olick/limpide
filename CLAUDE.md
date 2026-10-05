@@ -30,9 +30,13 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
 ## Stack
 
-- .NET 10, solution `Limpide` : `src/Limpide.Core` (domaine, extraction, découpage, interfaces, sans dépendance
-  d'infra ni E/S), `src/Limpide.Ingestion` (console : commandes et stockage), `tests/Limpide.Core.Tests` (xUnit).
-  Prévu en S2 : `src/Limpide.Infrastructure` (code Npgsql sorti d'Ingestion) et `src/Limpide.Web` (Blazor).
+- .NET 10, solution `Limpide` :
+  - `src/Limpide.Core` : domaine, extraction, découpage, évaluation, interfaces (`IPassageSearch`) ;
+    sans dépendance d'infra ni E/S (seuls paquets : AngleSharp, Microsoft.Extensions.AI.Abstractions).
+  - `src/Limpide.Infrastructure` : PostgreSQL/pgvector (stores, `PgvectorPassageSearch`), Ollama ;
+    tout s'enregistre par `services.AddLimpideInfrastructure(configuration)`.
+  - `src/Limpide.Ingestion` : console (commandes, mode interactif) ; aucun accès direct à Npgsql ni Ollama.
+  - `tests/Limpide.Core.Tests` (xUnit). Prévu en S2 : `src/Limpide.Web` (Blazor), qui réutilise l'infrastructure.
 - PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma dans `db/init/001_schema.sql`.
 - Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
@@ -95,7 +99,18 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 En cas de retard, sacrifier dans cet ordre : recherche hybride (S2), élargissement du corpus (S5),
 garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 
-**Semaine en cours : S1** (`docs/plan/semaine-01.md`)
+**Semaine en cours : S2** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
+
+- [ ] Session 1 : architecture et choix du LLM — **en cours**
+  - [x] `Limpide.Infrastructure` créé, code Npgsql/Ollama déplacé, `IPassageSearch` dans Core
+    (non-régression : `evaluate` identique, 8/10)
+  - [ ] ADR-004 : choix du LLM (qualité en français, coût par requête, hébergement des données) — **prochaine tâche**
+- [ ] Session 2 : génération avec citations (`ask`, `AnswerResult`)
+- [ ] Session 3 : garde-fous v1 et recherche hybride (ADR-005)
+- [ ] Session 4 : interface Blazor
+- [ ] Session 5 : tests et bilan
+
+**S1 terminée** (`docs/plan/semaine-01.md`) :
 
 - [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
 - [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
@@ -104,7 +119,6 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 5 : `search`, `evaluate`, 10 questions (`eval/questions.json`), score dans le README :
   top 5 = 5/10 (texte seul) puis **8/10 (titre + texte, retenu)**
 
-**Semaine 1 terminée. Prochaine : S2** (`docs/plan/semaine-02.md`), session 1 : `Limpide.Infrastructure`, ADR-004 (LLM).
 
 Constats de la semaine 1 à reprendre en S2 (détail : `docs/notes/observations-decoupage.md`) :
 les considérants évincent les articles en tête des résultats (recherche hybride, ADR-005) ; le vocabulaire

@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Limpide.Core/Limpide.Core.csproj" />
+    <Project Path="src/Limpide.Infrastructure/Limpide.Infrastructure.csproj" />
     <Project Path="src/Limpide.Ingestion/Limpide.Ingestion.csproj" />
   </Folder>
   <Folder Name="/tests/">

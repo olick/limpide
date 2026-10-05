@@ -1,4 +1,4 @@
-namespace Limpide.Ingestion;
+namespace Limpide.Infrastructure;
 
 /// <summary>Section « Embedding » de la configuration : fournisseur d'embeddings (Ollama en local).</summary>
 public sealed class EmbeddingOptions
