@@ -49,7 +49,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         generation.Stop();
 
         var answer = response.Text.Trim();
-        var declined = answer.Contains(AnswerPrompt.Decline, StringComparison.Ordinal);
+        // Refus = la phrase seule (guillemets éventuels mis à part). Une réponse sur le fond suivie de la phrase
+        // de refus n'est pas un refus : elle est signalée (« reponse-ambigue »).
+        var mentionsDecline = answer.Contains(AnswerPrompt.Decline, StringComparison.Ordinal);
+        var declined = mentionsDecline && answer.Trim('«', '»', '"', ' ', '\n').Length <= AnswerPrompt.Decline.Length + 2;
         var citations = Citations.Check(answer, found.Passages.Count);
 
         var passages = found.Passages
@@ -66,7 +69,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             AnswerPrompt.Version,
             new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, generation.Elapsed, total.Elapsed),
             Usage(response.Usage),
-            Guardrails(answer, declined, citations, response.FinishReason));
+            Guardrails(answer, declined, mentionsDecline, citations, response.FinishReason));
     }
 
     /// <summary>Aucun passage assez proche : réponse fixe, sans appel au modèle (coût nul, aucun risque d'invention).</summary>
@@ -93,9 +96,14 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         return new TokenUsage(input, output, cost);
     }
 
-    private static List<Guardrail> Guardrails(string answer, bool declined, CitationCheck citations, ChatFinishReason? finish)
+    private static List<Guardrail> Guardrails(
+        string answer, bool declined, bool mentionsDecline, CitationCheck citations, ChatFinishReason? finish)
     {
         var triggered = new List<Guardrail>();
+
+        if (mentionsDecline && !declined)
+            triggered.Add(new Guardrail("reponse-ambigue",
+                "La réponse donne des éléments puis déclare ne pas savoir : à lire avec prudence."));
 
         if (citations.Invented.Count > 0)
             triggered.Add(new Guardrail("citation-inventee",

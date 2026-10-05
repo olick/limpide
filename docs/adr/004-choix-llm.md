@@ -1,6 +1,6 @@
 # ADR-004 : Génération des réponses par Mistral, hébergé en UE
 
-- **Statut** : accepté — choix du modèle (Small ou Medium) à confirmer par mesure en fin de semaine 2
+- **Statut** : accepté — Medium 3.5 recommandé après relecture, sous réserve des deux améliorations (voir la fin)
 - **Date** : 2026-10-05
 
 ## Contexte
@@ -76,3 +76,43 @@ Critères de la mesure : citations inventées (vérification automatique), « je
 Sources : [tarifs de l'API Mistral](https://mistral.ai/pricing/api),
 [tarifs Anthropic](https://platform.claude.com/docs/en/about-claude/pricing.md),
 [tarifs GPU Scaleway](https://www.scaleway.com/en/pricing/gpu/), relevés le 2026-10-05.
+
+## Mesure de fin de semaine 2 (2026-10-05)
+
+15 questions (10 à réponse citée, 5 pièges), `evaluate-answers`, détail dans `docs/notes/observations-generation.md`.
+
+| | Small 4 | Medium 3.5 |
+|---|---|---|
+| Comportement vérifié automatiquement | 12/15 | 11/15 |
+| Passage attendu cité | 8/10 | 7/10 |
+| Pièges refusés | 4/4 | 4/4 |
+| Qualification juridique sur « suis-je en infraction ? » | non | **oui** (2 passes sur 2) |
+| Coût des 15 questions | 0,52 centime | 5,45 centimes |
+
+**Lecture** : sur les contrôles automatiques, Small fait un peu mieux et coûte dix fois moins. Mais la relecture
+de q03 (tri de CV) trouve une erreur de chaque côté : Small applique au recrutement une exception du considérant 61,
+qui concerne la justice (sens déformé) ; Medium tranche la situation de l'utilisateur, comme sur t05.
+
+### Relecture des 15 réponses (2026-10-05)
+
+Faite par Claude (un modèle relisant un autre modèle, **pas** une relecture de juriste), phrase par phrase contre
+les passages cités ; verdicts sur la ligne « Relecture » de chaque réponse dans `eval/results/2026-10-05-1922-*.md`.
+
+| | Small 4 | Medium 3.5 |
+|---|---|---|
+| Erreurs de lecture (sens déformé) | **2** : q03 (exception du considérant 61, sur la justice, appliquée au recrutement), q10 (« attention particulière » devenu interdiction) | 0 grave ; imprécisions mineures (q09) |
+| Qualification de la situation de l'utilisateur | 0 | **2** : q03, t05 (« votre logiciel est… », « il n'est pas interdit ») |
+| Liste incomplète présentée comme complète | q01 | non (« selon les passages fournis »), mais omet un point fourni |
+| Conditions et nuances conservées | plusieurs omises (PME, données sensibles, échéance 2027) | conservées (PME, données sensibles, échéancier complet, exception répressive) |
+
+**Décision recommandée : Medium 3.5 pour la démo.** Les erreurs de Small sont **silencieuses** : citation valide,
+texte réel, sens faux ; aucun contrôle automatique ne les voit, et la fidélité est la promesse centrale de Limpide
+(et une condition de la licence EUR-Lex). Le défaut de Medium (trancher la situation) est **détectable** et
+**corrigeable** : d'où la condition — faire les deux améliorations (garde-fou déterministe « qualification
+juridique », consignes renforcées `answer/3`) et remesurer avant la mise en ligne (S3).
+
+Coût : ≈ 0,4 centime par question avec Medium, soit plus de 2 000 questions par mois sous le plafond de 10 €.
+
+**Leçon de méthode** : les contrôles automatiques donnaient l'avantage à Small (12/15 contre 11/15) ; la relecture
+renverse la conclusion. La relecture n'est pas une formalité, et en S7 elle devra être outillée (relecture
+assistée par un modèle juge, échantillon relu par un humain).

@@ -68,6 +68,16 @@ public class AnswerServiceTests
     }
 
     [Fact]
+    public async Task An_answer_that_ends_with_the_decline_sentence_is_flagged_not_counted_as_a_refusal()
+    {
+        var result = await Service(new FakeChatClient($"Le recrutement est classé à haut risque [P1].\n\n{AnswerPrompt.Decline}"))
+            .AskAsync("?", CancellationToken.None);
+
+        Assert.False(result.Declined);
+        Assert.Equal(["reponse-ambigue"], result.Guardrails.Select(g => g.Code));
+    }
+
+    [Fact]
     public async Task Cost_is_unknown_rather_than_guessed_when_the_price_is_not_configured()
     {
         var service = new AnswerService(new FakeSearch(Article5), new FakeChatClient("[P1]"), Settings with { Price = null });

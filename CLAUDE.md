@@ -119,8 +119,10 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 3 : recherche hybride mesurée et écartée, seuil de pertinence calibré, avertissement fixe (ADR-005)
 - [x] Session 4 : interface Blazor, testée de bout en bout par Alexandre le 2026-10-05
   (profil VS Code « Web », ou `dotnet run --project src/Limpide.Web --launch-profile http`, http://localhost:5181)
-- [ ] Session 5 : tests et bilan — **prochaine tâche**
-  Inclut la comparaison Mistral Small 4 / Medium 3.5 (ADR-004)
+- [ ] Session 5 : 15 questions (10 + 5 pièges) passées par `evaluate-answers`, Small et Medium comparés
+  (rapports `eval/results/`, synthèse `docs/notes/observations-generation.md`). **Reste** : relecture de fidélité
+  faite par Claude ; **reste** : garde-fou « qualification juridique » et consignes `answer/3`, remesure, bascule de la
+  démo sur Medium (`Generation:Model`), capture d'écran du README.
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 
@@ -166,6 +168,20 @@ avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à
 commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
 Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
 VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la S2, session 5 :
+
+- `eval/questions.json` : champ `behavior` (`answer` par défaut, `decline`, `noLegalQualification`) ; pièges t01–t05
+  distincts des questions de calibrage du seuil. `evaluate` (recherche) ne compte que les questions `answer`.
+- `evaluate-answers` : chaîne complète, contrôle automatique (`AnswerChecks` : OK / ÉCHEC / À RELIRE), rapport Markdown
+  daté par modèle dans `eval/results/` (versionné : preuve et base de comparaison).
+- Citations : renvois précis acceptés (`[P1a]`, `[P5.1.a]`, `[P4.c]`, `[P1, point a]`) ; refus = phrase seule,
+  sinon garde-fou `reponse-ambigue`.
+- Relecture complète faite par Claude (Alexandre l'a déléguée) : Small déforme 2 textes sans que rien ne le détecte
+  (q03, q10) ; Medium est plus fidèle mais tranche la situation de l'utilisateur (q03, t05). **Recommandation :
+  Medium**, sous condition des deux améliorations (garde-fou « qualification juridique », consignes `answer/3`).
+- Rapports avec le texte des passages cités sous chaque réponse (relecture sans quitter le fichier), nommés
+  `AAAA-MM-JJ-HHmm-<modèle>.md` (les réponses varient d'une passe à l'autre : ne pas écraser).
 
 Choix de la S2, session 4 :
 

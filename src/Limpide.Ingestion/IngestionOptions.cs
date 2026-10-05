@@ -7,6 +7,9 @@ public sealed class IngestionOptions
 
     public string QuestionsPath { get; set; } = "eval/questions.json";
 
+    /// <summary>Rapports de evaluate-answers (Markdown, un par jour et par modèle), versionnés avec le code.</summary>
+    public string ResultsPath { get; set; } = "eval/results";
+
     /// <summary>Racine des fichiers bruts. En base, <c>raw_path</c> est relatif à cette racine.</summary>
     public string RawDataPath { get; set; } = "data/raw";
 

@@ -30,6 +30,7 @@ public static class CommandRunner
             "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
             "search" => await services.GetRequiredService<SearchCommand>().RunAsync(line.Text, ct),
             "evaluate" => await services.GetRequiredService<EvaluateCommand>().RunAsync(ct),
+            "evaluate-answers" => await services.GetRequiredService<EvaluateAnswersCommand>().RunAsync(ct),
             _ => throw new ArgumentException($"commande inconnue : {line.Name}"),
         };
     }
@@ -56,6 +57,7 @@ public static class CommandRunner
         builder.Services.AddSingleton<AskCommand>();
         builder.Services.AddSingleton<SearchCommand>();
         builder.Services.AddSingleton<EvaluateCommand>();
+        builder.Services.AddSingleton<EvaluateAnswersCommand>();
 
         return builder.Build();
     }

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Limpide.Core.Evaluation;
 
@@ -10,6 +11,7 @@ public static class EvaluationSetLoader
         AllowTrailingCommas = true,
         RespectRequiredConstructorParameters = true,
         RespectNullableAnnotations = true,
+        Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase, allowIntegerValues: false) },
     };
 
     public static EvaluationSet Load(string path) => Parse(File.ReadAllText(path));
@@ -34,11 +36,7 @@ public static class EvaluationSetLoader
             var id in set.Questions.GroupBy(q => q.Id).Where(g => g.Count() > 1).Select(g => g.Key)
         )
             errors.Add($"identifiant en double : {id}");
-        foreach (
-            var q in set.Questions.Where(q =>
-                (q.Expected.Anchors?.Count ?? 0) + (q.Expected.Headings?.Count ?? 0) == 0
-            )
-        )
+        foreach (var q in set.Questions.Where(q => q.Behavior == ExpectedBehavior.Answer && (q.Expected?.IsEmpty ?? true)))
             errors.Add($"{q.Id} : aucun passage attendu");
 
         if (errors.Count > 0)

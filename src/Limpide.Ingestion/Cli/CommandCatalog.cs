@@ -19,7 +19,8 @@ public static class CommandCatalog
         new("embed", "embed", "calcule les embeddings des passages qui n'en ont pas", Ingestion),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),
-        new("evaluate", "evaluate", "score de la recherche sur le jeu de questions (eval/questions.json)", Search),
+        new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
+        new("evaluate-answers", "evaluate-answers", "pose tout le jeu de questions (recherche + Mistral), rapport dans eval/results/", Search),
         new("help", "help", "affiche cette aide", Session),
         new("exit", "exit", "quitte (aussi : quit, Ctrl+D)", Session),
     ];

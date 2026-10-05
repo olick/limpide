@@ -18,6 +18,8 @@ public class CitationsTests
     [InlineData("[P1, 2]")]
     [InlineData("[p1; p2]")]
     [InlineData("[P1a][P2e]")] // lettre du point de l'article, ajoutée par Mistral Small et Medium
+    [InlineData("[P1.1.a][P2.c]")] // paragraphe et point, ajoutés par Mistral Medium
+    [InlineData("[P1, point a][P2]")]
     public void Accepts_the_variants_models_produce(string text)
     {
         Assert.Equal([1, 2], Citations.Check(text, passageCount: 5).Cited);

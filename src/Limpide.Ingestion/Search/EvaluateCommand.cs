@@ -20,10 +20,11 @@ public sealed class EvaluateCommand(IPassageSearch search, IngestionOptions opti
         Console.WriteLine($"Jeu : {options.QuestionsPath} — recherche {search.Strategy}\n");
         Console.WriteLine($"{"",-4} {"Rang",-5} Premier résultat");
 
-        foreach (var question in set.Questions)
+        // Recherche seule : seules les questions qui attendent un passage précis sont comptées.
+        foreach (var question in set.Questions.Where(q => q.Behavior == ExpectedBehavior.Answer && q.Expected is not null))
         {
             var results = (await search.SearchAsync(question.Question, Depth, ct)).Passages;
-            var rank = RetrievalScore.RankOf(question.Expected, results.Select(r => (r.Anchor, r.Heading)));
+            var rank = RetrievalScore.RankOf(question.Expected!, results.Select(r => (r.Anchor, r.Heading)));
             outcomes.Add(new QuestionOutcome(question, rank));
 
             var top = results.FirstOrDefault();

@@ -36,3 +36,55 @@ L'hypothèse de l'ADR-004 (2 500 tokens en entrée) était pessimiste : environ 
   sur le jeu de questions de la session 5, en priorité sur les articles à exceptions.
 - **Démarrage à froid d'Ollama** : première vectorisation de question à 4,7 s (modèle déchargé après 5 minutes
   d'inactivité), puis environ 200 ms. Argument pour l'ADR-006 (hébergement du modèle d'embedding).
+
+## Semaine 2, session 5 — 15 questions, Small contre Medium (2026-10-05)
+
+`evaluate-answers` : 10 questions qui attendent une réponse citée + 5 pièges (2 hors sujet dont un déguisé,
+2 sans réponse dans le corpus, 1 demande de qualification juridique). Consignes `answer/2`, température 0,
+5 passages, seuil 0,50. Rapports : `eval/results/2026-10-05-<modèle>.md` (seconde passe, contrôles corrigés) et
+`eval/results/2026-10-05-1922-<modèle>.md` (troisième passe, avec le texte des passages cités, pour la relecture).
+
+| | Small (`mistral-small-2603`) | Medium (`mistral-medium-2604`) |
+|---|---|---|
+| Comportement vérifié automatiquement | 12/15 | 11/15 |
+| Échecs | 0 | 0 |
+| Passage attendu cité | 8/10 | 7/10 |
+| Pièges refusés | 4/4 | 4/4 |
+| Qualification juridique (t05) | non (réponse ambiguë, signalée) | oui, aux deux passes |
+| Coût des 15 questions | 0,52 centime | 5,45 centimes |
+| Durée médiane / max | 1,3 s / 3,6 s | 1,6 s / 2,7 s |
+
+**Constats**
+
+- **Les contrôles automatiques ont eux-mêmes été pris en défaut**, et corrigés avant de conclure :
+  - Medium cite `[P5.1.a]`, `[P4.c]` (paragraphe et point) : non reconnus, d'où un faux « passage attendu non cité »
+    sur q07 à la première passe (Medium y citait bien l'article 53). La vérification lit désormais le numéro de tête ;
+  - Small a répondu sur le fond **puis** écrit la phrase « Je ne sais pas… » : comptée à tort comme un refus.
+    Un refus est maintenant la phrase seule ; le mélange déclenche le garde-fou `reponse-ambigue`.
+- **Qualification juridique (règle 5)** : à « suis-je en infraction ? » (tri de CV), Medium écrit
+  « Si votre logiciel ne relève pas de ces cas, il n'est pas interdit », puis « Vous n'êtes donc pas en infraction
+  par principe » : il tranche, malgré la consigne et le renvoi final vers un professionnel. Small ne tranche pas.
+- **La réponse est plafonnée par la recherche** : q03 (tri de CV) et q10 (qualité de l'annotation) ne citent le
+  passage attendu chez aucun des deux modèles, parce qu'il arrivait 6e et 10e à la recherche et n'était donc pas
+  fourni (5 passages). Améliorer ces deux questions est un problème de recherche, pas de modèle.
+- **Les pièges** : le seuil de pertinence a arrêté les deux hors sujet **et** la question sur Clearview AI
+  (dans le domaine, absente du corpus) ; le modèle a refusé la question statistique. Le poème sur l'IA, qu'on
+  craignait de voir passer le seuil, a été arrêté par lui.
+- **Medium cite le considérant 96 plutôt que l'article 27** sur la banque (q08) : fond juste, source moins forte.
+- **Erreur de fidélité de Small sur q03** (tri de CV), vue à la relecture et reproduite à la troisième passe :
+  « Si le tri des CV est une activité administrative purement accessoire […], il ne serait pas considéré comme
+  à haut risque [P1] ». P1 est le considérant 61, qui traite de **l'administration de la justice** : l'exception
+  « activités administratives purement accessoires » y vise les juridictions, pas le recrutement. Citation valide,
+  texte réel, sens déformé : exactement ce qu'aucun contrôle automatique ne voit, et ce que la licence EUR-Lex
+  interdit (« ne pas dénaturer le sens »). Sur la même question, Medium tranche (« Oui, votre logiciel est
+  considéré comme un système à haut risque »). **Les deux modèles se trompent sur q03, chacun à sa manière.**
+- **Relecture complète** (par Claude, verdicts dans les rapports de 19 h 22) : Small fait 2 erreurs de lecture
+  silencieuses (q03, q10) et perd des conditions ; Medium est plus fidèle et plus complet, mais tranche la situation
+  de l'utilisateur (q03, t05). Synthèse et décision dans l'ADR-004 : Medium, sous condition des deux améliorations.
+- **Leçon de méthode** : les chiffres automatiques (12/15 contre 11/15) faisaient pencher pour Small ; la relecture
+  renverse la conclusion. La relecture n'est pas une formalité.
+
+**Pistes, non faites** :
+- garde-fou déterministe « qualification juridique » (« vous êtes / n'êtes pas en infraction », « votre logiciel
+  n'est pas interdit »…) : ce qu'on ne peut pas garantir par la consigne, on peut au moins le détecter ;
+- renforcer la règle 5 des consignes (`answer/3`), puis remesurer.
