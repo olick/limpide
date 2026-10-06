@@ -112,7 +112,17 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 En cas de retard, sacrifier dans cet ordre : recherche hybride (S2), élargissement du corpus (S5),
 garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 
-**Semaine en cours : S2** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
+**Semaine en cours : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
+
+- [x] Session 1 : ADR-006 accepté — **OVHcloud VPS-1** (2 vCores, 4 Go, ≈ 3,81 € HT/mois, France) + Docker Compose,
+  Ollama compris (≈ 2,3 Go utilisés sur 4) ; VPS-2 en rupture. Azure ≈ 10 fois plus cher pour un service toujours
+  allumé. Pas de nom de domaine pour l'instant (démo d'abord sur l'IP). **Reste** : commande du VPS par Alexandre.
+- [ ] Session 2 : conteneuriser (`docker-compose.prod.yml`) — **prochaine tâche**
+- [ ] Session 3 : déployer (HTTPS, nom de domaine)
+- [ ] Session 4 : protéger la démo publique (limite par IP, plafond de dépenses)
+- [ ] Session 5 : README et bilan de la phase 1
+
+**S2 terminée** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
 
 - [x] Session 1 : `Limpide.Infrastructure` (code Npgsql/Ollama déplacé, `IPassageSearch` dans Core,
   `evaluate` identique), ADR-004 (Mistral, UE)
@@ -125,7 +135,7 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   garde-fou `qualification-juridique`, consignes `answer/3`, démo basculée sur Medium (ADR-004).
   Captures d'écran dans `docs/images/`, intégrées au README.
 
-**S2 terminée. Prochaine : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo.
+
 
 **S1 terminée** (`docs/plan/semaine-01.md`) :
 
