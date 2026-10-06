@@ -195,6 +195,8 @@ Choix de la S3 :
   mot de passe changé par Alexandre (jamais transmis). Domaine : choix en cours (`limpide-ia.fr` suggéré, libre au
   2026-10-06 ; `limpide.fr/.eu/.io/.app` déjà pris par un même titulaire).
 - Données transférées par `pg_dump`/`pg_restore` (3,7 Mo) plutôt que recalculées sur le VPS (30 à 40 min).
+  **Après une restauration, redémarrer `web`** : `--clean` recrée pgvector, le type `vector` change d'identifiant, et
+  Npgsql garde l'ancien en cache (« cache lookup failed for type 16386 », vu en production le 2026-10-06).
 - `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` dans l'image web : l'application voit l'IP du visiteur et le schéma
   HTTPS derrière Caddy (nécessaire à la limite par IP de la session 4).
 - `EmbeddingWarmup` (web) : vectorise une phrase au démarrage pour charger bge-m3 ; `OLLAMA_KEEP_ALIVE=-1` le garde.

@@ -49,7 +49,14 @@ docker compose exec -T postgres pg_dump -U rag -d rag -Fc > data/limpide-$(date 
 # Sur la machine de production (après copie du fichier)
 limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner < limpide-AAAAMMJJ.dump
 limpide exec -T postgres psql -U rag -d rag -tAc "SELECT count(*), count(embedding) FROM chunks"   # 691|691
+limpide restart web    # OBLIGATOIRE si l'application tournait pendant la restauration (voir ci-dessous)
 ```
+
+**Pourquoi redémarrer l'application** : `--clean` supprime puis recrée l'extension pgvector, et le type `vector`
+change d'identifiant interne (16386 → 16791 au premier déploiement). L'application, connectée avant la restauration,
+garde l'ancien identifiant en mémoire : toute recherche échoue (`cache lookup failed for type 16386`), et la page
+affiche « service de recherche ou de génération indisponible ». Les commandes de la console, lancées après coup, ne
+voient pas le problème : ce sont de nouveaux processus. Constaté en production le 2026-10-06.
 
 ## Vérifier
 
@@ -60,6 +67,27 @@ curl -s -o /dev/null -w "%{http_code} %{content_type}\n" http://localhost/_frame
 # Sans ce script, la page s'affiche mais rien n'est interactif (bouton sans effet) : vérifier aussi dans un navigateur.
 limpide run --rm ingestion evaluate                  # recherche : 8/10 dans le top 5 (même score qu'en développement)
 limpide run --rm ingestion ask Quelles pratiques d\'IA sont interdites \?
+```
+
+## Sauvegarde quotidienne de la base
+
+`deploy/backup-db.sh` : `pg_dump`, vérification du fichier (`pg_restore --list`), 7 jours d'historique dans `~/backups`.
+Lancé chaque nuit à 3 h 15 par un minuteur systemd (rattrapé au démarrage si le serveur était éteint).
+Les sauvegardes sont sur le disque du VPS, lui-même sauvegardé chaque jour par OVH (copie hors serveur, 1 jour).
+
+```bash
+# Installation (une fois)
+sudo cp deploy/limpide-backup.service deploy/limpide-backup.timer /etc/systemd/system/
+sudo systemctl daemon-reload && sudo systemctl enable --now limpide-backup.timer
+
+systemctl list-timers limpide-backup.timer       # prochaine exécution
+sudo systemctl start limpide-backup.service      # sauvegarde immédiate
+journalctl -u limpide-backup.service -n 5        # résultat des dernières sauvegardes
+ls -lh ~/backups
+
+# Restaurer une sauvegarde, puis redémarrer l'application (voir « Données » ci-dessus)
+limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner < ~/backups/limpide-AAAAMMJJ-HHMM.dump
+limpide restart web
 ```
 
 ## Mettre à jour l'application

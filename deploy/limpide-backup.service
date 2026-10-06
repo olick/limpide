@@ -1,0 +1,10 @@
+# Sauvegarde de la base de la démo. Installation : voir deploy/README.md.
+[Unit]
+Description=Limpide : sauvegarde de la base (pg_dump)
+Requires=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+User=debian
+ExecStart=/home/debian/limpide/deploy/backup-db.sh

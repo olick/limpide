@@ -1,0 +1,10 @@
+# Chaque nuit à 3 h 15 ; rattrapée au démarrage si le serveur était éteint à l'heure prévue (Persistent).
+[Unit]
+Description=Limpide : sauvegarde quotidienne de la base
+
+[Timer]
+OnCalendar=*-*-* 03:15
+Persistent=true
+
+[Install]
+WantedBy=timers.target
