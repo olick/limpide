@@ -89,6 +89,11 @@ reproduits à l'identique avec source, lien, date de collecte et licence, et le 
 (stratégie de recherche, modèle, durées par étape, tokens, coût, garde-fous, passages fournis et leur score).
 Mêmes secrets que la console (user-secrets partagés) et mêmes réglages (`src/appsettings.shared.json`).
 
+## Mise en ligne
+
+Image Docker multi-étapes (`Dockerfile`), pile `docker-compose.prod.yml` (Caddy, application, PostgreSQL, Ollama),
+secrets dans `.env.prod` (jamais commité). Procédure complète : [`deploy/README.md`](deploy/README.md).
+
 ## Score de recherche
 
 Recherche vectorielle seule (sans LLM), sur les 10 questions de [`eval/questions.json`](eval/questions.json) :
@@ -107,6 +112,7 @@ Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/
 ```
 .
 ├── db/init/            Scripts SQL exécutés au premier démarrage de PostgreSQL
+├── deploy/             Mise en ligne : Caddyfile, procédure de déploiement
 ├── docs/
 │   ├── adr/            Décisions d'architecture (une par fichier)
 │   ├── notes/          Observations en cours, matière des futurs ADR

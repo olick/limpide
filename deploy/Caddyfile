@@ -1,0 +1,13 @@
+# Reverse proxy de la démo : seul point d'entrée exposé sur Internet.
+# SITE_ADDRESS = « :80 » tant qu'il n'y a pas de nom de domaine (HTTP sur l'adresse IP) ;
+# = « limpide-ia.fr » (par exemple) ensuite : Caddy obtient et renouvelle seul le certificat HTTPS (Let's Encrypt).
+{$SITE_ADDRESS} {
+	encode gzip
+	# Blazor Server passe par WebSocket : Caddy le relaie sans configuration particulière.
+	reverse_proxy web:8080
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

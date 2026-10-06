@@ -1,0 +1,14 @@
+# Contexte de construction des images : le code seulement, jamais les secrets ni les données.
+**/bin/
+**/obj/
+.git/
+.vscode/
+.env
+.env.*
+data/
+docs/
+tests/
+eval/results/
+scripts/
+db/
+*.md

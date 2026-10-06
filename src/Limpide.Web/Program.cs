@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Mêmes réglages que la console (recherche, seuil, modèle, tarifs) et mêmes services.
 builder.Configuration.AddLimpideSharedSettings();
 builder.Services.AddLimpideInfrastructure(builder.Configuration);
+builder.Services.AddHostedService<Limpide.Web.EmbeddingWarmup>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

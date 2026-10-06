@@ -10,3 +10,7 @@ obj/
 
 # Données locales
 data/
+
+# Secrets de la démo en ligne (seuls les modèles .example sont versionnés)
+.env.*
+!.env*.example

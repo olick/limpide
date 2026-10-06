@@ -1,0 +1,109 @@
+# Démo en ligne (ADR-006) : une seule machine, 4 Go de mémoire.
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
+#   docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm ingestion <commande>
+# Seul Caddy est exposé ; PostgreSQL et Ollama restent sur le réseau interne (Ollama n'a pas d'authentification).
+# Projet distinct de l'environnement de développement (docker-compose.yml) : volumes séparés.
+name: limpide-prod
+
+x-app-env: &app-env
+  ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=${POSTGRES_USER:-rag};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}"
+  Embedding__Endpoint: "http://ollama:11434"
+  Mistral__ApiKey: "${MISTRAL_API_KEY:?MISTRAL_API_KEY manquant dans .env.prod}"
+
+services:
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+    environment:
+      SITE_ADDRESS: "${SITE_ADDRESS:-:80}"
+    volumes:
+      - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - web
+    mem_limit: 128m
+
+  web:
+    build:
+      context: .
+      target: web
+    image: limpide-web
+    restart: unless-stopped
+    environment:
+      <<: *app-env
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama-model:
+        condition: service_completed_successfully
+    mem_limit: 512m
+
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-rag}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}
+      POSTGRES_DB: ${POSTGRES_DB:-rag}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    mem_limit: 512m
+
+  ollama:
+    image: ollama/ollama:latest
+    restart: unless-stopped
+    environment:
+      # Modèle gardé en mémoire indéfiniment : pas de démarrage à froid entre deux visites.
+      OLLAMA_KEEP_ALIVE: "-1"
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    mem_limit: 2g
+
+  # Télécharge bge-m3 au premier démarrage (≈ 1,2 Go), puis ne fait plus rien : le modèle reste dans le volume.
+  ollama-model:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_HOST: "ollama:11434"
+    entrypoint: ["ollama", "pull", "bge-m3"]
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+
+  # Console d'ingestion, lancée à la demande : jamais démarrée par « up ».
+  ingestion:
+    build:
+      context: .
+      target: ingestion
+    image: limpide-ingestion
+    profiles: ["outils"]
+    environment:
+      <<: *app-env
+    volumes:
+      - ingestion_data:/limpide/data
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 512m
+
+volumes:
+  pgdata:
+  ollama:
+  caddy_data:
+  caddy_config:
+  ingestion_data:

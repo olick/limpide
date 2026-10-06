@@ -117,8 +117,15 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 - [x] Session 1 : ADR-006 accepté — **OVHcloud VPS-1** (2 vCores, 4 Go, ≈ 3,81 € HT/mois, France) + Docker Compose,
   Ollama compris (≈ 2,3 Go utilisés sur 4) ; VPS-2 en rupture. Azure ≈ 10 fois plus cher pour un service toujours
   allumé. Pas de nom de domaine pour l'instant (démo d'abord sur l'IP). **Reste** : commande du VPS par Alexandre.
-- [ ] Session 2 : conteneuriser (`docker-compose.prod.yml`) — **prochaine tâche**
-- [ ] Session 3 : déployer (HTTPS, nom de domaine)
+- [x] Session 2 : `Dockerfile` (cibles `web` et `ingestion`, non root), `docker-compose.prod.yml` (projet `limpide-prod` :
+  Caddy, web, postgres, ollama + `ollama-model`, ingestion en profil `outils`), `deploy/Caddyfile`, `.env.prod` (ignoré).
+  Testée en local : page via Caddy, préchauffage bge-m3 (2,3 s), base restaurée (691/691), `evaluate` 8/10, `ask` OK,
+  puis dans le navigateur par Alexandre, qui a trouvé `blazor.web.js` en 404 : la restauration faite sur les seuls .csproj
+  n'inclut pas le paquet des fichiers Blazor (le SDK ne l'ajoute qu'en voyant les .razor). Corrigé (publication sans
+  `--no-restore`) et verrouillé : l'image ne se construit pas si `blazor.web.js` manque. Leçon : tester dans un navigateur.
+  Procédure : `deploy/README.md`.
+- [ ] Session 3 : déployer sur le VPS (57.129.175.88, utilisateur `debian`, connexion par clé OK) — **prochaine tâche**
+
 - [ ] Session 4 : protéger la démo publique (limite par IP, plafond de dépenses)
 - [ ] Session 5 : README et bilan de la phase 1
 
@@ -181,6 +188,16 @@ avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à
 commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
 Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
 VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la S3 :
+
+- VPS OVHcloud VPS-1 (2 vCores, 3,7 Go, Debian 13), IP 57.129.175.88, utilisateur `debian`, connexion par clé ;
+  mot de passe changé par Alexandre (jamais transmis). Domaine : choix en cours (`limpide-ia.fr` suggéré, libre au
+  2026-10-06 ; `limpide.fr/.eu/.io/.app` déjà pris par un même titulaire).
+- Données transférées par `pg_dump`/`pg_restore` (3,7 Mo) plutôt que recalculées sur le VPS (30 à 40 min).
+- `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` dans l'image web : l'application voit l'IP du visiteur et le schéma
+  HTTPS derrière Caddy (nécessaire à la limite par IP de la session 4).
+- `EmbeddingWarmup` (web) : vectorise une phrase au démarrage pour charger bge-m3 ; `OLLAMA_KEEP_ALIVE=-1` le garde.
 
 Choix de la S2, session 5 :
 
