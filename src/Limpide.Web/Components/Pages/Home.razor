@@ -1,6 +1,8 @@
-@page "/"
+﻿@page "/"
 @using System.Globalization
+@using Limpide.Core.Protection
 @inject AnswerService Answers
+@inject QuestionQuota Quota
 @inject ILogger<Home> Logger
 
 <PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
@@ -25,7 +27,7 @@
               placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
               @bind="question" @bind:event="oninput"></textarea>
     <div class="ask-actions">
-        <span class="count">@question.Length / @MaxLength</span>
+        <span class="count">@question.Length / @MaxLength · @QuotaPerHour questions par heure et par visiteur</span>
         <button type="submit" disabled="@(busy || string.IsNullOrWhiteSpace(question))">
             @(busy ? "Recherche en cours…" : "Poser la question")
         </button>
@@ -184,13 +186,35 @@
     private string answerHtml = "";
     private bool engineOpen;
 
+    /// <summary>Adresse IP du visiteur (App.razor) ; sans elle, tous les visiteurs partagent un même quota.</summary>
+    [CascadingParameter(Name = "ClientAddress")]
+    private string? ClientAddress { get; set; }
+
+    [Inject]
+    private QuotaOptions QuotaSettings { get; set; } = default!;
+
+    private int QuotaPerHour => QuotaSettings.PerClientPerHour;
+
     private async Task AskAsync()
     {
         if (busy || string.IsNullOrWhiteSpace(question))
             return;
 
-        busy = true;
         error = null;
+        var quota = Quota.TryConsume(ClientAddress ?? "inconnue");
+        if (!quota.Allowed)
+        {
+            // L'adresse IP n'est pas journalisée (donnée personnelle) : seulement le type de limite atteinte.
+            Logger.LogInformation("Question refusée par le quota : {Verdict}", quota.Verdict);
+            error = quota.Verdict == QuotaVerdict.ClientLimitReached
+                ? $"Limite atteinte : {QuotaSettings.PerClientPerHour} questions par heure et par visiteur, pour maîtriser le coût "
+                  + $"de cette démo publique. Nouvelle question possible dans {Duration(quota.RetryAfter)}."
+                : "La démo a atteint son nombre maximal de questions pour aujourd'hui (budget fixé à l'avance). "
+                  + $"Nouvelle question possible dans {Duration(quota.RetryAfter)}.";
+            return;
+        }
+
+        busy = true;
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -220,6 +244,11 @@
         ("Recherche des passages", t.Search),
         ("Génération de la réponse", t.Generation),
     ];
+
+    private static string Duration(TimeSpan delay) =>
+        delay.TotalMinutes < 1 ? "moins d'une minute"
+        : delay.TotalHours < 1 ? $"{Math.Ceiling(delay.TotalMinutes):0} min"
+        : $"{(int)delay.TotalHours} h {delay.Minutes:00}";
 
     private static string Ms(TimeSpan duration) => $"{duration.TotalMilliseconds.ToString("N0", French)} ms";
 

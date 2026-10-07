@@ -13,9 +13,19 @@
 </head>
 
 <body>
-    <Routes @rendermode="InteractiveServer" />
+    <Routes @rendermode="InteractiveServer" ClientAddress="@clientAddress" />
     <ReconnectModal />
     <script src="@Assets["_framework/blazor.web.js"]"></script>
 </body>
 
 </html>
+
+@code {
+    // Seule requête HTTP de la visite : les questions passent ensuite par la connexion WebSocket.
+    // L'adresse vient de X-Forwarded-For (Caddy), lu grâce à ASPNETCORE_FORWARDEDHEADERS_ENABLED.
+    // Transmise à la partie interactive comme paramètre du composant racine : Blazor la protège contre la falsification.
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? clientAddress => HttpContext?.Connection.RemoteIpAddress?.ToString();
+}

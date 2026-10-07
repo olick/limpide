@@ -105,6 +105,17 @@ Le domaine nu `limpide-ia.fr` pointe encore sur la redirection web d'OVH (213.18
 en HTTPS. Pour le servir aussi : remplacer cette redirection par une entrée A vers `57.129.175.88`, puis
 `SITE_ADDRESS=www.limpide-ia.fr, limpide-ia.fr`.
 
+## Protections de la démo publique (S3, session 4)
+
+- **Quota de questions** (`Protection` dans `src/Limpide.Web/appsettings.json`) : 10 par heure et par adresse IP,
+  60 par jour au total (≈ 9 €/mois au plus avec Mistral Medium, sous le plafond de 10 € fixé chez Mistral).
+  En mémoire : remis à zéro au redémarrage de `web`.
+- **Adresse du visiteur** : Caddy remplace tout `X-Forwarded-For` reçu d'Internet par l'adresse réelle (un visiteur ne
+  peut pas usurper une autre adresse), et Docker transmet l'adresse publique d'origine. Vérifié le 2026-10-07.
+- **Docker contourne `ufw`** pour les ports publiés : un conteneur de test publié sur 8099 était joignable depuis
+  Internet malgré le pare-feu (vérifié le 2026-10-07). Ne publier que les ports de Caddy ; jamais ceux de PostgreSQL
+  ni d'Ollama.
+
 ## Mettre à jour l'application
 
 ```bash

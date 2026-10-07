@@ -1,6 +1,14 @@
-﻿<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
+﻿<CascadingValue Name="ClientAddress" Value="ClientAddress">
+<Router AppAssembly="typeof(Program).Assembly" NotFoundPage="typeof(Pages.NotFound)">
     <Found Context="routeData">
         <RouteView RouteData="routeData" DefaultLayout="typeof(Layout.MainLayout)" />
         <FocusOnNavigate RouteData="routeData" Selector="h1" />
     </Found>
 </Router>
+</CascadingValue>
+
+@code {
+    /// <summary>Adresse IP du visiteur, relevée à l'ouverture de la page (App.razor) ; sert au quota de questions.</summary>
+    [Parameter]
+    public string? ClientAddress { get; set; }
+}

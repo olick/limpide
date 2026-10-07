@@ -1,4 +1,5 @@
-﻿using Limpide.Infrastructure;
+﻿using Limpide.Core.Protection;
+using Limpide.Infrastructure;
 using Limpide.Web.Components;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddLimpideSharedSettings();
 builder.Services.AddLimpideInfrastructure(builder.Configuration);
 builder.Services.AddHostedService<Limpide.Web.EmbeddingWarmup>();
+builder.Services.AddSingleton(TimeProvider.System);
+builder.Services.AddSingleton(builder.Configuration.GetSection("Protection").Get<QuotaOptions>() ?? new QuotaOptions());
+builder.Services.AddSingleton<QuestionQuota>();
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();
