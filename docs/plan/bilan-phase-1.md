@@ -73,3 +73,7 @@ Les points qui ont changé une décision, ou qui auraient fait échouer la démo
 Recueillis par le formulaire en bas de page (trois questions : qu'avez-vous compris de ce que fait Limpide ? une
 réponse vous a-t-elle paru fausse ou trompeuse ? le panneau « sous le capot » vous a-t-il servi ?), lus avec la
 commande `feedback`. À synthétiser ici après les premiers testeurs (objectif : 2 ou 3 personnes extérieures).
+
+**Premier retour (Alexandre, 2026-10-07, question jointe sur les chatbots)** : « Il donne un point de vue légal » —
+malgré l'avertissement, la réponse est perçue comme un avis juridique : risque à suivre pour la gouvernance (S9).
+« Je n'ai pas tout compris [du panneau] mais c'est utile » : à rendre lisible pour un non-spécialiste (S8).

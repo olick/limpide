@@ -93,6 +93,11 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Traçabilité** : chaque réponse cite la version et la date de collecte du document
 - Élargissement du corpus (autres fiches CNIL, lignes directrices européennes) maintenant que le pipeline est fiable
 
+- **Back office, v1** (demandé le 2026-10-07) : retours des visiteurs (lecture, statut « traité », export) ;
+  versions des documents et quarantaine (voir une version bloquée, la publier ou la rejeter). Accessible seulement
+  par tunnel SSH (aucune page de connexion exposée) ; réglages (seuil, quota, modèle) en lecture seule : ils changent
+  par Git, donc tracés et, dès la S7, évalués en CI
+
 **Terminé quand** : une source corrompue est bloquée sans impact sur la démo, et l'alerte arrive.
 **ADR** : 008 stratégie de découpage (avec les observations de S1 et S5), 009 batch incrémental plutôt que streaming
 **Blocs RNCP** : BC03, BC01 (qualité et traçabilité)
@@ -133,6 +138,8 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Questions réelles des visiteurs** (formulaire de retours, avec leur accord) : source de questions écrites par
   d'autres que l'auteur pour le jeu d'évaluation ; un retour « réponse fausse » devient un cas de test
 
+- **Back office, v2** : transformer un retour de visiteur en cas de test ; résultats d'évaluation par version
+
 **Terminé quand** : une modification du prompt qui dégrade les scores est bloquée automatiquement.
 **ADR** : 013 métriques et seuils d'évaluation
 **Blocs RNCP** : BC04
@@ -148,6 +155,14 @@ Détail : [`semaine-01.md`](semaine-01.md)
 
 - **Données des visiteurs** : revoir la politique des retours (contenu, durée, information), à intégrer au registre
   des traitements de la S9
+
+- **Suivi en direct dans l'interface** (demandé le 2026-10-07) : chaque étape affichée au fur et à mesure
+  (vectorisation, recherche, seuil, génération, contrôles), réponse affichée en continu (streaming) ; mêmes mesures
+  que les traces OpenTelemetry. Les citations ne se vérifient qu'une fois la réponse complète : l'afficher
+  (« vérification des citations… »). Panneau « sous le capot » expliqué pour un non-spécialiste (retour de testeur :
+  « je n'ai pas tout compris »)
+- **Back office, v3** : tableaux de bord — coût par jour et par modèle, quota consommé, garde-fous déclenchés,
+  taux de « je ne sais pas » (dérive), latences ; authentification Entra ID une fois sur Azure
 
 **Terminé quand** : pour n'importe quelle requête de la démo, on retrouve sa trace, son coût et ses garde-fous.
 **Blocs RNCP** : BC04, BC02 (sécurité, FinOps)
@@ -206,7 +221,8 @@ Rattrapage du retard accumulé, finitions, préparation d'un support de soutenan
 ## Risques du planning
 
 - **Le temps disponible** : la mission client passe en premier. En cas de retard, sacrifier dans cet ordre :
-  la recherche hybride (S2), l'élargissement du corpus (S5), les garde-fous v2 (S8). Ne jamais sacrifier
+  la recherche hybride (S2), l'élargissement du corpus (S5), les garde-fous v2 (S8), puis reporter en S10 le
+  suivi en direct et les tableaux de bord du back office (S8). Ne jamais sacrifier
   l'évaluation (S7) : c'est ce qui distingue le projet.
 - **Airflow et Terraform** sont nouveaux : S4 et S6 sont les semaines les plus susceptibles de déborder. La S10 est là pour ça.
 - **Le coût Azure** : fixer une alerte de budget dès la S3 et détruire la préproduction quand elle ne sert pas.

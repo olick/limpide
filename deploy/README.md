@@ -138,7 +138,10 @@ limpide run --rm ingestion feedback        # Markdown, les plus récents d'abord
 ## Mettre à jour l'application
 
 ```bash
-git pull && limpide up -d --build --wait web
+git pull
+limpide --profile outils build ingestion     # image de la console (sinon elle garde l'ancienne version du code)
+limpide up -d --build --wait web             # l'application (coupure de quelques secondes)
+# puis appliquer les nouveaux scripts de db/init/ s'il y en a (voir « Évolutions du schéma »)
 ```
 
 ## Test en local de la configuration de production

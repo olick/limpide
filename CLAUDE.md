@@ -110,7 +110,12 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 | Marge | S10 | Rattrapage, finitions, soutenance |
 
 En cas de retard, sacrifier dans cet ordre : recherche hybride (S2), élargissement du corpus (S5),
-garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
+garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les tableaux de bord du back office (S8).
+Ne jamais sacrifier l'évaluation (S7).
+
+Ajouts au plan (demandés le 2026-10-07, détail dans `docs/plan/plan-global.md`) : **back office** en trois temps
+(S5 : retours et quarantaine, accès par tunnel SSH seulement, réglages en lecture seule car modifiés par Git ;
+S7 : retour → cas de test ; S8 : tableaux de bord), **suivi en direct** des étapes et réponse en streaming (S8).
 
 **Phase 1 terminée (2026-10-07)** : démo publique sur https://www.limpide-ia.fr. Bilan : `docs/plan/bilan-phase-1.md`.
 **Prochaine : S4** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
