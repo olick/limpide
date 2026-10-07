@@ -1,0 +1,109 @@
+@using Limpide.Core.Answering
+@using Limpide.Core.Feedback
+@using Limpide.Core.Protection
+@using Limpide.Infrastructure.Storage
+@inject FeedbackStore Store
+@inject ILogger<FeedbackForm> Logger
+
+<section class="feedback" aria-labelledby="feedback-title">
+    <h2 id="feedback-title">Votre avis <span class="label">facultatif, chaque question l'est aussi</span></h2>
+
+    @if (sent)
+    {
+        <p class="ok" role="status">Merci : votre retour est enregistré.</p>
+    }
+    else
+    {
+        <form @onsubmit="SendAsync">
+            <label for="fb-understood">Qu'avez-vous compris de ce que fait Limpide ?</label>
+            <textarea id="fb-understood" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="understood"></textarea>
+
+            <label for="fb-misleading">Une réponse vous a-t-elle paru fausse ou trompeuse ? Laquelle, et pourquoi ?</label>
+            <textarea id="fb-misleading" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="misleading"></textarea>
+
+            <label for="fb-under-the-hood">Le panneau « sous le capot » vous a-t-il servi à quelque chose ?</label>
+            <textarea id="fb-under-the-hood" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="underTheHood"></textarea>
+
+            @if (LastResult is not null)
+            {
+                <label class="checkbox">
+                    <input type="checkbox" @bind="attachLastAnswer" disabled="@sending" />
+                    Joindre ma dernière question et la réponse obtenue (« @Shorten(LastResult.Question, 80) »)
+                </label>
+            }
+            else
+            {
+                <p class="hint">Après avoir posé une question, vous pourrez la joindre à votre avis.</p>
+            }
+
+            <p class="privacy">
+                Vos réponses servent à améliorer Limpide et à constituer ses questions de test. Elles sont conservées
+                12 mois, sans adresse IP ni identifiant ; votre question n'est jointe que si vous cochez la case.
+                N'y écrivez pas de données personnelles.
+            </p>
+
+            @if (error is not null)
+            {
+                <p class="error" role="alert">@error</p>
+            }
+
+            <button type="submit" disabled="@sending">@(sending ? "Envoi…" : "Envoyer mon avis")</button>
+        </form>
+    }
+</section>
+
+@code {
+    /// <summary>Dernière réponse affichée : proposée en pièce jointe, avec l'accord du visiteur.</summary>
+    [Parameter]
+    public AnswerResult? LastResult { get; set; }
+
+    [CascadingParameter(Name = "ClientAddress")]
+    private string? ClientAddress { get; set; }
+
+    /// <summary>Anti-spam : quota propre aux retours, distinct de celui des questions.</summary>
+    [Inject(Key = "feedback")]
+    private QuestionQuota Quota { get; set; } = default!;
+
+    private string? understood;
+    private string? misleading;
+    private string? underTheHood;
+    private bool attachLastAnswer;
+    private bool sending;
+    private bool sent;
+    private string? error;
+
+    private async Task SendAsync()
+    {
+        error = null;
+        var feedback = VisitorFeedback.From(understood, misleading, underTheHood, attachLastAnswer ? LastResult : null);
+        if (feedback is null)
+        {
+            error = "Répondez à au moins une des trois questions.";
+            return;
+        }
+
+        if (!Quota.TryConsume(ClientAddress ?? "inconnue").Allowed)
+        {
+            error = "Trop d'envois en peu de temps : réessayez plus tard.";
+            return;
+        }
+
+        sending = true;
+        try
+        {
+            await Store.SaveAsync(feedback, CancellationToken.None);
+            sent = true;
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            Logger.LogError(ex, "Échec de l'enregistrement d'un retour");
+            error = "Votre retour n'a pas pu être enregistré. Réessayez dans un instant.";
+        }
+        finally
+        {
+            sending = false;
+        }
+    }
+
+    private static string Shorten(string text, int max) => text.Length <= max ? text : text[..(max - 1)] + "…";
+}

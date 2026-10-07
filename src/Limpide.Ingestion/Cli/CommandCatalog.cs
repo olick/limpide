@@ -21,6 +21,7 @@ public static class CommandCatalog
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),
         new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
         new("evaluate-answers", "evaluate-answers", "pose tout le jeu de questions (recherche + Mistral), rapport dans eval/results/", Search),
+        new("feedback", "feedback", "affiche les retours des visiteurs (Markdown, redirigeable vers un fichier)", Search),
         new("help", "help", "affiche cette aide", Session),
         new("exit", "exit", "quitte (aussi : quit, Ctrl+D)", Session),
     ];

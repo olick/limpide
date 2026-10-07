@@ -131,8 +131,19 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   disque sauvegardé par OVH en plus), HTTPS Let's Encrypt par Caddy (`SITE_ADDRESS=www.limpide-ia.fr`, 2026-10-07).
   Domaine nu `limpide-ia.fr` : encore la redirection web d'OVH (pas de HTTPS) ; à passer en A vers le VPS.
 
-- [ ] Session 4 : protéger la démo publique (limite par IP, plafond de dépenses) — **prochaine tâche**
-- [ ] Session 5 : README et bilan de la phase 1
+- [ ] Session 4 : quota en production (2026-10-07) — `QuestionQuota` (Core) : 10 questions/h par IP, 60/jour au total
+  (≈ 9 €/mois max avec Medium, sous le plafond Mistral de 10 €), appliqué dans `Home.razor` avant l'appel au modèle ;
+  IP relevée dans `App.razor` (seule requête HTTP de la visite), transmise en paramètre du composant racine, non
+  journalisée. Vérifié : Caddy écarte un `X-Forwarded-For` forgé, Docker transmet l'IP publique réelle, et Docker
+  contourne `ufw` pour les ports publiés. **Reste** : test dans le navigateur (message à la 11e question), alerte à 50 %
+  dans la console Mistral (Alexandre), anti-bot (proposé : reporter en S8), domaine nu (`limpide-ia.fr` → A du VPS).
+  Chaque déploiement de `web` coupe le site quelques secondes (502 pendant le redémarrage).
+- [ ] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
+  limites) ; bilan `docs/plan/bilan-phase-1.md` (limites de la V1 = programme de la phase 2). **Reste (Alexandre)** :
+  contacter Jedha, faire tester la démo par 2 ou 3 personnes et noter leurs retours dans le bilan.
+  Formulaire de retours ajouté (`FeedbackForm.razor`, table `feedback` via `db/init/002_feedback.sql`, `FeedbackStore`,
+  commande `feedback`) : 3 questions facultatives, question jointe seulement si le visiteur coche la case, aucune IP,
+  conservation 12 mois (purge à chaque envoi), 5 envois/h par visiteur (quota à clé `"feedback"`).
 
 **S2 terminée** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
 

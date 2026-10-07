@@ -233,6 +233,41 @@ details.engine h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
 .passages td:nth-child(4) { font-variant-numeric: tabular-nums; }
 .passages tr.cited td { font-weight: 600; }
 
+/* Formulaire de retours */
+.feedback {
+    margin-top: 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.25rem;
+}
+
+.feedback label { display: block; font-weight: 600; font-size: 0.92rem; margin: 0.8rem 0 0.3rem; }
+.feedback label.checkbox { font-weight: 400; display: flex; gap: 0.5rem; align-items: baseline; }
+
+.feedback textarea {
+    width: 100%;
+    resize: vertical;
+    font: inherit;
+    color: inherit;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.5rem 0.7rem;
+}
+
+.feedback .hint { font-size: 0.85rem; color: var(--muted); margin: 0.8rem 0 0; }
+.feedback .privacy { font-size: 0.82rem; color: var(--muted); margin: 0.9rem 0; }
+
+.feedback button {
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 0.45rem 1rem;
+    font-weight: 600;
+}
+
 /* Pied de page */
 .site-footer { padding-block: 1rem 2rem; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--border); }
 

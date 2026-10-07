@@ -56,6 +56,9 @@ Détail : [`semaine-01.md`](semaine-01.md)
   du LLM, protection anti-bot, longueur de question limitée
 - README avec lien vers la démo et captures
 
+- **Formulaire de retours** en bas de page (ajouté en cours de S3) : trois questions facultatives, dernière question
+  jointe seulement avec l'accord du visiteur, aucune adresse IP, conservation 12 mois, anti-spam ; commande `feedback`
+
 **Terminé quand** : une personne extérieure peut utiliser la démo, et un abus ne peut pas dépasser le budget fixé.
 **ADR** : 006 hébergement de la démo (coût, simplicité, souveraineté)
 **Blocs RNCP** : BC02 (amorce)
@@ -127,6 +130,9 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Versionnement** de ce qui influence la qualité : prompt, modèle, modèle d'embedding, jeu d'évaluation
 - Page publique des résultats d'évaluation, par version
 
+- **Questions réelles des visiteurs** (formulaire de retours, avec leur accord) : source de questions écrites par
+  d'autres que l'auteur pour le jeu d'évaluation ; un retour « réponse fausse » devient un cas de test
+
 **Terminé quand** : une modification du prompt qui dégrade les scores est bloquée automatiquement.
 **ADR** : 013 métriques et seuils d'évaluation
 **Blocs RNCP** : BC04
@@ -139,6 +145,9 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Garde-fous v2** : détection d'injection de prompt, filtrage des sorties, journalisation des refus
 - **Sécurité** : revue des accès, rotation des secrets, analyse des images de conteneurs
 - **Surveillance de la dérive** : suivi dans le temps du taux de « je ne sais pas » et des scores de recherche
+
+- **Données des visiteurs** : revoir la politique des retours (contenu, durée, information), à intégrer au registre
+  des traitements de la S9
 
 **Terminé quand** : pour n'importe quelle requête de la démo, on retrouve sa trace, son coût et ses garde-fous.
 **Blocs RNCP** : BC04, BC02 (sécurité, FinOps)

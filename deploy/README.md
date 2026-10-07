@@ -105,6 +105,25 @@ Le domaine nu `limpide-ia.fr` pointe encore sur la redirection web d'OVH (213.18
 en HTTPS. Pour le servir aussi : remplacer cette redirection par une entrée A vers `57.129.175.88`, puis
 `SITE_ADDRESS=www.limpide-ia.fr, limpide-ia.fr`.
 
+## Évolutions du schéma (en attendant l'outil de migrations, S5)
+
+Les scripts de `db/init/` ne s'exécutent qu'au premier démarrage d'une base vide. Sur la base de production
+existante, appliquer à la main chaque nouveau script (tous sont rejouables sans risque) :
+
+```bash
+limpide exec -T postgres psql -U rag -d rag -v ON_ERROR_STOP=1 < db/init/002_feedback.sql   # retours des visiteurs
+```
+
+## Retours des visiteurs
+
+Formulaire en bas de page : trois questions facultatives, dernière question et réponse jointes seulement avec
+l'accord du visiteur (case décochée par défaut), aucune adresse IP, conservation 12 mois (purge à chaque envoi),
+5 envois par heure et par visiteur. Lecture :
+
+```bash
+limpide run --rm ingestion feedback        # Markdown, les plus récents d'abord
+```
+
 ## Protections de la démo publique (S3, session 4)
 
 - **Quota de questions** (`Protection` dans `src/Limpide.Web/appsettings.json`) : 10 par heure et par adresse IP,
