@@ -112,7 +112,12 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 En cas de retard, sacrifier dans cet ordre : recherche hybride (S2), élargissement du corpus (S5),
 garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
 
-**Semaine en cours : S3** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
+**Phase 1 terminée (2026-10-07)** : démo publique sur https://www.limpide-ia.fr. Bilan : `docs/plan/bilan-phase-1.md`.
+**Prochaine : S4** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
+En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
+vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
+
+**S3 terminée** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
 
 - [x] Session 1 : ADR-006 accepté — **OVHcloud VPS-1** (2 vCores, 4 Go, ≈ 3,81 € HT/mois, France) + Docker Compose,
   Ollama compris (≈ 2,3 Go utilisés sur 4) ; VPS-2 en rupture. Azure ≈ 10 fois plus cher pour un service toujours
@@ -131,14 +136,14 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   disque sauvegardé par OVH en plus), HTTPS Let's Encrypt par Caddy (`SITE_ADDRESS=www.limpide-ia.fr`, 2026-10-07).
   Domaine nu `limpide-ia.fr` : encore la redirection web d'OVH (pas de HTTPS) ; à passer en A vers le VPS.
 
-- [ ] Session 4 : quota en production (2026-10-07) — `QuestionQuota` (Core) : 10 questions/h par IP, 60/jour au total
+- [x] Session 4 : quota en production (2026-10-07) — `QuestionQuota` (Core) : 10 questions/h par IP, 60/jour au total
   (≈ 9 €/mois max avec Medium, sous le plafond Mistral de 10 €), appliqué dans `Home.razor` avant l'appel au modèle ;
   IP relevée dans `App.razor` (seule requête HTTP de la visite), transmise en paramètre du composant racine, non
   journalisée. Vérifié : Caddy écarte un `X-Forwarded-For` forgé, Docker transmet l'IP publique réelle, et Docker
   contourne `ufw` pour les ports publiés. **Reste** : test dans le navigateur (message à la 11e question), alerte à 50 %
   dans la console Mistral (Alexandre), anti-bot (proposé : reporter en S8), domaine nu (`limpide-ia.fr` → A du VPS).
   Chaque déploiement de `web` coupe le site quelques secondes (502 pendant le redémarrage).
-- [ ] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
+- [x] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
   limites) ; bilan `docs/plan/bilan-phase-1.md` (limites de la V1 = programme de la phase 2). **Reste (Alexandre)** :
   contacter Jedha, faire tester la démo par 2 ou 3 personnes et noter leurs retours dans le bilan.
   Formulaire de retours ajouté (`FeedbackForm.razor`, table `feedback` via `db/init/002_feedback.sql`, `FeedbackStore`,
