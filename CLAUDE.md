@@ -124,9 +124,14 @@ garde-fous v2 (S8). Ne jamais sacrifier l'évaluation (S7).
   n'inclut pas le paquet des fichiers Blazor (le SDK ne l'ajoute qu'en voyant les .razor). Corrigé (publication sans
   `--no-restore`) et verrouillé : l'image ne se construit pas si `blazor.web.js` manque. Leçon : tester dans un navigateur.
   Procédure : `deploy/README.md`.
-- [ ] Session 3 : déployer sur le VPS (57.129.175.88, utilisateur `debian`, connexion par clé OK) — **prochaine tâche**
+- [x] Session 3 : **démo en ligne sur https://www.limpide-ia.fr** (VPS 57.129.175.88 ; testée par Alexandre le 2026-10-06). Fait : mises à jour
+  + `unattended-upgrades`, SSH par clé seule (`/etc/ssh/sshd_config.d/00-limpide.conf`, pas de root), pare-feu `ufw`
+  (22, 80, 443), Docker, dépôt cloné dans `~/limpide`, `.env.prod`, base restaurée (691/691), recherche 8/10 sur le
+  serveur, sauvegarde quotidienne (`deploy/backup-db.sh`, minuteur systemd 3 h 15 UTC, `~/backups`, 7 jours ;
+  disque sauvegardé par OVH en plus), HTTPS Let's Encrypt par Caddy (`SITE_ADDRESS=www.limpide-ia.fr`, 2026-10-07).
+  Domaine nu `limpide-ia.fr` : encore la redirection web d'OVH (pas de HTTPS) ; à passer en A vers le VPS.
 
-- [ ] Session 4 : protéger la démo publique (limite par IP, plafond de dépenses)
+- [ ] Session 4 : protéger la démo publique (limite par IP, plafond de dépenses) — **prochaine tâche**
 - [ ] Session 5 : README et bilan de la phase 1
 
 **S2 terminée** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
@@ -192,8 +197,8 @@ VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONME
 Choix de la S3 :
 
 - VPS OVHcloud VPS-1 (2 vCores, 3,7 Go, Debian 13), IP 57.129.175.88, utilisateur `debian`, connexion par clé ;
-  mot de passe changé par Alexandre (jamais transmis). Domaine : choix en cours (`limpide-ia.fr` suggéré, libre au
-  2026-10-06 ; `limpide.fr/.eu/.io/.app` déjà pris par un même titulaire).
+  mot de passe changé par Alexandre (jamais transmis). Domaine **`limpide-ia.fr`** (« ia », pas « ai »), démo sur
+  `www` ; `limpide.fr/.eu/.io/.app` déjà pris par un même titulaire.
 - Données transférées par `pg_dump`/`pg_restore` (3,7 Mo) plutôt que recalculées sur le VPS (30 à 40 min).
   **Après une restauration, redémarrer `web`** : `--clean` recrée pgvector, le type `vector` change d'identifiant, et
   Npgsql garde l'ancien en cache (« cache lookup failed for type 16386 », vu en production le 2026-10-06).

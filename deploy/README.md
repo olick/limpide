@@ -90,6 +90,21 @@ limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner
 limpide restart web
 ```
 
+## Nom de domaine et HTTPS
+
+Démo : **https://www.limpide-ia.fr** (zone DNS chez OVH : `www` → A `57.129.175.88`, aucune entrée AAAA).
+`SITE_ADDRESS=www.limpide-ia.fr` dans `.env.prod` ; Caddy obtient le certificat Let's Encrypt au démarrage
+et le renouvelle seul ; HTTP redirige vers HTTPS.
+
+```bash
+limpide up -d caddy        # après toute modification de SITE_ADDRESS (restart ne relit pas .env.prod)
+limpide logs caddy | grep -o '"msg":"certificate[^"]*"'
+```
+
+Le domaine nu `limpide-ia.fr` pointe encore sur la redirection web d'OVH (213.186.33.5), qui ne sait pas répondre
+en HTTPS. Pour le servir aussi : remplacer cette redirection par une entrée A vers `57.129.175.88`, puis
+`SITE_ADDRESS=www.limpide-ia.fr, limpide-ia.fr`.
+
 ## Mettre à jour l'application
 
 ```bash

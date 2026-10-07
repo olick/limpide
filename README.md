@@ -1,5 +1,7 @@
 # Limpide
 
+**Démo : [https://www.limpide-ia.fr](https://www.limpide-ia.fr)**
+
 Assistant RAG « transparent » sur les textes publics encadrant l'IA (AI Act, recommandations CNIL).
 Chaque réponse expose ce qui se passe sous le capot : sources citées, scores, stratégie de recherche,
 latence, tokens, coût, garde-fous déclenchés. Une page publique affiche les résultats d'évaluation.
