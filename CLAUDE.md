@@ -63,6 +63,8 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - ADR-004 : génération par Mistral (API, inférence UE), **Medium 3.5** retenu après mesure et relecture : Small
   déforme des textes sans que rien ne le détecte ; le défaut de Medium (trancher la situation) a été corrigé par les
   consignes `answer/3` et est surveillé par le garde-fou `qualification-juridique`.
+- ADR-007 : Airflow orchestre les commandes .NET conteneurisées (`DockerOperator` en local, socket Docker = choix de
+  développement ; service cloud en S6), aucun code métier en Python ; étapes en `all_done`, tâche `bilan` pour l'alerte.
 - Licence du dépôt : Apache 2.0.
 - Batch incrémental, pas de streaming : les sources changent rarement. Pas de Kafka.
 
@@ -119,7 +121,7 @@ S7 : retour → cas de test ; S8 : tableaux de bord), **suivi en direct** des é
 
 **Phase 1 terminée (2026-10-07)** : démo publique sur https://www.limpide-ia.fr. Bilan : `docs/plan/bilan-phase-1.md`.
 
-**Semaine en cours : S4** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
+**S4 terminée** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
 Détail et constats : `pipelines/airflow/README.md`.
 
 - [x] Session 1 : Airflow 3.3.1 en local (compose officiel dans `pipelines/airflow/`, ports sur 127.0.0.1, exemples
@@ -134,9 +136,18 @@ Détail et constats : `pipelines/airflow/README.md`.
   vérifié). Vérifié le 2026-10-08 sur une vraie nouvelle version CNIL : passages et vecteurs identiques au bit près à
   ceux d'une ingestion manuelle. Sortir le DAG de pause a lancé aussitôt la dernière échéance manquée, malgré
   `catchup=False`. Règle locale : `psql` sur la base locale autorisé sans confirmation (`.claude/settings.local.json`).
-- [ ] Session 4 : alertes, trois pannes. Constats à traiter : une source en échec bloque toute la chaîne ; un document
-  disparaît de la recherche entre `fetch` et la fin d'`embed` (version courante sans passages vectorisés).
-- [ ] Session 5 : ADR-007, schéma du pipeline.
+- [x] Session 4 : étapes en `all_done` + tâche `bilan` (une alerte Discord par exécution, avec la cause de chaque
+  échec ; webhook dans `pipelines/airflow/.env`, variable `discord_webhook_secret`) ; `IngestionCommand` fait des
+  lignes d'erreur de la console le message d'échec. Trois pannes testées le 2026-10-08 (source en 404, Ollama arrêté,
+  base arrêtée) : relances, alerte, réparation sans doublon. Constat clé pour la S5 : pendant la panne d'Ollama, les
+  fiches CNIL ont été **absentes de la recherche ≈ 17 min** (version courante dès `fetch`). Fausses versions CNIL :
+  3 dans la journée. Pylance strict : `pipelines/airflow/.venv` (Airflow 3.3.1) + `pyrightconfig.json`, 0 erreur.
+- [x] Session 5 : ADR-007 (`docs/adr/007-airflow-taches-conteneurisees.md`), schéma `docs/pipeline-ingestion.md`.
+  **Reste (Alexandre)** : exercices dans l'interface (onglet XCom, « Réinitialiser » = Clear).
+
+**Prochaine : S5** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations ; Alexandre veut la faire en entier
+malgré la charge (élargissement du corpus en dernier). Déployer en production avec la première migration :
+correctif GSS de Npgsql et résumés JSON pas encore en ligne.
 
 En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
 vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).

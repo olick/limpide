@@ -1,0 +1,15 @@
+{
+  // Analyse des DAG Airflow (Pylance dans VS Code, ou `pipelines/airflow/.venv/bin/pyright`).
+  // Environnement : pipelines/airflow/.venv, mêmes versions qu'Airflow en conteneur (voir pipelines/airflow/README.md).
+  "include": ["pipelines"],
+  "exclude": ["pipelines/airflow/.venv", "pipelines/airflow/logs"],
+  "venvPath": "pipelines/airflow",
+  "venv": ".venv",
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "strict",
+  // Les modules (providers) d'Airflow ne publient pas de fichiers de types : Pyright lit leur code source à la place.
+  "reportMissingTypeStubs": false,
+  // Le contexte d'exécution d'Airflow déclare toutes ses clés facultatives (ti, run_id...), alors qu'elles sont
+  // toujours présentes pendant une tâche : context["ti"] est l'écriture documentée.
+  "reportTypedDictNotRequiredAccess": false
+}

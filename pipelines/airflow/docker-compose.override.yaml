@@ -15,3 +15,6 @@ services:
       AIRFLOW_VAR_LIMPIDE_DB_PASSWORD: "${LIMPIDE_DB_PASSWORD:?LIMPIDE_DB_PASSWORD manquant dans .env}"
       # Chemin, sur le poste, du répertoire data/ du dépôt : monté dans les conteneurs d'ingestion.
       AIRFLOW_VAR_LIMPIDE_DATA_DIR: "${LIMPIDE_DATA_DIR:?LIMPIDE_DATA_DIR manquant dans .env}"
+      # Alertes d'échec (tâche bilan du DAG ingestion) : adresse du webhook Discord, qui contient un jeton.
+      # Facultative : sans elle, l'échec est seulement visible dans l'interface.
+      AIRFLOW_VAR_DISCORD_WEBHOOK_SECRET: "${DISCORD_WEBHOOK_URL:-}"

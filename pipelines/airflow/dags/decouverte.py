@@ -13,7 +13,7 @@ import datetime
 
 import pendulum
 from airflow.providers.standard.operators.bash import BashOperator
-from airflow.sdk import DAG, Param
+from airflow.sdk import DAG, Param, chain
 
 with DAG(
     dag_id="decouverte",
@@ -21,7 +21,8 @@ with DAG(
     schedule=None,  # pas de planification : déclenchement à la main uniquement
     start_date=pendulum.datetime(2026, 10, 1, tz="UTC"),
     catchup=False,
-    params={"reussir": Param(False, type="boolean", description="Faire réussir la tâche echec_volontaire")},
+    # Un dict, converti par le DAG en ParamsDict ; les déclarations de types d'Airflow n'annoncent que ParamsDict.
+    params={"reussir": Param(False, type="boolean", description="Faire réussir la tâche echec_volontaire")},  # pyright: ignore[reportArgumentType]
     default_args={"retries": 2, "retry_delay": datetime.timedelta(seconds=10)},
     tags=["apprentissage"],
 ) as dag:
@@ -43,5 +44,6 @@ with DAG(
         ),
     )
 
-    # L'ordre des tâches : c'est tout ce que décrit un DAG.
-    bonjour >> date >> echec
+    # L'ordre des tâches : c'est tout ce que décrit un DAG. Équivaut à bonjour >> date >> echec (écriture courante,
+    # mais que Pylance signale comme une expression inutilisée).
+    chain(bonjour, date, echec)

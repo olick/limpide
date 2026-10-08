@@ -39,6 +39,19 @@ parce que l'interface n'est joignable que depuis le poste).
 | `airflow-triggerer` | tâches différées (attentes asynchrones) |
 | `postgres`, `redis` | base d'Airflow (historique, états), file de messages des workers |
 
+## Vérifier les DAG dans l'éditeur (Pylance)
+
+Airflow n'est installé que dans les conteneurs : sans environnement local, Pylance ne connaît pas `airflow` et
+signale tout. Environnement de développement, mêmes versions que les conteneurs (non versionné) :
+
+```bash
+cd pipelines/airflow
+python3 -m venv .venv
+.venv/bin/pip install "apache-airflow==3.3.1" "apache-airflow-providers-docker==4.5.9" pyright \
+  --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.3.1/constraints-3.12.txt"
+.venv/bin/pyright      # depuis la racine du dépôt : mêmes règles que Pylance (pyrightconfig.json, mode strict)
+```
+
 ## Commandes utiles
 
 ```bash
@@ -79,17 +92,54 @@ Après avoir désactivé les DAG d'exemple, la base d'Airflow gardait leur trace
   au même texte : 26 passages identiques (texte, titre, ancre, versions), vecteurs identiques au bit près ; fichiers
   écrits dans `data/` avec l'UID du poste.
 
+## Pannes testées (session 4)
+
+Échecs : `extract`, `chunk` et `embed` tournent même si l'étape précédente a échoué (`trigger_rule="all_done"`) ;
+la tâche `bilan` rassemble les résumés, envoie **une** alerte Discord si une tâche a échoué, et échoue à son tour
+(sinon Airflow marquerait l'exécution réussie, puisque `embed` réussit). Après réparation d'une tâche (« Clear »),
+cocher **Downstream** pour relancer aussi `bilan`.
+
+La **cause** figure dans le log et dans l'alerte. Airflow recopie la sortie du conteneur en INFO, ligne par ligne,
+sans en connaître la gravité ; `IngestionCommand` (un `DockerOperator` à peine étendu) fait donc des lignes d'erreur
+de la console (`fail:`, `Erreur (...)`) le message de l'échec : la ligne ERROR du log dit pourquoi, au lieu de
+`Docker container failed: {'StatusCode': 1}`. Après la dernière tentative, `keep_failure_cause` (*callback* d'échec)
+garde ce message comme XCom, et `bilan` le reprend :
+
+```
+**Limpide : ingestion en échec** (panne-ollama)
+❌ `embed` : Erreur (HttpRequestException) : Name or service not known (ollama:11434)
+✅ `fetch` : {"command":"fetch","exitCode":0,"unchanged":1,"created":2}
+...
+Logs : http://localhost:8080/dags/ingestion/runs/panne-ollama
+```
+
+Délai avant l'alerte : ≈ 10 min par tâche en échec (3 tentatives à 5 min d'écart), voulu : une coupure brève se
+résout souvent d'elle-même. Relancer une exécution sans date logique (déclenchée à la main) : par l'interface ou
+par l'API (`POST /api/v2/dags/ingestion/clearTaskInstances` avec `dag_run_id`) ; `airflow tasks clear` filtre par
+dates et ne la trouve pas.
+
+| Scénario | Comment | Résultat |
+|---|---|---|
+| Source indisponible | `airflow dags trigger ingestion -c '{"corpus": "data/pannes/source-indisponible.json"}'` (un document CNIL en 404) | 2026-10-08 : `fetch` 3 tentatives en échec (`HTTP 404`), les étapes suivantes réussissent, `bilan` en échec, alerte Discord reçue ; base inchangée (aucune trace du document de test) |
+| Ollama arrêté pendant `embed` | `docker compose stop ollama` (racine), puis déclenchement | 2026-10-08 : `fetch` crée 2 versions CNIL, `extract` et `chunk` réussissent, `embed` 3 tentatives en échec (`Name or service not known (ollama:11434)`), alerte avec la cause ; **fiches CNIL absentes de la recherche ≈ 17 min**. Réparation : `docker compose start ollama`, « Clear » d'`embed` avec la suite : 57/57 passages vectorisés, exécution réussie, aucun doublon (691 passages courants vectorisés) |
+| Base arrêtée | `docker compose stop postgres` (racine), puis déclenchement | 2026-10-08 : les 4 tâches en échec après 3 tentatives (`Erreur (NpgsqlException) : Name or service not known`), **une** alerte avec les 4 causes, ≈ 31 min après le début. Réparation : `docker compose start postgres`, « Réinitialiser » l'exécution (tâches en échec) : succès, aucun doublon (ni passage, ni seconde version courante) |
+
+`data/pannes/` (non versionné) : `source-indisponible.json` = le format de `corpus.json` avec un seul document,
+`"url": "https://www.cnil.fr/fr/limpide-test-page-inexistante"`.
+
 ## Constats (matière de l'ADR-007 et de la S5)
 
 - **`catchup=False` lance quand même la dernière échéance manquée** : sortir le DAG de pause un jeudi a lancé
   aussitôt l'exécution du lundi précédent. Sans conséquence ici (commandes idempotentes), mais à savoir : désactiver
   la pause, c'est potentiellement lancer une ingestion.
 
-- **Une source qui échoue arrête la chaîne** : `fetch` rend un code non nul si un seul document échoue ; `extract`,
-  `chunk` et `embed` ne tournent pas, même pour les documents collectés sans erreur. À trancher en session 4.
+- **Une source qui échouait arrêtait la chaîne** (`extract`, `chunk`, `embed` en `upstream_failed`) : corrigé en
+  session 4 (`all_done` + tâche `bilan`).
 - **Un document disparaît de la recherche entre `fetch` et la fin d'`embed`** : `fetch` rend la nouvelle version
   courante tout de suite, et la recherche ne lit que les passages vectorisés des versions courantes. Si `embed`
   échoue (Ollama arrêté), le document reste absent jusqu'à la réparation. Réponse prévue en S5 : publier une version
   seulement quand ses passages sont prêts.
 - **Fausses nouvelles versions CNIL** (déjà connues) : le 2026-10-08, `fetch` a créé 2 versions CNIL dont le texte
-  extrait est identique à l'ancien (mêmes 26 et 31 passages) ; ≈ 1 min de vectorisation chaque semaine. S5.
+  extrait est identique à l'ancien (mêmes 26 et 31 passages), et ce **trois fois dans la journée** (8 h, 16 h 30,
+  19 h) : le HTML change plusieurs fois par jour. ≈ 1 min de vectorisation inutile à chaque exécution. S5.
+- **Interface en français** : « Clear » s'appelle « Réinitialiser » (raccourci Maj + C).
