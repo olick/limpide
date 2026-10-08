@@ -14,3 +14,9 @@ data/
 # Secrets de la démo en ligne (seuls les modèles .example sont versionnés)
 .env.*
 !.env*.example
+
+# Airflow local (pipelines/airflow) : journaux et configuration générés
+pipelines/airflow/logs/
+pipelines/airflow/config/
+pipelines/airflow/plugins/
+__pycache__/
