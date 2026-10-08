@@ -2,6 +2,7 @@ using Limpide.Core.Chunking;
 using Limpide.Core.Corpus;
 using Limpide.Core.Extraction;
 using Limpide.Infrastructure.Storage;
+using Limpide.Ingestion.Cli;
 using Microsoft.Extensions.Logging;
 
 namespace Limpide.Ingestion.Chunking;
@@ -14,6 +15,7 @@ public sealed class ChunkCommand(
     DocumentVersionStore versions,
     ChunkStore chunks,
     IngestionOptions options,
+    CommandSummary summary,
     ILogger<ChunkCommand> logger)
 {
     public async Task<int> RunAsync(CancellationToken ct)
@@ -30,6 +32,7 @@ public sealed class ChunkCommand(
             catch (Exception ex) when (ex is InvalidDataException or IOException)
             {
                 failures++;
+                summary.Add("failed");
                 logger.LogError("{Source} / {Title} : échec — {Message}", version.SourceName, version.DocumentTitle, ex.Message);
             }
         }
@@ -45,6 +48,7 @@ public sealed class ChunkCommand(
 
         if (await chunks.IsUpToDateAsync(version.Id, extracted.Extractor, chunker.Version, ct))
         {
+            summary.Add("unchanged");
             logger.LogInformation("{Source} / {Title} : inchangé ({Chunker})", version.SourceName, version.DocumentTitle, chunker.Version);
             return;
         }
@@ -54,6 +58,8 @@ public sealed class ChunkCommand(
             throw new InvalidDataException("aucun passage produit");
 
         await chunks.ReplaceAsync(version.Id, passages, extracted.Extractor, chunker.Version, ct);
+        summary.Add("chunked");
+        summary.Add("passages", passages.Count);
 
         var lengths = passages.Select(p => p.Content.Length).Order().ToList();
         logger.LogInformation(

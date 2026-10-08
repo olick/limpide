@@ -18,10 +18,19 @@ public static class CommandRunner
 {
     public static async Task<int> RunAsync(CommandLine line, CancellationToken ct)
     {
-        using var host = Build(line.Settings);
-        var services = host.Services;
+        var summary = new CommandSummary(line.Name.ToLowerInvariant());
+        int code;
+        using (var host = Build(line.Settings, summary))
+            code = await RunAsync(line, host.Services, ct);
 
-        return line.Name.ToLowerInvariant() switch
+        // Après la fermeture de l'hôte, qui vide les journaux : le résumé est bien la dernière ligne (lue par Airflow).
+        if (!summary.IsEmpty)
+            Console.WriteLine(summary.ToJson(code));
+        return code;
+    }
+
+    private static async Task<int> RunAsync(CommandLine line, IServiceProvider services, CancellationToken ct) =>
+        line.Name.ToLowerInvariant() switch
         {
             "fetch" => await services.GetRequiredService<FetchCommand>().RunAsync(ct),
             "extract" => await services.GetRequiredService<ExtractCommand>().RunAsync(ct),
@@ -34,9 +43,8 @@ public static class CommandRunner
             "evaluate-answers" => await services.GetRequiredService<EvaluateAnswersCommand>().RunAsync(ct),
             _ => throw new ArgumentException($"commande inconnue : {line.Name}"),
         };
-    }
 
-    private static IHost Build(string[] settings)
+    private static IHost Build(string[] settings, CommandSummary summary)
     {
         var builder = Host.CreateApplicationBuilder(new HostApplicationBuilderSettings
         {
@@ -48,6 +56,7 @@ public static class CommandRunner
         builder.Configuration.AddLimpideSharedSettings();
         var options = builder.Configuration.GetSection("Ingestion").Get<IngestionOptions>() ?? new IngestionOptions();
         builder.Services.AddSingleton(options);
+        builder.Services.AddSingleton(summary);
         builder.Services.AddLimpideInfrastructure(builder.Configuration);
 
         builder.Services.AddSingleton(_ => FetchCommand.CreateHttpClient(options));

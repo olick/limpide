@@ -1,6 +1,7 @@
 using Limpide.Core.Corpus;
 using Limpide.Core.Extraction;
 using Limpide.Infrastructure.Storage;
+using Limpide.Ingestion.Cli;
 using Microsoft.Extensions.Logging;
 
 namespace Limpide.Ingestion.Extract;
@@ -12,6 +13,7 @@ namespace Limpide.Ingestion.Extract;
 public sealed class ExtractCommand(
     DocumentVersionStore store,
     IngestionOptions options,
+    CommandSummary summary,
     ILogger<ExtractCommand> logger)
 {
     public async Task<int> RunAsync(CancellationToken ct)
@@ -28,6 +30,7 @@ public sealed class ExtractCommand(
             catch (Exception ex) when (ex is InvalidDataException or IOException)
             {
                 failures++;
+                summary.Add("failed");
                 logger.LogError("{Source} / {Title} : échec — {Message}", version.SourceName, version.DocumentTitle, ex.Message);
             }
         }
@@ -46,6 +49,7 @@ public sealed class ExtractCommand(
             var existing = ExtractedDocumentJson.Deserialize(await File.ReadAllTextAsync(outputPath, ct));
             if (existing.Extractor == extractor.Version)
             {
+                summary.Add("unchanged");
                 logger.LogInformation("{Source} / {Title} : inchangé ({Extractor}, {Blocks} blocs)",
                     version.SourceName, version.DocumentTitle, extractor.Version, existing.Blocks.Count);
                 return;
@@ -62,6 +66,7 @@ public sealed class ExtractCommand(
         var tempPath = outputPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, ct);
         File.Move(tempPath, outputPath, overwrite: true);
+        summary.Add("extracted");
 
         logger.LogInformation("{Source} / {Title} : extrait ({Extractor}, {Blocks} blocs, {Chars:N0} caractères)",
             version.SourceName, version.DocumentTitle, extractor.Version, blocks.Count, blocks.Sum(b => b.Text.Length));

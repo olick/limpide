@@ -31,6 +31,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(_ =>
         {
             var dataSource = new NpgsqlDataSourceBuilder(connectionString);
+            // Pas de Kerberos : sans cela, Npgsql tente le chiffrement GSS et les images .NET, sans libgssapi,
+            // écrivent « libgssapi_krb5.so.2: cannot open shared object file » à chaque démarrage.
+            dataSource.ConnectionStringBuilder.GssEncryptionMode = GssEncryptionMode.Disable;
             dataSource.UseVector();
             return dataSource.Build();
         });

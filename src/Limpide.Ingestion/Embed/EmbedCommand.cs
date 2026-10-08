@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Limpide.Infrastructure;
 using Limpide.Infrastructure.Storage;
+using Limpide.Ingestion.Cli;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Logging;
 
@@ -16,11 +17,14 @@ public sealed class EmbedCommand(
     IEmbeddingGenerator<string, Embedding<float>> generator,
     EmbeddingStore store,
     EmbeddingOptions options,
+    CommandSummary summary,
     ILogger<EmbedCommand> logger)
 {
     public async Task<int> RunAsync(CancellationToken ct)
     {
         var total = await store.CountPendingAsync(options.Label, ct);
+        summary.Add("pending", total);
+        summary.Add("embedded", 0);
         if (total == 0)
         {
             logger.LogInformation("Aucun passage à vectoriser ({Model})", options.Label);
@@ -49,6 +53,7 @@ public sealed class EmbedCommand(
 
             firstBatch ??= watch.Elapsed;
             done += batch.Count;
+            summary.Add("embedded", batch.Count);
             characters += batch.Sum(c => c.Content.Length);
             logger.LogInformation("{Done}/{Total} — lot de {Count} en {Seconds:F1} s", done, total, batch.Count, watch.Elapsed.TotalSeconds);
         }

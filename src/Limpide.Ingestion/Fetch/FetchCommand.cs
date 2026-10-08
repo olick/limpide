@@ -1,6 +1,7 @@
 using System.Net;
 using Limpide.Core.Corpus;
 using Limpide.Infrastructure.Storage;
+using Limpide.Ingestion.Cli;
 using Microsoft.Extensions.Logging;
 
 namespace Limpide.Ingestion.Fetch;
@@ -13,6 +14,7 @@ public sealed class FetchCommand(
     HttpClient http,
     DocumentVersionStore store,
     IngestionOptions options,
+    CommandSummary summary,
     ILogger<FetchCommand> logger)
 {
     public async Task<int> RunAsync(CancellationToken ct)
@@ -36,6 +38,7 @@ public sealed class FetchCommand(
                                        && !ct.IsCancellationRequested)
             {
                 failures++;
+                summary.Add("failed");
                 logger.LogError("{Source} / {Title} : échec — {Message}", source.Name, document.Title, ex.Message);
             }
         }
@@ -56,6 +59,13 @@ public sealed class FetchCommand(
         await WriteRawFileAsync(rawPath, content, ct);
 
         var outcome = await store.SaveAsync(source, document, hash, rawPath, ct);
+        summary.Add(outcome switch
+        {
+            VersionOutcome.Unchanged => "unchanged",
+            VersionOutcome.Created => "created",
+            VersionOutcome.Restored => "restored",
+            _ => outcome.ToString(),
+        });
 
         logger.LogInformation("{Source} / {Title} : {Outcome} ({Hash}…, {Size:N0} octets)",
             source.Name, document.Title, Describe(outcome), hash[..12], content.Length);

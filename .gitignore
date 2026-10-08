@@ -20,3 +20,5 @@ pipelines/airflow/logs/
 pipelines/airflow/config/
 pipelines/airflow/plugins/
 __pycache__/
+
+.claude

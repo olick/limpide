@@ -1,0 +1,17 @@
+# Ajouts de Limpide au Docker Compose officiel d'Airflow (fusionné automatiquement par `docker compose`).
+# Valeurs dans .env (non versionné) : DOCKER_GID, LIMPIDE_DATA_DIR, LIMPIDE_DB_PASSWORD.
+services:
+  airflow-worker:
+    # Le worker lance les conteneurs d'ingestion (DockerOperator) : il lui faut le socket Docker du poste.
+    # Choix de DÉVELOPPEMENT : ce socket donne à Airflow le contrôle complet de Docker, donc de la machine
+    # (ADR-007). En production, les tâches seront lancées par un service cloud (S6).
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:?DOCKER_GID manquant dans .env (getent group docker)}"
+    environment:
+      # Variables Airflow lues dans l'environnement (préfixe AIRFLOW_VAR_) : jamais stockées dans la base d'Airflow.
+      # Une variable dont le nom contient « password » est masquée (***) dans les journaux et l'interface.
+      AIRFLOW_VAR_LIMPIDE_DB_PASSWORD: "${LIMPIDE_DB_PASSWORD:?LIMPIDE_DB_PASSWORD manquant dans .env}"
+      # Chemin, sur le poste, du répertoire data/ du dépôt : monté dans les conteneurs d'ingestion.
+      AIRFLOW_VAR_LIMPIDE_DATA_DIR: "${LIMPIDE_DATA_DIR:?LIMPIDE_DATA_DIR manquant dans .env}"

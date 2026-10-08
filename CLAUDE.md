@@ -118,7 +118,26 @@ Ajouts au plan (demandés le 2026-10-07, détail dans `docs/plan/plan-global.md`
 S7 : retour → cas de test ; S8 : tableaux de bord), **suivi en direct** des étapes et réponse en streaming (S8).
 
 **Phase 1 terminée (2026-10-07)** : démo publique sur https://www.limpide-ia.fr. Bilan : `docs/plan/bilan-phase-1.md`.
-**Prochaine : S4** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
+
+**Semaine en cours : S4** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
+Détail et constats : `pipelines/airflow/README.md`.
+
+- [x] Session 1 : Airflow 3.3.1 en local (compose officiel dans `pipelines/airflow/`, ports sur 127.0.0.1, exemples
+  désactivés, `FERNET_KEY`), DAG d'apprentissage `decouverte`. **Reste** : exercices dans l'interface par Alexandre.
+- [x] Session 2 : image `ingestion` (déjà faite en S3) testée par `docker run` sur la pile locale : 4 commandes OK,
+  `fetch` deux fois de suite = inchangé. Ajouts : résumé JSON en dernière ligne de chaque commande (`CommandSummary`,
+  écrit après fermeture de l'hôte pour passer après les journaux) ; chiffrement GSS désactivé dans Npgsql
+  (« libgssapi_krb5.so.2 » écrit sur stderr par les images .NET).
+- [x] Session 3 : DAG `ingestion` (`DockerOperator`, réseau `limpide_default`, `data/` monté, UID du worker), lundi
+  4 h UTC, sans rattrapage, 1 exécution à la fois, 2 relances à 5 min ; ajouts Limpide dans
+  `docker-compose.override.yaml` (socket Docker pour le worker seul, `AIRFLOW_VAR_*` : mot de passe masqué `***`,
+  vérifié). Vérifié le 2026-10-08 sur une vraie nouvelle version CNIL : passages et vecteurs identiques au bit près à
+  ceux d'une ingestion manuelle. Sortir le DAG de pause a lancé aussitôt la dernière échéance manquée, malgré
+  `catchup=False`. Règle locale : `psql` sur la base locale autorisé sans confirmation (`.claude/settings.local.json`).
+- [ ] Session 4 : alertes, trois pannes. Constats à traiter : une source en échec bloque toute la chaîne ; un document
+  disparaît de la recherche entre `fetch` et la fin d'`embed` (version courante sans passages vectorisés).
+- [ ] Session 5 : ADR-007, schéma du pipeline.
+
 En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
 vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
