@@ -90,6 +90,27 @@ limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner
 limpide restart web
 ```
 
+## Mémoire : swap de secours
+
+Le VPS n'avait pas de swap : si la mémoire manque vraiment (par exemple une construction d'image .NET pendant que
+tout tourne), le noyau tue un processus, le plus probablement Ollama (1,4 Go). Ajouté le 2026-10-09 : 2 Go, utilisé
+en dernier recours seulement (`vm.swappiness=10`).
+
+```bash
+# Installation (une fois)
+sudo fallocate -l 2G /swapfile && sudo chmod 600 /swapfile
+sudo mkswap /swapfile && sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+echo 'vm.swappiness=10' | sudo tee /etc/sysctl.d/99-limpide.conf && sudo sysctl -p /etc/sysctl.d/99-limpide.conf
+
+free -m      # lire « available » (mémoire réellement disponible), pas « used »
+```
+
+**Le graphique « RAM » d'OVH compte le cache disque comme de la mémoire utilisée** : il affiche ≈ 100 % alors que
+1,6 Go restent disponibles (2026-10-09 : 2,2 Go utilisés, 1,8 Go de cache, 1,6 Go disponibles, aucun processus tué).
+Linux remplit la mémoire libre avec le cache des fichiers lus (sauvegarde de 3 h 15, mises à jour) et le rend dès
+qu'un programme en a besoin. L'indicateur à surveiller (et à alerter en S8) est la mémoire **disponible**.
+
 ## Nom de domaine et HTTPS
 
 Démo : **https://www.limpide-ia.fr** (zone DNS chez OVH : `www` → A `57.129.175.88`, aucune entrée AAAA).

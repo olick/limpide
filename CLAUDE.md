@@ -105,6 +105,18 @@ Pièges déjà rencontrés :
 Plan global (10 semaines, ADR prévus, correspondance RNCP) : `docs/plan/plan-global.md`.
 Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la semaine en cours.
 
+**Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09) : à la fin de chaque semaine du plan
+(ou d'une étape marquante), **proposer à Alexandre le ou les épisodes suivants** et les ajouter au fichier, à la suite
+des existants (épisodes 1 à 14 = S1 à S4). Mêmes règles que les épisodes déjà écrits :
+
+- ordre chronologique du projet ; un récit par épisode : problème, enjeu, piste essayée, résultat, analyse, décision,
+  leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent / 📚 Tous les épisodes » ;
+- uniquement des faits du projet (ADR, `docs/notes/`, `eval/`, mesures), sources indiquées sous le titre ;
+  limites dites (ex. relecture faite par un modèle) ; rien d'inventé ;
+- public non spécialiste : expliquer chaque terme technique ;
+- mettre à jour le sommaire du fichier ; l'épisode « À vous de le casser » reste le dernier publié de la série
+  initiale : les suivants forment une nouvelle salve (S5 : quarantaine ; S6 : Terraform ; S7 : évaluation en CI…).
+
 | Phase | Semaines | Résultat |
 |---|---|---|
 | 1 — POC de bout en bout | S1 à S3 | Démo publique en ligne (S2 : RAG + interface « sous le capot », S3 : mise en ligne) |
@@ -256,6 +268,8 @@ Choix de la S3 :
 - `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` dans l'image web : l'application voit l'IP du visiteur et le schéma
   HTTPS derrière Caddy (nécessaire à la limite par IP de la session 4).
 - `EmbeddingWarmup` (web) : vectorise une phrase au démarrage pour charger bge-m3 ; `OLLAMA_KEEP_ALIVE=-1` le garde.
+- Swap de 2 Go sur le VPS (`/swapfile`, `vm.swappiness=10`, 2026-10-09) : filet de sécurité (construction d'images
+  sur le serveur pendant que tout tourne). Le graphique RAM d'OVH compte le cache disque : lire `free -m` → available.
 
 Choix de la S2, session 5 :
 

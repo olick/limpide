@@ -152,6 +152,9 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Garde-fous v2** : détection d'injection de prompt, filtrage des sorties, journalisation des refus
 - **Sécurité** : revue des accès, rotation des secrets, analyse des images de conteneurs
 - **Surveillance de la dérive** : suivi dans le temps du taux de « je ne sais pas » et des scores de recherche
+- **Ressources du serveur** : alerter sur la mémoire **disponible** (`MemAvailable`), le swap utilisé et le disque,
+  pas sur la mémoire « utilisée » : le graphique d'OVH affichait 100 % alors que 1,6 Go restaient disponibles
+  (cache disque, 2026-10-09, voir `deploy/README.md`)
 
 - **Données des visiteurs** : revoir la politique des retours (contenu, durée, information), à intégrer au registre
   des traitements de la S9
@@ -188,6 +191,16 @@ Détail : [`semaine-01.md`](semaine-01.md)
 ### S10 · Marge
 
 Rattrapage du retard accumulé, finitions, préparation d'un support de soutenance si la certification se confirme.
+
+**Étape bonus, seulement s'il reste du temps** (demandée le 2026-10-08) : **chaque retour devient une question de test**.
+En S7, la conversion d'un retour en cas de test est manuelle (back office v2). Le bonus l'automatise jusqu'à la
+proposition : à chaque retour accompagné de sa question (avec l'accord du visiteur), un cas de test candidat est préparé
+(question, comportement attendu : répondre, refuser ou ne pas qualifier, passage attendu si on le connaît) et attend
+une validation humaine dans le back office ; validé, il rejoint `eval/questions.json` par Git, donc passe par la CI.
+Jamais d'ajout sans relecture : un cas de test faux fausserait toutes les mesures suivantes.
+Les retours n'alimentent **jamais** le corpus : seulement l'évaluation.
+Lien : le post LinkedIn du jour 10 (`.vscode/linkedin-limpide.md`) annonce « Chaque retour devient une question de
+test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 
 ---
 
