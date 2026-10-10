@@ -175,7 +175,10 @@ entier malgré la charge (élargissement du corpus en dernier).
   quarantined. Nouvelle commande et tâche du DAG `publish`. `VersionStatus.ReadyToEmbed` = `chunked` en attendant
   `validate` (session 2 : passer à `validated`). Vérifié : migration sur copie et base vide (même schéma), cycle
   complet sans fenêtre d'absence, DAG local (2 fausses versions CNIL écartées). Base locale migrée.
-  **Reste : déployer en production** (`migrate` puis web ; correctif GSS et résumés JSON pas encore en ligne).
+  **Déployé en production le 2026-10-10** : sauvegarde, `git pull`, image ingestion, `migrate` (3 versions → published,
+  691 passages, 1 retour conservés), `web` reconstruit (plus d'erreur Kerberos dans ses journaux) ; `postgres` recréé
+  au passage (montage `db/init` retiré), données intactes. Avertissement préexistant : clés DataProtection de `web`
+  non persistées (perdues à chaque recréation du conteneur) — à traiter avec la sécurité (S8).
 
 En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
 vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
