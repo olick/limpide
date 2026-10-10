@@ -43,7 +43,8 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
   - `src/appsettings.shared.json` : connexion, Embedding, Search, Generation, communs aux deux applications
     (chargés en premier par `AddLimpideSharedSettings`, donc surchargeables). Ne pas les dupliquer ailleurs.
   - `tests/Limpide.Core.Tests` (xUnit).
-- PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma dans `db/init/001_schema.sql`.
+- PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma par migrations SQL numérotées
+  (`src/Limpide.Infrastructure/Migrations/`, DbUp, commande `migrate`).
 - Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
   (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
 - Paquets : Npgsql, Pgvector, AngleSharp (HTML, dans Core), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
@@ -63,6 +64,9 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - ADR-004 : génération par Mistral (API, inférence UE), **Medium 3.5** retenu après mesure et relecture : Small
   déforme des textes sans que rien ne le détecte ; le défaut de Medium (trancher la situation) a été corrigé par les
   consignes `answer/3` et est surveillé par le garde-fou `qualification-juridique`.
+- ADR-014 : cycle de vie des versions — `fetch` crée une **candidate**, la version publiée reste en service jusqu'à
+  `publish` (bascule atomique) ; candidate au texte identique écartée par `extract` (`TextFingerprint`) ; schéma par
+  migrations DbUp (`migrate`, jamais au démarrage du web).
 - ADR-007 : Airflow orchestre les commandes .NET conteneurisées (`DockerOperator` en local, socket Docker = choix de
   développement ; service cloud en S6), aucun code métier en Python ; étapes en `all_done`, tâche `bilan` pour l'alerte.
 - Licence du dépôt : Apache 2.0.
@@ -89,6 +93,7 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
 ```bash
 docker compose up -d --wait        # postgres + ollama, ports limités à 127.0.0.1
+dotnet run --project src/Limpide.Ingestion -- migrate   # schéma (base neuve ou après git pull)
 docker compose exec postgres psql -U rag -d rag
 dotnet build
 ```
@@ -157,9 +162,17 @@ Détail et constats : `pipelines/airflow/README.md`.
 - [x] Session 5 : ADR-007 (`docs/adr/007-airflow-taches-conteneurisees.md`), schéma `docs/pipeline-ingestion.md`.
   **Reste (Alexandre)** : exercices dans l'interface (onglet XCom, « Réinitialiser » = Clear).
 
-**Prochaine : S5** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations ; Alexandre veut la faire en entier
-malgré la charge (élargissement du corpus en dernier). Déployer en production avec la première migration :
-correctif GSS de Npgsql et résumés JSON pas encore en ligne.
+**Semaine en cours : S5** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations ; Alexandre veut la faire en
+entier malgré la charge (élargissement du corpus en dernier).
+
+- [x] Session 1 (2026-10-10) : ADR-014. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
+  `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
+  vie : `status`, `status_reason`, `text_hash`, `published_at`, `quality_report`), commande `migrate`. Statuts
+  (`VersionStatus`) : collected → extracted → chunked → (validated) → embedded → published → archived ; discarded,
+  quarantined. Nouvelle commande et tâche du DAG `publish`. `VersionStatus.ReadyToEmbed` = `chunked` en attendant
+  `validate` (session 2 : passer à `validated`). Vérifié : migration sur copie et base vide (même schéma), cycle
+  complet sans fenêtre d'absence, DAG local (2 fausses versions CNIL écartées). Base locale migrée.
+  **Reste : déployer en production** (`migrate` puis web ; correctif GSS et résumés JSON pas encore en ligne).
 
 En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
 vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
@@ -193,7 +206,7 @@ vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via
 - [x] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
   limites) ; bilan `docs/plan/bilan-phase-1.md` (limites de la V1 = programme de la phase 2). **Reste (Alexandre)** :
   contacter Jedha, faire tester la démo par 2 ou 3 personnes et noter leurs retours dans le bilan.
-  Formulaire de retours ajouté (`FeedbackForm.razor`, table `feedback` via `db/init/002_feedback.sql`, `FeedbackStore`,
+  Formulaire de retours ajouté (`FeedbackForm.razor`, table `feedback` (migration 0002), `FeedbackStore`,
   commande `feedback`) : 3 questions facultatives, question jointe seulement si le visiteur coche la case, aucune IP,
   conservation 12 mois (purge à chaque envoi), 5 envois/h par visiteur (quota à clé `"feedback"`).
 
@@ -244,7 +257,8 @@ Choix de la session 3 (voir la discussion du 2026-09-29) :
 - Table `chunks` : `anchor` (`art_5`, `rct_12`, `anx_III`, clé des questions de test), `extractor_version`
   et `chunker_version` ; `chunk` remplace tous les passages d'une version dans une transaction (COPY binaire).
 - Pour recréer la base sans perdre bge-m3 : `docker compose rm -sf postgres && docker volume rm limpide_pgdata`,
-  jamais `docker compose down -v` (efface aussi le volume Ollama).
+  jamais `docker compose down -v` (efface aussi le volume Ollama) ; puis `migrate` (le schéma n'est plus créé au
+  démarrage du conteneur depuis la S5).
 - La fiche CNIL « Annoter les données » contient un paragraphe en double dans la page elle-même : laissé tel quel.
 - **Fausses nouvelles versions CNIL** (constaté le 2026-09-29) : le HTML brut contient des identifiants aléatoires
   (menu, jeton `form_build_id`) qui changent d'un jour à l'autre ; chaque `fetch` crée une version dont le texte

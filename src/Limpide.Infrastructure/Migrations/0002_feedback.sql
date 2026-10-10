@@ -1,7 +1,5 @@
--- Retours des visiteurs (formulaire en bas de page, S3). Rejouable sans risque (IF NOT EXISTS) :
--- exécuté seul sur une base neuve ; à appliquer à la main sur une base existante (deploy/README.md),
--- en attendant l'outil de migrations (S5).
---
+-- Retours des visiteurs (formulaire en bas de page, S3). Anciennement db/init/002_feedback.sql.
+-- Rejouable (IF NOT EXISTS) : sans effet sur les bases où la table a été créée à la main.
 -- Données personnelles : aucune adresse IP ni identifiant. La question et la réponse ne sont jointes qu'avec
 -- l'accord explicite du visiteur (case décochée par défaut). Conservation : 12 mois, purge à chaque nouvel envoi.
 

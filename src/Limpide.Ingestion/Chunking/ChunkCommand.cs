@@ -8,8 +8,9 @@ using Microsoft.Extensions.Logging;
 namespace Limpide.Ingestion.Chunking;
 
 /// <summary>
-/// Découpe le texte extrait de chaque version courante en passages, de data/extracted vers la table chunks.
+/// Découpe le texte extrait des versions publiées et candidates en passages, de data/extracted vers la table chunks.
 /// Ne refait rien si les passages existent déjà avec les mêmes versions d'extracteur et de découpeur.
+/// Une candidate pas encore extraite (extract en échec) est laissée de côté : extract l'a déjà signalée.
 /// </summary>
 public sealed class ChunkCommand(
     DocumentVersionStore versions,
@@ -20,11 +21,18 @@ public sealed class ChunkCommand(
 {
     public async Task<int> RunAsync(CancellationToken ct)
     {
-        var current = await versions.ListCurrentAsync(ct);
+        var current = await versions.ListActiveAsync(ct);
         var failures = 0;
 
         foreach (var version in current)
         {
+            if (version.Status == VersionStatus.Collected)
+            {
+                summary.Add("notExtracted");
+                logger.LogWarning("{Source} / {Title} : candidate pas encore extraite, laissée de côté", version.SourceName, version.DocumentTitle);
+                continue;
+            }
+
             try
             {
                 await ChunkAsync(version, ct);
@@ -37,17 +45,18 @@ public sealed class ChunkCommand(
             }
         }
 
-        logger.LogInformation("Découpage terminé : {Count} document(s), {Failures} échec(s)", current.Count, failures);
+        logger.LogInformation("Découpage terminé : {Count} version(s), {Failures} échec(s)", current.Count, failures);
         return failures == 0 ? 0 : 1;
     }
 
-    private async Task ChunkAsync(CurrentVersion version, CancellationToken ct)
+    private async Task ChunkAsync(ActiveVersion version, CancellationToken ct)
     {
         var extracted = await ReadExtractedAsync(version, ct);
         var chunker = Chunkers.ForSource(Slugs.From(version.SourceName));
 
         if (await chunks.IsUpToDateAsync(version.Id, extracted.Extractor, chunker.Version, ct))
         {
+            await versions.AdvanceAsync(version.Id, VersionStatus.Extracted, VersionStatus.Chunked, ct);
             summary.Add("unchanged");
             logger.LogInformation("{Source} / {Title} : inchangé ({Chunker})", version.SourceName, version.DocumentTitle, chunker.Version);
             return;
@@ -58,6 +67,7 @@ public sealed class ChunkCommand(
             throw new InvalidDataException("aucun passage produit");
 
         await chunks.ReplaceAsync(version.Id, passages, extracted.Extractor, chunker.Version, ct);
+        await versions.AdvanceAsync(version.Id, VersionStatus.Extracted, VersionStatus.Chunked, ct);
         summary.Add("chunked");
         summary.Add("passages", passages.Count);
 
@@ -71,7 +81,7 @@ public sealed class ChunkCommand(
             lengths.Count(l => l > Packer.MaxLength), Packer.MaxLength);
     }
 
-    private async Task<ExtractedDocument> ReadExtractedAsync(CurrentVersion version, CancellationToken ct)
+    private async Task<ExtractedDocument> ReadExtractedAsync(ActiveVersion version, CancellationToken ct)
     {
         var path = Path.Combine(options.ExtractedDataPath, Path.ChangeExtension(version.RawPath, ".json"));
         if (!File.Exists(path))

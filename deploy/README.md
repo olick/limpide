@@ -35,6 +35,7 @@ alias limpide='docker compose -f docker-compose.prod.yml --env-file .env.prod'
 ```bash
 cp .env.prod.example .env.prod && chmod 600 .env.prod   # puis remplir les secrets
 limpide up -d --build --wait                              # télécharge bge-m3 au premier démarrage (≈ 1,2 Go)
+limpide run --rm ingestion migrate                        # crée le schéma (base vide)
 ```
 
 ## Données : transférer la base plutôt que tout recalculer
@@ -126,14 +127,21 @@ Le domaine nu `limpide-ia.fr` pointe encore sur la redirection web d'OVH (213.18
 en HTTPS. Pour le servir aussi : remplacer cette redirection par une entrée A vers `57.129.175.88`, puis
 `SITE_ADDRESS=www.limpide-ia.fr, limpide-ia.fr`.
 
-## Évolutions du schéma (en attendant l'outil de migrations, S5)
+## Schéma de la base : migrations (S5)
 
-Les scripts de `db/init/` ne s'exécutent qu'au premier démarrage d'une base vide. Sur la base de production
-existante, appliquer à la main chaque nouveau script (tous sont rejouables sans risque) :
+Le schéma évolue par des scripts SQL numérotés (`src/Limpide.Infrastructure/Migrations/`, outil DbUp), appliqués par
+la commande `migrate` de la console. Chaque script ne s'exécute qu'une fois par base, dans sa propre transaction ;
+la table `schemaversions` garde la liste des scripts appliqués. Jamais au démarrage de l'application web : un
+changement de schéma de production est un acte explicite de la mise à jour.
 
 ```bash
-limpide exec -T postgres psql -U rag -d rag -v ON_ERROR_STOP=1 < db/init/002_feedback.sql   # retours des visiteurs
+limpide run --rm ingestion migrate     # {"applied":N,...} ; sans effet si tout est déjà appliqué
+limpide exec -T postgres psql -U rag -d rag -c "SELECT scriptname, applied FROM schemaversions"
 ```
+
+Les bases créées avant la S5 (scripts `db/init`, supprimés depuis) reçoivent 0001 et 0002 sans effet (`IF NOT
+EXISTS`) : DbUp les inscrit simplement dans son journal. Vérifié le 2026-10-10 sur une copie de la base locale et
+sur une base vide : même schéma à l'arrivée, aucune donnée perdue.
 
 ## Retours des visiteurs
 
@@ -161,8 +169,8 @@ limpide run --rm ingestion feedback        # Markdown, les plus récents d'abord
 ```bash
 git pull
 limpide --profile outils build ingestion     # image de la console (sinon elle garde l'ancienne version du code)
+limpide run --rm ingestion migrate           # schéma, AVANT l'application (voir « Schéma de la base »)
 limpide up -d --build --wait web             # l'application (coupure de quelques secondes)
-# puis appliquer les nouveaux scripts de db/init/ s'il y en a (voir « Évolutions du schéma »)
 ```
 
 ## Test en local de la configuration de production

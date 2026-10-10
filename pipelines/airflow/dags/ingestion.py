@@ -1,8 +1,11 @@
-"""Ingestion du corpus de Limpide : fetch → extract → chunk → embed, chaque semaine.
+"""Ingestion du corpus de Limpide : fetch → extract → chunk → embed → publish, chaque semaine.
 
 Airflow orchestre, il ne traite pas les données : chaque tâche lance l'image `limpide-ingestion` (console .NET) avec
 une commande. Les commandes sont idempotentes, c'est ce qui rend les relances sans risque ; elles échangent par le
 stockage (data/, base), jamais par Airflow. Chacune écrit un résumé JSON en dernière ligne, gardé comme XCom.
+
+Une version collectée est une candidate : la version publiée reste en service jusqu'à `publish`, qui bascule la recherche
+en une transaction. Une candidate au texte identique à la version publiée est écartée dès `extract`.
 
 Échecs : une étape en échec n'arrête pas les suivantes (un document indisponible ne bloque pas les autres) ; la tâche
 `bilan` envoie alors une seule alerte Discord et marque l'exécution en échec.
@@ -28,7 +31,7 @@ from docker.types import Mount
 # Réseau Docker de la pile locale du dépôt (projet Compose « limpide ») : les conteneurs y joignent postgres et ollama.
 NETWORK = "limpide_default"
 IMAGE = "limpide-ingestion"
-COMMANDS = ["fetch", "extract", "chunk", "embed"]
+COMMANDS = ["fetch", "extract", "chunk", "embed", "publish"]
 
 ENVIRONMENT: dict[str, str] = {
     # Mot de passe : variable Airflow lue dans l'environnement du worker, masquée (***) dans l'interface et les logs.
@@ -127,6 +130,9 @@ with DAG(
     chunk = ingestion_task("chunk", datetime.timedelta(minutes=15), trigger_rule="all_done")
     # Corpus complet sur CPU : ≈ 10 min ; une semaine ordinaire : quelques passages.
     embed = ingestion_task("embed", datetime.timedelta(hours=1), trigger_rule="all_done")
+    # Ne publie que les candidates entièrement vectorisées : une étape en échec plus haut retient seulement sa version,
+    # la version publiée reste en service (cycle de vie, migration 0003).
+    publish = ingestion_task("publish", datetime.timedelta(minutes=5), trigger_rule="all_done")
 
     @task(trigger_rule="all_done", retries=0)
     def bilan() -> dict[str, Any]:
@@ -152,4 +158,4 @@ with DAG(
         # Sans cette exception, l'exécution serait marquée réussie dès que la dernière tâche (embed) réussit.
         raise AirflowException(f"tâches en échec : {', '.join(failed)}")
 
-    chain(fetch, extract, chunk, embed, bilan())
+    chain(fetch, extract, chunk, embed, publish, bilan())

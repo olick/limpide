@@ -8,7 +8,8 @@ namespace Limpide.Ingestion.Fetch;
 
 /// <summary>
 /// Télécharge chaque document de corpus.json dans data/raw/&lt;source&gt;/&lt;sha256&gt;.&lt;ext&gt;
-/// et enregistre une nouvelle version uniquement si l'empreinte a changé. Relançable sans effet de bord.
+/// et enregistre une version candidate uniquement si l'empreinte a changé ; la version publiée reste en service
+/// jusqu'à la commande publish. Relançable sans effet de bord.
 /// </summary>
 public sealed class FetchCommand(
     HttpClient http,
@@ -62,6 +63,7 @@ public sealed class FetchCommand(
         summary.Add(outcome switch
         {
             VersionOutcome.Unchanged => "unchanged",
+            VersionOutcome.Pending => "pending",
             VersionOutcome.Created => "created",
             VersionOutcome.Restored => "restored",
             _ => outcome.ToString(),
@@ -128,8 +130,9 @@ public sealed class FetchCommand(
     private static string Describe(VersionOutcome outcome) => outcome switch
     {
         VersionOutcome.Unchanged => "inchangé",
-        VersionOutcome.Created => "nouvelle version",
-        VersionOutcome.Restored => "version antérieure redevenue courante",
+        VersionOutcome.Pending => "candidate déjà collectée, en cours de traitement",
+        VersionOutcome.Created => "nouvelle version candidate",
+        VersionOutcome.Restored => "version déjà connue, de nouveau candidate",
         _ => outcome.ToString(),
     };
 

@@ -51,7 +51,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-rag}
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ./db/init:/docker-entrypoint-initdb.d:ro
+      # Schéma : limpide run --rm ingestion migrate (deploy/README.md), plus de scripts d'initialisation.
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 5s

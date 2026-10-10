@@ -7,8 +7,9 @@ using Microsoft.Extensions.Logging;
 namespace Limpide.Ingestion.Extract;
 
 /// <summary>
-/// Extrait le texte structuré de la version courante de chaque document, de data/raw vers data/extracted.
-/// Ne refait rien si le fichier extrait existe déjà avec la même version d'extracteur.
+/// Extrait le texte structuré des versions publiées et candidates, de data/raw vers data/extracted.
+/// Ne refait rien si le fichier extrait existe déjà avec la même version d'extracteur. Enregistre l'empreinte du texte,
+/// puis écarte les candidates dont le texte est identique à celui de la version publiée (fausses nouvelles versions).
 /// </summary>
 public sealed class ExtractCommand(
     DocumentVersionStore store,
@@ -18,7 +19,7 @@ public sealed class ExtractCommand(
 {
     public async Task<int> RunAsync(CancellationToken ct)
     {
-        var versions = await store.ListCurrentAsync(ct);
+        var versions = await store.ListActiveAsync(ct);
         var failures = 0;
 
         foreach (var version in versions)
@@ -35,11 +36,18 @@ public sealed class ExtractCommand(
             }
         }
 
-        logger.LogInformation("Extraction terminée : {Count} document(s), {Failures} échec(s)", versions.Count, failures);
+        foreach (var discarded in await store.DiscardIdenticalTextAsync(ct))
+        {
+            summary.Add("discarded");
+            logger.LogInformation("{Source} / {Title} : candidate écartée, texte identique à la version publiée ({Hash}…)",
+                discarded.SourceName, discarded.DocumentTitle, discarded.ContentHash[..12]);
+        }
+
+        logger.LogInformation("Extraction terminée : {Count} version(s), {Failures} échec(s)", versions.Count, failures);
         return failures == 0 ? 0 : 1;
     }
 
-    private async Task ExtractAsync(CurrentVersion version, CancellationToken ct)
+    private async Task ExtractAsync(ActiveVersion version, CancellationToken ct)
     {
         var extractor = Extractors.ForSource(Slugs.From(version.SourceName));
         var outputPath = Path.Combine(options.ExtractedDataPath, Path.ChangeExtension(version.RawPath, ".json"));
@@ -49,6 +57,7 @@ public sealed class ExtractCommand(
             var existing = ExtractedDocumentJson.Deserialize(await File.ReadAllTextAsync(outputPath, ct));
             if (existing.Extractor == extractor.Version)
             {
+                await RecordAsync(version, existing.Blocks, ct);
                 summary.Add("unchanged");
                 logger.LogInformation("{Source} / {Title} : inchangé ({Extractor}, {Blocks} blocs)",
                     version.SourceName, version.DocumentTitle, extractor.Version, existing.Blocks.Count);
@@ -66,14 +75,22 @@ public sealed class ExtractCommand(
         var tempPath = outputPath + ".tmp";
         await File.WriteAllTextAsync(tempPath, json, ct);
         File.Move(tempPath, outputPath, overwrite: true);
+        await RecordAsync(version, blocks, ct);
         summary.Add("extracted");
 
         logger.LogInformation("{Source} / {Title} : extrait ({Extractor}, {Blocks} blocs, {Chars:N0} caractères)",
             version.SourceName, version.DocumentTitle, extractor.Version, blocks.Count, blocks.Sum(b => b.Text.Length));
     }
 
+    /// <summary>Empreinte du texte (comparée à celle de la version publiée), et candidate passée à « extracted ».</summary>
+    private async Task RecordAsync(ActiveVersion version, IReadOnlyList<Block> blocks, CancellationToken ct)
+    {
+        await store.SetTextHashAsync(version.Id, TextFingerprint.Compute(blocks), ct);
+        await store.AdvanceAsync(version.Id, VersionStatus.Collected, VersionStatus.Extracted, ct);
+    }
+
     /// <summary>Relit le fichier brut et vérifie qu'il correspond toujours à l'empreinte enregistrée.</summary>
-    private async Task<byte[]> ReadRawAsync(CurrentVersion version, CancellationToken ct)
+    private async Task<byte[]> ReadRawAsync(ActiveVersion version, CancellationToken ct)
     {
         var rawPath = Path.Combine(options.RawDataPath, version.RawPath);
         if (!File.Exists(rawPath))

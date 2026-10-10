@@ -5,6 +5,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="dbup-postgresql" Version="7.0.1" />
     <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.10.1" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="10.0.12" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="10.0.12" />
@@ -12,6 +13,11 @@
     <PackageReference Include="Npgsql" Version="10.0.3" />
     <PackageReference Include="OllamaSharp" Version="5.4.30" />
     <PackageReference Include="Pgvector" Version="0.3.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Migrations du schéma (DbUp) : appliquées dans l'ordre de leur nom par la commande migrate. -->
+    <EmbeddedResource Include="Migrations\*.sql" />
   </ItemGroup>
 
   <PropertyGroup>

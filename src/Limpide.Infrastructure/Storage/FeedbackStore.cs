@@ -6,7 +6,7 @@ namespace Limpide.Infrastructure.Storage;
 
 public sealed record StoredFeedback(DateTimeOffset CreatedAt, VisitorFeedback Feedback);
 
-/// <summary>Retours des visiteurs (table feedback, db/init/002_feedback.sql).</summary>
+/// <summary>Retours des visiteurs (table feedback, migration 0002_feedback.sql).</summary>
 public sealed class FeedbackStore(NpgsqlDataSource dataSource)
 {
     /// <summary>

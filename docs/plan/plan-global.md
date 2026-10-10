@@ -222,14 +222,15 @@ test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 | 003 | Ingestion console .NET puis Airflow | S1 ✔ |
 | 004 | Choix du LLM | S2 ✔ (Mistral, UE) |
 | 005 | Recherche hybride | S2 ✔ (écartée, mesures) |
-| 006 | Hébergement de la démo | S3 |
-| 007 | Airflow et tâches .NET conteneurisées | S4 |
+| 006 | Hébergement de la démo | S3 ✔ (VPS OVHcloud) |
+| 007 | Airflow et tâches .NET conteneurisées | S4 ✔ |
 | 008 | Stratégie de découpage | S5 |
 | 009 | Batch incrémental plutôt que streaming | S5 |
 | 010 | Container Apps plutôt qu'AKS | S6 |
 | 011 | Hébergement d'Airflow | S6 |
 | 012 | LLM par API ou auto-hébergé sur GPU | S6 |
 | 013 | Métriques et seuils d'évaluation | S7 |
+| 014 | Cycle de vie des versions et migrations du schéma (ajouté) | S5 ✔ |
 
 ## Risques du planning
 

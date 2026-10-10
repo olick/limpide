@@ -185,7 +185,6 @@ Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/
 
 ```
 .
-├── db/init/            Scripts SQL exécutés au premier démarrage de PostgreSQL
 ├── deploy/             Mise en ligne : Caddyfile, procédure de déploiement
 ├── docs/
 │   ├── adr/            Décisions d'architecture (une par fichier)

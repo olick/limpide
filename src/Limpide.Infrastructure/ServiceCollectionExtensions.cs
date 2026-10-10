@@ -1,11 +1,13 @@
 using System.ClientModel;
 using Limpide.Core.Answering;
 using Limpide.Core.Search;
+using Limpide.Infrastructure.Migrations;
 using Limpide.Infrastructure.Search;
 using Limpide.Infrastructure.Storage;
 using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Npgsql;
 using OllamaSharp;
 using OpenAI;
@@ -41,6 +43,7 @@ public static class ServiceCollectionExtensions
         // Changer de fournisseur d'embeddings = remplacer cette ligne par une autre implémentation d'IEmbeddingGenerator.
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(embedding.Endpoint, embedding.Model));
 
+        services.AddSingleton(provider => new DatabaseMigrator(connectionString, provider.GetRequiredService<ILogger<DatabaseMigrator>>()));
         services.AddSingleton<DocumentVersionStore>();
         services.AddSingleton<ChunkStore>();
         services.AddSingleton<EmbeddingStore>();

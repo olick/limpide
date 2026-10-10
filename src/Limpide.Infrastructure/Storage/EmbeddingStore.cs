@@ -6,14 +6,14 @@ namespace Limpide.Infrastructure.Storage;
 public sealed record PendingChunk(Guid Id, string Heading, string Content);
 
 /// <summary>
-/// Embeddings des passages des versions courantes. Un passage est « à calculer » s'il n'a pas d'embedding
-/// ou si son embedding vient d'un autre modèle que celui configuré.
+/// Embeddings des passages des versions publiées et des candidates prêtes à vectoriser. Un passage est « à calculer »
+/// s'il n'a pas d'embedding ou si son embedding vient d'un autre modèle que celui configuré.
 /// </summary>
 public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
 {
     private const string Pending = """
         FROM chunks c
-        JOIN document_versions v ON v.id = c.document_version_id AND v.is_current
+        JOIN document_versions v ON v.id = c.document_version_id AND (v.is_current OR v.status IN (@ready, 'embedded'))
         WHERE c.embedding IS NULL OR c.embedding_model IS DISTINCT FROM @model
         """;
 
@@ -21,6 +21,7 @@ public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
     {
         await using var command = dataSource.CreateCommand($"SELECT count(*) {Pending}");
         command.Parameters.AddWithValue("model", model);
+        command.Parameters.AddWithValue("ready", VersionStatus.ReadyToEmbed);
         return Convert.ToInt32(await command.ExecuteScalarAsync(ct));
     }
 
@@ -29,6 +30,7 @@ public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
         await using var command = dataSource.CreateCommand($"SELECT c.id, coalesce(c.heading, ''), c.content {Pending} ORDER BY c.id LIMIT @size");
         command.Parameters.AddWithValue("model", model);
         command.Parameters.AddWithValue("size", size);
+        command.Parameters.AddWithValue("ready", VersionStatus.ReadyToEmbed);
         await using var reader = await command.ExecuteReaderAsync(ct);
 
         var batch = new List<PendingChunk>();

@@ -8,14 +8,15 @@ using Microsoft.Extensions.Logging;
 namespace Limpide.Ingestion.Embed;
 
 /// <summary>
-/// Calcule les embeddings des passages des versions courantes qui n'en ont pas (ou qui viennent d'un autre modèle),
-/// par lots. Chaque lot est enregistré dès qu'il est calculé : une interruption ne perd que le lot en cours,
+/// Calcule les embeddings des passages des versions publiées et des candidates découpées qui n'en ont pas (ou qui
+/// viennent d'un autre modèle), par lots, puis marque « embedded » les candidates entièrement vectorisées. Chaque lot est enregistré dès qu'il est calculé : une interruption ne perd que le lot en cours,
 /// et une relance reprend là où on s'était arrêté.
 /// </summary>
 /// <remarks>Texte vectorisé : le contenu seul, ou « titre + contenu » avec <see cref="EmbeddingOptions.IncludeHeading"/>.</remarks>
 public sealed class EmbedCommand(
     IEmbeddingGenerator<string, Embedding<float>> generator,
     EmbeddingStore store,
+    DocumentVersionStore versions,
     EmbeddingOptions options,
     CommandSummary summary,
     ILogger<EmbedCommand> logger)
@@ -28,6 +29,7 @@ public sealed class EmbedCommand(
         if (total == 0)
         {
             logger.LogInformation("Aucun passage à vectoriser ({Model})", options.Label);
+            await MarkReadyAsync(ct);
             return 0;
         }
 
@@ -66,6 +68,19 @@ public sealed class EmbedCommand(
             + "(premier lot, avec chargement du modèle : {First:F1} s), {PerChunk:F0} ms par passage en régime établi",
             done, characters, elapsed.TotalSeconds, firstBatch!.Value.TotalSeconds, steady.TotalMilliseconds);
 
+        await MarkReadyAsync(ct);
         return 0;
+    }
+
+    /// <summary>Candidates dont tous les passages sont vectorisés : prêtes pour publish.</summary>
+    private async Task MarkReadyAsync(CancellationToken ct)
+    {
+        summary.Add("ready", 0);
+        foreach (var ready in await versions.MarkEmbeddedAsync(options.Label, ct))
+        {
+            summary.Add("ready");
+            logger.LogInformation("{Source} / {Title} : candidate vectorisée, prête à publier ({Hash}…)",
+                ready.SourceName, ready.DocumentTitle, ready.ContentHash[..12]);
+        }
     }
 }

@@ -1,13 +1,11 @@
--- Schéma initial du corpus.
--- Exécuté automatiquement au premier démarrage du conteneur PostgreSQL
--- (volume vide). Pour le rejouer sans perdre le modèle Ollama :
---   docker compose rm -sf postgres && docker volume rm limpide_pgdata && docker compose up -d --wait
--- puis relancer fetch et extract. Un outil de migrations remplacera ce mécanisme en semaine 5.
+-- Schéma initial du corpus (S1). Anciennement db/init/001_schema.sql, exécuté à la création du volume PostgreSQL.
+-- Rejouable (IF NOT EXISTS) : sur les bases créées avant l'outil de migrations (S5), il ne change rien et
+-- DbUp l'inscrit simplement dans son journal (table schemaversions).
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Une source = un producteur de documents (CNIL, EUR-Lex...).
-CREATE TABLE sources (
+CREATE TABLE IF NOT EXISTS sources (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     name            text NOT NULL UNIQUE,
     base_url        text NOT NULL,
@@ -16,7 +14,7 @@ CREATE TABLE sources (
 );
 
 -- Un document = une page ou un fichier identifié par son URL.
-CREATE TABLE documents (
+CREATE TABLE IF NOT EXISTS documents (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     source_id       uuid NOT NULL REFERENCES sources(id),
     url             text NOT NULL UNIQUE,
@@ -26,9 +24,8 @@ CREATE TABLE documents (
 );
 
 -- Une version = un contenu précis à un instant donné.
--- L'empreinte (SHA-256 du contenu brut) rend l'ingestion idempotente :
--- même empreinte => rien à refaire.
-CREATE TABLE document_versions (
+-- L'empreinte (SHA-256 du contenu brut) rend l'ingestion idempotente : même empreinte => rien à refaire.
+CREATE TABLE IF NOT EXISTS document_versions (
     id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     document_id     uuid NOT NULL REFERENCES documents(id),
     content_hash    char(64) NOT NULL,
@@ -38,12 +35,12 @@ CREATE TABLE document_versions (
     UNIQUE (document_id, content_hash)
 );
 
-CREATE UNIQUE INDEX one_current_version_per_document
+CREATE UNIQUE INDEX IF NOT EXISTS one_current_version_per_document
     ON document_versions (document_id) WHERE is_current;
 
 -- Un chunk = un passage indexé, rattaché à une version précise.
--- Chaque réponse pourra ainsi citer la version exacte de sa source.
-CREATE TABLE chunks (
+-- Chaque réponse peut ainsi citer la version exacte de sa source.
+CREATE TABLE IF NOT EXISTS chunks (
     id                  uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     document_version_id uuid NOT NULL REFERENCES document_versions(id) ON DELETE CASCADE,
     ordinal             int  NOT NULL,      -- position dans le document
@@ -59,12 +56,12 @@ CREATE TABLE chunks (
     UNIQUE (document_version_id, ordinal)
 );
 
-CREATE INDEX chunks_embedding_hnsw
+CREATE INDEX IF NOT EXISTS chunks_embedding_hnsw
     ON chunks USING hnsw (embedding vector_cosine_ops);
 
--- Recherche plein texte (servira à la recherche hybride en semaine 2).
+-- Recherche plein texte (recherche hybride, ADR-005).
 ALTER TABLE chunks
-    ADD COLUMN content_tsv tsvector
+    ADD COLUMN IF NOT EXISTS content_tsv tsvector
     GENERATED ALWAYS AS (to_tsvector('french', content)) STORED;
 
-CREATE INDEX chunks_content_tsv ON chunks USING gin (content_tsv);
+CREATE INDEX IF NOT EXISTS chunks_content_tsv ON chunks USING gin (content_tsv);

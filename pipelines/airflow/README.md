@@ -71,7 +71,7 @@ Après avoir désactivé les DAG d'exemple, la base d'Airflow gardait leur trace
 
 | DAG | Rôle |
 |---|---|
-| `ingestion` | `fetch → extract → chunk → embed`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` |
+| `ingestion` | `fetch → extract → chunk → embed → publish`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` |
 | `decouverte` | apprentissage : deux tâches qui réussissent, une qui échoue volontairement (relances, logs, « Clear ») |
 
 ### `ingestion`
@@ -135,11 +135,11 @@ dates et ne la trouve pas.
 
 - **Une source qui échouait arrêtait la chaîne** (`extract`, `chunk`, `embed` en `upstream_failed`) : corrigé en
   session 4 (`all_done` + tâche `bilan`).
-- **Un document disparaît de la recherche entre `fetch` et la fin d'`embed`** : `fetch` rend la nouvelle version
-  courante tout de suite, et la recherche ne lit que les passages vectorisés des versions courantes. Si `embed`
-  échoue (Ollama arrêté), le document reste absent jusqu'à la réparation. Réponse prévue en S5 : publier une version
-  seulement quand ses passages sont prêts.
+- **Un document disparaissait de la recherche entre `fetch` et la fin d'`embed`** (`fetch` rendait la nouvelle
+  version courante tout de suite). **Corrigé en S5** (ADR-014) : candidate, puis bascule atomique par `publish`.
 - **Fausses nouvelles versions CNIL** (déjà connues) : le 2026-10-08, `fetch` a créé 2 versions CNIL dont le texte
   extrait est identique à l'ancien (mêmes 26 et 31 passages), et ce **trois fois dans la journée** (8 h, 16 h 30,
-  19 h) : le HTML change plusieurs fois par jour. ≈ 1 min de vectorisation inutile à chaque exécution. S5.
+  19 h) : le HTML change plusieurs fois par jour. ≈ 1 min de vectorisation inutile à chaque exécution.
+  **Corrigé en S5** (ADR-014) : candidate au texte identique écartée par `extract` (vérifié le 2026-10-10 : 2 fausses
+  versions écartées, aucune vectorisation).
 - **Interface en français** : « Clear » s'appelle « Réinitialiser » (raccourci Maj + C).

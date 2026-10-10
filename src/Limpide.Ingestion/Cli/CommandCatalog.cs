@@ -7,16 +7,19 @@ public sealed record CommandInfo(string Name, string Usage, string Description, 
 /// <summary>Commandes connues : source unique de l'aide et de la validation.</summary>
 public static class CommandCatalog
 {
+    public const string Database = "Base de données";
     public const string Ingestion = "Ingestion, dans l'ordre";
     public const string Search = "Questions et recherche";
     public const string Session = "Mode interactif";
 
     public static readonly IReadOnlyList<CommandInfo> All =
     [
-        new("fetch", "fetch", "télécharge le corpus (corpus.json) et enregistre les nouvelles versions", Ingestion),
-        new("extract", "extract", "extrait le texte structuré des versions courantes (data/extracted)", Ingestion),
+        new("migrate", "migrate", "applique les migrations du schéma qui manquent (à chaque déploiement)", Database),
+        new("fetch", "fetch", "télécharge le corpus (corpus.json) ; un contenu nouveau devient une version candidate", Ingestion),
+        new("extract", "extract", "extrait le texte (data/extracted) ; écarte les candidates au texte inchangé", Ingestion),
         new("chunk", "chunk", "découpe le texte extrait en passages (table chunks)", Ingestion),
         new("embed", "embed", "calcule les embeddings des passages qui n'en ont pas", Ingestion),
+        new("publish", "publish", "met en service les candidates prêtes (bascule atomique de la recherche)", Ingestion),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),
         new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
