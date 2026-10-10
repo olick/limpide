@@ -180,8 +180,7 @@ entier malgré la charge (élargissement du corpus en dernier).
   au passage (montage `db/init` retiré), données intactes. Avertissement préexistant : clés DataProtection de `web`
   non persistées (perdues à chaque recréation du conteneur) — à traiter avec la sécurité (S8).
 
-En suspens (Alexandre) : domaine nu `limpide-ia.fr` (aucune entrée A chez OVH au 2026-10-07 ; ensuite redirection
-vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
+En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
 **S3 terminée** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
 
@@ -200,7 +199,8 @@ vers www dans Caddy), message à Jedha, 2 ou 3 testeurs extérieurs (retours via
   (22, 80, 443), Docker, dépôt cloné dans `~/limpide`, `.env.prod`, base restaurée (691/691), recherche 8/10 sur le
   serveur, sauvegarde quotidienne (`deploy/backup-db.sh`, minuteur systemd 3 h 15 UTC, `~/backups`, 7 jours ;
   disque sauvegardé par OVH en plus), HTTPS Let's Encrypt par Caddy (`SITE_ADDRESS=www.limpide-ia.fr`, 2026-10-07).
-  Domaine nu `limpide-ia.fr` : encore la redirection web d'OVH (pas de HTTPS) ; à passer en A vers le VPS.
+  Domaine nu `limpide-ia.fr` : entrée A vers le VPS, redirigé (301) vers `www` par Caddy (`REDIRECT_FROM` dans
+  `.env.prod`, certificat Let's Encrypt propre), 2026-10-10.
 
 - [x] Session 4 : quota en production (2026-10-07) — `QuestionQuota` (Core) : 10 questions/h par IP, 60/jour au total
   (≈ 9 €/mois max avec Medium, sous le plafond Mistral de 10 €), appliqué dans `Home.razor` avant l'appel au modèle ;
