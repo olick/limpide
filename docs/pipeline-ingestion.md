@@ -7,7 +7,7 @@ Mise en place : `pipelines/airflow/README.md`.
 flowchart LR
     subgraph Airflow["Airflow (DAG ingestion, lundi 4 h UTC)"]
         direction LR
-        F[fetch] --> E[extract] --> C[chunk] --> M[embed] --> P[publish] --> B{bilan}
+        F[fetch] --> E[extract] --> C[chunk] --> V[validate] --> M[embed] --> P[publish] --> B{bilan}
     end
 
     subgraph Conteneurs["Image limpide-ingestion (une par tâche)"]
@@ -15,6 +15,7 @@ flowchart LR
         CF["fetch : télécharge, empreinte SHA-256,<br/>nouvelle candidate si l'empreinte change"]
         CE["extract : texte structuré<br/>(extracteur versionné)"]
         CC["chunk : passages<br/>(découpeur versionné)"]
+        CV["validate : 8 contrôles qualité<br/>validée ou en quarantaine"]
         CM["embed : vecteurs bge-m3<br/>par lots, reprise possible"]
         CP["publish : bascule atomique<br/>candidate → version publiée"]
     end
@@ -23,6 +24,7 @@ flowchart LR
     CF --> Raw[(data/raw)]
     Raw --> CE --> Ext[(data/extracted)]
     Ext --> CC --> DB[(PostgreSQL<br/>pgvector)]
+    DB --> CV --> DB
     DB --> CM --> DB
     CP --> DB
     Ollama[Ollama bge-m3] --- CM
@@ -31,6 +33,7 @@ flowchart LR
     F -.lance.-> CF
     E -.lance.-> CE
     C -.lance.-> CC
+    V -.lance.-> CV
     M -.lance.-> CM
     P -.lance.-> CP
     B -- "une tâche en échec" --> Discord[Alerte Discord]
@@ -56,7 +59,9 @@ stateDiagram-v2
     collected --> extracted : extract
     extracted --> discarded : texte identique à la version publiée
     extracted --> chunked : chunk
-    chunked --> embedded : embed (S5 session 2 : chunked → validated → embedded)
+    chunked --> validated : validate (contrôles réussis)
+    chunked --> quarantined : validate (un contrôle en échec)
+    validated --> embedded : embed
     embedded --> published : publish (transaction)
     published --> archived : publication d'une version plus récente
     collected --> discarded : collecte plus récente
@@ -66,6 +71,11 @@ stateDiagram-v2
 publiée reste en service. La bascule (`publish`) est atomique : le document n'est jamais absent de la recherche.
 Avant (S4) : la version devenait courante dès `fetch`, et le document disparaissait de la recherche jusqu'à la fin
 d'`embed` (≈ 17 min pendant la panne d'Ollama du 2026-10-08).
+
+**Quarantaine** : une candidate qui échoue à un contrôle qualité (texte trop court, autre langue, nombre de passages
+très différent, structure perdue, résidus HTML...) n'est ni vectorisée ni publiée ; la raison est enregistrée
+(`status_reason`, rapport complet dans `quality_report`). Une nouvelle collecte du même contenu la laisse en
+quarantaine : seule une décision humaine l'en sort. Seuils et calibrage : `docs/notes/observations-qualite.md`.
 
 **Fausses nouvelles versions** : une candidate dont le texte extrait est identique à celui de la version publiée
 (pages CNIL dont seul le HTML change) est écartée dès `extract`, sans découpage ni vectorisation.

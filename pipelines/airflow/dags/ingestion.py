@@ -1,11 +1,12 @@
-"""Ingestion du corpus de Limpide : fetch → extract → chunk → embed → publish, chaque semaine.
+"""Ingestion du corpus de Limpide : fetch → extract → chunk → validate → embed → publish, chaque semaine.
 
 Airflow orchestre, il ne traite pas les données : chaque tâche lance l'image `limpide-ingestion` (console .NET) avec
 une commande. Les commandes sont idempotentes, c'est ce qui rend les relances sans risque ; elles échangent par le
 stockage (data/, base), jamais par Airflow. Chacune écrit un résumé JSON en dernière ligne, gardé comme XCom.
 
 Une version collectée est une candidate : la version publiée reste en service jusqu'à `publish`, qui bascule la recherche
-en une transaction. Une candidate au texte identique à la version publiée est écartée dès `extract`.
+en une transaction. Une candidate au texte identique à la version publiée est écartée dès `extract` ; une candidate qui
+échoue aux contrôles qualité (`validate`) part en quarantaine.
 
 Échecs : une étape en échec n'arrête pas les suivantes (un document indisponible ne bloque pas les autres) ; la tâche
 `bilan` envoie alors une seule alerte Discord et marque l'exécution en échec.
@@ -31,7 +32,7 @@ from docker.types import Mount
 # Réseau Docker de la pile locale du dépôt (projet Compose « limpide ») : les conteneurs y joignent postgres et ollama.
 NETWORK = "limpide_default"
 IMAGE = "limpide-ingestion"
-COMMANDS = ["fetch", "extract", "chunk", "embed", "publish"]
+COMMANDS = ["fetch", "extract", "chunk", "validate", "embed", "publish"]
 
 ENVIRONMENT: dict[str, str] = {
     # Mot de passe : variable Airflow lue dans l'environnement du worker, masquée (***) dans l'interface et les logs.
@@ -128,6 +129,8 @@ with DAG(
     # cohérentes ; un document en échec plus haut est signalé par elle (texte extrait absent...), les autres avancent.
     extract = ingestion_task("extract", datetime.timedelta(minutes=15), trigger_rule="all_done")
     chunk = ingestion_task("chunk", datetime.timedelta(minutes=15), trigger_rule="all_done")
+    # Contrôles qualité : une candidate qui échoue passe en quarantaine (ni vectorisée, ni publiée).
+    validate = ingestion_task("validate", datetime.timedelta(minutes=15), trigger_rule="all_done")
     # Corpus complet sur CPU : ≈ 10 min ; une semaine ordinaire : quelques passages.
     embed = ingestion_task("embed", datetime.timedelta(hours=1), trigger_rule="all_done")
     # Ne publie que les candidates entièrement vectorisées : une étape en échec plus haut retient seulement sa version,
@@ -158,4 +161,4 @@ with DAG(
         # Sans cette exception, l'exécution serait marquée réussie dès que la dernière tâche (embed) réussit.
         raise AirflowException(f"tâches en échec : {', '.join(failed)}")
 
-    chain(fetch, extract, chunk, embed, publish, bilan())
+    chain(fetch, extract, chunk, validate, embed, publish, bilan())

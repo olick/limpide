@@ -16,6 +16,9 @@ public enum VersionOutcome
 
     /// <summary>Le contenu est revenu à une version déjà connue (archivée, écartée...), qui redevient candidate.</summary>
     Restored,
+
+    /// <summary>Même empreinte qu'une version en quarantaine : elle y reste, seule une décision humaine l'en sort.</summary>
+    Quarantined,
 }
 
 /// <summary>
@@ -37,16 +40,14 @@ public static class VersionStatus
     /// <summary>Candidates en cours de traitement (au plus une par document : index one_candidate_version_per_document).</summary>
     public static readonly string[] Candidates = [Collected, Extracted, Chunked, Validated, Embedded];
 
-    /// <summary>
-    /// Étape à partir de laquelle une candidate est vectorisée. En attendant les contrôles qualité (S5, session 2),
-    /// c'est la sortie du découpage ; ensuite, ce sera « validated ».
-    /// </summary>
-    public const string ReadyToEmbed = Chunked;
+    /// <summary>Étape à partir de laquelle une candidate est vectorisée : après les contrôles qualité (validate).</summary>
+    public const string ReadyToEmbed = Validated;
 }
 
 /// <summary>Version traitée par les étapes après la collecte : la version publiée ou une candidate.</summary>
 public sealed record ActiveVersion(
-    Guid Id, string SourceName, string DocumentTitle, string ContentHash, string RawPath, string Status, string? TextHash)
+    Guid Id, string SourceName, string DocumentTitle, string ContentHash, string RawPath, string Status, string? TextHash,
+    bool HasQualityReport = false)
 {
     public bool IsPublished => Status == VersionStatus.Published;
 }
@@ -66,7 +67,8 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
     public async Task<IReadOnlyList<ActiveVersion>> ListActiveAsync(CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand("""
-            SELECT v.id, s.name, coalesce(d.title, d.url), v.content_hash, v.raw_path, v.status, v.text_hash
+            SELECT v.id, s.name, coalesce(d.title, d.url), v.content_hash, v.raw_path, v.status, v.text_hash,
+                   v.quality_report IS NOT NULL
             FROM document_versions v
             JOIN documents d ON d.id = v.document_id
             JOIN sources s ON s.id = d.source_id
@@ -81,7 +83,7 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
         {
             versions.Add(new ActiveVersion(
                 reader.GetGuid(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4),
-                reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6)));
+                reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetBoolean(7)));
         }
 
         return versions;
@@ -139,6 +141,12 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
             return VersionOutcome.Pending;
         }
 
+        if (status == VersionStatus.Quarantined)
+        {
+            await tx.CommitAsync(ct);
+            return VersionOutcome.Quarantined;
+        }
+
         // Une candidate inachevée (panne, contrôle en échec...) est remplacée par ce que la source publie maintenant.
         await ExecuteAsync(connection, tx, """
             UPDATE document_versions SET status = 'discarded', status_reason = @reason
@@ -179,6 +187,21 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
     public Task SetTextHashAsync(Guid versionId, string textHash, CancellationToken ct) =>
         ExecuteAsync("UPDATE document_versions SET text_hash = @hash WHERE id = @id AND text_hash IS DISTINCT FROM @hash",
             ct, ("id", versionId), ("hash", textHash));
+
+    /// <summary>
+    /// Enregistre le rapport des contrôles qualité. Une candidate découpée passe en « validated » ou en
+    /// « quarantined » (status_reason : les contrôles en échec) ; la version publiée garde son statut.
+    /// </summary>
+    public Task SaveQualityReportAsync(Guid versionId, string reportJson, bool passed, string summary, CancellationToken ct) =>
+        ExecuteAsync("""
+            UPDATE document_versions
+            SET quality_report = @report::jsonb,
+                status = CASE WHEN status = 'chunked' THEN @status ELSE status END,
+                status_reason = CASE WHEN status = 'chunked' AND NOT @passed THEN @summary ELSE status_reason END
+            WHERE id = @id
+            """, ct,
+            ("id", versionId), ("report", reportJson), ("passed", passed), ("summary", summary),
+            ("status", passed ? VersionStatus.Validated : VersionStatus.Quarantined));
 
     /// <summary>Fait passer une candidate d'une étape à la suivante ; sans effet si elle est déjà plus loin.</summary>
     public Task AdvanceAsync(Guid versionId, string from, string to, CancellationToken ct) =>

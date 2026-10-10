@@ -179,6 +179,15 @@ entier malgré la charge (élargissement du corpus en dernier).
   691 passages, 1 retour conservés), `web` reconstruit (plus d'erreur Kerberos dans ses journaux) ; `postgres` recréé
   au passage (montage `db/init` retiré), données intactes. Testé dans le navigateur par Alexandre le 2026-10-10. Avertissement préexistant : clés DataProtection de `web`
   non persistées (perdues à chaque recréation du conteneur) — à traiter avec la sécurité (S8).
+- [x] Session 2 (2026-10-10) : commande et tâche du DAG `validate` (entre `chunk` et `embed`), 8 contrôles déterministes
+  dans `Limpide.Core/Quality` (`QualityValidator`, 20 tests) : texte minimal, langue (part de mots outils français),
+  nombre de passages (± 30 % de la version publiée), longueur, doublons, structure (AI Act ≥ 100 articles, CNIL ≥ 4
+  intertitres), résidus HTML, texte d'interface. Seuils en configuration (`Quality`, appsettings de la console),
+  calibrés avec marge : `docs/notes/observations-qualite.md`. Candidate → `validated` ou `quarantined` (raison dans
+  `status_reason`, rapport JSON dans `quality_report`) ; versions publiées : rapport seul. `ReadyToEmbed` = `validated`.
+  Même contenu qu'une version en quarantaine à la collecte : elle y reste (`stillQuarantined`). Quarantaine = code 0
+  (compté dans le résumé) : l'alerte sera faite par `bilan` (session 3). Vérifié sur copie : quarantaine bloque
+  embed/publish, version publiée servie, levée simulée → validée, vectorisée, publiée. Pas encore en production.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 

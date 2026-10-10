@@ -1,3 +1,4 @@
+using Limpide.Core.Quality;
 using Limpide.Infrastructure;
 using Limpide.Ingestion.Chunking;
 using Limpide.Ingestion.Database;
@@ -5,6 +6,7 @@ using Limpide.Ingestion.Embed;
 using Limpide.Ingestion.Extract;
 using Limpide.Ingestion.Fetch;
 using Limpide.Ingestion.Publish;
+using Limpide.Ingestion.Validate;
 using Limpide.Ingestion.Search;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -38,6 +40,7 @@ public static class CommandRunner
             "fetch" => await services.GetRequiredService<FetchCommand>().RunAsync(ct),
             "extract" => await services.GetRequiredService<ExtractCommand>().RunAsync(ct),
             "chunk" => await services.GetRequiredService<ChunkCommand>().RunAsync(ct),
+            "validate" => await services.GetRequiredService<ValidateCommand>().RunAsync(ct),
             "embed" => await services.GetRequiredService<EmbedCommand>().RunAsync(ct),
             "publish" => await services.GetRequiredService<PublishCommand>().RunAsync(ct),
             "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
@@ -68,6 +71,8 @@ public static class CommandRunner
         builder.Services.AddSingleton<FetchCommand>();
         builder.Services.AddSingleton<ExtractCommand>();
         builder.Services.AddSingleton<ChunkCommand>();
+        builder.Services.AddSingleton(builder.Configuration.GetSection("Quality").Get<QualityOptions>() ?? new QualityOptions());
+        builder.Services.AddSingleton<ValidateCommand>();
         builder.Services.AddSingleton<EmbedCommand>();
         builder.Services.AddSingleton<PublishCommand>();
         builder.Services.AddSingleton<AskCommand>();

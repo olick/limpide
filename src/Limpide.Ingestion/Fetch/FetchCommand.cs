@@ -64,6 +64,7 @@ public sealed class FetchCommand(
         {
             VersionOutcome.Unchanged => "unchanged",
             VersionOutcome.Pending => "pending",
+            VersionOutcome.Quarantined => "stillQuarantined",
             VersionOutcome.Created => "created",
             VersionOutcome.Restored => "restored",
             _ => outcome.ToString(),
@@ -131,6 +132,7 @@ public sealed class FetchCommand(
     {
         VersionOutcome.Unchanged => "inchangé",
         VersionOutcome.Pending => "candidate déjà collectée, en cours de traitement",
+        VersionOutcome.Quarantined => "toujours en quarantaine (même contenu que la version bloquée)",
         VersionOutcome.Created => "nouvelle version candidate",
         VersionOutcome.Restored => "version déjà connue, de nouveau candidate",
         _ => outcome.ToString(),

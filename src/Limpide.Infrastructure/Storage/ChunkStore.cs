@@ -1,4 +1,5 @@
 using Limpide.Core.Chunking;
+using Limpide.Core.Quality;
 using Npgsql;
 using NpgsqlTypes;
 
@@ -20,6 +21,33 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
         command.Parameters.AddWithValue("extractor", extractorVersion);
         command.Parameters.AddWithValue("chunker", chunkerVersion);
         return await command.ExecuteScalarAsync(ct) is true;
+    }
+
+    /// <summary>Texte et ancre des passages d'une version, dans l'ordre : l'entrée des contrôles qualité.</summary>
+    public async Task<IReadOnlyList<PassageText>> ListTextsAsync(Guid versionId, CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand(
+            "SELECT content, anchor FROM chunks WHERE document_version_id = @version ORDER BY ordinal");
+        command.Parameters.AddWithValue("version", versionId);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+
+        var passages = new List<PassageText>();
+        while (await reader.ReadAsync(ct))
+            passages.Add(new PassageText(reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetString(1)));
+        return passages;
+    }
+
+    /// <summary>Nombre de passages de la version publiée du même document ; null s'il n'y en a pas d'autre.</summary>
+    public async Task<int?> PublishedCountAsync(Guid versionId, CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand("""
+            SELECT (SELECT count(*) FROM chunks c WHERE c.document_version_id = p.id)
+            FROM document_versions v
+            JOIN document_versions p ON p.document_id = v.document_id AND p.is_current AND p.id <> v.id
+            WHERE v.id = @version
+            """);
+        command.Parameters.AddWithValue("version", versionId);
+        return await command.ExecuteScalarAsync(ct) is long count ? (int)count : null;
     }
 
     /// <summary>

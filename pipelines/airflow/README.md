@@ -71,7 +71,7 @@ Après avoir désactivé les DAG d'exemple, la base d'Airflow gardait leur trace
 
 | DAG | Rôle |
 |---|---|
-| `ingestion` | `fetch → extract → chunk → embed → publish`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` |
+| `ingestion` | `fetch → extract → chunk → validate → embed → publish`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` |
 | `decouverte` | apprentissage : deux tâches qui réussissent, une qui échoue volontairement (relances, logs, « Clear ») |
 
 ### `ingestion`

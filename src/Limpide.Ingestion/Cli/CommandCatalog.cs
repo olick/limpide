@@ -18,6 +18,7 @@ public static class CommandCatalog
         new("fetch", "fetch", "télécharge le corpus (corpus.json) ; un contenu nouveau devient une version candidate", Ingestion),
         new("extract", "extract", "extrait le texte (data/extracted) ; écarte les candidates au texte inchangé", Ingestion),
         new("chunk", "chunk", "découpe le texte extrait en passages (table chunks)", Ingestion),
+        new("validate", "validate", "contrôles qualité des candidates découpées : validées, ou en quarantaine", Ingestion),
         new("embed", "embed", "calcule les embeddings des passages qui n'en ont pas", Ingestion),
         new("publish", "publish", "met en service les candidates prêtes (bascule atomique de la recherche)", Ingestion),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
