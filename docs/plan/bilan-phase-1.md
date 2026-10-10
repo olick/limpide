@@ -50,7 +50,7 @@ Les points qui ont changé une décision, ou qui auraient fait échouer la démo
 | Schéma modifié en recréant la base | impossible en production | outil de migrations SQL | S5 |
 | Déploiement manuel, une seule machine | erreurs de manipulation, pas de préproduction | Terraform sur Azure, deux environnements | S6 |
 | Secrets dans un fichier sur le serveur | fuite, rotation difficile | Key Vault, identités managées | S6 |
-| Hébergement du modèle d'embedding | coût au repos, démarrage à froid | comparer Ollama sur CPU et `mistral-embed` (mesure, recalibrage du seuil) | S6 (ADR-012) |
+| Hébergement du modèle d'embedding | coût au repos, démarrage à froid | comparer Ollama sur CPU et `mistral-embed` (mesure, recalibrage du seuil) | S6 (ADR sur l'hébergement des modèles) |
 | Pas d'évaluation automatique avant mise en ligne | une modification du prompt ou du modèle dégrade la qualité sans alerte | jeu de 50 questions, évaluation en CI, déploiement bloqué si le score baisse | S7 |
 | Relecture des réponses entièrement manuelle | coûteuse, donc rare | relecture assistée (modèle juge) + échantillon relu par un humain | S7 |
 | Pas de supervision ni de traces | une panne ou une dérive passe inaperçue | OpenTelemetry, tableaux de bord, alertes | S8 |

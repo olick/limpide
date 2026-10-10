@@ -48,7 +48,7 @@ empreinte, même version d'extracteur ou de découpeur, passages déjà vectoris
 **Échec d'une étape** : les suivantes tournent quand même (`all_done`) et ne traitent que les versions cohérentes ;
 un document en échec plus haut est signalé, les autres avancent.
 
-## Cycle de vie d'une version (ADR-014)
+## Cycle de vie d'une version (ADR-008)
 
 ```mermaid
 stateDiagram-v2

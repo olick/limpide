@@ -3,7 +3,7 @@
 Docker Compose **officiel** d'Apache Airflow 3.3.1 (exécuteur Celery), deux modifications seulement :
 ports limités à `127.0.0.1`, DAG d'exemple désactivés. Les ajouts propres à Limpide sont dans
 `docker-compose.override.yaml` (fusionné automatiquement). Pour le développement : l'hébergement d'Airflow
-en production est décidé en S6 (ADR-011).
+en production est décidé en S6 (ADR sur l'hébergement d'Airflow).
 
 **Airflow orchestre, il ne traite pas les données** : chaque tâche lance une commande de la console d'ingestion
 (`fetch`, `extract`, `chunk`, `embed`), déjà idempotente ; c'est ce qui rend les relances sans risque.
@@ -136,10 +136,10 @@ dates et ne la trouve pas.
 - **Une source qui échouait arrêtait la chaîne** (`extract`, `chunk`, `embed` en `upstream_failed`) : corrigé en
   session 4 (`all_done` + tâche `bilan`).
 - **Un document disparaissait de la recherche entre `fetch` et la fin d'`embed`** (`fetch` rendait la nouvelle
-  version courante tout de suite). **Corrigé en S5** (ADR-014) : candidate, puis bascule atomique par `publish`.
+  version courante tout de suite). **Corrigé en S5** (ADR-008) : candidate, puis bascule atomique par `publish`.
 - **Fausses nouvelles versions CNIL** (déjà connues) : le 2026-10-08, `fetch` a créé 2 versions CNIL dont le texte
   extrait est identique à l'ancien (mêmes 26 et 31 passages), et ce **trois fois dans la journée** (8 h, 16 h 30,
   19 h) : le HTML change plusieurs fois par jour. ≈ 1 min de vectorisation inutile à chaque exécution.
-  **Corrigé en S5** (ADR-014) : candidate au texte identique écartée par `extract` (vérifié le 2026-10-10 : 2 fausses
+  **Corrigé en S5** (ADR-008) : candidate au texte identique écartée par `extract` (vérifié le 2026-10-10 : 2 fausses
   versions écartées, aucune vectorisation).
 - **Interface en français** : « Clear » s'appelle « Réinitialiser » (raccourci Maj + C).

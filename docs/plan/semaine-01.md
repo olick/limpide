@@ -93,7 +93,7 @@ ni passage vide, ni article coupé au milieu d'une phrase, ni menu de navigation
    son article perd la phrase qui introduit sa liste (ex. « h) l'utilisation de systèmes… » sans
    « 1. Les pratiques suivantes sont interdites: ») ; le titre (« Article 5 — Pratiques interdites… ») peut compenser.
    Recalculer les embeddings, repasser les 10 questions, comparer les deux scores. On ne garde la variante que si
-   elle améliore le résultat, et on note la mesure dans `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
+   elle améliore le résultat, et on note la mesure dans `docs/notes/observations-decoupage.md` (matière de l'ADR sur la stratégie de découpage).
 5. Compléter l'ADR-002 avec les mesures (temps d'ingestion, qualité observée).
 
 **Terminé quand** : le score est noté dans le README, même s'il est mauvais. C'est le point de référence.

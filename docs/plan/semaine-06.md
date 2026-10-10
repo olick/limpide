@@ -57,7 +57,7 @@
 4. **Réseau** : la base n'est joignable que depuis l'environnement de l'application.
    Deux options à comparer : accès privé par réseau virtuel (plus sûr, plus complexe et plus cher)
    ou accès public restreint par pare-feu. Choisir et justifier.
-5. **Embeddings en production** : trancher entre un conteneur Ollama dans Azure et une API d'embeddings (voir ADR-012).
+5. **Embeddings en production** : trancher entre un conteneur Ollama dans Azure et une API d'embeddings (voir l'ADR sur l'hébergement des modèles).
 
 **Terminé quand** : la démo tourne sur Azure, déployée uniquement par Terraform.
 
@@ -72,10 +72,10 @@
 
 ## Session 6 : décisions et documentation (≈ 2 h 30)
 
-1. **ADR-010 — Container Apps plutôt qu'AKS** : coût, exploitation, compétences ; AKS comme voie de montée en charge.
-2. **ADR-011 — hébergement d'Airflow** : service managé, conteneur dédié, ou petite machine.
+1. **ADR — Container Apps plutôt qu'AKS** : coût, exploitation, compétences ; AKS comme voie de montée en charge.
+2. **ADR — hébergement d'Airflow** : service managé, conteneur dédié, ou petite machine.
    C'est le composant le plus lourd du projet : chiffrer chaque option.
-3. **ADR-012 — LLM par API ou auto-hébergé sur GPU** : calcul du coût mensuel pour 100, 1 000 et 10 000 questions par jour,
+3. **ADR — hébergement des modèles : LLM par API ou auto-hébergé sur GPU** : calcul du coût mensuel pour 100, 1 000 et 10 000 questions par jour,
    seuil de bascule, contraintes de souveraineté. On ne loue pas de GPU : le calcul suffit.
 4. Schéma d'architecture physique (ressources, réseau, flux) et comparaison avec le déploiement manuel de la semaine 3.
 
@@ -94,7 +94,7 @@
 ## Livrables
 
 - `infrastructure/terraform/` : backend, modules, environnements
-- ADR-010, ADR-011, ADR-012
+- ADR : Container Apps ou AKS, hébergement d'Airflow, hébergement des modèles (API ou GPU)
 - Schéma d'architecture physique
 - Démo servie depuis Azure
 
@@ -106,4 +106,4 @@
 | Identités managées | S7 : authentification de GitHub Actions à Azure |
 | Journalisation Container Apps | S8 : observabilité |
 | Alertes de budget | S8 : FinOps |
-| ADR-012 (coût GPU) | Soutenance BC02 : dimensionnement CPU/GPU |
+| ADR hébergement des modèles (coût GPU) | Soutenance BC02 : dimensionnement CPU/GPU |

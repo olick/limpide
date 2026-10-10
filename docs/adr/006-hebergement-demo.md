@@ -59,7 +59,7 @@ de quelques centaines de millisecondes (non mesuré sur le VPS), et une revector
 opération rare, de l'ordre de 30 à 40 minutes. Passage à une offre supérieure possible si la mémoire manque.
 
 L'option 3 (`mistral-embed`, sans Ollama) n'est plus nécessaire pour tenir dans le serveur ; elle reste une
-simplification à mesurer dans l'ADR-012 (semaine 6), avec le reste de l'infrastructure Azure.
+simplification à mesurer dans l'ADR sur l'hébergement des modèles (semaine 6), avec le reste de l'infrastructure Azure.
 
 ## Conséquences
 
@@ -72,7 +72,7 @@ simplification à mesurer dans l'ADR-012 (semaine 6), avec le reste de l'infrast
 - Les données des utilisateurs (questions posées) transitent par le serveur et par Mistral : rien n'est conservé
   pour l'instant ; la question des journaux et des données personnelles est traitée en S8.
 - **Conditions de révision** : besoin de haute disponibilité ; trafic qui sature le serveur ; passage à Azure
-  en S6 (ADR-010, 011, 012), qui reprendra ce choix avec les coûts réels mesurés ici.
+  en S6 (ADR sur Container Apps, l'hébergement d'Airflow et celui des modèles), qui reprendra ce choix avec les coûts réels mesurés ici.
 
 Sources : [OVHcloud, offres VPS](https://www.ovhcloud.com/fr/vps/) ;
 [comparaison Container Apps / Hetzner, 2026-09](https://bex.co/blog/2026/09/07/azure-container-apps-vs-hetzner-box) ;

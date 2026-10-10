@@ -51,7 +51,7 @@ Option 3. Le DAG `ingestion` ne contient que l'ordre des tâches, leurs réglage
 - **Coût** : un conteneur par tâche, ≈ 1 s de démarrage chacun ; négligeable pour un traitement hebdomadaire.
 - **Socket Docker monté dans le worker : choix de DÉVELOPPEMENT seulement.** Il donne à Airflow le contrôle complet
   de Docker, donc de la machine. En production, les tâches seront lancées par un service fait pour cela
-  (Container Apps Jobs ou équivalent, décision en S6 : ADR-011), avec une identité aux droits limités.
+  (Container Apps Jobs ou équivalent, décision en S6, ADR sur l'hébergement d'Airflow), avec une identité aux droits limités.
 - **Code de sortie grossier** : une commande en échec partiel (un document sur trois) et une commande en échec
   total (base arrêtée) rendent le même code 1. Airflow relance donc toute la commande dans les deux cas ;
   acceptable parce qu'elle est idempotente.

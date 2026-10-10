@@ -1,6 +1,6 @@
 # Observations sur l'extraction et le découpage
 
-Notes prises au fil de l'eau pour l'ADR-008 (stratégie de découpage, semaine 5).
+Notes prises au fil de l'eau pour l'ADR sur la stratégie de découpage (semaine 5).
 
 ## Semaine 1 — premier découpage structurel (2026-09-29)
 

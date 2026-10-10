@@ -53,7 +53,7 @@ Lecture :
   pour la phase 1, avec deux réserves : échantillon de 10 questions, et vocabulaire de l'utilisateur
   (« grands modèles de langage ») éloigné de celui du règlement (« modèles d'IA à usage général »).
 
-## Question ouverte pour les ADR-006 et 012
+## Question ouverte pour l'ADR-006 et l'ADR sur l'hébergement des modèles (S6)
 
 Le calcul hors ligne n'est pas le point dur : c'est un batch rare, dont la durée importe peu.
 Le point dur est la **vectorisation des questions** en ligne : l'API a besoin du même modèle, disponible

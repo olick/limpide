@@ -72,8 +72,8 @@ Le résultat est enregistré dans `quality_report` : chaque contrôle, sa valeur
 
 ## Session 5 : ADR et documentation (≈ 1 h 30)
 
-1. **ADR-008 — stratégie de découpage** : découpage structurel contre taille fixe, avec les observations de S1 et S5.
-2. **ADR-009 — batch incrémental plutôt que streaming** : fréquence de mise à jour des sources,
+1. **ADR — stratégie de découpage** : découpage structurel contre taille fixe, avec les observations de S1 et S5.
+2. **ADR — batch incrémental plutôt que streaming** : fréquence de mise à jour des sources,
    coût et complexité d'un flux temps réel, condition de révision.
 3. Mettre à jour le schéma du pipeline et `CLAUDE.md`.
 
@@ -94,7 +94,7 @@ Le résultat est enregistré dans `quality_report` : chaque contrôle, sa valeur
 - Commande `validate`, rapports de qualité, tâche Airflow associée
 - Démonstration de quarantaine enregistrée
 - Corpus élargi, `docs/sources.md` à jour
-- ADR-008, ADR-009
+- ADR : stratégie de découpage, batch incrémental plutôt que streaming (le cycle de vie des versions a pris le n° 008, session 1)
 
 ## Ce qui prépare la suite
 

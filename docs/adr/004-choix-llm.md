@@ -39,7 +39,7 @@ Prix relevés le 2026-10-05, par million de tokens (entrée / sortie).
    il faudrait un compte et une configuration sur une plateforme cloud, à d'autres tarifs.
 3. **Modèle ouvert auto-hébergé** — rentable seulement au-delà d'environ 80 000 questions par mois face à
    Mistral Medium ; démarrage à froid de plusieurs dizaines de secondes s'il s'éteint au repos ; un serveur
-   de plus à sécuriser (Ollama n'a pas d'authentification). Comparaison chiffrée prévue dans l'ADR-012 (S6).
+   de plus à sécuriser (Ollama n'a pas d'authentification). Comparaison chiffrée prévue en S6 (l'ADR sur l'hébergement des modèles).
 4. **Petit modèle local via Ollama pour le développement** (prévu par le plan) — sur le CPU du poste,
    génération estimée à environ une minute par réponse (non mesuré) : le temps perdu coûte plus que l'API.
 
@@ -71,7 +71,7 @@ Critères de la mesure : citations inventées (vérification automatique), « je
   Coût mesuré sur une question : 0,06 centime (Small), 0,67 centime (Medium), pour ≈ 1 800 tokens en entrée.
 - **Conditions de révision** : Medium 3.5 ne tient pas la fidélité au texte (essayer Large 3, ou Claude via
   une plateforme UE) ; l'intégration `IChatClient` pose problème ; le volume dépasse quelques dizaines de milliers
-  de questions par mois (ADR-012) ; ou un client impose un hébergement maîtrisé de bout en bout.
+  de questions par mois (l'ADR sur l'hébergement des modèles, S6) ; ou un client impose un hébergement maîtrisé de bout en bout.
 
 Sources : [tarifs de l'API Mistral](https://mistral.ai/pricing/api),
 [tarifs Anthropic](https://platform.claude.com/docs/en/about-claude/pricing.md),

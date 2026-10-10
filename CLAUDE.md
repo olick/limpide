@@ -56,6 +56,9 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
 ## Décisions déjà prises (voir `docs/adr/`)
 
+Numérotation : un numéro d'ADR s'attribue **à l'écriture**, dans l'ordre ; une décision à venir se désigne par son
+sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs/adr/README.md`.
+
 - ADR-001 : PostgreSQL + pgvector plutôt que Qdrant.
 - ADR-002 : embeddings locaux bge-m3 (accepté après les mesures de la semaine 1).
 - ADR-003 : ingestion en console .NET en phase 1, reprise par Airflow en phase 2 sans réécriture.
@@ -64,11 +67,11 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 - ADR-004 : génération par Mistral (API, inférence UE), **Medium 3.5** retenu après mesure et relecture : Small
   déforme des textes sans que rien ne le détecte ; le défaut de Medium (trancher la situation) a été corrigé par les
   consignes `answer/3` et est surveillé par le garde-fou `qualification-juridique`.
-- ADR-014 : cycle de vie des versions — `fetch` crée une **candidate**, la version publiée reste en service jusqu'à
-  `publish` (bascule atomique) ; candidate au texte identique écartée par `extract` (`TextFingerprint`) ; schéma par
-  migrations DbUp (`migrate`, jamais au démarrage du web).
 - ADR-007 : Airflow orchestre les commandes .NET conteneurisées (`DockerOperator` en local, socket Docker = choix de
   développement ; service cloud en S6), aucun code métier en Python ; étapes en `all_done`, tâche `bilan` pour l'alerte.
+- ADR-008 : cycle de vie des versions — `fetch` crée une **candidate**, la version publiée reste en service jusqu'à
+  `publish` (bascule atomique) ; candidate au texte identique écartée par `extract` (`TextFingerprint`) ; schéma par
+  migrations DbUp (`migrate`, jamais au démarrage du web).
 - Licence du dépôt : Apache 2.0.
 - Batch incrémental, pas de streaming : les sources changent rarement. Pas de Kafka.
 
@@ -165,7 +168,7 @@ Détail et constats : `pipelines/airflow/README.md`.
 **Semaine en cours : S5** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations ; Alexandre veut la faire en
 entier malgré la charge (élargissement du corpus en dernier).
 
-- [x] Session 1 (2026-10-10) : ADR-014. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
+- [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
   vie : `status`, `status_reason`, `text_hash`, `published_at`, `quality_report`), commande `migrate`. Statuts
   (`VersionStatus`) : collected → extracted → chunked → (validated) → embedded → published → archived ; discarded,
@@ -239,7 +242,7 @@ Constats de la semaine 1 à reprendre en S2 (détail : `docs/notes/observations-
 les considérants évincent les articles en tête des résultats (recherche hybride, ADR-005) ; le vocabulaire
 des utilisateurs diffère de celui du règlement (« grands modèles de langage » contre « modèles d'IA à usage général »).
 `evaluate` donne le score à chaque modification de la recherche : le relancer avant/après, noter dans le README.
-Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-008).
+Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR sur la stratégie de découpage, S5).
 
 Choix de la session 3 (voir la discussion du 2026-09-29) :
 
@@ -345,7 +348,7 @@ Choix de la session 4 :
   (`--Embedding:BatchSize=32` en ligne de commande pour essayer une autre taille de lot).
 - Ollama tourne sur CPU : le GPU du poste n'est pas exposé au conteneur (pas de NVIDIA Container Toolkit).
   Volontaire : c'est la configuration la plus proche de l'hébergement probable. Question ouverte dans l'ADR-002 :
-  où tourne le modèle qui vectorise les questions en ligne, et combien il coûte au repos (ADR-006, 012).
+  où tourne le modèle qui vectorise les questions en ligne, et combien il coûte au repos (ADR-006, puis l'ADR sur l'hébergement des modèles, S6).
 
 Notes de la session 2 :
 

@@ -45,9 +45,9 @@ Chaque question porte une version : le jeu d'évaluation est versionné comme le
 
 1. **Sortir le prompt du code** : fichier versionné, chargé par configuration.
 2. Fixer les seuils de blocage à partir des résultats actuels, avec une tolérance (les scores d'un LLM varient légèrement d'une exécution à l'autre).
-3. **ADR-013 — métriques et seuils** : ce qu'on mesure, pourquoi, les seuils, les limites du LLM juge.
+3. **ADR — métriques et seuils** : ce qu'on mesure, pourquoi, les seuils, les limites du LLM juge.
 
-**Terminé quand** : l'ADR-013 est rédigé et les seuils sont en configuration.
+**Terminé quand** : l'ADR sur les métriques est rédigé et les seuils sont en configuration.
 
 ## Session 4 : la chaîne CI/CD (≈ 2 h 30)
 
@@ -97,7 +97,7 @@ déploiement en production (validation manuelle)
 - `eval/questions.jsonl` (≈ 50 questions)
 - `Limpide.Evaluation`, rapports JSON
 - `.github/workflows/` : chaîne CI/CD avec authentification OIDC
-- ADR-013
+- ADR : métriques et seuils d'évaluation
 - Démonstration de blocage enregistrée, page publique d'évaluation
 
 ## Ce qui prépare la suite

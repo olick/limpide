@@ -1,4 +1,4 @@
-# ADR-014 : Cycle de vie des versions (candidate → publiée) et migrations du schéma
+# ADR-008 : Cycle de vie des versions (candidate → publiée) et migrations du schéma
 
 - **Statut** : accepté
 - **Date** : 2026-10-10

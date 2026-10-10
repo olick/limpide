@@ -49,6 +49,7 @@ de ces seuls passages → contrôles déterministes (citations vérifiées, qual
 | Génération | Mistral Medium 3.5, inférence UE | retenu après mesure et relecture face à Small ([ADR-004](docs/adr/004-choix-llm.md)) |
 | Recherche | vectorielle seule, seuil de pertinence | l'hybride (plein texte) mesurée moins bonne ([ADR-005](docs/adr/005-recherche-hybride.md)) |
 | Hébergement | VPS OVHcloud en France, Docker Compose | ≈ 4 €/mois, sans démarrage à froid ; Azure ≈ 10 fois plus cher ([ADR-006](docs/adr/006-hebergement-demo.md)) |
+| Mise à jour du corpus | une nouvelle version n'est publiée qu'une fois prête, d'un seul coup ; texte inchangé = version écartée | le document ne disparaît jamais de la recherche pendant une mise à jour ([ADR-008](docs/adr/008-cycle-de-vie-des-versions.md)) |
 | Orchestration | Airflow lance les commandes .NET en conteneurs, chaque semaine | relances, alerte avec la cause, même code qu'à la main ; trois pannes testées ([ADR-007](docs/adr/007-airflow-taches-conteneurisees.md), [schéma](docs/pipeline-ingestion.md)) |
 
 ## Ce qui a été mesuré

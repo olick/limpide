@@ -99,7 +99,7 @@ Détail : [`semaine-01.md`](semaine-01.md)
   par Git, donc tracés et, dès la S7, évalués en CI
 
 **Terminé quand** : une source corrompue est bloquée sans impact sur la démo, et l'alerte arrive.
-**ADR** : 008 stratégie de découpage (avec les observations de S1 et S5), 009 batch incrémental plutôt que streaming
+**ADR** : 008 cycle de vie des versions et migrations (ajouté, session 1) ; à écrire : stratégie de découpage (avec les observations de S1 et S5), batch incrémental plutôt que streaming
 **Blocs RNCP** : BC03, BC01 (qualité et traçabilité)
 
 ### S6 · Terraform : apprentissage et infrastructure Azure
@@ -117,7 +117,7 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - Hébergement d'Airflow : trancher et documenter
 
 **Terminé quand** : `terraform destroy` puis `terraform apply` recrée un environnement fonctionnel sans intervention manuelle.
-**ADR** : 010 Container Apps plutôt qu'AKS, 011 hébergement d'Airflow, 012 LLM par API ou auto-hébergé sur GPU (calcul de coût comparatif)
+**ADR** : Container Apps plutôt qu'AKS, hébergement d'Airflow, hébergement des modèles : LLM par API ou auto-hébergé sur GPU (calcul de coût comparatif)
 **Blocs RNCP** : BC02
 
 ### S7 · Évaluation et CI/CD
@@ -141,7 +141,7 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - **Back office, v2** : transformer un retour de visiteur en cas de test ; résultats d'évaluation par version
 
 **Terminé quand** : une modification du prompt qui dégrade les scores est bloquée automatiquement.
-**ADR** : 013 métriques et seuils d'évaluation
+**ADR** : métriques et seuils d'évaluation
 **Blocs RNCP** : BC04
 
 ### S8 · Observabilité, coûts, sécurité
@@ -213,7 +213,10 @@ test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 | BC03 Pipelines | Airflow, contrôles qualité, quarantaine, versionnement, arbitrage batch/streaming | S1, S4, S5 |
 | BC04 Industrialisation | Évaluation en CI, déploiement conditionné, observabilité, coûts, garde-fous, dérive | S2, S7, S8 |
 
-## Registre des ADR prévus
+## Registre des ADR
+
+Un numéro est attribué **au moment où l'ADR est écrit** (convention adoptée le 2026-10-10) : les décisions à venir se
+désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 
 | N° | Sujet | Semaine |
 |---|---|---|
@@ -224,13 +227,18 @@ test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 | 005 | Recherche hybride | S2 ✔ (écartée, mesures) |
 | 006 | Hébergement de la démo | S3 ✔ (VPS OVHcloud) |
 | 007 | Airflow et tâches .NET conteneurisées | S4 ✔ |
-| 008 | Stratégie de découpage | S5 |
-| 009 | Batch incrémental plutôt que streaming | S5 |
-| 010 | Container Apps plutôt qu'AKS | S6 |
-| 011 | Hébergement d'Airflow | S6 |
-| 012 | LLM par API ou auto-hébergé sur GPU | S6 |
-| 013 | Métriques et seuils d'évaluation | S7 |
-| 014 | Cycle de vie des versions et migrations du schéma (ajouté) | S5 ✔ |
+| 008 | Cycle de vie des versions et migrations du schéma (non prévu au départ) | S5 ✔ |
+
+À écrire :
+
+| Sujet | Semaine |
+|---|---|
+| Stratégie de découpage | S5 |
+| Batch incrémental plutôt que streaming | S5 |
+| Container Apps plutôt qu'AKS | S6 |
+| Hébergement d'Airflow | S6 |
+| Hébergement des modèles : LLM par API ou auto-hébergé sur GPU, embeddings | S6 |
+| Métriques et seuils d'évaluation | S7 |
 
 ## Risques du planning
 

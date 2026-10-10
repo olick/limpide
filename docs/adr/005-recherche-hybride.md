@@ -98,5 +98,5 @@ légitimes (marge 0,04, mince).
 - Pas de classifieur « hors périmètre » par LLM : le seuil suffit sur les exemples mesurés, un appel de plus coûterait
   sans gain démontré.
 - Le seuil dépend du modèle d'embedding et du texte vectorisé : à recalibrer si l'un change (ex. passage à une API
-  d'embeddings, ADR-006 / 012). À recalibrer aussi en semaine 7 sur un jeu plus large ; la marge de 0,04 côté
+  d'embeddings : ADR-006, puis l'ADR sur l'hébergement des modèles en S6). À recalibrer aussi en semaine 7 sur un jeu plus large ; la marge de 0,04 côté
   questions légitimes peut se révéler trop étroite (une question légitime mal formulée serait refusée).
