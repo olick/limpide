@@ -177,7 +177,7 @@ entier malgré la charge (élargissement du corpus en dernier).
   complet sans fenêtre d'absence, DAG local (2 fausses versions CNIL écartées). Base locale migrée.
   **Déployé en production le 2026-10-10** : sauvegarde, `git pull`, image ingestion, `migrate` (3 versions → published,
   691 passages, 1 retour conservés), `web` reconstruit (plus d'erreur Kerberos dans ses journaux) ; `postgres` recréé
-  au passage (montage `db/init` retiré), données intactes. Avertissement préexistant : clés DataProtection de `web`
+  au passage (montage `db/init` retiré), données intactes. Testé dans le navigateur par Alexandre le 2026-10-10. Avertissement préexistant : clés DataProtection de `web`
   non persistées (perdues à chaque recréation du conteneur) — à traiter avec la sécurité (S8).
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
@@ -206,8 +206,10 @@ En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours 
   (≈ 9 €/mois max avec Medium, sous le plafond Mistral de 10 €), appliqué dans `Home.razor` avant l'appel au modèle ;
   IP relevée dans `App.razor` (seule requête HTTP de la visite), transmise en paramètre du composant racine, non
   journalisée. Vérifié : Caddy écarte un `X-Forwarded-For` forgé, Docker transmet l'IP publique réelle, et Docker
-  contourne `ufw` pour les ports publiés. **Reste** : test dans le navigateur (message à la 11e question), alerte à 50 %
-  dans la console Mistral (Alexandre), anti-bot (proposé : reporter en S8).
+  contourne `ufw` pour les ports publiés. **Reste** : test du message à la 11e question,
+  anti-bot (proposé : reporter en S8). La console Mistral n'a pas d'alerte de seuil documentée (vérifié le
+  2026-10-10) : seulement le plafond mensuel (10 €, posé) et les tableaux de consommation ; l'alerte de budget est à
+  construire en S8 (le coût par question est déjà calculé).
   Chaque déploiement de `web` coupe le site quelques secondes (502 pendant le redémarrage).
 - [x] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
   limites) ; bilan `docs/plan/bilan-phase-1.md` (limites de la V1 = programme de la phase 2). **Reste (Alexandre)** :
