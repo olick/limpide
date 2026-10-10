@@ -11,3 +11,11 @@
 		-Server
 	}
 }
+
+# Adresse(s) redirigée(s) vers SITE_ADDRESS (ex. domaine nu « limpide-ia.fr » → « www.limpide-ia.fr ») : une seule
+# adresse canonique. Caddy obtient aussi le certificat de cette adresse, pour rediriger en HTTPS.
+# REDIRECT_FROM vide ou absent : docker-compose.prod.yml passe une adresse inexistante, en HTTP (aucun certificat
+# demandé), donc sans effet. Une variable vide n'est pas absente pour Caddy : la valeur par défaut est dans Compose.
+{$REDIRECT_FROM:http://redirection-inactive.invalid} {
+	redir https://{$SITE_ADDRESS}{uri} permanent
+}

@@ -19,6 +19,8 @@ services:
       - "${HTTPS_PORT:-443}:443"
     environment:
       SITE_ADDRESS: "${SITE_ADDRESS:-:80}"
+      # Vide ou absent : adresse inexistante en HTTP (un bloc sans adresse casserait la configuration de Caddy).
+      REDIRECT_FROM: "${REDIRECT_FROM:-http://redirection-inactive.invalid}"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data

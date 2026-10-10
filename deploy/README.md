@@ -123,9 +123,10 @@ limpide up -d caddy        # après toute modification de SITE_ADDRESS (restart 
 limpide logs caddy | grep -o '"msg":"certificate[^"]*"'
 ```
 
-Le domaine nu `limpide-ia.fr` pointe encore sur la redirection web d'OVH (213.186.33.5), qui ne sait pas répondre
-en HTTPS. Pour le servir aussi : remplacer cette redirection par une entrée A vers `57.129.175.88`, puis
-`SITE_ADDRESS=www.limpide-ia.fr, limpide-ia.fr`.
+Domaine nu `limpide-ia.fr` : entrée A vers `57.129.175.88` (zone DNS OVH, à la place de la redirection web d'OVH,
+qui ne savait pas répondre en HTTPS), et `REDIRECT_FROM=limpide-ia.fr` dans `.env.prod` : Caddy obtient son certificat
+et le redirige (301) vers `https://www.limpide-ia.fr`, l'adresse canonique (2026-10-10). Après modification de
+`.env.prod` : `limpide up -d caddy` (recréé pour lire la variable, coupure d'une seconde).
 
 ## Schéma de la base : migrations (S5)
 
