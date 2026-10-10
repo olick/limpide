@@ -207,7 +207,7 @@ En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours 
   IP relevée dans `App.razor` (seule requête HTTP de la visite), transmise en paramètre du composant racine, non
   journalisée. Vérifié : Caddy écarte un `X-Forwarded-For` forgé, Docker transmet l'IP publique réelle, et Docker
   contourne `ufw` pour les ports publiés. **Reste** : test dans le navigateur (message à la 11e question), alerte à 50 %
-  dans la console Mistral (Alexandre), anti-bot (proposé : reporter en S8), domaine nu (`limpide-ia.fr` → A du VPS).
+  dans la console Mistral (Alexandre), anti-bot (proposé : reporter en S8).
   Chaque déploiement de `web` coupe le site quelques secondes (502 pendant le redémarrage).
 - [x] Session 5 : README réorganisé pour un lecteur extérieur (architecture en schéma, choix et ADR, mesures, garde-fous,
   limites) ; bilan `docs/plan/bilan-phase-1.md` (limites de la V1 = programme de la phase 2). **Reste (Alexandre)** :
