@@ -6,6 +6,7 @@ using Limpide.Ingestion.Embed;
 using Limpide.Ingestion.Extract;
 using Limpide.Ingestion.Fetch;
 using Limpide.Ingestion.Publish;
+using Limpide.Ingestion.Review;
 using Limpide.Ingestion.Validate;
 using Limpide.Ingestion.Search;
 using Microsoft.Extensions.Configuration;
@@ -43,6 +44,9 @@ public static class CommandRunner
             "validate" => await services.GetRequiredService<ValidateCommand>().RunAsync(ct),
             "embed" => await services.GetRequiredService<EmbedCommand>().RunAsync(ct),
             "publish" => await services.GetRequiredService<PublishCommand>().RunAsync(ct),
+            "versions" => await services.GetRequiredService<VersionsCommand>().RunAsync(ct),
+            "release" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, release: true, ct),
+            "reject" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, release: false, ct),
             "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
             "search" => await services.GetRequiredService<SearchCommand>().RunAsync(line.Text, ct),
             "evaluate" => await services.GetRequiredService<EvaluateCommand>().RunAsync(ct),
@@ -75,6 +79,8 @@ public static class CommandRunner
         builder.Services.AddSingleton<ValidateCommand>();
         builder.Services.AddSingleton<EmbedCommand>();
         builder.Services.AddSingleton<PublishCommand>();
+        builder.Services.AddSingleton<VersionsCommand>();
+        builder.Services.AddSingleton<QuarantineDecisionCommand>();
         builder.Services.AddSingleton<AskCommand>();
         builder.Services.AddSingleton<SearchCommand>();
         builder.Services.AddSingleton<EvaluateCommand>();

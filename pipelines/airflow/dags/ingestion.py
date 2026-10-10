@@ -139,26 +139,46 @@ with DAG(
 
     @task(trigger_rule="all_done", retries=0)
     def bilan() -> dict[str, Any]:
-        """Rassemble les résumés ; une tâche sans résumé a échoué (le résumé n'est gardé qu'en cas de succès)."""
+        """
+        Rassemble les résumés et envoie au plus une alerte :
+        - une tâche a échoué (pas de résumé : il n'est gardé qu'en cas de succès) → alerte, exécution en échec ;
+        - une version est (ou reste) en quarantaine → alerte avec la raison et la marche à suivre, exécution réussie :
+          le pipeline a fonctionné, c'est la donnée qui est refusée, et la version publiée reste en service.
+        """
         context = get_current_context()
         ti = context["ti"]
         pulled: dict[str, str | None] = {command: ti.xcom_pull(task_ids=command) for command in COMMANDS}
-        summaries = {command: summary for command, summary in pulled.items() if summary is not None}
+        summaries: dict[str, dict[str, Any]] = {c: json.loads(s) for c, s in pulled.items() if s is not None}
         failed = [command for command in COMMANDS if command not in summaries]
-        if not failed:
-            return {command: json.loads(summary) for command, summary in summaries.items()}
+        quarantined: list[str] = summaries.get("validate", {}).get("quarantinedVersions", [])
+        still_quarantined: list[str] = summaries.get("fetch", {}).get("stillQuarantinedVersions", [])
 
         run_id = context["run_id"]
-        lines = [f"**Limpide : ingestion en échec** ({run_id})"]
-        for command in failed:
-            cause: list[str] = ti.xcom_pull(task_ids=command, key="cause") or ["cause non relevée (voir les logs)"]
-            lines.append(f"❌ `{command}` : " + "\n    ".join(cause))
-        lines += [f"✅ `{command}` : {summary}" for command, summary in summaries.items()]
+        lines: list[str] = []
+        if failed:
+            lines.append(f"**Limpide : ingestion en échec** ({run_id})")
+            for command in failed:
+                cause: list[str] = ti.xcom_pull(task_ids=command, key="cause") or ["cause non relevée (voir les logs)"]
+                lines.append(f"❌ `{command}` : " + "\n    ".join(cause))
+        elif quarantined or still_quarantined:
+            lines.append(f"**Limpide : version en quarantaine** ({run_id}) — la version publiée reste en service")
+        if quarantined or still_quarantined:
+            lines += [f"🛑 {version}" for version in quarantined]
+            lines += [f"🛑 toujours en quarantaine : {version}" for version in still_quarantined]
+            lines.append("Vérifier le texte, puis `release <empreinte> <motif>` ou `reject <empreinte> <motif>` "
+                         "(console d'ingestion, `versions` pour l'état).")
+        if not lines:
+            return summaries
+
+        if failed:
+            lines += [f"✅ `{command}` : {pulled[command]}" for command in summaries]
         lines.append(f"Logs : http://localhost:8080/dags/ingestion/runs/{urllib.parse.quote(run_id)}")
         message = "\n".join(lines)
         print(message)  # le même texte dans le log de bilan
         send_discord_alert(message)
-        # Sans cette exception, l'exécution serait marquée réussie dès que la dernière tâche (embed) réussit.
-        raise AirflowException(f"tâches en échec : {', '.join(failed)}")
+        if failed:
+            # Sans cette exception, l'exécution serait marquée réussie dès que la dernière tâche (publish) réussit.
+            raise AirflowException(f"tâches en échec : {', '.join(failed)}")
+        return summaries
 
     chain(fetch, extract, chunk, validate, embed, publish, bilan())

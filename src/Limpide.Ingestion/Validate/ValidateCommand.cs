@@ -87,6 +87,7 @@ public sealed class ValidateCommand(
         else
         {
             summary.Add("quarantined");
+            summary.Detail("quarantinedVersions", $"{version.SourceName} / {version.DocumentTitle} ({version.ContentHash[..12]}) : {report.Summary()}");
             logger.LogWarning("{Source} / {Title} : candidate EN QUARANTAINE ({Hash}…) — {Summary}",
                 version.SourceName, version.DocumentTitle, version.ContentHash[..12], report.Summary());
         }

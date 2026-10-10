@@ -71,7 +71,7 @@ Après avoir désactivé les DAG d'exemple, la base d'Airflow gardait leur trace
 
 | DAG | Rôle |
 |---|---|
-| `ingestion` | `fetch → extract → chunk → validate → embed → publish`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` |
+| `ingestion` | `fetch → extract → chunk → validate → embed → publish`, le lundi à 4 h UTC ; chaque tâche lance l'image `limpide-ingestion` ; `bilan` alerte en cas d'échec ou de quarantaine |
 | `decouverte` | apprentissage : deux tâches qui réussissent, une qui échoue volontairement (relances, logs, « Clear ») |
 
 ### `ingestion`
@@ -126,6 +126,48 @@ dates et ne la trouve pas.
 
 `data/pannes/` (non versionné) : `source-indisponible.json` = le format de `corpus.json` avec un seul document,
 `"url": "https://www.cnil.fr/fr/limpide-test-page-inexistante"`.
+
+## Quarantaine (S5)
+
+`validate` met en quarantaine une candidate qui échoue aux contrôles qualité (`docs/notes/observations-qualite.md`) :
+ni vectorisée ni publiée, la version publiée reste en service. **Ce n'est pas un échec du pipeline** : l'exécution
+reste réussie, mais `bilan` envoie une alerte Discord avec la raison et la marche à suivre :
+
+```
+**Limpide : version en quarantaine** (demo-quarantaine-…) — la version publiée reste en service
+🛑 CNIL / IA : Annoter les données (c3094b5d5737) : nombre-de-passages : écart d'au plus 0,3 avec la version
+   publiée, mesuré 0,615 ; structure : au moins 4 intertitres, mesuré 3
+Vérifier le texte, puis `release <empreinte> <motif>` ou `reject <empreinte> <motif>` (...)
+```
+
+Une collecte du même contenu la laisse en quarantaine (et l'alerte le rappelle) : seule une décision humaine l'en sort.
+
+```bash
+dotnet run --project src/Limpide.Ingestion -- versions                                  # état, empreintes, raisons
+dotnet run --project src/Limpide.Ingestion -- release c3094b5d "vérifié : refonte de la page, texte complet"
+dotnet run --project src/Limpide.Ingestion -- reject c3094b5d "page tronquée côté source"
+```
+
+- `release` : la version passe à `validated` ; le prochain passage d'`embed` et `publish` (DAG ou à la main) la publie.
+  À n'utiliser qu'après avoir relu le texte : une version tronquée publiée remplacerait la version complète.
+- `reject` : rejet définitif ; une collecte du même contenu est ignorée (`"rejected": 1` dans le résumé de `fetch`).
+- Motif obligatoire, gardé dans `status_reason` ; empreinte : au moins 8 caractères (voir `versions`).
+
+### Démonstration (à enregistrer pour la vidéo)
+
+`demo/quarantaine.sh` sert la fiche CNIL « IA : Annoter les données » **tronquée** (code 200, HTML valide, trois quarts
+du contenu absents) par un conteneur nginx local, et lance le DAG avec un corpus qui la désigne comme le vrai document.
+Chaque essai produit une nouvelle version (commentaire daté dans `<head>`).
+
+```bash
+pipelines/airflow/demo/quarantaine.sh            # page tronquée, serveur source-demo, DAG déclenché
+pipelines/airflow/demo/quarantaine.sh arreter    # arrête le serveur
+```
+
+À montrer : la grille du DAG (tout en vert), le XCom de `validate` (`quarantined: 1` et la raison), l'alerte Discord,
+`versions`, puis une question sur l'annotation dans l'application web : la réponse cite encore la section « Garantir
+la qualité de l'annotation », absente de la page tronquée. Vérifié le 2026-10-10 (deux prises, deux quarantaines,
+691 passages servis tout du long) ; `reject` et `release` vérifiés sur une copie de la base.
 
 ## Constats (matière de l'ADR-007 et de la S5)
 

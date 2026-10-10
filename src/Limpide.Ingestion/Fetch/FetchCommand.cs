@@ -65,10 +65,13 @@ public sealed class FetchCommand(
             VersionOutcome.Unchanged => "unchanged",
             VersionOutcome.Pending => "pending",
             VersionOutcome.Quarantined => "stillQuarantined",
+            VersionOutcome.Rejected => "rejected",
             VersionOutcome.Created => "created",
             VersionOutcome.Restored => "restored",
             _ => outcome.ToString(),
         });
+        if (outcome == VersionOutcome.Quarantined)
+            summary.Detail("stillQuarantinedVersions", $"{source.Name} / {document.Title} ({hash[..12]})");
 
         logger.LogInformation("{Source} / {Title} : {Outcome} ({Hash}…, {Size:N0} octets)",
             source.Name, document.Title, Describe(outcome), hash[..12], content.Length);
@@ -133,6 +136,7 @@ public sealed class FetchCommand(
         VersionOutcome.Unchanged => "inchangé",
         VersionOutcome.Pending => "candidate déjà collectée, en cours de traitement",
         VersionOutcome.Quarantined => "toujours en quarantaine (même contenu que la version bloquée)",
+        VersionOutcome.Rejected => "contenu déjà rejeté après vérification : ignoré",
         VersionOutcome.Created => "nouvelle version candidate",
         VersionOutcome.Restored => "version déjà connue, de nouveau candidate",
         _ => outcome.ToString(),

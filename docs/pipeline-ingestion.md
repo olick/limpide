@@ -74,8 +74,10 @@ d'`embed` (≈ 17 min pendant la panne d'Ollama du 2026-10-08).
 
 **Quarantaine** : une candidate qui échoue à un contrôle qualité (texte trop court, autre langue, nombre de passages
 très différent, structure perdue, résidus HTML...) n'est ni vectorisée ni publiée ; la raison est enregistrée
-(`status_reason`, rapport complet dans `quality_report`). Une nouvelle collecte du même contenu la laisse en
-quarantaine : seule une décision humaine l'en sort. Seuils et calibrage : `docs/notes/observations-qualite.md`.
+(`status_reason`, rapport complet dans `quality_report`). `bilan` envoie une alerte avec la raison ; l'exécution reste
+réussie (le pipeline a fonctionné, c'est la donnée qui est refusée). Une nouvelle collecte du même contenu la laisse
+en quarantaine : seule une décision humaine l'en sort (`release` : publiée au prochain passage ; `reject` : rejet
+définitif, le même contenu sera ignoré). Seuils et calibrage : `docs/notes/observations-qualite.md`.
 
 **Fausses nouvelles versions** : une candidate dont le texte extrait est identique à celui de la version publiée
 (pages CNIL dont seul le HTML change) est écartée dès `extract`, sans découpage ni vectorisation.

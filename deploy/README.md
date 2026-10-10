@@ -144,6 +144,17 @@ Les bases créées avant la S5 (scripts `db/init`, supprimés depuis) reçoivent
 EXISTS`) : DbUp les inscrit simplement dans son journal. Vérifié le 2026-10-10 sur une copie de la base locale et
 sur une base vide : même schéma à l'arrivée, aucune donnée perdue.
 
+## Versions en quarantaine
+
+Les contrôles qualité (`validate`) bloquent une version douteuse ; la version publiée reste en service. Décision
+humaine, après lecture du texte (procédure complète : `pipelines/airflow/README.md`, « Quarantaine ») :
+
+```bash
+limpide run --rm ingestion versions                                   # état, empreintes, raisons
+limpide run --rm ingestion release <empreinte> "<motif>"              # publiée au prochain passage d'embed et publish
+limpide run --rm ingestion reject <empreinte> "<motif>"               # rejet définitif
+```
+
 ## Retours des visiteurs
 
 Formulaire en bas de page : trois questions facultatives, dernière question et réponse jointes seulement avec

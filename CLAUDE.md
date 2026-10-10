@@ -187,7 +187,15 @@ entier malgré la charge (élargissement du corpus en dernier).
   `status_reason`, rapport JSON dans `quality_report`) ; versions publiées : rapport seul. `ReadyToEmbed` = `validated`.
   Même contenu qu'une version en quarantaine à la collecte : elle y reste (`stillQuarantined`). Quarantaine = code 0
   (compté dans le résumé) : l'alerte sera faite par `bilan` (session 3). Vérifié sur copie : quarantaine bloque
-  embed/publish, version publiée servie, levée simulée → validée, vectorisée, publiée. Pas encore en production.
+  embed/publish, version publiée servie, levée simulée → validée, vectorisée, publiée.
+- [x] Session 3 (2026-10-10) : `bilan` alerte sur une quarantaine (raison + marche à suivre) sans faire échouer
+  l'exécution ; résumé JSON avec détails (`quarantinedVersions`, `stillQuarantinedVersions`). Commandes `versions`,
+  `release <empreinte> <motif>` (→ validated, publiée au prochain passage), `reject` (définitif : même contenu ignoré
+  à la collecte). Démonstration `pipelines/airflow/demo/quarantaine.sh` : fiche CNIL servie tronquée par nginx local
+  (`source-demo`, réseau `limpide_default`, `fetchUrl` du corpus de démo) → quarantaine (passages −62 %, 3
+  intertitres), alerte reçue, 691 passages servis. Base locale : 2 versions de démonstration en quarantaine
+  (c3094b5d, 4e4b03a2), gardées comme exemples. **Reste (Alexandre)** : enregistrer la démonstration pour la vidéo.
+  Sessions 2 et 3 pas encore en production.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 

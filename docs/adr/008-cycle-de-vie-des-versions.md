@@ -73,3 +73,15 @@ collected → extracted → chunked → (validated, S5 session 2) → embedded �
 - Le schéma de production évolue désormais par `migrate` (procédure : `deploy/README.md`).
 - Les statuts préparent les sessions suivantes : `validated` et `quarantined` (contrôles qualité), `quality_report`
   (rapport des contrôles), et le back office (voir une version bloquée, la publier ou la rejeter).
+
+## Complément : contrôles qualité et quarantaine (2026-10-10, sessions 2 et 3)
+
+- `validate` (8 contrôles déterministes, seuils calibrés : `docs/notes/observations-qualite.md`) fait passer une
+  candidate découpée en `validated` ou en `quarantined` ; seules les candidates validées sont vectorisées.
+- **Une quarantaine n'est pas un échec** : code de sortie 0, exécution du DAG réussie, mais alerte Discord avec la
+  raison (le résumé JSON de `validate` porte la liste des versions bloquées). Un échec, lui, signale une panne.
+- **Décision humaine** : `release` (lève la quarantaine : publiée au prochain passage) ou `reject` (rejet définitif,
+  le même contenu sera ignoré à la collecte), motif obligatoire. Une version en quarantaine collectée de nouveau à
+  l'identique y reste. Le back office reprendra ces deux décisions (S5).
+- **Démonstration** (`pipelines/airflow/demo/quarantaine.sh`) : une page CNIL servie tronquée (code 200, HTML valide)
+  est bloquée (passages −62 %, structure perdue), la version publiée reste servie, l'alerte arrive.

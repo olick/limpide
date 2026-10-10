@@ -9,6 +9,7 @@ public static class CommandCatalog
 {
     public const string Database = "Base de données";
     public const string Ingestion = "Ingestion, dans l'ordre";
+    public const string Review = "Quarantaine (décision humaine)";
     public const string Search = "Questions et recherche";
     public const string Session = "Mode interactif";
 
@@ -21,6 +22,9 @@ public static class CommandCatalog
         new("validate", "validate", "contrôles qualité des candidates découpées : validées, ou en quarantaine", Ingestion),
         new("embed", "embed", "calcule les embeddings des passages qui n'en ont pas", Ingestion),
         new("publish", "publish", "met en service les candidates prêtes (bascule atomique de la recherche)", Ingestion),
+        new("versions", "versions", "état des documents : version publiée, candidates, quarantaines et leur raison", Review),
+        new("release", "release <empreinte> <motif>", "lève une quarantaine après vérification : publiée au prochain passage", Review, RequiresText: true),
+        new("reject", "reject <empreinte> <motif>", "rejette définitivement une version en quarantaine", Review, RequiresText: true),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),
         new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
@@ -47,7 +51,7 @@ public static class CommandCatalog
         {
             text.AppendLine().AppendLine($"{group.Key} :");
             foreach (var command in group)
-                text.AppendLine($"  {command.Usage,-20} {command.Description}");
+                text.AppendLine($"  {command.Usage,-28} {command.Description}");
         }
 
         text.AppendLine().Append("""

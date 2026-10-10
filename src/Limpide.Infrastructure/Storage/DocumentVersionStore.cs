@@ -19,6 +19,9 @@ public enum VersionOutcome
 
     /// <summary>Même empreinte qu'une version en quarantaine : elle y reste, seule une décision humaine l'en sort.</summary>
     Quarantined,
+
+    /// <summary>Même empreinte qu'une version rejetée après vérification (commande reject) : ignorée.</summary>
+    Rejected,
 }
 
 /// <summary>
@@ -37,6 +40,9 @@ public static class VersionStatus
     public const string Discarded = "discarded";
     public const string Quarantined = "quarantined";
 
+    /// <summary>Début de status_reason d'une version rejetée par une personne (commande reject) : le rejet est définitif.</summary>
+    public const string RejectedReason = "rejetée : ";
+
     /// <summary>Candidates en cours de traitement (au plus une par document : index one_candidate_version_per_document).</summary>
     public static readonly string[] Candidates = [Collected, Extracted, Chunked, Validated, Embedded];
 
@@ -51,6 +57,11 @@ public sealed record ActiveVersion(
 {
     public bool IsPublished => Status == VersionStatus.Published;
 }
+
+/// <summary>Une version telle que la montre la commande versions.</summary>
+public sealed record VersionRow(
+    string SourceName, string DocumentTitle, string ContentHash, string Status, string? Reason,
+    DateTimeOffset FetchedAt, DateTimeOffset? PublishedAt);
 
 /// <summary>Version qui a changé d'étape, pour le journal des commandes.</summary>
 public sealed record VersionChange(string SourceName, string DocumentTitle, string ContentHash);
@@ -128,12 +139,20 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
         // Une version déjà écartée parce que son texte est celui de la version publiée (fausse nouvelle version CNIL
         // revenue telle quelle) compte comme la version publiée : rien à refaire.
         var status = await ExecuteScalarAsync<string?>(connection, tx, """
-            SELECT CASE WHEN v.status = 'discarded' AND v.text_hash = p.text_hash THEN 'published' ELSE v.status END
+            SELECT CASE WHEN v.status = 'discarded' AND v.text_hash = p.text_hash THEN 'published'
+                        WHEN v.status = 'discarded' AND v.status_reason LIKE @rejected || '%' THEN 'rejected'
+                        ELSE v.status END
             FROM document_versions v
             LEFT JOIN document_versions p ON p.document_id = v.document_id AND p.is_current
             WHERE v.document_id = @document_id AND v.content_hash = @content_hash
             """, ct,
-            ("document_id", documentId), ("content_hash", contentHash));
+            ("document_id", documentId), ("content_hash", contentHash), ("rejected", VersionStatus.RejectedReason));
+
+        if (status == "rejected")
+        {
+            await tx.CommitAsync(ct);
+            return VersionOutcome.Rejected;
+        }
 
         if (status is not null && VersionStatus.Candidates.Contains(status))
         {
@@ -202,6 +221,87 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
             """, ct,
             ("id", versionId), ("report", reportJson), ("passed", passed), ("summary", summary),
             ("status", passed ? VersionStatus.Validated : VersionStatus.Quarantined));
+
+    /// <summary>
+    /// Décision humaine sur une version en quarantaine, désignée par le début de son empreinte (au moins 8 caractères) :
+    /// levée (« validated » : elle sera vectorisée puis publiée) ou rejet définitif (« discarded »). Le motif est gardé
+    /// dans status_reason. Erreur si l'empreinte est ambiguë ou ne désigne aucune version en quarantaine.
+    /// </summary>
+    public async Task<VersionChange> DecideQuarantineAsync(string hashPrefix, bool release, string motive, CancellationToken ct)
+    {
+        if (hashPrefix.Length < 8 || !hashPrefix.All(char.IsAsciiHexDigitLower))
+            throw new ArgumentException($"empreinte « {hashPrefix} » : au moins 8 caractères hexadécimaux minuscules (voir la commande versions)");
+
+        await using var connection = await dataSource.OpenConnectionAsync(ct);
+        await using var tx = await connection.BeginTransactionAsync(ct);
+
+        var ids = new List<Guid>();
+        await using (var find = new NpgsqlCommand(
+            "SELECT id FROM document_versions WHERE status = 'quarantined' AND content_hash LIKE @prefix || '%' FOR UPDATE",
+            connection, tx))
+        {
+            find.Parameters.AddWithValue("prefix", hashPrefix);
+            await using var reader = await find.ExecuteReaderAsync(ct);
+            while (await reader.ReadAsync(ct))
+                ids.Add(reader.GetGuid(0));
+        }
+
+        if (ids.Count != 1)
+            throw new ArgumentException(ids.Count == 0
+                ? $"aucune version en quarantaine dont l'empreinte commence par « {hashPrefix} »"
+                : $"{ids.Count} versions en quarantaine commencent par « {hashPrefix} » : préciser l'empreinte");
+
+        VersionChange change;
+        try
+        {
+            await using var update = new NpgsqlCommand($"""
+                WITH changed AS (
+                    UPDATE document_versions SET status = @status, status_reason = @reason
+                    WHERE id = @id RETURNING document_id, content_hash)
+                SELECT {Describe.Replace("v.content_hash", "changed.content_hash")}
+                JOIN changed ON changed.document_id = d.id
+                """, connection, tx);
+            update.Parameters.AddWithValue("id", ids[0]);
+            update.Parameters.AddWithValue("status", release ? VersionStatus.Validated : VersionStatus.Discarded);
+            update.Parameters.AddWithValue("reason", (release ? "quarantaine levée : " : VersionStatus.RejectedReason) + motive);
+            await using var reader = await update.ExecuteReaderAsync(ct);
+            await reader.ReadAsync(ct);
+            change = new VersionChange(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+        }
+        catch (PostgresException ex) when (ex.SqlState == PostgresErrorCodes.UniqueViolation)
+        {
+            throw new InvalidOperationException(
+                "une autre version de ce document est déjà en cours de traitement : la laisser aboutir, puis recommencer", ex);
+        }
+
+        await tx.CommitAsync(ct);
+        return change;
+    }
+
+    /// <summary>Versions publiées, candidates et en quarantaine, puis les dernières écartées ou rejetées (commande versions).</summary>
+    public async Task<IReadOnlyList<VersionRow>> ListForReviewAsync(CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand("""
+            SELECT s.name, coalesce(d.title, d.url), v.content_hash, v.status, v.status_reason, v.fetched_at, v.published_at
+            FROM document_versions v
+            JOIN documents d ON d.id = v.document_id
+            JOIN sources s ON s.id = d.source_id
+            WHERE v.status <> 'archived'
+              AND (v.status <> 'discarded' OR v.fetched_at > now() - interval '7 days')
+            ORDER BY s.name, d.title, v.fetched_at DESC
+            """);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+
+        var rows = new List<VersionRow>();
+        while (await reader.ReadAsync(ct))
+        {
+            rows.Add(new VersionRow(reader.GetString(0), reader.GetString(1), reader.GetString(2), reader.GetString(3),
+                reader.IsDBNull(4) ? null : reader.GetString(4), reader.GetFieldValue<DateTimeOffset>(5),
+                reader.IsDBNull(6) ? null : reader.GetFieldValue<DateTimeOffset>(6)));
+        }
+
+        return rows;
+    }
 
     /// <summary>Fait passer une candidate d'une étape à la suivante ; sans effet si elle est déjà plus loin.</summary>
     public Task AdvanceAsync(Guid versionId, string from, string to, CancellationToken ct) =>
