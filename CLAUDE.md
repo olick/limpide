@@ -115,7 +115,7 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 
 **Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09) : à la fin de chaque semaine du plan
 (ou d'une étape marquante), **proposer à Alexandre le ou les épisodes suivants** et les ajouter au fichier, à la suite
-des existants (épisodes 1 à 14 = S1 à S4). Mêmes règles que les épisodes déjà écrits :
+des existants (épisodes 1 à 14 = S1 à S4 ; post de lancement publié le 2026-10-08). Mêmes règles que les épisodes déjà écrits :
 
 - ordre chronologique du projet ; un récit par épisode : problème, enjeu, piste essayée, résultat, analyse, décision,
   leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent / 📚 Tous les épisodes » ;
