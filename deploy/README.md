@@ -146,6 +146,10 @@ sur une base vide : même schéma à l'arrivée, aucune donnée perdue.
 
 ## Versions en quarantaine
 
+**Limite actuelle** : l'ingestion ne tourne pas en production (Airflow est sur le poste de développement, S6). Le corpus
+de production vient d'une sauvegarde de la base ; le volume `data/` du serveur est vide, donc `validate` y échoue
+(« texte extrait absent »). Les commandes ci-dessous serviront quand l'ingestion tournera ici.
+
 Les contrôles qualité (`validate`) bloquent une version douteuse ; la version publiée reste en service. Décision
 humaine, après lecture du texte (procédure complète : `pipelines/airflow/README.md`, « Quarantaine ») :
 

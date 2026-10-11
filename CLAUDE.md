@@ -195,7 +195,11 @@ entier malgré la charge (élargissement du corpus en dernier).
   (`source-demo`, réseau `limpide_default`, `fetchUrl` du corpus de démo) → quarantaine (passages −62 %, 3
   intertitres), alerte reçue, 691 passages servis. Base locale : 2 versions de démonstration en quarantaine
   (c3094b5d, 4e4b03a2), gardées comme exemples. **Reste (Alexandre)** : enregistrer la démonstration pour la vidéo.
-  Sessions 2 et 3 pas encore en production.
+  **Sessions 2 et 3 déployées le 2026-10-11** (sauvegarde, image ingestion, `migrate` : rien à appliquer, `web`
+  reconstruit, 691 passages servis). `validate` en production : « texte extrait absent » pour les 3 versions — le volume
+  `data/` du serveur est vide, le corpus de production vient d'une sauvegarde de la base (S3) et **aucune ingestion
+  n'y a jamais tourné** : le corpus de production n'est mis à jour par aucun pipeline (sujet de la S6, hébergement
+  d'Airflow).
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
