@@ -7,7 +7,8 @@ namespace Limpide.Core.Tests.Evaluation;
 public class AnswerCheckTests
 {
     private static readonly RetrievedPassage Article5 = new("Article 5 — Pratiques interdites", "art_5", "…", 0.7,
-        "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE");
+        "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE",
+        new PassageOrigin(Guid.Empty, new string('0', 64), "eur-lex-xhtml/1", "ai-act/1"));
 
     private static readonly RetrievedPassage Recital29 = Article5 with { Heading = "Considérant (29)", Anchor = "rct_29" };
 

@@ -34,7 +34,8 @@ public class VisitorFeedbackTests
     public void The_attached_answer_keeps_what_produced_it()
     {
         var passage = new RetrievedPassage("Article 5 — Pratiques interdites", "art_5", "…", 0.7,
-            "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE");
+            "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE",
+            new PassageOrigin(Guid.Empty, "d8b1a7775f597dc8d49a2bdc91af0dca3bc12ac558b97504685f9534660bb44e", "eur-lex-xhtml/1", "ai-act/1"));
         var result = new AnswerResult("Qu'est-ce qui est interdit ?", "Ceci [P1].", false,
             [new SourcePassage("P1", passage, Cited: true)], "vectorielle", "mistral-medium-2604", "answer/3",
             new AnswerTimings(TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero), new TokenUsage(1, 1, 0m), []);
@@ -42,6 +43,6 @@ public class VisitorFeedbackTests
         var context = VisitorFeedback.From(null, "La réponse oublie un cas.", null, attach: result)!.Context!;
 
         Assert.Equal(("Qu'est-ce qui est interdit ?", "mistral-medium-2604", "answer/3"), (context.Question, context.Model, context.PromptVersion));
-        Assert.Equal(["Article 5 — Pratiques interdites (art_5)"], context.Cited);
+        Assert.Equal(["Article 5 — Pratiques interdites (art_5) · version d8b1a7775f59"], context.Cited);
     }
 }

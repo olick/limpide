@@ -23,7 +23,8 @@ public sealed class PgvectorPassageSearch(
 {
     private const string Columns = """
         c.heading, c.anchor, c.content, 1 - (c.embedding <=> @query) AS score,
-        s.name, d.title, d.url, v.fetched_at, s.reuse_terms
+        s.name, d.title, d.url, v.fetched_at, s.reuse_terms,
+        c.id, v.content_hash, c.extractor_version, c.chunker_version
         """;
 
     private const string Current = """
@@ -121,7 +122,8 @@ public sealed class PgvectorPassageSearch(
             results.Add(new RetrievedPassage(
                 reader.GetString(0), reader.IsDBNull(1) ? null : reader.GetString(1), reader.GetString(2), reader.GetDouble(3),
                 reader.GetString(4), reader.GetString(5), reader.GetString(6), reader.GetFieldValue<DateTimeOffset>(7),
-                reader.GetString(8)));
+                reader.GetString(8),
+                new PassageOrigin(reader.GetGuid(9), reader.GetString(10), reader.GetString(11), reader.GetString(12))));
         }
 
         return new SearchOutcome(results, embeddingDuration, watch.Elapsed);

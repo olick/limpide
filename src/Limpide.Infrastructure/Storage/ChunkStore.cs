@@ -5,6 +5,12 @@ using NpgsqlTypes;
 
 namespace Limpide.Infrastructure.Storage;
 
+/// <summary>Lignage d'un passage : de la version publiée jusqu'au fichier collecté (commande trace).</summary>
+public sealed record PassageLineage(
+    Guid ChunkId, int Ordinal, string Url, string VersionHash, string Status, DateTimeOffset FetchedAt,
+    DateTimeOffset? PublishedAt, string RawPath, string ExtractorVersion, string ChunkerVersion, string? EmbeddingModel,
+    bool? QualityPassed);
+
 /// <summary>Passages d'une version, dans la table chunks.</summary>
 public sealed class ChunkStore(NpgsqlDataSource dataSource)
 {
@@ -21,6 +27,32 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
         command.Parameters.AddWithValue("extractor", extractorVersion);
         command.Parameters.AddWithValue("chunker", chunkerVersion);
         return await command.ExecuteScalarAsync(ct) is true;
+    }
+
+    public async Task<IReadOnlyList<PassageLineage>> LineageAsync(IReadOnlyList<Guid> chunkIds, CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand("""
+            SELECT c.id, c.ordinal, d.url, v.content_hash, v.status, v.fetched_at, v.published_at, v.raw_path,
+                   c.extractor_version, c.chunker_version, c.embedding_model, (v.quality_report ->> 'passed')::boolean
+            FROM chunks c
+            JOIN document_versions v ON v.id = c.document_version_id
+            JOIN documents d ON d.id = v.document_id
+            WHERE c.id = ANY (@ids)
+            """);
+        command.Parameters.AddWithValue("ids", chunkIds.ToArray());
+        await using var reader = await command.ExecuteReaderAsync(ct);
+
+        var rows = new Dictionary<Guid, PassageLineage>();
+        while (await reader.ReadAsync(ct))
+        {
+            rows[reader.GetGuid(0)] = new PassageLineage(
+                reader.GetGuid(0), reader.GetInt32(1), reader.GetString(2), reader.GetString(3), reader.GetString(4),
+                reader.GetFieldValue<DateTimeOffset>(5), reader.IsDBNull(6) ? null : reader.GetFieldValue<DateTimeOffset>(6),
+                reader.GetString(7), reader.GetString(8), reader.GetString(9), reader.IsDBNull(10) ? null : reader.GetString(10),
+                reader.IsDBNull(11) ? null : reader.GetBoolean(11));
+        }
+
+        return chunkIds.Where(rows.ContainsKey).Select(id => rows[id]).ToList();
     }
 
     /// <summary>Texte et ancre des passages d'une version, dans l'ordre : l'entrée des contrôles qualité.</summary>

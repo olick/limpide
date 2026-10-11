@@ -49,6 +49,7 @@ public static class CommandRunner
             "reject" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, release: false, ct),
             "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
             "search" => await services.GetRequiredService<SearchCommand>().RunAsync(line.Text, ct),
+            "trace" => await services.GetRequiredService<TraceCommand>().RunAsync(line.Text, ct),
             "evaluate" => await services.GetRequiredService<EvaluateCommand>().RunAsync(ct),
             "feedback" => await services.GetRequiredService<FeedbackCommand>().RunAsync(ct),
             "evaluate-answers" => await services.GetRequiredService<EvaluateAnswersCommand>().RunAsync(ct),
@@ -83,6 +84,7 @@ public static class CommandRunner
         builder.Services.AddSingleton<QuarantineDecisionCommand>();
         builder.Services.AddSingleton<AskCommand>();
         builder.Services.AddSingleton<SearchCommand>();
+        builder.Services.AddSingleton<TraceCommand>();
         builder.Services.AddSingleton<EvaluateCommand>();
         builder.Services.AddSingleton<EvaluateAnswersCommand>();
         builder.Services.AddSingleton<FeedbackCommand>();

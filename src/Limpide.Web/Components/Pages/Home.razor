@@ -76,7 +76,9 @@
                     <footer>
                         <span>@p.SourceName — @p.DocumentTitle</span>
                         <a href="@p.Url" target="_blank" rel="noopener noreferrer">Texte officiel</a>
-                        <span>Collecté le @p.FetchedAt.ToString("d MMMM yyyy", French)</span>
+                        <span title="Empreinte SHA-256 du texte collecté : @p.Origin.VersionHash">
+                            Version collectée le @p.FetchedAt.ToString("d MMMM yyyy", French) · <code>@p.Origin.ShortHash</code>
+                        </span>
                         <span class="licence">Licence : @p.ReuseTerms</span>
                     </footer>
                 </article>
@@ -148,7 +150,7 @@
         <div class="table-scroll">
             <table class="passages">
                 <thead>
-                    <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th></tr>
+                    <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th><th>Version</th></tr>
                 </thead>
                 <tbody>
                     @foreach (var (id, p, cited) in r.Passages)
@@ -159,6 +161,7 @@
                             <td>@(p.Anchor ?? "—")</td>
                             <td>@p.Score.ToString("0.000", French)</td>
                             <td>@(cited ? "oui" : "non")</td>
+                            <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
                         </tr>
                     }
                 </tbody>

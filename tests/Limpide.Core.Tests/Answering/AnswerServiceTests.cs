@@ -136,7 +136,8 @@ public class AnswerServiceTests
     private static AnswerService Service(FakeChatClient chat) => new(new FakeSearch(Article5, Recital29), chat, Settings);
 
     private static RetrievedPassage Passage(string heading, string anchor, string content) =>
-        new(heading, anchor, content, 0.7, "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE");
+        new(heading, anchor, content, 0.7, "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE",
+            new PassageOrigin(Guid.Empty, new string('0', 64), "eur-lex-xhtml/1", "ai-act/1"));
 
     private sealed class FakeSearch(params RetrievedPassage[] passages) : IPassageSearch
     {

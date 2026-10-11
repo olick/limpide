@@ -27,6 +27,7 @@ public static class CommandCatalog
         new("reject", "reject <empreinte> <motif>", "rejette définitivement une version en quarantaine", Review, RequiresText: true),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),
+        new("trace", "trace <question>", "lignage : pour chaque passage trouvé, sa version, son fichier brut, ses contrôles", Search, RequiresText: true),
         new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
         new("evaluate-answers", "evaluate-answers", "pose tout le jeu de questions (recherche + Mistral), rapport dans eval/results/", Search),
         new("feedback", "feedback", "affiche les retours des visiteurs (Markdown, redirigeable vers un fichier)", Search),

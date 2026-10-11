@@ -200,6 +200,11 @@ entier malgré la charge (élargissement du corpus en dernier).
   `data/` du serveur est vide, le corpus de production vient d'une sauvegarde de la base (S3) et **aucune ingestion
   n'y a jamais tourné** : le corpus de production n'est mis à jour par aucun pipeline (sujet de la S6, hébergement
   d'Airflow).
+- [ ] Session 4 : traçabilité faite (2026-10-11) — `RetrievedPassage.Origin` (`PassageOrigin` : id du passage,
+  empreinte de version, extracteur, découpeur) ; interface : « Version collectée le … · 8ee3433abfca » sous chaque
+  extrait cité (SHA-256 complète au survol), colonne « Version » dans « Passages fournis au modèle » ; retours :
+  passages cités avec leur version ; commande `trace <question>` (lignage : passage → version → fichiers brut et
+  extrait → extracteur, découpeur, embedding → contrôles qualité). **Reste** : élargissement du corpus.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 

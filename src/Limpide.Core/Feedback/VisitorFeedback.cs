@@ -49,5 +49,8 @@ public sealed record AnsweredQuestion(string Question, string Answer, string Mod
         result.Answer,
         result.Model,
         result.PromptVersion,
-        result.CitedPassages.Select(p => p.Passage.Anchor is null ? p.Passage.Heading : $"{p.Passage.Heading} ({p.Passage.Anchor})").ToList());
+        // Avec la version : le retour désigne le texte exact sur lequel portait la réponse.
+        result.CitedPassages.Select(p =>
+            (p.Passage.Anchor is null ? p.Passage.Heading : $"{p.Passage.Heading} ({p.Passage.Anchor})")
+            + $" · version {p.Passage.Origin.ShortHash}").ToList());
 }

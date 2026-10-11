@@ -26,6 +26,7 @@ public sealed record SearchOutcome(
 /// <param name="Content">Texte de la source, reproduit sans modification.</param>
 /// <param name="Score">Similarité cosinus entre la question et le passage (1 = identique).</param>
 /// <param name="ReuseTerms">Conditions de réutilisation de la source, à afficher avec l'extrait.</param>
+/// <param name="Origin">D'où vient le passage : sa version exacte et ce qui l'a produit (traçabilité).</param>
 public sealed record RetrievedPassage(
     string Heading,
     string? Anchor,
@@ -35,4 +36,15 @@ public sealed record RetrievedPassage(
     string DocumentTitle,
     string Url,
     DateTimeOffset FetchedAt,
-    string ReuseTerms);
+    string ReuseTerms,
+    PassageOrigin Origin);
+
+/// <summary>
+/// Origine d'un passage : la version du document (empreinte SHA-256 du fichier brut), l'extracteur et le découpeur qui
+/// l'ont produit. Avec l'identifiant du passage, de quoi remonter jusqu'au fichier collecté (commande trace).
+/// </summary>
+public sealed record PassageOrigin(Guid ChunkId, string VersionHash, string ExtractorVersion, string ChunkerVersion)
+{
+    /// <summary>Empreinte courte affichée (12 caractères, comme la commande versions).</summary>
+    public string ShortHash => VersionHash[..12];
+}
