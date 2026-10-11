@@ -16,3 +16,5 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [006](006-hebergement-demo.md) | Démo hébergée sur un VPS français, sous Docker Compose | 2026-10-05 |
 | [007](007-airflow-taches-conteneurisees.md) | Airflow orchestre des commandes .NET conteneurisées, sans code métier en Python | 2026-10-08 |
 | [008](008-cycle-de-vie-des-versions.md) | Cycle de vie des versions (candidate → publiée) et migrations du schéma | 2026-10-10 |
+| [009](009-batch-incremental.md) | Mise à jour du corpus en batch incrémental hebdomadaire, pas en flux continu | 2026-10-11 |
+| [010](010-decoupage-structurel.md) | Découpage structurel (article, considérant, section) plutôt qu'à taille fixe, mesuré | 2026-10-11 |

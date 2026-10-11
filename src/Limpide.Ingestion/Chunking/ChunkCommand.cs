@@ -52,7 +52,8 @@ public sealed class ChunkCommand(
     private async Task ChunkAsync(ActiveVersion version, CancellationToken ct)
     {
         var extracted = await ReadExtractedAsync(version, ct);
-        var chunker = Chunkers.ForSource(Slugs.From(version.SourceName));
+        var chunker = Chunkers.ForSource(Slugs.From(version.SourceName),
+            fixedSize: options.ChunkingStrategy.Equals("FixedSize", StringComparison.OrdinalIgnoreCase));
 
         if (await chunks.IsUpToDateAsync(version.Id, extracted.Extractor, chunker.Version, ct))
         {

@@ -1,6 +1,6 @@
 # Observations sur l'extraction et le découpage
 
-Notes prises au fil de l'eau pour l'ADR sur la stratégie de découpage (semaine 5).
+Notes prises au fil de l'eau ; décision : ADR-010 (découpage structurel, mesuré contre la taille fixe).
 
 ## Semaine 1 — premier découpage structurel (2026-09-29)
 
@@ -110,3 +110,10 @@ relire sont fidèles**, aucune ne tranche la situation. q08 et q10 s'appuient su
 **Pour la S7** (jeu de 50 questions) : admettre plusieurs passages attendus par question ; surveiller la concurrence
 entre fiches CNIL (RGPD) et AI Act sur les questions de droits fondamentaux ; la faiblesse « considérants avant
 articles » reste entière.
+
+## Semaine 5 — découpage à taille fixe, mesuré (2026-10-11)
+
+Sur une copie de la base, même corpus (18 documents), découpage à taille fixe (≈ 1 000 caractères, chevauchement de
+200, `FixedSizeChunker`) : 1 362 passages ; top 1 **2/10**, top 5 **5/10**, MRR **0,37**, contre 4/10, 7/10, 0,52 en
+structurel. Décision et détail : ADR-010.
+

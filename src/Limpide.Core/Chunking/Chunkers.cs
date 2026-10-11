@@ -9,8 +9,10 @@ public static class Chunkers
         ["cnil"] = new CnilChunker(),
     };
 
-    public static IChunker ForSource(string sourceSlug) =>
-        BySourceSlug.TryGetValue(sourceSlug, out var chunker)
+    /// <param name="fixedSize">Découpage à taille fixe au lieu du découpage structurel : pour comparaison seulement.</param>
+    public static IChunker ForSource(string sourceSlug, bool fixedSize = false) =>
+        fixedSize ? new FixedSizeChunker(sourceSlug)
+        : BySourceSlug.TryGetValue(sourceSlug, out var chunker)
             ? chunker
             : throw new InvalidDataException($"aucun découpeur pour la source « {sourceSlug} »");
 }

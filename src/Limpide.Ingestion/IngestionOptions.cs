@@ -21,4 +21,10 @@ public sealed class IngestionOptions
     public TimeSpan DelayBetweenRequests { get; set; } = TimeSpan.FromSeconds(1.5);
 
     public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// « Structural » (par défaut : article, considérant, section) ou « FixedSize » (≈ 1 000 caractères, chevauchement de
+    /// 200) : pour mesurer l'écart, sur une copie de la base (ADR sur la stratégie de découpage).
+    /// </summary>
+    public string ChunkingStrategy { get; set; } = "Structural";
 }

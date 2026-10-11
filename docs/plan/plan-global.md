@@ -99,7 +99,7 @@ Détail : [`semaine-01.md`](semaine-01.md)
   par Git, donc tracés et, dès la S7, évalués en CI
 
 **Terminé quand** : une source corrompue est bloquée sans impact sur la démo, et l'alerte arrive.
-**ADR** : 008 cycle de vie des versions et migrations (ajouté, session 1) ; à écrire : stratégie de découpage (avec les observations de S1 et S5), batch incrémental plutôt que streaming
+**ADR** : 008 cycle de vie des versions et migrations (ajouté, session 1), 009 batch incrémental plutôt que streaming, 010 découpage structurel plutôt qu'à taille fixe (mesuré)
 **Blocs RNCP** : BC03, BC01 (qualité et traçabilité)
 
 ### S6 · Terraform : apprentissage et infrastructure Azure
@@ -228,13 +228,13 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | 006 | Hébergement de la démo | S3 ✔ (VPS OVHcloud) |
 | 007 | Airflow et tâches .NET conteneurisées | S4 ✔ |
 | 008 | Cycle de vie des versions et migrations du schéma (non prévu au départ) | S5 ✔ |
+| 009 | Batch incrémental plutôt que streaming | S5 ✔ |
+| 010 | Stratégie de découpage : structurel plutôt qu'à taille fixe (mesuré) | S5 ✔ |
 
 À écrire :
 
 | Sujet | Semaine |
 |---|---|
-| Stratégie de découpage | S5 |
-| Batch incrémental plutôt que streaming | S5 |
 | Container Apps plutôt qu'AKS | S6 |
 | Hébergement d'Airflow | S6 |
 | Hébergement des modèles : LLM par API ou auto-hébergé sur GPU, embeddings | S6 |

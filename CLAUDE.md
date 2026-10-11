@@ -72,8 +72,11 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
 - ADR-008 : cycle de vie des versions — `fetch` crée une **candidate**, la version publiée reste en service jusqu'à
   `publish` (bascule atomique) ; candidate au texte identique écartée par `extract` (`TextFingerprint`) ; schéma par
   migrations DbUp (`migrate`, jamais au démarrage du web).
+- ADR-009 : batch incrémental hebdomadaire, pas de flux continu (13 jours mesurés : aucun changement réel de texte,
+  jusqu'à 3 fausses versions CNIL par jour ; 11 à 19 s par passage sans changement).
+- ADR-010 : découpage structurel, **mesuré** contre la taille fixe (1 000 / 200) sur le corpus élargi : top 5 7/10
+  contre 5/10, MRR 0,52 contre 0,37 ; `FixedSizeChunker` gardé, activable (`--Ingestion:ChunkingStrategy=FixedSize`).
 - Licence du dépôt : Apache 2.0.
-- Batch incrémental, pas de streaming : les sources changent rarement. Pas de Kafka.
 
 ## Règles à respecter dans le code
 
@@ -216,6 +219,9 @@ entier malgré la charge (élargissement du corpus en dernier).
   et redémarré ; 18 documents, 1 130 passages, 1 retour conservé. Après chaque recréation de `web` : erreurs
   « antiforgery token could not be decrypted » dans ses journaux (clés DataProtection non persistées, sans effet
   pour les visiteurs).
+- [x] Session 5 (2026-10-11) : ADR-009 (batch incrémental, mesuré sur 13 jours) et ADR-010 (découpage structurel,
+  **mesuré** contre la taille fixe sur une copie de la base : `FixedSizeChunker`, 1 362 passages, top 5 5/10 contre
+  7/10, MRR 0,37 contre 0,52). Index `docs/adr/README.md`, README. **Reste de la S5 : back office v1.**
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
@@ -284,7 +290,7 @@ Constats de la semaine 1 à reprendre en S2 (détail : `docs/notes/observations-
 les considérants évincent les articles en tête des résultats (recherche hybride, ADR-005) ; le vocabulaire
 des utilisateurs diffère de celui du règlement (« grands modèles de langage » contre « modèles d'IA à usage général »).
 `evaluate` donne le score à chaque modification de la recherche : le relancer avant/après, noter dans le README.
-Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR sur la stratégie de découpage, S5).
+Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-010).
 
 Choix de la session 3 (voir la discussion du 2026-09-29) :
 
