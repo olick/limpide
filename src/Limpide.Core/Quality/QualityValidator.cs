@@ -78,11 +78,11 @@ public static partial class QualityValidator
 
     private static QualityCheck PassageLength(QualityInput input, QualityOptions options)
     {
-        var outside = input.Passages.Where(p => p.Content.Length < options.TargetMinLength || p.Content.Length > options.TargetMaxLength).ToList();
-        var share = Share(outside.Count, input.Passages.Count);
-        return new("longueur-des-passages", share <= options.MaxOutOfBoundsShare, share, options.MaxOutOfBoundsShare,
-            $"au plus {QualityReport.Format(options.MaxOutOfBoundsShare)} de passages hors de {options.TargetMinLength} à {options.TargetMaxLength} caractères",
-            $"{outside.Count} sur {input.Passages.Count}");
+        var abnormal = input.Passages.Where(p => p.Content.Length < options.MinPassageLength || p.Content.Length > options.MaxPassageLength).ToList();
+        var share = Share(abnormal.Count, input.Passages.Count);
+        return new("longueur-des-passages", share <= options.MaxAbnormalShare, share, options.MaxAbnormalShare,
+            $"au plus {QualityReport.Format(options.MaxAbnormalShare)} de passages de moins de {options.MinPassageLength} ou plus de {options.MaxPassageLength} caractères",
+            $"{abnormal.Count} sur {input.Passages.Count}");
     }
 
     private static QualityCheck Duplicates(QualityInput input, QualityOptions options)

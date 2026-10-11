@@ -179,6 +179,7 @@ le passage attendu figure-t-il dans les 5 premiers résultats ? Mesuré par `eva
 | 2026-09-29 | texte du passage (référence) | 4/10 | 5/10 | 0,45 |
 | 2026-09-29 | titre de rattachement + texte (**retenu**) | 4/10 | 8/10 | 0,55 |
 | 2026-10-05 | hybride : vectorielle + plein texte, fusion RRF (écartée, ADR-005) | 3/10 | 6/10 | 0,45 |
+| 2026-10-11 | titre + texte, **corpus élargi** (AI Act + 17 pages CNIL, 1 130 passages) | 4/10 | 7/10 | 0,52 |
 
 Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/notes/observations-decoupage.md).
 

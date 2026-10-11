@@ -53,4 +53,31 @@ public class CnilExtractorTests
     {
         Assert.Throws<InvalidDataException>(() => Fixtures.Extract(new CnilExtractor(), "ai-act-extraits.xhtml"));
     }
+
+    [Fact]
+    public void Further_reading_and_attached_documents_are_not_text_of_the_fiche()
+    {
+        // Fin de page réelle de la synthèse des recommandations IA (2026-10-11), réduite à sa structure.
+        const string html = """
+            <main><div class="ctn-gen">
+              <h1>IA : les recommandations en bref</h1>
+              <p>Le texte de la fiche.</p>
+              <div class='ctn-gen-textes-references'>
+                <div class='textref text-hide'>Texte reference</div>
+                <div class='ctn-gen-textes-references-contenu'><h2>Pour approfondir</h2>
+                  <ul><li><a href="/fr/intelligence-artificielle-ia">Tous les contenus de la CNIL sur l’intelligence artificielle</a></li></ul>
+                </div>
+              </div>
+              <div class='ctn-gen-documents'>
+                <div class='docref text-hide'>Document reference</div>
+                <div class='ctn-gen-documents-contenu'><h2>Liste de vérification</h2>
+                  <a href="/ia.pdf">Développement des systèmes d'IA : Que faut-il vérifier ? [ PDF-152.33 Ko ]</a>
+                </div>
+              </div>
+            </div></main>
+            """;
+        var blocks = new CnilExtractor().Extract(new MemoryStream(System.Text.Encoding.UTF8.GetBytes(html)));
+
+        Assert.Equal(["IA : les recommandations en bref", "Le texte de la fiche."], blocks.Select(b => b.Text));
+    }
 }

@@ -24,6 +24,8 @@
       "name": "CNIL",
       "baseUrl": "https://www.cnil.fr",
       "reuseTerms": "CC-BY-ND 4.0 FR : attribution, aucune modification. Images exclues (CC-BY-NC-ND).",
+      // Série « Les fiches pratiques IA » (https://www.cnil.fr/fr/les-fiches-pratiques-ia), complète depuis le
+      // 2026-10-11 : 17 pages. Licence vérifiée le même jour (docs/sources.md).
       "documents": [
         {
           "title": "IA : Annoter les données",
@@ -33,6 +35,81 @@
         {
           "title": "IA : Informer les personnes concernées",
           "url": "https://www.cnil.fr/fr/ia-informer-les-personnes-concernees",
+          "format": "html"
+        },
+        {
+          "title": "IA : Les recommandations de la CNIL en bref (synthèse)",
+          "url": "https://www.cnil.fr/fr/developpement-des-systemes-dia-les-recommandations-de-la-cnil-pour-respecter-le-rgpd",
+          "format": "html"
+        },
+        {
+          "title": "IA : Quel est le périmètre des fiches pratiques ?",
+          "url": "https://www.cnil.fr/fr/quel-est-le-perimetre-des-fiches-pratiques-sur-lia",
+          "format": "html"
+        },
+        {
+          "title": "IA : Déterminer le régime juridique applicable",
+          "url": "https://www.cnil.fr/fr/determiner-le-regime-juridique-applicable",
+          "format": "html"
+        },
+        {
+          "title": "IA : Définir une finalité",
+          "url": "https://www.cnil.fr/fr/definir-une-finalite-0",
+          "format": "html"
+        },
+        {
+          "title": "IA : Déterminer la qualification juridique des fournisseurs de systèmes d'IA",
+          "url": "https://www.cnil.fr/fr/determiner-la-qualification-juridique-des-fournisseurs-de-systemes-dia",
+          "format": "html"
+        },
+        {
+          "title": "IA : Assurer que le traitement est licite (base légale)",
+          "url": "https://www.cnil.fr/fr/assurer-que-le-traitement-est-licite",
+          "format": "html"
+        },
+        {
+          "title": "IA : Assurer que le traitement est licite (réutilisation des données)",
+          "url": "https://www.cnil.fr/fr/assurer-que-le-traitement-est-licite-reutilisation-des-donnees",
+          "format": "html"
+        },
+        {
+          "title": "IA : Réaliser une analyse d'impact si nécessaire",
+          "url": "https://www.cnil.fr/fr/realiser-une-analyse-dimpact-si-necessaire",
+          "format": "html"
+        },
+        {
+          "title": "IA : Tenir compte de la protection des données dans la conception du système",
+          "url": "https://www.cnil.fr/fr/tenir-compte-de-la-protection-des-donnees-dans-la-conception-du-systeme",
+          "format": "html"
+        },
+        {
+          "title": "IA : Tenir compte de la protection des données dans la collecte et la gestion des données",
+          "url": "https://www.cnil.fr/fr/tenir-compte-de-la-protection-des-donnees-dans-la-collecte-et-la-gestion-des-donnees",
+          "format": "html"
+        },
+        {
+          "title": "IA : Mobiliser la base légale de l'intérêt légitime",
+          "url": "https://www.cnil.fr/fr/base-legale-interet-legitime-developpement-systeme",
+          "format": "html"
+        },
+        {
+          "title": "IA : Intérêt légitime, collecte par moissonnage (web scraping)",
+          "url": "https://www.cnil.fr/fr/focus-interet-legitime-collecte-par-moissonnage",
+          "format": "html"
+        },
+        {
+          "title": "IA : Respecter et faciliter l'exercice des droits des personnes",
+          "url": "https://www.cnil.fr/fr/ia-respecter-lexercice-des-droits-des-personnes",
+          "format": "html"
+        },
+        {
+          "title": "IA : Garantir la sécurité du développement d'un système d'IA",
+          "url": "https://www.cnil.fr/fr/ia-garantir-la-securite-du-developpement",
+          "format": "html"
+        },
+        {
+          "title": "IA : Analyser le statut d'un modèle d'IA au regard du RGPD",
+          "url": "https://www.cnil.fr/fr/ia-analyser-le-statut-dun-modele-dia-au-regard-du-rgpd",
           "format": "html"
         }
       ]

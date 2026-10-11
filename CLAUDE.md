@@ -200,11 +200,19 @@ entier malgré la charge (élargissement du corpus en dernier).
   `data/` du serveur est vide, le corpus de production vient d'une sauvegarde de la base (S3) et **aucune ingestion
   n'y a jamais tourné** : le corpus de production n'est mis à jour par aucun pipeline (sujet de la S6, hébergement
   d'Airflow).
-- [ ] Session 4 : traçabilité faite (2026-10-11) — `RetrievedPassage.Origin` (`PassageOrigin` : id du passage,
+- [x] Session 4 : traçabilité faite (2026-10-11) — `RetrievedPassage.Origin` (`PassageOrigin` : id du passage,
   empreinte de version, extracteur, découpeur) ; interface : « Version collectée le … · 8ee3433abfca » sous chaque
   extrait cité (SHA-256 complète au survol), colonne « Version » dans « Passages fournis au modèle » ; retours :
   passages cités avec leur version ; commande `trace <question>` (lignage : passage → version → fichiers brut et
-  extrait → extracteur, découpeur, embedding → contrôles qualité). **Reste** : élargissement du corpus.
+  extrait → extracteur, découpeur, embedding → contrôles qualité). Élargissement (2026-10-11) : les 15 autres pages
+  de la série CNIL « Les fiches pratiques IA » (licence revérifiée, `docs/sources.md`) ; lignes directrices de la
+  Commission non retenues (pas de version française trouvée, PDF : à trancher par Alexandre). Premier vrai test des
+  contrôles : 2 pages en quarantaine, fausses alertes du contrôle de longueur (recalibré : ≤ 10 % de passages < 100 ou
+  > 2 000 caractères) et un vrai défaut d'extraction (« Pour approfondir », documents joints : extracteur `cnil-html/2`) ;
+  décision `retry` ajoutée (recontrôler après correction du code), utilisée pour les 2 pages. 18 documents publiés,
+  1 130 passages. Évaluation : recherche top 5 7/10 (8/10 avant), MRR 0,52 ; réponses 11/15, 0 échec, relecture :
+  fidèles (`docs/notes/observations-decoupage.md`). **Pas encore en production** (corpus de production = sauvegarde
+  de la base : transfert à faire).
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 

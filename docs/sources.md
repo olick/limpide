@@ -6,7 +6,21 @@ Ce fichier alimente aussi le dossier de gouvernance (bloc 1 de la RNCP).
 | Source  | Document                         | Format | URL                                                                     | Conditions de réutilisation                                                                  | Vérifié le |
 | ------- | -------------------------------- | ------ | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
 | EUR-Lex | AI Act (règlement 2024/1689), FR | HTML   | https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689 | Décision 2011/833/UE : réutilisation autorisée, mention de la source, sans dénaturer le sens | 2026-09-28 |
-| CNIL    | Fiches pratiques IA              | HTML   | https://www.cnil.fr/fr/les-fiches-pratiques-ia                          | CC-BY-ND 4.0 FR : attribution, aucune modification. Images exclues (CC-BY-NC-ND)             | 2026-09-28 |
+| CNIL    | Fiches pratiques IA (17 pages)   | HTML   | https://www.cnil.fr/fr/les-fiches-pratiques-ia                          | CC-BY-ND 4.0 FR : attribution, aucune modification. Images exclues (CC-BY-NC-ND)             | 2026-10-11 |
+
+Vérification du 2026-10-11 (élargissement, S5) : la page « Informations publiques » de la CNIL
+(https://www.cnil.fr/fr/informations-publiques) indique « Licence CC BY-ND » pour les « fiches web », et
+« CC BY-NC-ND » pour les images et iconographies (exclues par l'extracteur). Inchangé depuis le 2026-09-28.
+
+## Périmètre
+
+**Depuis le 2026-10-11** : l'AI Act et les 17 pages de la série CNIL « Les fiches pratiques IA » (synthèse,
+introduction, fiches 1 à 13 dont la 4 en deux parties, fiche focus sur le moissonnage). Liste exacte : `corpus.json`.
+
+**Envisagé, non retenu pour l'instant** : les lignes directrices de la Commission européenne sur les pratiques
+interdites et sur la définition d'un système d'IA (février 2025). Version française non trouvée (documents PDF en
+anglais d'après les sources consultées) : il faudrait un extracteur PDF et décider d'un corpus bilingue, que le
+contrôle de langue (`validate`) bloquerait aujourd'hui. À trancher par Alexandre.
 
 ## Périmètre de la phase 1
 
@@ -26,8 +40,9 @@ La liste exacte est dans [`corpus.json`](../corpus.json) :
   publications (`http://publications.europa.eu/resource/celex/32024R1689`, en-têtes
   `Accept: application/xhtml+xml` et `Accept-Language: fra`). Même texte officiel, même licence.
   L'URL EUR-Lex reste celle qui est citée aux utilisateurs.
-- **CNIL** : pages HTML téléchargées directement. Contenu brut stable d'un téléchargement à l'autre
-  (vérifié le 2026-09-28), donc l'empreinte SHA-256 du brut suffit à détecter les changements.
+- **CNIL** : pages HTML téléchargées directement. Le HTML brut change plusieurs fois par jour (identifiants
+  techniques) sans que le texte change (constaté à partir du 2026-09-29) : `extract` compare l'empreinte du texte
+  extrait à celle de la version publiée et écarte ces fausses nouvelles versions (ADR-008).
 
 ## Règles
 

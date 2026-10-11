@@ -23,6 +23,7 @@ public sealed class VersionsCommand(DocumentVersionStore versions)
         }
 
         Console.WriteLine("\nLever une quarantaine (après vérification du texte) : release <empreinte> <motif>");
+        Console.WriteLine("La recontrôler après une correction du code       : retry <empreinte> <motif>");
         Console.WriteLine("La rejeter définitivement                         : reject <empreinte> <motif>");
         return 0;
     }

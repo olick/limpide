@@ -1,5 +1,6 @@
 using Limpide.Core.Quality;
 using Limpide.Infrastructure;
+using Limpide.Infrastructure.Storage;
 using Limpide.Ingestion.Chunking;
 using Limpide.Ingestion.Database;
 using Limpide.Ingestion.Embed;
@@ -45,8 +46,9 @@ public static class CommandRunner
             "embed" => await services.GetRequiredService<EmbedCommand>().RunAsync(ct),
             "publish" => await services.GetRequiredService<PublishCommand>().RunAsync(ct),
             "versions" => await services.GetRequiredService<VersionsCommand>().RunAsync(ct),
-            "release" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, release: true, ct),
-            "reject" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, release: false, ct),
+            "release" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, QuarantineDecision.Release, ct),
+            "retry" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, QuarantineDecision.Retry, ct),
+            "reject" => await services.GetRequiredService<QuarantineDecisionCommand>().RunAsync(line.Text, QuarantineDecision.Reject, ct),
             "ask" => await services.GetRequiredService<AskCommand>().RunAsync(line.Text, ct),
             "search" => await services.GetRequiredService<SearchCommand>().RunAsync(line.Text, ct),
             "trace" => await services.GetRequiredService<TraceCommand>().RunAsync(line.Text, ct),

@@ -87,3 +87,26 @@ quand le passage est une suite de liste.
 - **Le vocabulaire de l'utilisateur n'est pas celui du texte** (q07 « grands modèles de langage » contre
   « modèles d'IA à usage général » ; q10 « étiquettes » contre « labels », « annotation »).
   La recherche plein texte n'aidera pas sur ces cas ; une reformulation de la question par le LLM, peut-être.
+
+## Semaine 5 — élargissement du corpus (2026-10-11)
+
+AI Act + 17 pages CNIL (au lieu de 2) : 1 130 passages servis (691 avant). Recherche vectorielle, mêmes 10 questions :
+top 1 **4/10** (inchangé), top 5 **7/10** (8/10 avant), MRR **0,52** (0,55).
+
+| Question | Avant | Après | Ce qui passe devant |
+|---|---|---|---|
+| q02 définition d'un système d'IA | 3 | 4 | — |
+| q03 tri de CV, haut risque | 6 | 8 | considérants, fiches CNIL sur l'AIPD |
+| q08 banque, impact sur les droits | 4 | 9 | fiche CNIL « intérêt légitime » (atteinte aux droits au sens du RGPD : autre question) |
+| q10 fiabilité des étiquettes | 10 | > 10 | fiche CNIL « sécurité » (données d'entraînement **et leurs annotations**), article 10 |
+
+Chaîne complète (`evaluate-answers`, Medium, `eval/results/2026-10-11-1806-mistral-medium-2604.md`) : 11/15
+vérifiées, 0 échec, passage attendu cité 7/10 (8/10 le 2026-10-05) ; **relecture (par Claude) : les 4 réponses à
+relire sont fidèles**, aucune ne tranche la situation. q08 et q10 s'appuient sur d'autres textes pertinents
+(considérants 58 et 96 ; fiche « sécurité », considérant 67 qui dit « y compris les étiquettes »).
+
+**Lecture** : la recherche se dégrade un peu (une question sort du top 5), les réponses non. Le jeu de 10 questions,
+écrit pour 3 documents, n'attend qu'un passage par question ; avec 18 documents, plusieurs passages répondent.
+**Pour la S7** (jeu de 50 questions) : admettre plusieurs passages attendus par question ; surveiller la concurrence
+entre fiches CNIL (RGPD) et AI Act sur les questions de droits fondamentaux ; la faiblesse « considérants avant
+articles » reste entière.

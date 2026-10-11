@@ -24,6 +24,7 @@ public static class CommandCatalog
         new("publish", "publish", "met en service les candidates prêtes (bascule atomique de la recherche)", Ingestion),
         new("versions", "versions", "état des documents : version publiée, candidates, quarantaines et leur raison", Review),
         new("release", "release <empreinte> <motif>", "lève une quarantaine après vérification : publiée au prochain passage", Review, RequiresText: true),
+        new("retry", "retry <empreinte> <motif>", "renvoie une version en quarantaine dans tout le circuit, après correction du code", Review, RequiresText: true),
         new("reject", "reject <empreinte> <motif>", "rejette définitivement une version en quarantaine", Review, RequiresText: true),
         new("ask", "ask <question>", "répond à la question en citant les textes (recherche + Mistral)", Search, RequiresText: true),
         new("search", "search <question>", "affiche les 5 passages les plus proches de la question", Search, RequiresText: true),

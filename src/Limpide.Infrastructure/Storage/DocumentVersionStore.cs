@@ -58,6 +58,19 @@ public sealed record ActiveVersion(
     public bool IsPublished => Status == VersionStatus.Published;
 }
 
+/// <summary>Décision humaine sur une version en quarantaine.</summary>
+public enum QuarantineDecision
+{
+    /// <summary>Lever : le texte est bon tel quel ; « validated », publiée au prochain passage d'embed et publish.</summary>
+    Release,
+
+    /// <summary>Recontrôler : le code a été corrigé (extracteur, seuils) ; « collected », tout le circuit est refait.</summary>
+    Retry,
+
+    /// <summary>Rejeter définitivement : « discarded » ; une collecte du même contenu sera ignorée.</summary>
+    Reject,
+}
+
 /// <summary>Une version telle que la montre la commande versions.</summary>
 public sealed record VersionRow(
     string SourceName, string DocumentTitle, string ContentHash, string Status, string? Reason,
@@ -223,11 +236,10 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
             ("status", passed ? VersionStatus.Validated : VersionStatus.Quarantined));
 
     /// <summary>
-    /// Décision humaine sur une version en quarantaine, désignée par le début de son empreinte (au moins 8 caractères) :
-    /// levée (« validated » : elle sera vectorisée puis publiée) ou rejet définitif (« discarded »). Le motif est gardé
-    /// dans status_reason. Erreur si l'empreinte est ambiguë ou ne désigne aucune version en quarantaine.
+    /// Décision humaine sur une version en quarantaine, désignée par le début de son empreinte (au moins 8 caractères).
+    /// Le motif est gardé dans status_reason. Erreur si l'empreinte est ambiguë ou ne désigne aucune version en quarantaine.
     /// </summary>
-    public async Task<VersionChange> DecideQuarantineAsync(string hashPrefix, bool release, string motive, CancellationToken ct)
+    public async Task<VersionChange> DecideQuarantineAsync(string hashPrefix, QuarantineDecision decision, string motive, CancellationToken ct)
     {
         if (hashPrefix.Length < 8 || !hashPrefix.All(char.IsAsciiHexDigitLower))
             throw new ArgumentException($"empreinte « {hashPrefix} » : au moins 8 caractères hexadécimaux minuscules (voir la commande versions)");
@@ -262,8 +274,14 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
                 JOIN changed ON changed.document_id = d.id
                 """, connection, tx);
             update.Parameters.AddWithValue("id", ids[0]);
-            update.Parameters.AddWithValue("status", release ? VersionStatus.Validated : VersionStatus.Discarded);
-            update.Parameters.AddWithValue("reason", (release ? "quarantaine levée : " : VersionStatus.RejectedReason) + motive);
+            var (status, reason) = decision switch
+            {
+                QuarantineDecision.Release => (VersionStatus.Validated, "quarantaine levée : "),
+                QuarantineDecision.Retry => (VersionStatus.Collected, "à recontrôler : "),
+                _ => (VersionStatus.Discarded, VersionStatus.RejectedReason),
+            };
+            update.Parameters.AddWithValue("status", status);
+            update.Parameters.AddWithValue("reason", reason + motive);
             await using var reader = await update.ExecuteReaderAsync(ct);
             await reader.ReadAsync(ct);
             change = new VersionChange(reader.GetString(0), reader.GetString(1), reader.GetString(2));

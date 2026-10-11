@@ -15,13 +15,17 @@ public sealed class QualityOptions
     /// <summary>Écart maximal du nombre de passages avec la version publiée (corpus : 0).</summary>
     public double MaxPassageCountChange { get; init; } = 0.30;
 
-    /// <summary>Bornes visées par le découpage (Packer) : un passage hors de ces bornes n'est pas une erreur en soi.</summary>
-    public int TargetMinLength { get; init; } = 500;
+    /// <summary>
+    /// Passage anormalement court (miette) ou long (au-delà de la limite du découpeur) : signe d'un découpage cassé.
+    /// Recalibré le 2026-10-11 : l'ancienne règle (≤ 20 % hors de 500 à 1 500 caractères, les bornes visées par le
+    /// découpeur) mettait en quarantaine des pages saines faites de sections courtes. Corpus élargi : 0 à 3,2 %.
+    /// </summary>
+    public int MinPassageLength { get; init; } = 100;
 
-    public int TargetMaxLength { get; init; } = 1_500;
+    public int MaxPassageLength { get; init; } = 2_000;
 
-    /// <summary>Part maximale de passages hors des bornes visées (corpus : 4 à 12 %).</summary>
-    public double MaxOutOfBoundsShare { get; init; } = 0.20;
+    /// <summary>Part maximale de passages anormaux (moins de MinPassageLength ou plus de MaxPassageLength caractères).</summary>
+    public double MaxAbnormalShare { get; init; } = 0.10;
 
     /// <summary>Part maximale de passages au contenu identique à un autre (corpus : 0).</summary>
     public double MaxDuplicateShare { get; init; } = 0.05;

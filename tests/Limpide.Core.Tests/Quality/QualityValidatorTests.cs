@@ -74,7 +74,7 @@ public class QualityValidatorTests
     }
 
     [Fact]
-    public void Too_many_passages_out_of_bounds_fail()
+    public void A_chunking_shredded_into_crumbs_fails()
     {
         var input = Healthy();
         var passages = input.Passages.ToList();
@@ -84,6 +84,25 @@ public class QualityValidatorTests
         var check = Check(input with { Passages = passages }, "longueur-des-passages");
         Assert.False(check.Passed);
         Assert.Equal(0.3, check.Value);
+    }
+
+    [Fact]
+    public void Short_but_real_sections_are_not_anomalies()
+    {
+        // Pages faites de sections courtes (synthèse CNIL) : des passages de 200 à 500 caractères sont normaux.
+        var input = Healthy();
+        var passages = input.Passages.Select(p => p with { Content = p.Content[..250] }).ToList();
+        Assert.True(Check(input with { Passages = passages }, "longueur-des-passages").Passed);
+    }
+
+    [Fact]
+    public void A_passage_beyond_the_chunker_limit_is_an_anomaly()
+    {
+        var input = Healthy();
+        var passages = input.Passages.ToList();
+        passages[0] = passages[0] with { Content = new string('x', 5_000) };
+        passages[1] = passages[1] with { Content = new string('y', 5_000) };
+        Assert.False(Check(input with { Passages = passages }, "longueur-des-passages").Passed);
     }
 
     [Fact]

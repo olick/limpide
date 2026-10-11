@@ -156,6 +156,7 @@ humaine, après lecture du texte (procédure complète : `pipelines/airflow/READ
 ```bash
 limpide run --rm ingestion versions                                   # état, empreintes, raisons
 limpide run --rm ingestion release <empreinte> "<motif>"              # publiée au prochain passage d'embed et publish
+limpide run --rm ingestion retry <empreinte> "<motif>"                # recontrôlée après une correction du code
 limpide run --rm ingestion reject <empreinte> "<motif>"               # rejet définitif
 ```
 

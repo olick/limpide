@@ -150,6 +150,8 @@ dotnet run --project src/Limpide.Ingestion -- reject c3094b5d "page tronquée c�
 
 - `release` : la version passe à `validated` ; le prochain passage d'`embed` et `publish` (DAG ou à la main) la publie.
   À n'utiliser qu'après avoir relu le texte : une version tronquée publiée remplacerait la version complète.
+- `retry` : après une correction du code (extracteur, seuils), renvoie la version dans tout le circuit
+  (`extract` → `validate`) ; utilisé le 2026-10-11 pour deux pages CNIL (voir `docs/notes/observations-qualite.md`).
 - `reject` : rejet définitif ; une collecte du même contenu est ignorée (`"rejected": 1` dans le résumé de `fetch`).
 - Motif obligatoire, gardé dans `status_reason` ; empreinte : au moins 8 caractères (voir `versions`).
 

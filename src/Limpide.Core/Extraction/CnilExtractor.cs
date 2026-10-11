@@ -7,12 +7,16 @@ namespace Limpide.Core.Extraction;
 /// <summary>
 /// Fiches du site cnil.fr (Drupal). Le contenu est dans « main .ctn-gen » : titre, introduction,
 /// corps et sections repliables. Écarte menus, outils de partage, date, fiches précédente/suivante,
-/// mots-clés et suggestions. Images exclues (licence CC-BY-NC-ND, voir docs/sources.md).
+/// mots-clés et suggestions, rubriques « Pour approfondir » et documents joints. Images exclues
+/// (licence CC-BY-NC-ND, voir docs/sources.md).
+/// <para>Version 2 (2026-10-11) : la synthèse des recommandations IA gardait en fin de texte ses liens « Pour approfondir »
+/// et sa liste de documents, avec leurs étiquettes masquées (« Texte reference », « Document reference »).</para>
 /// </summary>
 public sealed class CnilExtractor : IExtractor
 {
     private const string Chrome =
         ".page--tools, .ctn-gen-push-3, .general-tags, .nav--hub-nav, .ctn-gen-auteur, " +
+        ".ctn-gen-textes-references, .ctn-gen-documents, .text-hide, " +
         "button.ctn-gen-ascenseur-collapse, .sr-only, .visually-hidden, " +
         "script, style, noscript, form, img, picture, figure, svg, iframe, video";
 
@@ -22,7 +26,7 @@ public sealed class CnilExtractor : IExtractor
         "small", "span", "strong", "sub", "sup", "u", "time",
     ];
 
-    public string Version => "cnil-html/1";
+    public string Version => "cnil-html/2";
 
     public IReadOnlyList<Block> Extract(Stream content)
     {
