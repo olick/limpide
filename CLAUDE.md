@@ -211,8 +211,11 @@ entier malgré la charge (élargissement du corpus en dernier).
   > 2 000 caractères) et un vrai défaut d'extraction (« Pour approfondir », documents joints : extracteur `cnil-html/2`) ;
   décision `retry` ajoutée (recontrôler après correction du code), utilisée pour les 2 pages. 18 documents publiés,
   1 130 passages. Évaluation : recherche top 5 7/10 (8/10 avant), MRR 0,52 ; réponses 11/15, 0 échec, relecture :
-  fidèles (`docs/notes/observations-decoupage.md`). **Pas encore en production** (corpus de production = sauvegarde
-  de la base : transfert à faire).
+  fidèles (`docs/notes/observations-decoupage.md`). **En production le 2026-10-11** : base locale transférée
+  (`pg_dump --exclude-table=feedback` pour garder les retours de production), `pg_restore --clean`, `web` reconstruit
+  et redémarré ; 18 documents, 1 130 passages, 1 retour conservé. Après chaque recréation de `web` : erreurs
+  « antiforgery token could not be decrypted » dans ses journaux (clés DataProtection non persistées, sans effet
+  pour les visiteurs).
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
