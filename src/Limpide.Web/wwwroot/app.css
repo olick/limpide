@@ -269,6 +269,26 @@ details.engine h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
 }
 
 /* Pied de page */
+/* Ce que fait Limpide : trois points, lisibles sans connaissance technique. */
+.promises { list-style: none; padding: 0; margin: 1.2rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.8rem; }
+.promises li { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.8rem 1rem; font-size: 0.9rem; line-height: 1.45; }
+.promises strong { display: block; margin-bottom: 0.3rem; }
+
+/* Sous le capot : le récit en étapes, puis les détails techniques repliés. */
+details.engine summary { font-size: 1.05rem; }
+.story { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0 0; }
+.story li { counter-increment: step; position: relative; padding: 0 0 0.9rem 2.4rem; border-left: 2px solid var(--border); margin-left: 0.9rem; }
+.story li:last-child { border-left-color: transparent; }
+.story li::before { content: counter(step); position: absolute; left: -0.95rem; top: -0.1rem; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.story .step-title { font-weight: 700; }
+.story .ms { margin-left: 0.5rem; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.story p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.5; }
+.story .guardrails { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.92rem; }
+.cost { margin: 0.4rem 0 0; padding: 0.7rem 0.9rem; background: var(--accent-soft); border-radius: var(--radius); font-size: 0.92rem; }
+details.technical { margin-top: 1rem; border-top: 1px solid var(--border); padding-top: 0.6rem; }
+details.technical summary { font-weight: 600; font-size: 0.92rem; color: var(--muted); }
+details.technical .hint { font-size: 0.82rem; color: var(--muted); }
+
 /* Technologies utilisées : icônes en masque, dans la couleur du texte (lisibles en clair comme en sombre). */
 .stack {
     margin-top: 2rem;

@@ -4,17 +4,37 @@
 @inject AnswerService Answers
 @inject QuestionQuota Quota
 @inject ILogger<Home> Logger
+@inject GenerationSettings Generation
 
 <PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
 
 <header class="hero">
     <h1>Limpide</h1>
     <p class="tagline">
-        Interrogez le règlement européen sur l'intelligence artificielle et les fiches pratiques IA de la CNIL.
-        Chaque réponse montre ses sources, et ce qui se passe sous le capot.
+        Posez une question sur les règles de l'intelligence artificielle en Europe : Limpide retrouve les passages des
+        textes officiels qui y répondent, vous les cite mot pour mot, et vous montre comment il a fait.
     </p>
 </header>
 
+<ul class="promises" aria-label="Ce que fait Limpide">
+    <li>
+        <strong>✔ Ce qu'il fait</strong>
+        Il cherche dans le règlement européen sur l'IA (AI Act) et les 17 fiches pratiques IA de la CNIL les passages
+        qui répondent à votre question, et rédige une réponse qui renvoie à chacun d'eux.
+    </li>
+    <li>
+        <strong>✘ Ce qu'il ne fait pas</strong>
+        Il ne dit pas si votre situation est conforme : c'est le rôle d'un professionnel du droit. C'est une IA, qui
+        peut se tromper : les textes cités font foi, pas sa formulation.
+    </li>
+    <li>
+        <strong>🔍 Pourquoi il montre tout</strong>
+        Sous chaque réponse, « Sous le capot » explique comment elle a été produite : quels textes ont été retenus,
+        par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.
+    </li>
+</ul>
+
+@* Obligation de transparence (AI Act, article 50) : la personne sait qu'elle échange avec un système d'IA. *@
 <aside class="transparency" role="note">
     <strong>Vous échangez avec une IA.</strong>
     Les réponses sont rédigées automatiquement à partir des textes cités : elles peuvent contenir des erreurs
@@ -87,86 +107,178 @@
     }
 
     <details class="engine" open="@engineOpen">
-        <summary>Sous le capot</summary>
+        <summary>Sous le capot : comment cette réponse a été produite</summary>
 
-        <dl class="metrics">
-            <div>
-                <dt>Recherche</dt>
-                <dd>@r.SearchStrategy</dd>
-            </div>
-            <div>
-                <dt>Modèle</dt>
-                <dd>@r.Model <span class="muted">· consignes @r.PromptVersion</span></dd>
-            </div>
-            <div>
-                <dt>Tokens</dt>
-                <dd>@Number(r.Usage.InputTokens) en entrée · @Number(r.Usage.OutputTokens) en sortie</dd>
-            </div>
-            <div>
-                <dt>Coût estimé</dt>
-                <dd>
-                    @if (r.Usage.EstimatedCost is { } cost)
-                    {
-                        <span>@cost.ToString("0.000000", French) $</span>
-                        <span class="muted"> · @((cost * 1000).ToString("0.00", French)) $ pour 1 000 questions</span>
-                    }
-                    else
-                    {
-                        <span>inconnu (tarif du modèle non configuré)</span>
-                    }
-                </dd>
-            </div>
-        </dl>
-
-        <h3>Durées</h3>
-        <ul class="timings">
-            @foreach (var (label, duration) in Steps(r.Timings))
-            {
-                <li>
-                    <span class="step">@label</span>
-                    <span class="bar"><span style="width: @Percent(duration, r.Timings.Total)"></span></span>
-                    <span class="ms">@Ms(duration)</span>
-                </li>
-            }
-            <li class="total"><span class="step">Total</span><span></span><span class="ms">@Ms(r.Timings.Total)</span></li>
-        </ul>
-
-        <h3>Garde-fous</h3>
-        @if (r.Guardrails.Count == 0)
-        {
-            <p class="ok">Aucun déclenché.</p>
-        }
-        else
-        {
-            <ul class="guardrails">
-                @foreach (var g in r.Guardrails)
+        @{ var outOfScope = r.Guardrails.Any(g => g.Code == "hors-perimetre");
+           var best = r.Passages.Count == 0 ? 0 : r.Passages.Max(p => p.Passage.Score);
+           var citedCount = r.CitedPassages.Count(); }
+        <ol class="story">
+            <li>
+                <span class="step-title">Votre question est traduite en « sens »</span>
+                <span class="ms">@Ms(r.Timings.Embedding)</span>
+                <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres qui
+                    représente son sens. À cette étape, rien ne quitte le serveur.</p>
+            </li>
+            <li>
+                <span class="step-title">Recherche des passages les plus proches</span>
+                <span class="ms">@Ms(r.Timings.Search)</span>
+                <p>Limpide compare ce « sens » à celui de chaque passage des textes officiels, et retient les
+                    @r.Passages.Count plus proches. Leur proximité est notée de 0 à 1 : le meilleur obtient
+                    <strong>@best.ToString("0.00", French)</strong>.</p>
+            </li>
+            <li>
+                <span class="step-title">Est-ce bien le sujet des textes ?</span>
+                @if (outOfScope)
                 {
-                    <li><code>@g.Code</code> @g.Description</li>
+                    <p><strong>Non.</strong> Même le meilleur passage est trop éloigné (@best.ToString("0.00", French), sous le seuil
+                        de @Generation.MinScore.ToString("0.00", French)). Limpide s'arrête là et répond qu'il ne sait pas, sans
+                        appeler le modèle de rédaction : rien d'inventé, rien de payé.</p>
                 }
-            </ul>
-        }
+                else
+                {
+                    <p><strong>Oui.</strong> Le meilleur passage dépasse le seuil de @Generation.MinScore.ToString("0.00", French),
+                        en dessous duquel Limpide répond « je ne sais pas » sans aller plus loin.</p>
+                }
+            </li>
+            <li>
+                <span class="step-title">Rédaction de la réponse</span>
+                @if (outOfScope)
+                {
+                    <p>Étape sautée : le modèle de rédaction n'a pas été appelé.</p>
+                }
+                else
+                {
+                    <span class="ms">@Ms(r.Timings.Generation)</span>
+                    <p>@PlainLanguage.ModelName(r.Model), un modèle de Mistral AI hébergé en Europe, a reçu votre question et
+                        ces @r.Passages.Count passages, avec une consigne : répondre seulement à partir d'eux, renvoyer à
+                        chaque passage utilisé ([P1], [P2]…), dire « je ne sais pas » sinon, et ne jamais juger votre
+                        situation.
+                        @(r.Declined ? "Il a répondu ne pas savoir : les passages trouvés ne contenaient pas la réponse."
+                                     : $"Il s'est appuyé sur {citedCount} passage{(citedCount > 1 ? "s" : "")}, reproduit{(citedCount > 1 ? "s" : "")} ci-dessus.")</p>
+                }
+            </li>
+            <li>
+                <span class="step-title">Contrôles automatiques</span>
+                @if (r.Guardrails.Count == 0)
+                {
+                    <p class="ok">Tous réussis : chaque renvoi [P…] correspond bien à un passage fourni, et la réponse ne
+                        semble pas juger votre situation.</p>
+                }
+                else
+                {
+                    <ul class="guardrails">
+                        @foreach (var g in r.Guardrails)
+                        {
+                            var (title, meaning) = PlainLanguage.Guardrail(g.Code);
+                            <li><strong>@title.</strong> @meaning</li>
+                        }
+                    </ul>
+                }
+            </li>
+        </ol>
 
-        <h3>Passages fournis au modèle</h3>
-        <div class="table-scroll">
-            <table class="passages">
-                <thead>
-                    <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th><th>Version</th></tr>
-                </thead>
-                <tbody>
-                    @foreach (var (id, p, cited) in r.Passages)
+        <p class="cost">
+            <strong>Coût de cette réponse :</strong>
+            @if (outOfScope)
+            {
+                <span>rien, le modèle de rédaction n'a pas été appelé.</span>
+            }
+            else if (r.Usage.EstimatedCost is { } answerCost)
+            {
+                <span>@PlainLanguage.Cost(answerCost, French), le prix facturé par Mistral pour lire @Number(r.Usage.InputTokens)
+                    « tokens » (des morceaux de mots : votre question, les passages et la consigne) et en écrire
+                    @Number(r.Usage.OutputTokens).</span>
+            }
+            else
+            {
+                <span>inconnu (tarif du modèle non configuré).</span>
+            }
+        </p>
+
+        <details class="technical">
+            <summary>Détails techniques</summary>
+            <dl class="metrics">
+                <div>
+                    <dt>Recherche</dt>
+                    <dd>@r.SearchStrategy</dd>
+                </div>
+                <div>
+                    <dt>Modèle</dt>
+                    <dd>@r.Model <span class="muted">· consignes @r.PromptVersion</span></dd>
+                </div>
+                <div>
+                    <dt>Tokens</dt>
+                    <dd>@Number(r.Usage.InputTokens) en entrée · @Number(r.Usage.OutputTokens) en sortie</dd>
+                </div>
+                <div>
+                    <dt>Coût estimé</dt>
+                    <dd>
+                        @if (r.Usage.EstimatedCost is { } cost)
+                        {
+                            <span>@cost.ToString("0.000000", French) $</span>
+                            <span class="muted"> · @((cost * 1000).ToString("0.00", French)) $ pour 1 000 questions</span>
+                        }
+                        else
+                        {
+                            <span>inconnu (tarif du modèle non configuré)</span>
+                        }
+                    </dd>
+                </div>
+            </dl>
+
+            <h3>Durées</h3>
+            <ul class="timings">
+                @foreach (var (label, duration) in Steps(r.Timings))
+                {
+                    <li>
+                        <span class="step">@label</span>
+                        <span class="bar"><span style="width: @Percent(duration, r.Timings.Total)"></span></span>
+                        <span class="ms">@Ms(duration)</span>
+                    </li>
+                }
+                <li class="total"><span class="step">Total</span><span></span><span class="ms">@Ms(r.Timings.Total)</span></li>
+            </ul>
+
+            <h3>Garde-fous</h3>
+            @if (r.Guardrails.Count == 0)
+            {
+                <p class="ok">Aucun déclenché.</p>
+            }
+            else
+            {
+                <ul class="guardrails">
+                    @foreach (var g in r.Guardrails)
                     {
-                        <tr class="@(cited ? "cited" : "")">
-                            <td>@id</td>
-                            <td>@p.Heading</td>
-                            <td>@(p.Anchor ?? "—")</td>
-                            <td>@p.Score.ToString("0.000", French)</td>
-                            <td>@(cited ? "oui" : "non")</td>
-                            <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
-                        </tr>
+                        <li><code>@g.Code</code> @g.Description</li>
                     }
-                </tbody>
-            </table>
-        </div>
+                </ul>
+            }
+
+            <h3>Passages fournis au modèle</h3>
+            <div class="table-scroll">
+                <table class="passages">
+                    <thead>
+                        <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th><th>Version</th></tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var (id, p, cited) in r.Passages)
+                        {
+                            <tr class="@(cited ? "cited" : "")">
+                                <td>@id</td>
+                                <td>@p.Heading</td>
+                                <td>@(p.Anchor ?? "—")</td>
+                                <td>@p.Score.ToString("0.000", French)</td>
+                                <td>@(cited ? "oui" : "non")</td>
+                                <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+    
+            <p class="hint">Score : proximité de sens entre votre question et le passage (similarité cosinus, de 0 à 1).
+                Version : empreinte du texte collecté, pour remonter jusqu'au fichier téléchargé.</p>
+        </details>
     </details>
 }
 
