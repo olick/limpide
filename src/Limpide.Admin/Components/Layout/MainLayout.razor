@@ -1,0 +1,26 @@
+@inherits LayoutComponentBase
+
+<header class="top">
+    <a class="brand" href="/">Limpide · back office</a>
+    <AuthorizeView Policy="@AdminAuthentication.Policy">
+        <Authorized>
+            <nav>
+                <NavLink href="/versions">Versions et quarantaine</NavLink>
+                <NavLink href="/retours">Retours</NavLink>
+                <NavLink href="/journal">Journal</NavLink>
+                <NavLink href="/reglages">Réglages</NavLink>
+            </nav>
+            <span class="user">@context.User.Identity?.Name · <a href="/deconnexion">se déconnecter</a></span>
+        </Authorized>
+    </AuthorizeView>
+</header>
+
+<main>
+    @Body
+</main>
+
+<div id="blazor-error-ui" data-nosnippet>
+    Une erreur est survenue.
+    <a href="." class="reload">Recharger</a>
+    <span class="dismiss">🗙</span>
+</div>

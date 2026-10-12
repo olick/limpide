@@ -1,0 +1,85 @@
+@page "/retours"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@rendermode InteractiveServer
+@inject FeedbackStore Store
+
+<PageTitle>Retours · Limpide</PageTitle>
+
+<h1>Retours des visiteurs</h1>
+<p class="hint">Conservés 12 mois, sans adresse IP ; la question n'est jointe que si le visiteur l'a accepté.
+    « Traité » ne supprime rien : le retour reste jusqu'à la fin de sa durée de conservation.
+    <a href="/retours/export.csv">Exporter (CSV)</a></p>
+
+<label class="checkbox"><input type="checkbox" @bind="showHandled" /> Afficher aussi les retours traités</label>
+
+@if (items is null)
+{
+    <p>Chargement…</p>
+}
+else if (!Visible.Any())
+{
+    <p class="ok">Aucun retour à traiter.</p>
+}
+else
+{
+    @foreach (var item in Visible)
+    {
+        var f = item.Feedback;
+        <article class="feedback @(item.HandledAt is null ? "" : "handled")">
+            <header>
+                <span>@item.CreatedAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm") UTC</span>
+                @if (item.HandledAt is { } at)
+                {
+                    <span class="hint">traité le @at.ToUniversalTime().ToString("yyyy-MM-dd") par @item.HandledBy</span>
+                }
+                else
+                {
+                    <button class="secondary" disabled="@busy" @onclick="() => MarkAsync(item)">Marquer traité</button>
+                }
+            </header>
+            @Field("Compris de Limpide", f.Understood)
+            @Field("Réponse fausse ou trompeuse", f.Misleading)
+            @Field("Panneau « sous le capot »", f.UnderTheHood)
+            @if (f.Context is { } context)
+            {
+                <details>
+                    <summary>Question jointe : « @context.Question »</summary>
+                    <blockquote>@context.Answer</blockquote>
+                    <p class="hint">@context.Model, consignes @context.PromptVersion ; cités : @string.Join(" ; ", context.Cited)</p>
+                </details>
+            }
+        </article>
+    }
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private IReadOnlyList<StoredFeedback>? items;
+    private bool showHandled;
+    private bool busy;
+
+    private IEnumerable<StoredFeedback> Visible => (items ?? []).Where(i => showHandled || i.HandledAt is null);
+
+    protected override async Task OnInitializedAsync() => items = await Store.ListAsync(500, CancellationToken.None);
+
+    private async Task MarkAsync(StoredFeedback item)
+    {
+        var actor = AuthenticationState is null ? null : Actor.From((await AuthenticationState).User);
+        if (actor is null)
+            return;
+        busy = true;
+        await Store.MarkHandledAsync(item.Id, actor, CancellationToken.None);
+        items = await Store.ListAsync(500, CancellationToken.None);
+        busy = false;
+    }
+
+    private static RenderFragment Field(string label, string? value) => __builder =>
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            <p><strong>@label</strong> : @value</p>
+        }
+    };
+}

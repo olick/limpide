@@ -1,0 +1,18 @@
+@page "/refuse"
+
+<PageTitle>Accès refusé · Limpide</PageTitle>
+
+<h1>Accès refusé</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <p>Ce compte (<strong>@context.User.Identity?.Name</strong>) n'est pas dans la liste des administrateurs.</p>
+        <p>Si c'est le vôtre et qu'il doit avoir accès, ajoutez cet identifiant à <code>Admin:AllowedUsers</code>
+            (configuration du back office), puis redémarrez l'application :</p>
+        <pre class="identifier">@(Actor.From(context.User)?.Id ?? "(identifiant introuvable : le fournisseur n'a pas transmis de « sub »)")</pre>
+        <p><a href="/deconnexion">Se déconnecter</a></p>
+    </Authorized>
+    <NotAuthorized>
+        <p><a href="/">Retour à l'accueil</a></p>
+    </NotAuthorized>
+</AuthorizeView>

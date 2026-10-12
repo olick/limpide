@@ -1,0 +1,52 @@
+@page "/versions"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@inject DocumentVersionStore Store
+
+<PageTitle>Versions · Limpide</PageTitle>
+
+<h1>Versions et quarantaine</h1>
+<p class="hint">Version publiée (en service), candidates en cours, versions en quarantaine, et versions écartées ces 7
+    derniers jours. Une version en quarantaine attend une décision : ouvrez-la.</p>
+
+@if (rows is null)
+{
+    <p>Chargement…</p>
+}
+else
+{
+    @foreach (var document in rows.GroupBy(r => (r.SourceName, r.DocumentTitle)))
+    {
+        <section class="document">
+            <h2>@document.Key.SourceName · @document.Key.DocumentTitle</h2>
+            <table>
+                <thead><tr><th>Empreinte</th><th>Statut</th><th>Date</th><th>Raison</th></tr></thead>
+                <tbody>
+                    @foreach (var row in document)
+                    {
+                        <tr class="@row.Status">
+                            <td><a href="/versions/@row.ContentHash"><code>@row.ContentHash[..12]</code></a></td>
+                            <td><span class="status @row.Status">@Label(row.Status)</span></td>
+                            <td>@((row.PublishedAt ?? row.FetchedAt).ToUniversalTime().ToString("yyyy-MM-dd HH:mm")) UTC</td>
+                            <td>@row.Reason</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+}
+
+@code {
+    private IReadOnlyList<VersionRow>? rows;
+
+    protected override async Task OnInitializedAsync() => rows = await Store.ListForReviewAsync(CancellationToken.None);
+
+    public static string Label(string status) => status switch
+    {
+        VersionStatus.Published => "publiée",
+        VersionStatus.Quarantined => "en quarantaine",
+        VersionStatus.Discarded => "écartée",
+        VersionStatus.Archived => "archivée",
+        _ => $"en cours ({status})",
+    };
+}

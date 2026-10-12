@@ -12,6 +12,19 @@
 	}
 }
 
+# Back office (ADMIN_ADDRESS, ex. « admin.limpide-ia.fr ») : adresse séparée, son propre certificat. L'accès est
+# protégé par l'application (connexion OpenID Connect, liste d'administrateurs) ; vide ou absent : bloc inactif.
+{$ADMIN_ADDRESS} {
+	encode gzip
+	reverse_proxy admin:8080
+	header {
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
 # Adresse(s) redirigée(s) vers SITE_ADDRESS (ex. domaine nu « limpide-ia.fr » → « www.limpide-ia.fr ») : une seule
 # adresse canonique. Caddy obtient aussi le certificat de cette adresse, pour rediriger en HTTPS.
 # REDIRECT_FROM vide ou absent : docker-compose.prod.yml passe une adresse inexistante, en HTTP (aucun certificat

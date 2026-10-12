@@ -1,0 +1,148 @@
+@page "/versions/{Hash}"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@rendermode InteractiveServer
+@using System.Text.Json
+@using Limpide.Core.Quality
+@inject DocumentVersionStore Versions
+@inject ChunkStore Chunks
+
+<PageTitle>Version @Hash[..Math.Min(12, Hash.Length)] · Limpide</PageTitle>
+
+@if (detail is null)
+{
+    <h1>Version introuvable</h1>
+    <p>Aucune version (ou plusieurs) ne correspond à « @Hash ». <a href="/versions">Retour aux versions</a></p>
+}
+else
+{
+    <h1>@detail.SourceName · @detail.DocumentTitle</h1>
+    <dl class="facts">
+        <dt>Statut</dt><dd><span class="status @detail.Status">@Limpide.Admin.Components.Pages.Versions.Label(detail.Status)</span> @detail.Reason</dd>
+        <dt>Empreinte</dt><dd><code>@detail.ContentHash</code></dd>
+        <dt>Collectée</dt><dd>@detail.FetchedAt.ToUniversalTime().ToString("yyyy-MM-dd HH:mm") UTC</dd>
+        <dt>Publiée</dt><dd>@(detail.PublishedAt is { } published ? published.ToUniversalTime().ToString("yyyy-MM-dd HH:mm") + " UTC" : "—")</dd>
+        <dt>Source</dt><dd><a href="@detail.Url" target="_blank" rel="noopener noreferrer">@detail.Url</a></dd>
+    </dl>
+
+    <h2>Contrôles qualité</h2>
+    @if (checks is null)
+    {
+        <p class="hint">Pas de rapport pour cette version.</p>
+    }
+    else
+    {
+        <table>
+            <thead><tr><th></th><th>Contrôle</th><th>Règle</th><th>Mesuré</th><th>Précision</th></tr></thead>
+            <tbody>
+                @foreach (var check in checks)
+                {
+                    <tr class="@(check.Passed ? "" : "failed")">
+                        <td>@(check.Passed ? "✅" : "❌")</td>
+                        <td><code>@check.Name</code></td>
+                        <td>@check.Rule</td>
+                        <td>@QualityReport.Format(check.Value)</td>
+                        <td>@check.Detail</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+
+    @if (detail.Status == VersionStatus.Quarantined)
+    {
+        <section class="decision">
+            <h2>Décision</h2>
+            <p class="hint">Lisez les passages ci-dessous avant de décider. La décision et son motif sont inscrits au journal.</p>
+            <EditForm Model="form" OnValidSubmit="DecideAsync" FormName="decision">
+                <fieldset>
+                    <label><InputRadioGroup @bind-Value="form.Decision">
+                        <InputRadio Value="QuarantineDecision.Release" /> <strong>Publier</strong> : le texte est bon tel quel (publiée au prochain passage d'embed et publish)<br />
+                        <InputRadio Value="QuarantineDecision.Retry" /> <strong>Recontrôler</strong> : le code a été corrigé (extracteur, seuils), refaire tout le circuit<br />
+                        <InputRadio Value="QuarantineDecision.Reject" /> <strong>Rejeter</strong> définitivement : le même contenu sera ignoré à la collecte
+                    </InputRadioGroup></label>
+                </fieldset>
+                <label for="motive">Motif (obligatoire)</label>
+                <InputTextArea id="motive" @bind-Value="form.Motive" rows="2" maxlength="500" />
+                <button type="submit" disabled="@(busy || string.IsNullOrWhiteSpace(form.Motive))">Enregistrer la décision</button>
+            </EditForm>
+        </section>
+    }
+    @if (message is not null)
+    {
+        <p class="@(failed ? "error" : "ok")" role="status">@message</p>
+    }
+
+    <h2>Passages (@passages.Count)</h2>
+    @foreach (var passage in passages.Take(shown))
+    {
+        <blockquote class="passage">@passage.Content</blockquote>
+    }
+    @if (passages.Count > shown)
+    {
+        <button class="secondary" @onclick="() => shown += 10">Afficher 10 passages de plus</button>
+    }
+}
+
+@code {
+    [Parameter]
+    public string Hash { get; set; } = "";
+
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private VersionDetail? detail;
+    private IReadOnlyList<QualityCheck>? checks;
+    private IReadOnlyList<Limpide.Core.Quality.PassageText> passages = [];
+    private int shown = 5;
+    private readonly DecisionForm form = new();
+    private bool busy;
+    private string? message;
+    private bool failed;
+
+    private sealed class DecisionForm
+    {
+        public QuarantineDecision Decision { get; set; } = QuarantineDecision.Retry;
+        public string? Motive { get; set; }
+    }
+
+    private sealed record Report(bool Passed, List<QualityCheck> Checks);
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        detail = await Versions.GetForReviewAsync(Hash, CancellationToken.None);
+        if (detail is null)
+            return;
+        checks = detail.QualityReportJson is { } json
+            ? JsonSerializer.Deserialize<Report>(json, JsonSerializerOptions.Web)?.Checks
+            : null;
+        passages = await Chunks.ListTextsAsync(detail.Id, CancellationToken.None);
+    }
+
+    private async Task DecideAsync()
+    {
+        var actor = AuthenticationState is null ? null : Actor.From((await AuthenticationState).User);
+        if (actor is null || detail is null || string.IsNullOrWhiteSpace(form.Motive))
+            return;
+
+        busy = true;
+        try
+        {
+            var change = await Versions.DecideQuarantineAsync(detail.ContentHash[..12], form.Decision, form.Motive.Trim(), actor, CancellationToken.None);
+            (message, failed) = ($"Décision enregistrée pour {change.DocumentTitle} : {form.Decision switch {
+                QuarantineDecision.Release => "publiée au prochain passage d'embed et publish",
+                QuarantineDecision.Retry => "recontrôlée au prochain passage du DAG",
+                _ => "rejetée" }}.", false);
+            await LoadAsync();
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            (message, failed) = (ex.Message, true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

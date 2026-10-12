@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Limpide.Admin/Limpide.Admin.csproj" />
     <Project Path="src/Limpide.Core/Limpide.Core.csproj" />
     <Project Path="src/Limpide.Infrastructure/Limpide.Infrastructure.csproj" />
     <Project Path="src/Limpide.Ingestion/Limpide.Ingestion.csproj" />

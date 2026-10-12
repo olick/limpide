@@ -48,6 +48,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<ChunkStore>();
         services.AddSingleton<EmbeddingStore>();
         services.AddSingleton<FeedbackStore>();
+        services.AddSingleton<AuditStore>();
         services.AddSingleton(configuration.GetSection("Search").Get<SearchOptions>() ?? new SearchOptions());
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();
 

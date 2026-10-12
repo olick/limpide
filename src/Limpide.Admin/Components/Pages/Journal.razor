@@ -1,0 +1,42 @@
+@page "/journal"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@inject AuditStore Audit
+
+<PageTitle>Journal · Limpide</PageTitle>
+
+<h1>Journal des décisions</h1>
+<p class="hint">Toute décision humaine, depuis le back office ou la console, inscrite dans la même transaction que la
+    décision elle-même. Jamais modifié ni purgé.</p>
+
+@if (actions is null)
+{
+    <p>Chargement…</p>
+}
+else if (actions.Count == 0)
+{
+    <p>Aucune décision pour l'instant.</p>
+}
+else
+{
+    <table>
+        <thead><tr><th>Date</th><th>Auteur</th><th>Action</th><th>Cible</th><th>Détail</th></tr></thead>
+        <tbody>
+            @foreach (var a in actions)
+            {
+                <tr>
+                    <td>@a.At.ToUniversalTime().ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    <td title="@a.Actor">@(a.ActorName ?? a.Actor)</td>
+                    <td><code>@a.Action</code></td>
+                    <td><code>@(a.Target.Length > 12 ? a.Target[..12] : a.Target)</code></td>
+                    <td>@a.Detail</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private IReadOnlyList<AdminAction>? actions;
+
+    protected override async Task OnInitializedAsync() => actions = await Audit.ListAsync(300, CancellationToken.None);
+}

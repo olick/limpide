@@ -1,3 +1,4 @@
+using Limpide.Core.Administration;
 using Limpide.Infrastructure.Storage;
 using Limpide.Ingestion.Cli;
 using Microsoft.Extensions.Logging;
@@ -21,7 +22,7 @@ public sealed class QuarantineDecisionCommand(DocumentVersionStore versions, Com
             return 2;
         }
 
-        var change = await versions.DecideQuarantineAsync(parts[0], decision, parts[1], ct);
+        var change = await versions.DecideQuarantineAsync(parts[0], decision, parts[1], Actor.Console, ct);
         summary.Add(decision switch { QuarantineDecision.Release => "released", QuarantineDecision.Retry => "retried", _ => "rejected" });
         var next = decision switch
         {

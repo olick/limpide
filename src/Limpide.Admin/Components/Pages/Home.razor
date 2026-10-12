@@ -1,0 +1,71 @@
+@page "/"
+@inject AdminSettings Settings
+@inject DocumentVersionStore Versions
+@inject FeedbackStore Feedback
+@inject AuditStore Audit
+
+<PageTitle>Limpide · back office</PageTitle>
+
+<AuthorizeView Policy="@AdminAuthentication.Policy">
+    <Authorized>
+        <h1>Tableau de bord</h1>
+        @if (summary is not null)
+        {
+            <div class="cards">
+                <a class="card @(summary.Quarantined > 0 ? "alert" : "")" href="/versions">
+                    <strong>@summary.Quarantined</strong> version(s) en quarantaine
+                </a>
+                <a class="card" href="/versions"><strong>@summary.Published</strong> document(s) publiés</a>
+                <a class="card @(summary.Unhandled > 0 ? "alert" : "")" href="/retours">
+                    <strong>@summary.Unhandled</strong> retour(s) à traiter
+                </a>
+                <a class="card" href="/journal"><strong>@summary.Actions</strong> décision(s) au journal</a>
+            </div>
+        }
+    </Authorized>
+    <NotAuthorized>
+        <h1>Back office de Limpide</h1>
+        @if (context.User.Identity?.IsAuthenticated == true)
+        {
+            <p>Vous êtes connecté, mais ce compte n'a pas accès au back office. <a href="/refuse">Détails</a></p>
+        }
+        else if (!Settings.IsConfigured)
+        {
+            <p class="warning">Connexion non configurée : renseigner <code>Admin:Authority</code>, <code>Admin:ClientId</code> et
+                <code>Admin:ClientSecret</code> (voir <code>deploy/README.md</code>).</p>
+        }
+        else
+        {
+            <p>Accès réservé aux administrateurs.</p>
+            <a class="button" href="/connexion">Se connecter</a>
+        }
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    [Inject]
+    private IAuthorizationService Authorization { get; set; } = default!;
+
+    private Summary? summary;
+
+    private sealed record Summary(int Quarantined, int Published, int Unhandled, int Actions);
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Rien n'est lu en base pour un visiteur non autorisé.
+        if (AuthenticationState is null || !(await Authorization.AuthorizeAsync((await AuthenticationState).User, AdminAuthentication.Policy)).Succeeded)
+            return;
+
+        var versions = await Versions.ListForReviewAsync(CancellationToken.None);
+        var feedback = await Feedback.ListAsync(10_000, CancellationToken.None);
+        var actions = await Audit.ListAsync(10_000, CancellationToken.None);
+        summary = new Summary(
+            versions.Count(v => v.Status == VersionStatus.Quarantined),
+            versions.Count(v => v.Status == VersionStatus.Published),
+            feedback.Count(f => f.HandledAt is null),
+            actions.Count);
+    }
+}

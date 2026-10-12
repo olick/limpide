@@ -1,6 +1,7 @@
 # Images de Limpide, construites depuis la racine du dépôt :
 #   docker build --target web -t limpide-web .
 #   docker build --target ingestion -t limpide-ingestion .
+#   docker build --target admin -t limpide-admin .
 # Aucun secret dans les images : connexion, clé Mistral, etc. arrivent par variables d'environnement.
 
 # --- Compilation (commune aux deux images) ---
@@ -12,8 +13,10 @@ COPY src/Limpide.Core/Limpide.Core.csproj src/Limpide.Core/
 COPY src/Limpide.Infrastructure/Limpide.Infrastructure.csproj src/Limpide.Infrastructure/
 COPY src/Limpide.Ingestion/Limpide.Ingestion.csproj src/Limpide.Ingestion/
 COPY src/Limpide.Web/Limpide.Web.csproj src/Limpide.Web/
+COPY src/Limpide.Admin/Limpide.Admin.csproj src/Limpide.Admin/
 RUN dotnet restore src/Limpide.Web/Limpide.Web.csproj \
- && dotnet restore src/Limpide.Ingestion/Limpide.Ingestion.csproj
+ && dotnet restore src/Limpide.Ingestion/Limpide.Ingestion.csproj \
+ && dotnet restore src/Limpide.Admin/Limpide.Admin.csproj
 
 COPY src/ src/
 # Pas de --no-restore : la restauration précédente ne voyait que les .csproj ; or le SDK n'ajoute le paquet des
@@ -21,7 +24,9 @@ COPY src/ src/
 # composants .razor. Sans nouvelle restauration, l'image publiée n'a pas blazor.web.js (404 constaté le 2026-10-06).
 RUN dotnet publish src/Limpide.Web/Limpide.Web.csproj -c Release -o /out/web \
  && dotnet publish src/Limpide.Ingestion/Limpide.Ingestion.csproj -c Release -o /out/ingestion \
- && test -f /out/web/wwwroot/_framework/blazor.web.js
+ && dotnet publish src/Limpide.Admin/Limpide.Admin.csproj -c Release -o /out/admin \
+ && test -f /out/web/wwwroot/_framework/blazor.web.js \
+ && test -f /out/admin/wwwroot/_framework/blazor.web.js
 
 # --- Application web ---
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS web
@@ -31,9 +36,24 @@ ENV ASPNETCORE_HTTP_PORTS=8080 \
     # Derrière le reverse proxy : lire X-Forwarded-For / X-Forwarded-Proto (adresse du visiteur, HTTPS).
     ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
 EXPOSE 8080
+# Clés de chiffrement des cookies (DataProtection__KeysPath=/keys, volume) : répertoire créé au nom de l'utilisateur,
+# pour qu'un volume neuf en hérite.
+RUN mkdir -p /keys && chown $APP_UID /keys
 # Utilisateur non root fourni par l'image Microsoft.
 USER $APP_UID
 ENTRYPOINT ["dotnet", "Limpide.Web.dll"]
+
+# --- Back office (admin.limpide-ia.fr, connexion OpenID Connect) ---
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS admin
+WORKDIR /app
+COPY --from=build /out/admin .
+ENV ASPNETCORE_HTTP_PORTS=8080 \
+    # Derrière Caddy : adresse de retour du fournisseur d'identité en https://.
+    ASPNETCORE_FORWARDEDHEADERS_ENABLED=true
+EXPOSE 8080
+RUN mkdir -p /keys && chown $APP_UID /keys
+USER $APP_UID
+ENTRYPOINT ["dotnet", "Limpide.Admin.dll"]
 
 # --- Console d'ingestion (fetch, extract, chunk, embed, evaluate...) ---
 FROM mcr.microsoft.com/dotnet/runtime:10.0 AS ingestion

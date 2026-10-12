@@ -144,6 +144,40 @@ Les bases créées avant la S5 (scripts `db/init`, supprimés depuis) reçoivent
 EXISTS`) : DbUp les inscrit simplement dans son journal. Vérifié le 2026-10-10 sur une copie de la base locale et
 sur une base vide : même schéma à l'arrivée, aucune donnée perdue.
 
+## Back office (admin.limpide-ia.fr)
+
+Application séparée (`src/Limpide.Admin`, conteneur `admin`) : versions et quarantaine (publier, recontrôler, rejeter,
+motif obligatoire), retours des visiteurs (traité, export CSV), journal des décisions, réglages en lecture seule.
+Connexion **OpenID Connect générique** : le fournisseur n'est qu'une configuration (`AdminAuthentication.cs`, seul
+fichier qui le connaît). Accès réservé aux identifiants listés (« émetteur#sujet », stable chez tout fournisseur).
+
+**Mise en place (Microsoft, comptes personnels)**
+
+1. Zone DNS OVH : entrée A `admin` → `57.129.175.88`.
+2. Portail Azure → Microsoft Entra ID → Inscriptions d'applications → Nouvelle inscription : « Limpide Admin »,
+   comptes Microsoft personnels uniquement ; URI de redirection (Web) `https://admin.limpide-ia.fr/signin-oidc`, et
+   `http://localhost:5182/signin-oidc` pour le poste. Noter l'ID d'application ; créer un secret client.
+3. `.env.prod` (jamais commité) :
+   ```
+   ADMIN_ADDRESS=admin.limpide-ia.fr
+   ADMIN_OIDC_AUTHORITY=https://login.microsoftonline.com/consumers/v2.0
+   ADMIN_OIDC_CLIENT_ID=<ID d'application>
+   ADMIN_OIDC_CLIENT_SECRET=<secret client>
+   ADMIN_ALLOWED_USER=
+   ```
+4. `limpide up -d --build --wait admin caddy` ; se connecter sur https://admin.limpide-ia.fr : la page « Accès refusé »
+   affiche l'identifiant du compte ; le copier dans `ADMIN_ALLOWED_USER`, puis `limpide up -d admin`.
+
+**Sur le poste** : mêmes valeurs en user-secrets (`Admin:Authority`, `Admin:ClientId`, `Admin:ClientSecret`,
+`Admin:AllowedUsers:0`), puis `dotnet run --project src/Limpide.Admin --launch-profile http` (http://localhost:5182).
+Sans ces valeurs, l'application démarre et l'accueil indique « connexion non configurée ».
+
+**Changer de fournisseur** (Google, Pocket ID, Authelia...) : nouvelle inscription chez lui, puis les trois valeurs
+`ADMIN_OIDC_*` et le nouvel identifiant autorisé ; aucun changement de code.
+
+**Clés de chiffrement** : `web` et `admin` gardent leurs clés DataProtection dans des volumes (`web_keys`,
+`admin_keys`) : plus de déconnexion ni d'erreurs « antiforgery » à chaque déploiement.
+
 ## Versions en quarantaine
 
 **Limite actuelle** : l'ingestion ne tourne pas en production (Airflow est sur le poste de développement, S6). Le corpus

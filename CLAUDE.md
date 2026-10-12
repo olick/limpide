@@ -224,7 +224,17 @@ entier malgré la charge (élargissement du corpus en dernier).
   pour les visiteurs).
 - [x] Session 5 (2026-10-11) : ADR-009 (batch incrémental, mesuré sur 13 jours) et ADR-010 (découpage structurel,
   **mesuré** contre la taille fixe sur une copie de la base : `FixedSizeChunker`, 1 362 passages, top 5 5/10 contre
-  7/10, MRR 0,37 contre 0,52). Index `docs/adr/README.md`, README. **Reste de la S5 : back office v1.**
+  7/10, MRR 0,37 contre 0,52). Index `docs/adr/README.md`, README.
+- [ ] Back office v1 (2026-10-12, code fait, connexion à tester) : `src/Limpide.Admin` (Blazor, port local 5182),
+  exposé sur `admin.limpide-ia.fr` (conteneur `admin`, bloc Caddy `ADMIN_ADDRESS`, base seulement : ni clé Mistral ni
+  Ollama). Connexion OpenID Connect générique (`AdminAuthentication.cs`, seul fichier qui connaît le protocole ;
+  Microsoft comptes personnels, `consumers/v2.0`) ; accès par liste d'identifiants « émetteur#sujet » (`Actor`, Core,
+  testé) ; page `/refuse` qui affiche l'identifiant à autoriser. Pages : tableau de bord, versions et détail (rapport
+  de contrôles, passages, décision publier / recontrôler / rejeter avec motif), retours (traité, export CSV protégé
+  contre l'injection de formules), journal, réglages en lecture seule. Migration 0004 : `feedback.handled_at/by`,
+  table `admin_actions` (journal écrit dans la transaction de la décision ; la console écrit « console »).
+  Clés DataProtection persistées (`web_keys`, `admin_keys`). **Reste** : DNS `admin`, inscription Entra par
+  Alexandre, première connexion, déploiement, épisode 21.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 

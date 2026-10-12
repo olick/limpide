@@ -15,9 +15,11 @@ public sealed class FeedbackCommand(FeedbackStore store)
         var all = await store.ListAsync(Limit, ct);
         Console.WriteLine($"# Retours des visiteurs ({all.Count}{(all.Count == Limit ? $", les {Limit} plus récents" : "")})");
 
-        foreach (var (createdAt, f) in all)
+        foreach (var stored in all)
         {
-            Console.WriteLine($"\n## {createdAt.ToLocalTime():yyyy-MM-dd HH:mm}\n");
+            var f = stored.Feedback;
+            var handled = stored.HandledAt is { } at ? $" — traité le {at.ToLocalTime():yyyy-MM-dd} par {stored.HandledBy}" : "";
+            Console.WriteLine($"\n## {stored.CreatedAt.ToLocalTime():yyyy-MM-dd HH:mm}{handled}\n");
             Write("Compris de Limpide", f.Understood);
             Write("Réponse fausse ou trompeuse", f.Misleading);
             Write("Panneau « sous le capot »", f.UnderTheHood);

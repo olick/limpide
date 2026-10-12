@@ -1,3 +1,4 @@
+using Limpide.Core.Administration;
 using Limpide.Core.Corpus;
 using Npgsql;
 
@@ -75,6 +76,11 @@ public enum QuarantineDecision
 public sealed record VersionRow(
     string SourceName, string DocumentTitle, string ContentHash, string Status, string? Reason,
     DateTimeOffset FetchedAt, DateTimeOffset? PublishedAt);
+
+/// <summary>Une version en détail (back office) : statut, raison, dates, rapport des contrôles qualité (JSON).</summary>
+public sealed record VersionDetail(
+    Guid Id, string SourceName, string DocumentTitle, string Url, string ContentHash, string Status, string? Reason,
+    DateTimeOffset FetchedAt, DateTimeOffset? PublishedAt, string? QualityReportJson);
 
 /// <summary>Version qui a changé d'étape, pour le journal des commandes.</summary>
 public sealed record VersionChange(string SourceName, string DocumentTitle, string ContentHash);
@@ -239,7 +245,8 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
     /// Décision humaine sur une version en quarantaine, désignée par le début de son empreinte (au moins 8 caractères).
     /// Le motif est gardé dans status_reason. Erreur si l'empreinte est ambiguë ou ne désigne aucune version en quarantaine.
     /// </summary>
-    public async Task<VersionChange> DecideQuarantineAsync(string hashPrefix, QuarantineDecision decision, string motive, CancellationToken ct)
+    public async Task<VersionChange> DecideQuarantineAsync(
+        string hashPrefix, QuarantineDecision decision, string motive, Actor actor, CancellationToken ct)
     {
         if (hashPrefix.Length < 8 || !hashPrefix.All(char.IsAsciiHexDigitLower))
             throw new ArgumentException($"empreinte « {hashPrefix} » : au moins 8 caractères hexadécimaux minuscules (voir la commande versions)");
@@ -292,8 +299,44 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
                 "une autre version de ce document est déjà en cours de traitement : la laisser aboutir, puis recommencer", ex);
         }
 
+        // Le journal dans la même transaction que la décision : une décision sans trace est impossible.
+        await AuditStore.WriteAsync(connection, tx, actor, decision.ToString().ToLowerInvariant(), change.ContentHash,
+            $"{change.SourceName} / {change.DocumentTitle} — {motive}", ct);
+
         await tx.CommitAsync(ct);
         return change;
+    }
+
+    /// <summary>Détail d'une version (écran de quarantaine du back office), désignée par le début de son empreinte.</summary>
+    public async Task<VersionDetail?> GetForReviewAsync(string hashPrefix, CancellationToken ct)
+    {
+        if (hashPrefix.Length < 8 || !hashPrefix.All(char.IsAsciiHexDigitLower))
+            return null;
+
+        await using var command = dataSource.CreateCommand("""
+            SELECT v.id, s.name, coalesce(d.title, d.url), d.url, v.content_hash, v.status, v.status_reason,
+                   v.fetched_at, v.published_at, v.quality_report::text
+            FROM document_versions v
+            JOIN documents d ON d.id = v.document_id
+            JOIN sources s ON s.id = d.source_id
+            WHERE v.content_hash LIKE @prefix || '%'
+            LIMIT 2
+            """);
+        command.Parameters.AddWithValue("prefix", hashPrefix);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+
+        VersionDetail? found = null;
+        while (await reader.ReadAsync(ct))
+        {
+            if (found is not null)
+                return null; // empreinte ambiguë
+            found = new VersionDetail(
+                reader.GetGuid(0), reader.GetString(1), reader.GetString(2), reader.GetString(3), reader.GetString(4),
+                reader.GetString(5), reader.IsDBNull(6) ? null : reader.GetString(6), reader.GetFieldValue<DateTimeOffset>(7),
+                reader.IsDBNull(8) ? null : reader.GetFieldValue<DateTimeOffset>(8), reader.IsDBNull(9) ? null : reader.GetString(9));
+        }
+
+        return found;
     }
 
     /// <summary>Versions publiées, candidates et en quarantaine, puis les dernières écartées ou rejetées (commande versions).</summary>

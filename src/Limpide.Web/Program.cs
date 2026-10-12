@@ -1,6 +1,7 @@
 ﻿using Limpide.Core.Protection;
 using Limpide.Infrastructure;
 using Limpide.Web.Components;
+using Microsoft.AspNetCore.DataProtection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,11 @@ builder.Services.AddSingleton<QuestionQuota>();
 // Anti-spam du formulaire de retours : 5 envois par heure et par visiteur, 200 par jour au total.
 builder.Services.AddKeyedSingleton("feedback", (services, _) =>
     new QuestionQuota(new QuotaOptions(PerClientPerHour: 5, GlobalPerDay: 200), services.GetRequiredService<TimeProvider>()));
+
+// Clés de chiffrement des cookies conservées hors du conteneur (volume) : sans elles, chaque déploiement écrivait
+// « antiforgery token could not be decrypted » dans les journaux (S5).
+if (builder.Configuration["DataProtection:KeysPath"] is { Length: > 0 } keys)
+    builder.Services.AddDataProtection().SetApplicationName("limpide-web").PersistKeysToFileSystem(new DirectoryInfo(keys));
 
 builder.Services.AddRazorComponents()
     .AddInteractiveServerComponents();

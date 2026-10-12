@@ -21,6 +21,8 @@ services:
       SITE_ADDRESS: "${SITE_ADDRESS:-:80}"
       # Vide ou absent : adresse inexistante en HTTP (un bloc sans adresse casserait la configuration de Caddy).
       REDIRECT_FROM: "${REDIRECT_FROM:-http://redirection-inactive.invalid}"
+      # Back office (ex. « admin.limpide-ia.fr ») ; vide ou absent : bloc inactif.
+      ADMIN_ADDRESS: "${ADMIN_ADDRESS:-http://admin-inactif.invalid}"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -37,12 +39,37 @@ services:
     restart: unless-stopped
     environment:
       <<: *app-env
+      DataProtection__KeysPath: /keys
+    volumes:
+      - web_keys:/keys
     depends_on:
       postgres:
         condition: service_healthy
       ollama-model:
         condition: service_completed_successfully
     mem_limit: 512m
+
+  # Back office : seulement la base (ni clé Mistral, ni Ollama). Connexion OpenID Connect ; fournisseur et
+  # administrateurs autorisés dans .env.prod. Sans ADMIN_OIDC_*, la page d'accueil dit « connexion non configurée ».
+  admin:
+    build:
+      context: .
+      target: admin
+    image: limpide-admin
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=${POSTGRES_USER:-rag};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}"
+      Admin__Authority: "${ADMIN_OIDC_AUTHORITY:-}"
+      Admin__ClientId: "${ADMIN_OIDC_CLIENT_ID:-}"
+      Admin__ClientSecret: "${ADMIN_OIDC_CLIENT_SECRET:-}"
+      Admin__AllowedUsers__0: "${ADMIN_ALLOWED_USER:-}"
+      DataProtection__KeysPath: /keys
+    volumes:
+      - admin_keys:/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+    mem_limit: 256m
 
   postgres:
     image: pgvector/pgvector:pg17
@@ -109,3 +136,5 @@ volumes:
   caddy_data:
   caddy_config:
   ingestion_data:
+  web_keys:
+  admin_keys:

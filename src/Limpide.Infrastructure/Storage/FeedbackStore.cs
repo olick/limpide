@@ -1,10 +1,12 @@
+using Limpide.Core.Administration;
 using Limpide.Core.Feedback;
 using Npgsql;
 using NpgsqlTypes;
 
 namespace Limpide.Infrastructure.Storage;
 
-public sealed record StoredFeedback(DateTimeOffset CreatedAt, VisitorFeedback Feedback);
+public sealed record StoredFeedback(
+    Guid Id, DateTimeOffset CreatedAt, VisitorFeedback Feedback, DateTimeOffset? HandledAt = null, string? HandledBy = null);
 
 /// <summary>Retours des visiteurs (table feedback, migration 0002_feedback.sql).</summary>
 public sealed class FeedbackStore(NpgsqlDataSource dataSource)
@@ -51,7 +53,8 @@ public sealed class FeedbackStore(NpgsqlDataSource dataSource)
     public async Task<IReadOnlyList<StoredFeedback>> ListAsync(int limit, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand("""
-            SELECT created_at, understood, misleading, under_the_hood, question, answer, model, prompt_version, cited
+            SELECT created_at, understood, misleading, under_the_hood, question, answer, model, prompt_version, cited,
+                   id, handled_at, handled_by
             FROM feedback ORDER BY created_at DESC LIMIT @limit
             """);
         command.Parameters.AddWithValue("limit", limit);
@@ -65,10 +68,30 @@ public sealed class FeedbackStore(NpgsqlDataSource dataSource)
                 ? new AnsweredQuestion(question, Get(5) ?? "", Get(6) ?? "", Get(7) ?? "",
                     reader.IsDBNull(8) ? [] : reader.GetFieldValue<string[]>(8))
                 : null;
-            list.Add(new StoredFeedback(reader.GetFieldValue<DateTimeOffset>(0), new VisitorFeedback(Get(1), Get(2), Get(3), context)));
+            list.Add(new StoredFeedback(reader.GetGuid(9), reader.GetFieldValue<DateTimeOffset>(0),
+                new VisitorFeedback(Get(1), Get(2), Get(3), context),
+                reader.IsDBNull(10) ? null : reader.GetFieldValue<DateTimeOffset>(10), Get(11)));
         }
 
         return list;
+    }
+
+    /// <summary>Marque un retour « traité » (sans le supprimer) et le note au journal, dans une transaction.</summary>
+    public async Task MarkHandledAsync(Guid id, Actor actor, CancellationToken ct)
+    {
+        await using var connection = await dataSource.OpenConnectionAsync(ct);
+        await using var tx = await connection.BeginTransactionAsync(ct);
+        await using (var update = new NpgsqlCommand(
+            "UPDATE feedback SET handled_at = now(), handled_by = @by WHERE id = @id AND handled_at IS NULL", connection, tx))
+        {
+            update.Parameters.AddWithValue("id", id);
+            update.Parameters.AddWithValue("by", actor.Name);
+            if (await update.ExecuteNonQueryAsync(ct) == 0)
+                return; // déjà traité, ou supprimé par la purge
+        }
+
+        await AuditStore.WriteAsync(connection, tx, actor, "feedback-handled", id.ToString(), null, ct);
+        await tx.CommitAsync(ct);
     }
 
     private static NpgsqlParameter Text(string name, string? value) =>

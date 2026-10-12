@@ -1,0 +1,38 @@
+@page "/reglages"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@inject IConfiguration Configuration
+@inject AdminSettings Settings
+
+<PageTitle>Réglages · Limpide</PageTitle>
+
+<h1>Réglages</h1>
+<p class="hint">En lecture seule : les réglages se changent par Git (<code>src/appsettings.shared.json</code>), donc ils
+    sont tracés, relus, et, à partir de la S7, évalués avant chaque mise en ligne.</p>
+
+<table>
+    <tbody>
+        @foreach (var (label, key) in Shown)
+        {
+            <tr><th>@label</th><td><code>@(Configuration[key] ?? "—")</code></td></tr>
+        }
+        <tr><th>Fournisseur d'identité</th><td><code>@(Settings.Authority ?? "non configuré")</code></td></tr>
+        <tr><th>Administrateurs autorisés</th><td>@Settings.AllowedUsers.Length</td></tr>
+    </tbody>
+</table>
+
+<p class="hint">Autres réglages, propres à chaque application : quotas de la démo (<code>src/Limpide.Web/appsettings.json</code>,
+    section <code>Protection</code>), seuils des contrôles qualité (<code>src/Limpide.Ingestion/appsettings.json</code>,
+    section <code>Quality</code>).</p>
+
+@code {
+    private static readonly (string Label, string Key)[] Shown =
+    [
+        ("Modèle de génération", "Generation:Model"),
+        ("Seuil de pertinence", "Generation:MinScore"),
+        ("Passages fournis au modèle", "Generation:PassageCount"),
+        ("Température", "Generation:Temperature"),
+        ("Stratégie de recherche", "Search:Strategy"),
+        ("Modèle d'embedding", "Embedding:Model"),
+        ("Titre vectorisé avec le texte", "Embedding:IncludeHeading"),
+    ];
+}
