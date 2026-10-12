@@ -107,6 +107,10 @@ Détail : [`semaine-01.md`](semaine-01.md)
 
 ### S6 · Terraform : apprentissage et infrastructure Azure
 
+**Décision du 2026-10-12 (option B)** : la démo publique reste sur le VPS ; Azure est une **vitrine d'architecture**
+recréée à la demande (`apply` / `destroy` par session, alerte de budget dès le premier jour), pas un hébergement
+permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker` (pile locale) et `ovh` (zone DNS).
+
 - **Concepts à maîtriser** : provider, ressource, variable, **état (state)**, `plan` / `apply`, modules
 - Prise en main : un groupe de ressources créé puis détruit
 - **État distant** dans un compte de stockage Azure, avec verrouillage
@@ -118,6 +122,13 @@ Détail : [`semaine-01.md`](semaine-01.md)
   - réseau : la base n'est joignable que depuis l'application
 - Modules et deux environnements : préproduction et production
 - Hébergement d'Airflow : trancher et documenter
+- **Alternatives moins chères qu'Azure** (demandé le 2026-10-12 : baisser les coûts au maximum) : pour la même
+  architecture (conteneurs sans serveur, PostgreSQL + pgvector, stockage S3, secrets, tâches planifiées), chiffrer
+  Azure face à Scaleway, OVHcloud, Hetzner, Clever Cloud et à l'auto-hébergement sur le VPS (Docker Compose ou un
+  Kubernetes léger) ; deux profils : **fonctionnement permanent** (démo publique) et **à la demande** (vitrine
+  recréée par session). Prix relevés et datés, sources citées ; tableau dans l'ADR d'infrastructure, avec ce que
+  chaque option fait perdre (identités managées, préproduction, haute disponibilité). Le moins cher qui tient les
+  exigences de la démo devient la cible de l'étude de migration (S10).
 - **Portabilité vers un cloud souverain** (demandé le 2026-10-12 ; migration envisagée, pas décidée) :
   - stockage des fichiers bruts **derrière une interface** (comme `IEmbeddingGenerator`), deux implémentations
     possibles : Azure Blob et S3 (Scaleway, OVHcloud, Outscale) ; Azure Blob n'est pas compatible S3, le SDK Azure
@@ -206,7 +217,8 @@ Détail : [`semaine-01.md`](semaine-01.md)
 
 Rattrapage du retard accumulé, finitions, préparation d'un support de soutenance si la certification se confirme.
 
-**Piste, si le temps le permet** (demandée le 2026-10-12) : **étude de migration vers un cloud souverain**.
+**Piste, si le temps le permet** (demandée le 2026-10-12) : **étude de migration vers un cloud souverain**, en
+partant du comparatif de coûts de la S6 (alternative la moins chère qui tient les exigences de la démo).
 Cibles : Scaleway (le plus proche de l'architecture Azure prévue), OVHcloud (déjà l'hébergeur de la démo), Outscale
 (le plus souvent cité comme qualifié SecNumCloud) ; intermédiaires : Bleu (technologie Microsoft), S3NS (Google).
 Livrable : statut SecNumCloud vérifié dans la **liste officielle de l'ANSSI** (les comparatifs se contredisent),

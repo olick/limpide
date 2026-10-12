@@ -173,8 +173,12 @@ Détail et constats : `pipelines/airflow/README.md`.
 
 **S5 terminée (2026-10-12)** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations, back office.
 **Prochaine : S6** (`docs/plan/semaine-06.md`) — Terraform et Azure ; Alexandre ne connaît pas Terraform : concepts
-d'abord. Points à trancher en S6 : hébergement d'Airflow (le corpus de production n'est mis à jour par aucun
-pipeline), démo publique sur Azure ou maintien du VPS (la CI/CD de la S7 en dépend), portabilité souveraine.
+d'abord. **Option B décidée le 2026-10-12** : la démo publique reste sur le VPS ; Azure = vitrine d'architecture
+recréée à la demande (`apply` / `destroy` par session, alerte de budget), apprentissage d'abord sans frais
+(fournisseurs `docker`, puis `ovh` pour la zone DNS). Terraform ne demande pas d'abonnement ; seul le fournisseur
+`azurerm` en demande un (licence de Terraform : BSL depuis 2023 ; OpenTofu, compatible, en MPL). À faire en S6 :
+**comparatif de coûts** Azure / Scaleway / OVHcloud / Hetzner / Clever Cloud / VPS auto-hébergé (permanent et à la
+demande), hébergement d'Airflow (le corpus de production n'est mis à jour par aucun pipeline), portabilité souveraine.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de

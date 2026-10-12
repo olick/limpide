@@ -7,6 +7,13 @@
 
 **Prérequis** : compte Azure, **alerte de budget** configurée avant toute création de ressource.
 
+**Décision du 2026-10-12 (option B)** : la démo publique **reste sur le VPS** (≈ 4 €/mois, ADR-006). Azure sert de
+**vitrine d'architecture** : infrastructure décrite en code, préproduction et production identiques, Key Vault et
+identités managées, ingestion en tâches cloud, stockage objet des fichiers bruts. Les environnements Azure sont
+**recréés à la demande** (`apply` en début de session, `destroy` à la fin) : coût visé, quelques euros par mois, au
+lieu de 60 à 90 € pour un fonctionnement permanent. Avant Azure, apprendre Terraform sans frais : fournisseur `docker`
+(pile locale), puis fournisseur `ovh` (zone DNS de `limpide-ia.fr`, utile tout de suite).
+
 ---
 
 ## Les concepts à comprendre avant de coder
@@ -59,7 +66,8 @@
    ou accès public restreint par pare-feu. Choisir et justifier.
 5. **Embeddings en production** : trancher entre un conteneur Ollama dans Azure et une API d'embeddings (voir l'ADR sur l'hébergement des modèles).
 
-**Terminé quand** : la démo tourne sur Azure, déployée uniquement par Terraform.
+**Terminé quand** : la démo tourne sur Azure (environnement recréé à la demande), déployée uniquement par Terraform ;
+la démo publique, elle, reste sur le VPS (option B).
 
 ## Session 5 : modules et environnements (≈ 2 h)
 
