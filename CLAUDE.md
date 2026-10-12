@@ -117,9 +117,9 @@ Plan global (10 semaines, ADR prévus, correspondance RNCP) : `docs/plan/plan-gl
 Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la semaine en cours.
 
 **Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09, réorganisé le 2026-10-12) : **une seule
-série, dans l'ordre réel du projet**. Épisodes 1 à 20 écrits (S1 à S5, jusqu'au 2026-10-11) ; lancement publié le
+série, dans l'ordre réel du projet**. Épisodes 1 à 21 écrits (S1 à S5, jusqu'au 2026-10-12) ; lancement publié le
 2026-10-08, épisode 1 le 2026-10-09 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
-**proposer à Alexandre l'épisode suivant** (21 : le back office) et l'ajouter à la suite. Règles :
+**proposer à Alexandre l'épisode suivant** (22 : S6) et l'ajouter à la suite. Règles :
 
 - un épisode ne raconte qu'une tâche faite, à sa place dans la chronologie ; récit : problème, enjeu, piste essayée,
   résultat, analyse, décision, leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent /
@@ -171,8 +171,10 @@ Détail et constats : `pipelines/airflow/README.md`.
 - [x] Session 5 : ADR-007 (`docs/adr/007-airflow-taches-conteneurisees.md`), schéma `docs/pipeline-ingestion.md`.
   **Reste (Alexandre)** : exercices dans l'interface (onglet XCom, « Réinitialiser » = Clear).
 
-**Semaine en cours : S5** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations ; Alexandre veut la faire en
-entier malgré la charge (élargissement du corpus en dernier).
+**S5 terminée (2026-10-12)** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations, back office.
+**Prochaine : S6** (`docs/plan/semaine-06.md`) — Terraform et Azure ; Alexandre ne connaît pas Terraform : concepts
+d'abord. Points à trancher en S6 : hébergement d'Airflow (le corpus de production n'est mis à jour par aucun
+pipeline), démo publique sur Azure ou maintien du VPS (la CI/CD de la S7 en dépend), portabilité souveraine.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
@@ -238,8 +240,8 @@ entier malgré la charge (élargissement du corpus en dernier).
   l'identifiant autorisé est « émetteur#sujet » complet (≈ 119 caractères), pas un GUID du portail (l'ID d'annuaire
   `9188040d…` est seulement la partie émetteur). Déployé le 2026-10-12 : migration 0004, `admin` (256 Mo), Caddy
   (`ADMIN_ADDRESS`), `web` recréé avec ses clés ; vérifié : redirect_uri en https, PKCE S256, portées
-  `openid profile`, pages protégées → Microsoft. **Reste** : première connexion en production par Alexandre,
-  épisode 21.
+  `openid profile`, pages protégées → Microsoft. Première connexion en production par Alexandre le 2026-10-12 : tout
+  fonctionne. Épisode 21 écrit.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
