@@ -98,7 +98,8 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
 ## Environnement local
 
 ```bash
-docker compose up -d --wait        # postgres + ollama, ports limités à 127.0.0.1
+docker compose up -d --wait        # postgres + ollama + back office (http://localhost:5182), ports sur 127.0.0.1
+docker compose up -d --build admin # back office après une modification de son code ; `stop admin` avant de le déboguer
 dotnet run --project src/Limpide.Ingestion -- migrate   # schéma (base neuve ou après git pull)
 docker compose exec postgres psql -U rag -d rag
 dotnet build

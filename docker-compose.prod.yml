@@ -40,6 +40,8 @@ services:
     environment:
       <<: *app-env
       DataProtection__KeysPath: /keys
+      # Lien « Back office » en bas de la page (vide : pas de lien).
+      Site__AdminUrl: "${ADMIN_ADDRESS:-}"
     volumes:
       - web_keys:/keys
     depends_on:

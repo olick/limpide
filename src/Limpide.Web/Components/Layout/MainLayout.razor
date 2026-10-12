@@ -1,4 +1,5 @@
 @inherits LayoutComponentBase
+@inject IConfiguration Configuration
 
 <main class="page">
     @Body
@@ -12,6 +13,10 @@
         (CC-BY-ND 4.0). Extraits reproduits sans modification.
     </p>
     <p>Projet ouvert : <a href="https://github.com/olick/limpide" target="_blank" rel="noopener noreferrer">github.com/olick/limpide</a></p>
+    @if (AdminUrl is { } admin)
+    {
+        <p><a href="@admin" rel="nofollow">Back office</a> (accès réservé à l'administrateur)</p>
+    }
 </footer>
 
 <div id="blazor-error-ui" data-nosnippet>
@@ -19,3 +24,14 @@
     <a href="." class="reload">Recharger</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    // Adresse du back office (Site:AdminUrl) ; en production, ADMIN_ADDRESS sans schéma (« admin.limpide-ia.fr ») :
+    // HTTPS par défaut. Absente : pas de lien.
+    private string? AdminUrl => Configuration["Site:AdminUrl"] switch
+    {
+        null or "" => null,
+        var url when url.Contains("://") => url,
+        var host => $"https://{host}",
+    };
+}

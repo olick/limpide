@@ -25,6 +25,35 @@ services:
     volumes:
       - ollama:/root/.ollama
 
+  # Back office sur http://localhost:5182, sans lancer le débogueur. Même port que `dotnet run` (adresse de retour
+  # déjà inscrite chez le fournisseur d'identité) : `docker compose stop admin` avant de le déboguer.
+  # Après une modification du code : `docker compose up -d --build admin`.
+  admin:
+    build:
+      context: .
+      target: admin
+    image: limpide-admin
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      # Fournisseur OpenID Connect et administrateur autorisé : mêmes valeurs que les user-secrets (vides : l'accueil
+      # indique « connexion non configurée »).
+      Admin__Authority: "${ADMIN_OIDC_AUTHORITY:-}"
+      Admin__ClientId: "${ADMIN_OIDC_CLIENT_ID:-}"
+      Admin__ClientSecret: "${ADMIN_OIDC_CLIENT_SECRET:-}"
+      Admin__AllowedUsers__0: "${ADMIN_ALLOWED_USER:-}"
+      DataProtection__KeysPath: /keys
+      # Lien « Voir la démo » : la démo locale (dotnet run, profil http).
+      Site__DemoUrl: "http://localhost:5181"
+    ports:
+      - "127.0.0.1:${ADMIN_PORT:-5182}:8080"
+    volumes:
+      - admin_keys:/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   pgdata:
   ollama:
+  admin_keys:

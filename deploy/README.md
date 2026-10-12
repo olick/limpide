@@ -170,6 +170,9 @@ fichier qui le connaît). Accès réservé aux identifiants listés (« émetteu
 
 **Sur le poste** : mêmes valeurs en user-secrets (`Admin:Authority`, `Admin:ClientId`, `Admin:ClientSecret`,
 `Admin:AllowedUsers:0`), puis `dotnet run --project src/Limpide.Admin --launch-profile http` (http://localhost:5182).
+Sans débogueur : service `admin` du `docker-compose.yml` local, sur le même port, avec les mêmes valeurs dans `.env`
+(`ADMIN_OIDC_*`, `ADMIN_ALLOWED_USER`) ; `docker compose up -d --build admin` après une modification du code,
+`docker compose stop admin` avant de le déboguer (port partagé).
 Sans ces valeurs, l'application démarre et l'accueil indique « connexion non configurée ».
 
 **Changer de fournisseur** (Google, Pocket ID, Authelia...) : nouvelle inscription chez lui, puis les trois valeurs
