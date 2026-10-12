@@ -115,6 +115,17 @@ Détail : [`semaine-01.md`](semaine-01.md)
   - réseau : la base n'est joignable que depuis l'application
 - Modules et deux environnements : préproduction et production
 - Hébergement d'Airflow : trancher et documenter
+- **Portabilité vers un cloud souverain** (demandé le 2026-10-12 ; migration envisagée, pas décidée) :
+  - stockage des fichiers bruts **derrière une interface** (comme `IEmbeddingGenerator`), deux implémentations
+    possibles : Azure Blob et S3 (Scaleway, OVHcloud, Outscale) ; Azure Blob n'est pas compatible S3, le SDK Azure
+    utilisé directement enfermerait le code ;
+  - Terraform organisé **par rôle** (calcul, base, stockage, secrets, identité) : les ressources changent d'un
+    fournisseur à l'autre, l'organisation reste ;
+  - dans l'ADR d'infrastructure, un tableau d'équivalences Azure / Scaleway / OVHcloud, coûts compris : Container Apps
+    ↔ Serverless Containers (Scaleway) ; PostgreSQL managé + pgvector (confirmé chez Scaleway, à vérifier chez OVH) ;
+    Blob ↔ stockage S3 ; Key Vault ↔ gestionnaires de secrets (à vérifier) ; **identités managées : pas
+    d'équivalent** (clés d'API à stocker) ; Entra ID ↔ fournisseur OpenID Connect libre auto-hébergé (Pocket ID,
+    Authelia), déjà possible sans changer le code (connexion du back office en OpenID Connect générique)
 
 **Terminé quand** : `terraform destroy` puis `terraform apply` recrée un environnement fonctionnel sans intervention manuelle.
 **ADR** : Container Apps plutôt qu'AKS, hébergement d'Airflow, hébergement des modèles : LLM par API ou auto-hébergé sur GPU (calcul de coût comparatif)
@@ -191,6 +202,13 @@ Détail : [`semaine-01.md`](semaine-01.md)
 ### S10 · Marge
 
 Rattrapage du retard accumulé, finitions, préparation d'un support de soutenance si la certification se confirme.
+
+**Piste, si le temps le permet** (demandée le 2026-10-12) : **étude de migration vers un cloud souverain**.
+Cibles : Scaleway (le plus proche de l'architecture Azure prévue), OVHcloud (déjà l'hébergeur de la démo), Outscale
+(le plus souvent cité comme qualifié SecNumCloud) ; intermédiaires : Bleu (technologie Microsoft), S3NS (Google).
+Livrable : statut SecNumCloud vérifié dans la **liste officielle de l'ANSSI** (les comparatifs se contredisent),
+effort par composant, coût comparé, et démonstration du changement de fournisseur d'identité par configuration
+(Microsoft → Pocket ID ou Authelia). Point de départ : les équivalences notées en S6.
 
 **Étape bonus, seulement s'il reste du temps** (demandée le 2026-10-08) : **chaque retour devient une question de test**.
 En S7, la conversion d'un retour en cas de test est manuelle (back office v2). Le bonus l'automatise jusqu'à la
