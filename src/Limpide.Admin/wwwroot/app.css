@@ -26,7 +26,12 @@ dl.facts { display: grid; grid-template-columns: max-content 1fr; gap: .3rem 1re
 dl.facts dt { color: var(--muted); }
 dl.facts dd { margin: 0; word-break: break-all; }
 section.decision { margin-top: 2rem; padding: 1rem 1.2rem; background: #fff; border: 1px solid var(--bad); border-radius: 6px; }
-section.decision fieldset { border: 0; padding: 0; margin: 0 0 1rem; line-height: 1.9; }
+section.decision fieldset { border: 0; padding: 0; margin: 0 0 1rem; }
+section.decision legend { font-weight: 600; margin-bottom: .4rem; }
+label.choice { display: flex; gap: .6rem; align-items: flex-start; padding: .5rem .6rem; margin: .2rem 0; border-radius: 4px; cursor: pointer; }
+label.choice:hover { background: #f1f4f9; }
+label.choice:has(input:checked) { background: #e8eef8; outline: 1px solid var(--accent); }
+label.choice input { margin-top: .25rem; }
 textarea { width: 100%; box-sizing: border-box; font: inherit; }
 button, .button { display: inline-block; margin-top: .6rem; padding: .45rem .9rem; border: 0; border-radius: 4px; background: var(--accent); color: #fff; font: inherit; text-decoration: none; cursor: pointer; }
 button.secondary { background: #eef1f5; color: var(--ink); margin-top: 0; }

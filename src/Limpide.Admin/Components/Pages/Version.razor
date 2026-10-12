@@ -55,11 +55,16 @@ else
             <p class="hint">Lisez les passages ci-dessous avant de décider. La décision et son motif sont inscrits au journal.</p>
             <EditForm Model="form" OnValidSubmit="DecideAsync" FormName="decision">
                 <fieldset>
-                    <label><InputRadioGroup @bind-Value="form.Decision">
-                        <InputRadio Value="QuarantineDecision.Release" /> <strong>Publier</strong> : le texte est bon tel quel (publiée au prochain passage d'embed et publish)<br />
-                        <InputRadio Value="QuarantineDecision.Retry" /> <strong>Recontrôler</strong> : le code a été corrigé (extracteur, seuils), refaire tout le circuit<br />
-                        <InputRadio Value="QuarantineDecision.Reject" /> <strong>Rejeter</strong> définitivement : le même contenu sera ignoré à la collecte
-                    </InputRadioGroup></label>
+                    <legend>Que faire de cette version ?</legend>
+                    @* Un label par choix : un seul label autour des trois activerait toujours le premier bouton. *@
+                    <InputRadioGroup @bind-Value="form.Decision">
+                        <label class="choice"><InputRadio Value="QuarantineDecision.Release" />
+                            <span><strong>Publier</strong> : le texte est bon tel quel (publiée au prochain passage d'embed et publish)</span></label>
+                        <label class="choice"><InputRadio Value="QuarantineDecision.Retry" />
+                            <span><strong>Recontrôler</strong> : le code a été corrigé (extracteur, seuils), refaire tout le circuit</span></label>
+                        <label class="choice"><InputRadio Value="QuarantineDecision.Reject" />
+                            <span><strong>Rejeter</strong> définitivement : le même contenu sera ignoré à la collecte</span></label>
+                    </InputRadioGroup>
                 </fieldset>
                 <label for="motive">Motif (obligatoire)</label>
                 <InputTextArea id="motive" @bind-Value="form.Motive" rows="2" maxlength="500" />
