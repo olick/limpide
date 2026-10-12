@@ -94,8 +94,11 @@ Détail : [`semaine-01.md`](semaine-01.md)
 - Élargissement du corpus (autres fiches CNIL, lignes directrices européennes) maintenant que le pipeline est fiable
 
 - **Back office, v1** (demandé le 2026-10-07) : retours des visiteurs (lecture, statut « traité », export) ;
-  versions des documents et quarantaine (voir une version bloquée, la publier ou la rejeter). Accessible seulement
-  par tunnel SSH (aucune page de connexion exposée) ; réglages (seuil, quota, modèle) en lecture seule : ils changent
+  versions des documents et quarantaine (voir une version bloquée, la publier, la recontrôler ou la rejeter).
+  **Exposé sur `admin.limpide-ia.fr`** (décision du 2026-10-12, au lieu d'un tunnel SSH), connexion **OpenID Connect
+  générique** avec Microsoft comme premier fournisseur : changer de fournisseur = configuration, pas de code ; accès
+  réservé aux identifiants listés en configuration ; journal des décisions (qui, quoi, quand, motif) ; clés de
+  chiffrement ASP.NET conservées dans un volume. Réglages (seuil, quota, modèle) en lecture seule : ils changent
   par Git, donc tracés et, dès la S7, évalués en CI
 
 **Terminé quand** : une source corrompue est bloquée sans impact sur la démo, et l'alerte arrive.

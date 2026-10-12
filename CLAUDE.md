@@ -139,7 +139,8 @@ garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les tableaux de b
 Ne jamais sacrifier l'évaluation (S7).
 
 Ajouts au plan (demandés le 2026-10-07, détail dans `docs/plan/plan-global.md`) : **back office** en trois temps
-(S5 : retours et quarantaine, accès par tunnel SSH seulement, réglages en lecture seule car modifiés par Git ;
+(S5 : retours et quarantaine, exposé sur `admin.limpide-ia.fr` avec connexion OpenID Connect générique — Microsoft
+d'abord, fournisseur changeable par configuration —, réglages en lecture seule car modifiés par Git ;
 S7 : retour → cas de test ; S8 : tableaux de bord), **suivi en direct** des étapes et réponse en streaming (S8).
 
 **Phase 1 terminée (2026-10-07)** : démo publique sur https://www.limpide-ia.fr. Bilan : `docs/plan/bilan-phase-1.md`.
