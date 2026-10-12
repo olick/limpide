@@ -126,7 +126,11 @@ des existants (épisodes 1 à 14 = S1 à S4 ; post de lancement publié le 2026-
   limites dites (ex. relecture faite par un modèle) ; rien d'inventé ;
 - public non spécialiste : expliquer chaque terme technique ;
 - mettre à jour le sommaire du fichier ; l'épisode « À vous de le casser » reste le dernier publié de la série
-  initiale : les suivants forment une nouvelle salve (S5 : quarantaine ; S6 : Terraform ; S7 : évaluation en CI…).
+  initiale : les suivants forment une nouvelle salve (S5 : quarantaine ; S6 : Terraform ; S7 : évaluation en CI…) ;
+- **aligné sur l'avancement** (demandé le 2026-10-12) : un épisode ne raconte qu'une tâche faite ; chaque tâche à venir
+  a un **brouillon** en fin de fichier (idée, enjeu, ce qu'il faudra relever pendant la tâche) : relever ces faits
+  pendant la tâche, puis écrire l'épisode ; actualiser par un rappel bref les épisodes écrits mais pas encore publiés
+  quand le projet les dépasse (l'épisode publié, lui, reçoit un commentaire de suivi).
 
 | Phase | Semaines | Résultat |
 |---|---|---|
