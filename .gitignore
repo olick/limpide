@@ -31,3 +31,6 @@ __pycache__/
 *.tfstate.*
 *.tfplan
 crash.log
+
+# Identifiants de l'API OVHcloud si placés par erreur dans un dossier Terraform (à mettre dans ~/.ovh.conf).
+ovh.conf

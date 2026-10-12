@@ -191,7 +191,11 @@ demande), hébergement d'Airflow (le corpus de production n'est mis à jour par 
 Session 1 en cours : Terraform 1.16.5 installé (dépôt HashiCorp) ; exercice Docker
 (`infrastructure/terraform/apprentissage/docker/`, base `tf-apprentissage-*` sur 5442, fournisseur `kreuzwerker/docker`
 4.6.0) fait par Alexandre le 2026-10-12 : cycle, dérive, `-/+`, mot de passe en clair dans l'état, `destroy`. État et
-`.terraform/` ignorés par Git, `.terraform.lock.hcl` versionné. Suite : zone DNS OVH par import, puis Azure.
+`.terraform/` ignorés par Git, `.terraform.lock.hcl` versionné. Zone DNS OVH (`infrastructure/terraform/dns/`,
+fournisseur `ovh/ovh` 2.22.0, jeton d'API limité à la zone dans `~/.ovh.conf`) : inventaire par sources de données
+(12 entrées), import de `@`, `www`, `admin` (plan sans changement), entrée erronée `limpide-ia.fr.limpide-ia.fr`
+supprimée par le code (2026-10-12) ; entrées posées par OVH (NS, MX, SPF, ftp, TXT) non gérées. Terraform ajouté à la
+vitrine des technologies. État local (reconstructible par les blocs `import`). Suite : Azure (alerte de budget d'abord).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
