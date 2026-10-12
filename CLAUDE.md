@@ -188,6 +188,10 @@ recréée à la demande (`apply` / `destroy` par session, alerte de budget), app
 licence BSL depuis 2023) ; OpenTofu (fork compatible, MPL) noté dans l'ADR comme alternative sans réécriture. À faire en S6 :
 **comparatif de coûts** Azure / Scaleway / OVHcloud / Hetzner / Clever Cloud / VPS auto-hébergé (permanent et à la
 demande), hébergement d'Airflow (le corpus de production n'est mis à jour par aucun pipeline), portabilité souveraine.
+Session 1 en cours : Terraform 1.16.5 installé (dépôt HashiCorp) ; exercice Docker
+(`infrastructure/terraform/apprentissage/docker/`, base `tf-apprentissage-*` sur 5442, fournisseur `kreuzwerker/docker`
+4.6.0) fait par Alexandre le 2026-10-12 : cycle, dérive, `-/+`, mot de passe en clair dans l'état, `destroy`. État et
+`.terraform/` ignorés par Git, `.terraform.lock.hcl` versionné. Suite : zone DNS OVH par import, puis Azure.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de

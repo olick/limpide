@@ -30,11 +30,20 @@ lieu de 60 à 90 € pour un fonctionnement permanent. Avant Azure, apprendre Te
 
 ---
 
-## Session 1 : prise en main (≈ 1 h 30)
+## Session 1 : prise en main sans frais (≈ 1 h 30)
 
-1. Installer Terraform et Azure CLI, se connecter avec `az login`.
-2. Créer un groupe de ressources et un compte de stockage, lire le `plan`, appliquer, puis `terraform destroy`.
-3. Modifier une ressource à la main dans le portail, relancer `plan` : observer la **dérive**.
+Option B : le cycle s'apprend sur Docker, gratuitement, avant tout compte Azure. Exercices et notions :
+`infrastructure/terraform/apprentissage/docker/README.md`.
+
+1. Installer Terraform (dépôt HashiCorp, Debian 13).
+2. Base PostgreSQL + pgvector décrite en Terraform (fournisseur `docker`, noms `tf-apprentissage-*`, la pile de
+   développement n'est pas touchée) : `init`, lire le `plan`, `apply`, `plan` sans changement.
+3. **Dérive** : conteneur supprimé à la main, `plan` le constate, `apply` répare ; repérer `-/+` (remplacement)
+   contre `~` (modification en place).
+4. Lire l'état : le mot de passe y est en clair. Puis `destroy`.
+5. Ensuite, fournisseur `ovh` : la zone DNS de `limpide-ia.fr`, déjà existante, reprise par **import** (notion
+   nouvelle : faire entrer dans Terraform une ressource créée à la main) ; `plan` sans changement attendu.
+6. Puis Azure CLI, `az login`, alerte de budget, et le cycle sur un groupe de ressources et un compte de stockage.
 
 **Terminé quand** : tu as fait le cycle complet et observé une dérive.
 

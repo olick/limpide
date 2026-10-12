@@ -23,3 +23,11 @@ __pycache__/
 
 .claude
 .venv/
+
+# Terraform : dossier de travail et état (l'état peut contenir des secrets en clair ; distant à partir de la S6).
+# Le fichier de verrouillage des fournisseurs (.terraform.lock.hcl) est versionné.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+crash.log
