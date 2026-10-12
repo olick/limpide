@@ -1,0 +1,68 @@
+@* Les technologies utilisées par Limpide, groupées par rôle. À compléter à chaque technologie ajoutée au projet
+   (icônes : wwwroot/tech, Simple Icons, CC0). *@
+
+<section class="stack" aria-labelledby="stack-title">
+    <h2 id="stack-title">Comment Limpide est construit</h2>
+    <p class="hint">Chaque brique a été choisie, mesurée quand c'était possible, et documentée :
+        <a href="https://github.com/olick/limpide/tree/main/docs/adr" target="_blank" rel="noopener noreferrer">décisions d'architecture</a>.</p>
+
+    @foreach (var (group, items) in Groups)
+    {
+        <h3>@group</h3>
+        <ul>
+            @foreach (var tech in items)
+            {
+                <li>
+                    @if (tech.Icon is { } icon)
+                    {
+                        <span class="icon" style="--icon: url('tech/@(icon).svg')" aria-hidden="true"></span>
+                    }
+                    else
+                    {
+                        <span class="icon text" aria-hidden="true">@tech.Name[..1]</span>
+                    }
+                    <span><strong>@tech.Name</strong> <span class="role">@tech.Role</span></span>
+                </li>
+            }
+        </ul>
+    }
+
+    <p class="legal">Logos : Simple Icons (CC0). Les marques citées appartiennent à leurs propriétaires ; leur présence
+        indique seulement leur usage par Limpide.</p>
+</section>
+
+@code {
+    private sealed record Tech(string Name, string Role, string? Icon);
+
+    private static readonly (string Group, Tech[] Items)[] Groups =
+    [
+        ("Application", [
+            new(".NET 10", "langage et plateforme", "dotnet"),
+            new("Blazor", "interface web, rendue sur le serveur", "blazor"),
+        ]),
+        ("Recherche et IA", [
+            new("PostgreSQL", "base de données", "postgresql"),
+            new("pgvector", "recherche par le sens, dans PostgreSQL", null),
+            new("Ollama", "fait tourner le modèle de vectorisation sur le serveur", "ollama"),
+            new("bge-m3", "modèle multilingue qui transforme un texte en vecteur", null),
+            new("Mistral AI", "rédaction des réponses (Medium 3.5), hébergé en Europe", "mistralai"),
+        ]),
+        ("Données et pipeline", [
+            new("Apache Airflow", "mise à jour hebdomadaire des textes", "apacheairflow"),
+            new("Python", "description du pipeline", "python"),
+            new("Docker", "chaque composant dans son conteneur", "docker"),
+            new("DbUp", "évolutions du schéma de la base", null),
+        ]),
+        ("Hébergement et sécurité", [
+            new("OVHcloud", "serveur en France", "ovh"),
+            new("Debian", "système du serveur", "debian"),
+            new("Caddy", "serveur web, HTTPS automatique", "caddy"),
+            new("Let's Encrypt", "certificats HTTPS", "letsencrypt"),
+            new("OpenID Connect", "connexion au back office (Microsoft Entra ID)", "openid"),
+            new("Discord", "alertes du pipeline", "discord"),
+        ]),
+        ("Code", [
+            new("GitHub", "dépôt public, sous licence Apache 2.0", "github"),
+        ]),
+    ];
+}

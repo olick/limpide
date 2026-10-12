@@ -375,6 +375,11 @@ Choix de la S2, session 5 :
 - Rapports avec le texte des passages cités sous chaque réponse (relecture sans quitter le fichier), nommés
   `AAAA-MM-JJ-HHmm-<modèle>.md` (les réponses varient d'une passe à l'autre : ne pas écraser).
 
+Vitrine des technologies (demandée le 2026-10-12) : section « Comment Limpide est construit » de la démo
+(`src/Limpide.Web/Components/TechStack.razor`), technologies groupées par rôle, icônes Simple Icons (CC0) servies par
+l'application (`wwwroot/tech/`, aucune requête vers un tiers ; Microsoft absent de Simple Icons → icône OpenID).
+**À tenir à jour** à chaque technologie adoptée (Terraform ou OpenTofu en S6, GitHub Actions en S7, OpenTelemetry en S8…).
+
 Choix de la S2, session 4 :
 
 - Réponse du modèle = texte non fiable : rendu Markdown (Markdig) avec HTML brut, liens, images et liens
