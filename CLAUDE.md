@@ -178,7 +178,8 @@ Détail et constats : `pipelines/airflow/README.md`.
 d'abord. **Option B décidée le 2026-10-12** : la démo publique reste sur le VPS ; Azure = vitrine d'architecture
 recréée à la demande (`apply` / `destroy` par session, alerte de budget), apprentissage d'abord sans frais
 (fournisseurs `docker`, puis `ovh` pour la zone DNS). Terraform ne demande pas d'abonnement ; seul le fournisseur
-`azurerm` en demande un (licence de Terraform : BSL depuis 2023 ; OpenTofu, compatible, en MPL). À faire en S6 :
+`azurerm` en demande un. **Outil retenu : Terraform** (décision du 2026-10-12 : celui des clients et des offres ;
+licence BSL depuis 2023) ; OpenTofu (fork compatible, MPL) noté dans l'ADR comme alternative sans réécriture. À faire en S6 :
 **comparatif de coûts** Azure / Scaleway / OVHcloud / Hetzner / Clever Cloud / VPS auto-hébergé (permanent et à la
 demande), hébergement d'Airflow (le corpus de production n'est mis à jour par aucun pipeline), portabilité souveraine.
 

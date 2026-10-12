@@ -12,7 +12,8 @@
 identités managées, ingestion en tâches cloud, stockage objet des fichiers bruts. Les environnements Azure sont
 **recréés à la demande** (`apply` en début de session, `destroy` à la fin) : coût visé, quelques euros par mois, au
 lieu de 60 à 90 € pour un fonctionnement permanent. Avant Azure, apprendre Terraform sans frais : fournisseur `docker`
-(pile locale), puis fournisseur `ovh` (zone DNS de `limpide-ia.fr`, utile tout de suite).
+(pile locale), puis fournisseur `ovh` (zone DNS de `limpide-ia.fr`, utile tout de suite). Outil : **Terraform**
+(décision du 2026-10-12) ; OpenTofu, son fork libre compatible, à citer dans l'ADR comme alternative.
 
 ---
 
