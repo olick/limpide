@@ -105,6 +105,23 @@ Détail : [`semaine-01.md`](semaine-01.md)
 **ADR** : 008 cycle de vie des versions et migrations (ajouté, session 1), 009 batch incrémental plutôt que streaming, 010 découpage structurel plutôt qu'à taille fixe (mesuré)
 **Blocs RNCP** : BC03, BC01 (qualité et traçabilité)
 
+### Étape intermédiaire (avant la S6) · Rendre Limpide compréhensible par tous
+
+Demandée le 2026-10-12 : la démo doit parler à un visiteur sans connaissance technique (premier retour : « il donne
+un point de vue légal », « je n'ai pas tout compris [du panneau] mais c'est utile »).
+
+- **Objectif explicite** dès l'arrivée : ce que Limpide fait (retrouver et citer les passages de l'AI Act et des fiches
+  de la CNIL qui répondent à une question), ce qu'il ne fait pas (aucun avis sur votre situation), et pourquoi il
+  montre tout (vérifier soi-même) ; quelques exemples de questions à cliquer.
+- **« Sous le capot » expliqué en langage courant** : le déroulé en étapes (votre question → recherche des passages
+  les plus proches par le sens → seuil « je ne sais pas » → rédaction par Mistral → contrôles des citations), chaque
+  mesure traduite (« score de proximité », « tokens = morceaux de texte facturés », « coût : ce que cette réponse a
+  coûté »), un garde-fou déclenché expliqué par ce qu'il protège ; détails techniques repliés pour qui les veut.
+- **Validé par des personnes non techniques** (2 ou 3, retours notés dans le bilan) : comprennent-elles ce que fait
+  Limpide et ce que montre le panneau ?
+
+**Terminé quand** : une personne non technique explique, sans aide, ce que fait Limpide et ce que montre le panneau.
+
 ### S6 · Terraform : apprentissage et infrastructure Azure
 
 **Décision du 2026-10-12 (option B)** : la démo publique reste sur le VPS ; Azure est une **vitrine d'architecture**
@@ -187,8 +204,8 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 - **Suivi en direct dans l'interface** (demandé le 2026-10-07) : chaque étape affichée au fur et à mesure
   (vectorisation, recherche, seuil, génération, contrôles), réponse affichée en continu (streaming) ; mêmes mesures
   que les traces OpenTelemetry. Les citations ne se vérifient qu'une fois la réponse complète : l'afficher
-  (« vérification des citations… »). Panneau « sous le capot » expliqué pour un non-spécialiste (retour de testeur :
-  « je n'ai pas tout compris »)
+  (« vérification des citations… »). L'explication du panneau pour un non-spécialiste est avancée à l'étape
+  intermédiaire d'avant la S6 ; ici, l'affichage en direct reprend ces mêmes explications
 - **Back office, v3** : tableaux de bord — coût par jour et par modèle, quota consommé, garde-fous déclenchés,
   taux de « je ne sais pas » (dérive), latences ; authentification Entra ID une fois sur Azure
 

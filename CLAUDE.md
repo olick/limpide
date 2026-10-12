@@ -172,7 +172,9 @@ Détail et constats : `pipelines/airflow/README.md`.
   **Reste (Alexandre)** : exercices dans l'interface (onglet XCom, « Réinitialiser » = Clear).
 
 **S5 terminée (2026-10-12)** (`docs/plan/semaine-05.md`) — qualité, quarantaine, migrations, back office.
-**Prochaine : S6** (`docs/plan/semaine-06.md`) — Terraform et Azure ; Alexandre ne connaît pas Terraform : concepts
+**Prochaine : étape intermédiaire « rendre Limpide compréhensible par tous »** (plan global, avant la S6 ; demandée le
+2026-10-12) : objectif explicite dès l'arrivée, panneau « sous le capot » expliqué en langage courant, validé par 2 ou
+3 personnes non techniques. **Puis S6** (`docs/plan/semaine-06.md`) — Terraform et Azure ; Alexandre ne connaît pas Terraform : concepts
 d'abord. **Option B décidée le 2026-10-12** : la démo publique reste sur le VPS ; Azure = vitrine d'architecture
 recréée à la demande (`apply` / `destroy` par session, alerte de budget), apprentissage d'abord sans frais
 (fournisseurs `docker`, puis `ovh` pour la zone DNS). Terraform ne demande pas d'abonnement ; seul le fournisseur
