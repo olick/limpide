@@ -116,21 +116,19 @@ Pièges déjà rencontrés :
 Plan global (10 semaines, ADR prévus, correspondance RNCP) : `docs/plan/plan-global.md`.
 Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la semaine en cours.
 
-**Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09) : à la fin de chaque semaine du plan
-(ou d'une étape marquante), **proposer à Alexandre le ou les épisodes suivants** et les ajouter au fichier, à la suite
-des existants (épisodes 1 à 14 = S1 à S4 ; post de lancement publié le 2026-10-08). Mêmes règles que les épisodes déjà écrits :
+**Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09, réorganisé le 2026-10-12) : **une seule
+série, dans l'ordre réel du projet**. Épisodes 1 à 20 écrits (S1 à S5, jusqu'au 2026-10-11) ; lancement publié le
+2026-10-08, épisode 1 le 2026-10-09 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
+**proposer à Alexandre l'épisode suivant** (21 : le back office) et l'ajouter à la suite. Règles :
 
-- ordre chronologique du projet ; un récit par épisode : problème, enjeu, piste essayée, résultat, analyse, décision,
-  leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent / 📚 Tous les épisodes » ;
-- uniquement des faits du projet (ADR, `docs/notes/`, `eval/`, mesures), sources indiquées sous le titre ;
-  limites dites (ex. relecture faite par un modèle) ; rien d'inventé ;
-- public non spécialiste : expliquer chaque terme technique ;
-- mettre à jour le sommaire du fichier ; l'épisode « À vous de le casser » reste le dernier publié de la série
-  initiale : les suivants forment une nouvelle salve (S5 : quarantaine ; S6 : Terraform ; S7 : évaluation en CI…) ;
-- **aligné sur l'avancement** (demandé le 2026-10-12) : un épisode ne raconte qu'une tâche faite ; chaque tâche à venir
-  a un **brouillon** en fin de fichier (idée, enjeu, ce qu'il faudra relever pendant la tâche) : relever ces faits
-  pendant la tâche, puis écrire l'épisode ; actualiser par un rappel bref les épisodes écrits mais pas encore publiés
-  quand le projet les dépasse (l'épisode publié, lui, reçoit un commentaire de suivi).
+- un épisode ne raconte qu'une tâche faite, à sa place dans la chronologie ; récit : problème, enjeu, piste essayée,
+  résultat, analyse, décision, leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent /
+  📚 Tous les épisodes » ;
+- uniquement des faits du projet (ADR, `docs/notes/`, `eval/`, mesures), sources indiquées sous le titre ; limites
+  dites (ex. relecture faite par un modèle) ; rien d'inventé ; public non spécialiste : expliquer chaque terme ;
+- en fin de fichier, des **notes de travail** (une par tâche à venir : idée, enjeu, ce qu'il faudra relever pendant la
+  tâche) : relever ces faits pendant la tâche ; tenir à jour le journal des décisions et le sommaire ; un épisode écrit
+  mais pas encore publié que le projet dépasse reçoit un bref rappel ; un épisode publié, un commentaire de suivi.
 
 | Phase | Semaines | Résultat |
 |---|---|---|
