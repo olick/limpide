@@ -225,7 +225,7 @@ entier malgré la charge (élargissement du corpus en dernier).
 - [x] Session 5 (2026-10-11) : ADR-009 (batch incrémental, mesuré sur 13 jours) et ADR-010 (découpage structurel,
   **mesuré** contre la taille fixe sur une copie de la base : `FixedSizeChunker`, 1 362 passages, top 5 5/10 contre
   7/10, MRR 0,37 contre 0,52). Index `docs/adr/README.md`, README.
-- [ ] Back office v1 (2026-10-12, code fait, connexion à tester) : `src/Limpide.Admin` (Blazor, port local 5182),
+- [x] Back office v1 (2026-10-12, en production sur https://admin.limpide-ia.fr) : `src/Limpide.Admin` (Blazor, port local 5182),
   exposé sur `admin.limpide-ia.fr` (conteneur `admin`, bloc Caddy `ADMIN_ADDRESS`, base seulement : ni clé Mistral ni
   Ollama). Connexion OpenID Connect générique (`AdminAuthentication.cs`, seul fichier qui connaît le protocole ;
   Microsoft comptes personnels, `consumers/v2.0`) ; accès par liste d'identifiants « émetteur#sujet » (`Actor`, Core,
@@ -233,8 +233,13 @@ entier malgré la charge (élargissement du corpus en dernier).
   de contrôles, passages, décision publier / recontrôler / rejeter avec motif), retours (traité, export CSV protégé
   contre l'injection de formules), journal, réglages en lecture seule. Migration 0004 : `feedback.handled_at/by`,
   table `admin_actions` (journal écrit dans la transaction de la décision ; la console écrit « console »).
-  Clés DataProtection persistées (`web_keys`, `admin_keys`). **Reste** : DNS `admin`, inscription Entra par
-  Alexandre, première connexion, déploiement, épisode 21.
+  Clés DataProtection persistées (`web_keys`, `admin_keys`). Connexion testée en local par Alexandre (inscription
+  Entra « comptes personnels », même application pour le poste et la production, donc même identifiant). Piège vu :
+  l'identifiant autorisé est « émetteur#sujet » complet (≈ 119 caractères), pas un GUID du portail (l'ID d'annuaire
+  `9188040d…` est seulement la partie émetteur). Déployé le 2026-10-12 : migration 0004, `admin` (256 Mo), Caddy
+  (`ADMIN_ADDRESS`), `web` recréé avec ses clés ; vérifié : redirect_uri en https, PKCE S256, portées
+  `openid profile`, pages protégées → Microsoft. **Reste** : première connexion en production par Alexandre,
+  épisode 21.
 
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
