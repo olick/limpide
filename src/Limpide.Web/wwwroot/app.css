@@ -66,6 +66,7 @@ h1:focus { outline: none; }
 .tagline { margin: 0.25rem 0 1rem; color: var(--muted); }
 
 .transparency {
+    margin-top: 1.2rem; /* détaché des trois cartes « ce que fait Limpide » */
     background: var(--warn-bg);
     border: 1px solid var(--warn-border);
     border-radius: var(--radius);
