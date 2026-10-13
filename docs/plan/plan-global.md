@@ -241,7 +241,8 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 
 Rattrapage du retard accumulé, finitions, préparation d'un support de soutenance si la certification se confirme.
 
-**Piste, si le temps le permet** (demandée le 2026-10-12) : **étude de migration vers un cloud souverain**, en
+**Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
+projet) : **étude de migration vers un cloud souverain**, en
 partant du comparatif de coûts de la S6 (alternative la moins chère qui tient les exigences de la démo).
 Cibles : Scaleway (le plus proche de l'architecture Azure prévue), OVHcloud (déjà l'hébergeur de la démo), Outscale
 (le plus souvent cité comme qualifié SecNumCloud) ; intermédiaires : Bleu (technologie Microsoft), S3NS (Google).
@@ -259,6 +260,38 @@ Les retours n'alimentent **jamais** le corpus : seulement l'évaluation.
 Lien : le post LinkedIn du jour 10 (`.vscode/linkedin-limpide.md`) annonce « Chaque retour devient une question de
 test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 
+
+## Après le projet · Migration cloud (demandée le 2026-10-13)
+
+Après les 10 semaines, avant la mise à l'échelle (qui en dépend : la cible doit tenir un corpus plus gros).
+Objectif : **quitter Azure pour un hébergeur moins cher et plus souverain**, choisi sur mesures, puis y migrer
+réellement l'environnement industrialisé (préproduction, production, CI/CD), et pas seulement l'étudier.
+
+**Entrées** : le comparatif de coûts de la S6 (Azure / Scaleway / OVHcloud / Hetzner / Clever Cloud / auto-hébergement)
+et l'étude de la S10 (statut SecNumCloud vérifié sur la liste de l'ANSSI, effort par composant, équivalences).
+
+**Critères du choix**, écrits avant de comparer :
+
+- coût mensuel réel, en fonctionnement permanent et à la demande, relevé et daté ;
+- souveraineté : société et juridiction européennes (hors lois extraterritoriales), données en France, qualification
+  SecNumCloud si le surcoût reste raisonnable ;
+- services équivalents : conteneurs, PostgreSQL managé avec pgvector, stockage S3, secrets, tâches planifiées,
+  authentification de la CI sans secret stocké si le fournisseur le permet ;
+- effort de migration et réversibilité (Terraform par rôle, stockage derrière une interface).
+
+**Ce qui se perd, à dire franchement** : les identités managées et la connexion à PostgreSQL sans mot de passe
+(option choisie sur Azure en S6) n'ont pas d'équivalent direct chez les hébergeurs européens étudiés : clés d'API ou
+mots de passe à stocker dans un gestionnaire de secrets, à durée de vie courte et à faire tourner. C'est le prix de la
+souveraineté ; le chiffrer et le compenser (rotation, droits minimaux, journal des accès) plutôt que l'ignorer.
+
+**Migration** : Terraform du fournisseur cible (mêmes rôles, nouvelles ressources), implémentation S3 du stockage,
+données copiées puis vérifiées (nombre de passages, évaluation identique avant et après), CI/CD réauthentifiée,
+bascule puis destruction de l'environnement Azure ; la démo publique peut rejoindre la cible si elle y coûte moins
+que le VPS (ADR-006 révisé). Changement du fournisseur d'identité du back office (Microsoft → Pocket ID ou Authelia)
+par configuration, comme prévu.
+
+**Livrables** : ADR « hébergeur cible » (tableau des critères, coûts datés, ce qui se perd), environnement cible
+recréé par `apply`, évaluation identique avant et après, Azure détruit, coût mensuel comparé.
 
 ## Après le projet · Mise à l'échelle (demandée le 2026-10-13)
 

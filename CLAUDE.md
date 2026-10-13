@@ -275,7 +275,9 @@ d'apprentissage gardent un état local. Suite : session 3 (données et secrets).
   `openid profile`, pages protégées → Microsoft. Première connexion en production par Alexandre le 2026-10-12 : tout
   fonctionne. Épisode 22 écrit.
 
-**Après le projet : mise à l'échelle** (ajoutée au plan global le 2026-10-13) : toute la législation qui encadre
+**Après le projet : migration cloud** (ajoutée le 2026-10-13) : quitter Azure pour un hébergeur moins cher et plus
+souverain, choisi sur critères écrits d'avance (comparatif S6, étude S10), et y migrer réellement ; perte assumée
+des identités managées (à compenser). Puis **mise à l'échelle** (ajoutée au plan global le 2026-10-13) : toute la législation qui encadre
 l'AI Act, pertinence mesurée nettement meilleure, deux publics (juriste et entreprise) sans jamais qualifier la
 situation de l'utilisateur ; détail dans `docs/plan/plan-global.md`.
 
