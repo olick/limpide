@@ -2,6 +2,8 @@
 # rien à télécharger au démarrage, et toutes les instances ont exactement le même modèle (ID 790764642607, le même
 # que sur le poste et le VPS, vérifié le 2026-10-13).
 # Le VPS n'en a pas besoin (volume persistant + service ollama-model, docker-compose.prod.yml).
+# Depuis l'ADR-012 (2026-10-13), Azure vectorise par OVHcloud AI Endpoints : cette image ne sert plus qu'en secours
+# (deploy/publier-images.sh --avec-ollama).
 
 FROM ollama/ollama:0.34.4 AS modele
 # Démarre le serveur le temps de télécharger le modèle, puis l'arrête : le modèle reste dans /root/.ollama.

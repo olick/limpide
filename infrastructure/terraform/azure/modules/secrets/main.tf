@@ -22,6 +22,12 @@ resource "azurerm_role_assignment" "app_secrets" {
   principal_type       = "ServicePrincipal"
 }
 
+output "embedding_api_key_id" {
+  description = "Référence de la clé OVHcloud AI Endpoints (bge-m3, ADR-012)."
+  value       = "${data.azurerm_key_vault.socle.vault_uri}secrets/ovh-ai-endpoints-key"
+  depends_on  = [azurerm_role_assignment.app_secrets]
+}
+
 output "mistral_api_key_id" {
   description = "Référence du secret (pas sa valeur), lue par la plateforme au démarrage de l'application."
   # Dépend du droit de lecture : l'application n'est créée qu'une fois ce droit accordé.

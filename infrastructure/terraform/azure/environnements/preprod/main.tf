@@ -78,12 +78,13 @@ module "app" {
     client_id = module.identite.client_id
     name      = module.identite.name
   }
-  postgresql_fqdn    = module.donnees.fqdn
-  mistral_api_key_id = module.secrets.mistral_api_key_id
-  web_min_replicas   = 1
-  web_max_replicas   = 1
-  web_cpu            = 0.5
-  web_memory         = "1Gi"
+  postgresql_fqdn      = module.donnees.fqdn
+  mistral_api_key_id   = module.secrets.mistral_api_key_id
+  embedding_api_key_id = module.secrets.embedding_api_key_id
+  web_min_replicas     = 1
+  web_max_replicas     = 1
+  web_cpu              = 0.5
+  web_memory           = "1Gi"
 }
 
 module "budget" {

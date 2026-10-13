@@ -69,10 +69,6 @@ moved {
   to   = module.app.azurerm_container_app_environment.env
 }
 
-moved {
-  from = azurerm_container_app.ollama
-  to   = module.app.azurerm_container_app.ollama
-}
 
 moved {
   from = azurerm_container_app.web

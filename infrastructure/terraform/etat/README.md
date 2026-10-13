@@ -26,6 +26,9 @@ une intervention manuelle contraire au critère de la S6) :
 ```bash
 read -rsp "Clé Mistral : " CLE && echo     # saisie sans affichage
 az keyvault secret set --vault-name kvlimpide024b1e9f --name mistral-api-key --value "$CLE" --output none && unset CLE
+# Clé OVHcloud AI Endpoints (bge-m3, ADR-012), déjà rangée dans les user-secrets du poste :
+CLE="$(dotnet user-secrets list --project ../../../src/Limpide.Ingestion | sed -n 's/^Embedding:ApiKey = //p')"
+az keyvault secret set --vault-name kvlimpide024b1e9f --name ovh-ai-endpoints-key --value "$CLE" --output none && unset CLE
 ```
 
 Pourquoi un script et pas Terraform : Terraform ne peut pas ranger son état dans une ressource qu'il crée lui-même

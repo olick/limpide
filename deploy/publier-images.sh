@@ -4,7 +4,11 @@
 # commit de documentation ou de Terraform ne crée donc pas de nouvelle version. En S7, la CI fera la même chose.
 # Refuse des modifications non commitées de ces fichiers : une version doit correspondre à un commit précis.
 #
-# Prérequis : `docker login ghcr.io` (jeton GitHub avec le droit write:packages). Usage : deploy/publier-images.sh
+# Depuis l'ADR-012, Azure n'utilise plus Ollama (bge-m3 par OVHcloud AI Endpoints) : seule l'image web est publiée ;
+# l'image Ollama (deploy/ollama, secours) seulement avec --avec-ollama.
+#
+# Prérequis : `docker login ghcr.io` (jeton GitHub avec le droit write:packages).
+# Usage : deploy/publier-images.sh [--avec-ollama]
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
@@ -17,9 +21,11 @@ fi
 TAG="$(git log -1 --format=%h --abbrev=12 -- "${SOURCES[@]}")"
 
 docker build --target web -t "$REGISTRE/limpide-web:$TAG" .
-docker build -t "$REGISTRE/limpide-ollama:$TAG" deploy/ollama
 docker push "$REGISTRE/limpide-web:$TAG"
-docker push "$REGISTRE/limpide-ollama:$TAG"
+if [[ "${1:-}" == "--avec-ollama" ]]; then
+  docker build -t "$REGISTRE/limpide-ollama:$TAG" deploy/ollama
+  docker push "$REGISTRE/limpide-ollama:$TAG"
+fi
 
 echo
 echo "Images publiées, version $TAG :"

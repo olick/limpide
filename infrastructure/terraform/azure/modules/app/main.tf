@@ -43,6 +43,17 @@ variable "mistral_api_key_id" {
   type        = string
 }
 
+variable "embedding_api_key_id" {
+  description = "Référence de la clé de l'API d'embeddings dans le coffre (module secrets)."
+  type        = string
+}
+
+variable "embedding_endpoint" {
+  description = "API d'embeddings compatible OpenAI : bge-m3 chez OVHcloud AI Endpoints (ADR-012)."
+  type        = string
+  default     = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
+}
+
 variable "web_min_replicas" {
   description = "Instances minimales de l'application : 1 pendant une séance (pas de démarrage à froid), 0 pour ne payer qu'à l'usage."
   type        = number
@@ -80,47 +91,10 @@ resource "azurerm_container_app_environment" "env" {
   tags                       = var.tags
 }
 
-# Vectorisation des questions : Ollama et bge-m3, comme sur le VPS (mêmes vecteurs, même seuil). Image avec le modèle
-# inclus (deploy/ollama/Dockerfile) : rien à télécharger au démarrage. Joignable seulement depuis l'environnement.
-resource "azurerm_container_app" "ollama" {
-  name                         = "ca-ollama"
-  container_app_environment_id = azurerm_container_app_environment.env.id
-  resource_group_name          = var.resource_group_name
-  revision_mode                = "Single"
-  tags                         = var.tags
-
-  template {
-    min_replicas = 1 # modèle gardé en mémoire : pas d'attente de chargement à la première question
-    max_replicas = 1
-
-    container {
-      name   = "ollama"
-      image  = "${var.registre}/limpide-ollama:${var.image_tag}"
-      cpu    = 2
-      memory = "4Gi" # bge-m3 en utilise ≈ 2,3 Go (mesure du VPS, ADR-006)
-
-      env {
-        name  = "OLLAMA_KEEP_ALIVE"
-        value = "-1"
-      }
-    }
-  }
-
-  ingress {
-    external_enabled = false # interne à l'environnement : Ollama n'a pas d'authentification
-    target_port      = 11434
-    transport        = "http"
-
-    traffic_weight {
-      latest_revision = true
-      percentage      = 100
-    }
-  }
-}
-
 # L'application web (image de la S3), sans aucun secret dans sa configuration :
 # - PostgreSQL : jeton Entra ID de son identité (Database:Authentication = EntraId) ;
-# - clé Mistral : lue dans le coffre du socle par la plateforme, au démarrage, grâce à la même identité.
+# - clés Mistral et OVHcloud : lues dans le coffre du socle par la plateforme, au démarrage, grâce à la même identité ;
+# - vectorisation des questions : bge-m3 par l'API d'OVHcloud (ADR-012 ; plus de conteneur Ollama, ≈ 80 % du coût).
 resource "azurerm_container_app" "web" {
   name                         = "ca-web"
   container_app_environment_id = azurerm_container_app_environment.env.id
@@ -136,6 +110,12 @@ resource "azurerm_container_app" "web" {
   secret {
     name                = "mistral-api-key"
     key_vault_secret_id = var.mistral_api_key_id
+    identity            = var.identite.id
+  }
+
+  secret {
+    name                = "embedding-api-key"
+    key_vault_secret_id = var.embedding_api_key_id
     identity            = var.identite.id
   }
 
@@ -162,8 +142,16 @@ resource "azurerm_container_app" "web" {
         value = var.identite.client_id
       }
       env {
+        name  = "Embedding__Provider"
+        value = "OpenAI"
+      }
+      env {
         name  = "Embedding__Endpoint"
-        value = "http://${azurerm_container_app.ollama.name}"
+        value = var.embedding_endpoint
+      }
+      env {
+        name        = "Embedding__ApiKey"
+        secret_name = "embedding-api-key"
       }
       env {
         name        = "Mistral__ApiKey"

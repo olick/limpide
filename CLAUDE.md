@@ -46,8 +46,9 @@ Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
   - `tests/Limpide.Core.Tests` (xUnit).
 - PostgreSQL 17 + pgvector (image `pgvector/pgvector:pg17`), schéma par migrations SQL numérotées
   (`src/Limpide.Infrastructure/Migrations/`, DbUp, commande `migrate`).
-- Embeddings : bge-m3 (1024 dimensions) via Ollama en local, derrière `IEmbeddingGenerator`
-  (Microsoft.Extensions.AI) pour pouvoir changer de fournisseur par configuration.
+- Embeddings : bge-m3 (1024 dimensions), derrière `IEmbeddingGenerator` (Microsoft.Extensions.AI) ; fournisseur par
+  configuration (`Embedding:Provider` = `Ollama` sur le poste, `OpenAI` = API compatible : **bge-m3 chez OVHcloud AI
+  Endpoints en production**, VPS et Azure, ADR-012 ; mêmes vecteurs, cosinus 0,99998 ; clé `Embedding:ApiKey`).
 - Paquets : Npgsql, Pgvector, AngleSharp (HTML, dans Core), PdfPig (PDF), OllamaSharp, Microsoft.Extensions.Hosting.
 - Génération (S2) : Mistral via son API, inférence UE, derrière `IChatClient` (Microsoft.Extensions.AI) ;
   **Medium 3.5 (`mistral-medium-2604`) par défaut** ; Small 4 pour des essais (`--Generation:Model=mistral-small-2603`).
@@ -80,6 +81,10 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
 - ADR-011 : Azure Container Apps (plan Consommation) plutôt qu'AKS (tarifs relevés le 2026-10-13 : ≈ 0,08 $/h en
   séance, ≈ 55 $/mois permanent, contre ≈ 65 €/mois pour AKS avec un nœud B2ms) ; AKS = voie de montée en charge,
   et de sortie si l'hébergeur cible n'a pas d'équivalent.
+- ADR-012 : génération par API Mistral (GPU rentable seulement vers 3 800 questions/jour face à Medium, et avec un
+  modèle moins bon) ; vectorisation par **bge-m3 chez OVHcloud AI Endpoints** (0,01 €/million de tokens, France, mêmes
+  vecteurs et même évaluation qu'Ollama ; mistral-embed mesuré et écarté : top 5 5/10, MRR 0,31) ; Ollama sur le poste
+  et en secours (profil `ollama` du VPS, `deploy/ollama`).
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code

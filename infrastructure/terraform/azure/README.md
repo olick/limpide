@@ -13,7 +13,7 @@ socle `../etat`).
 | `donnees` | PostgreSQL 17 managé, pgvector autorisé, base `rag`, **connexion par Entra ID seulement** ; pare-feu : poste de l'administrateur et services Azure |
 | `stockage` | compte de stockage des documents bruts (conteneur `brut`), sans clés d'accès ; l'application y écrit |
 | `secrets` | droit de l'application de lire les secrets du **coffre permanent du socle** |
-| `app` | journaux (Log Analytics), environnement Container Apps, Ollama + bge-m3 (interne), application web (publique) |
+| `app` | journaux (Log Analytics), environnement Container Apps, application web (publique) ; vectorisation par bge-m3 chez OVHcloud AI Endpoints (ADR-012) |
 | `budget` | alerte de budget de l'environnement (50, 80, 100 % ; propriétaires de l'abonnement) |
 
 | Environnement (`environnements/`) | PostgreSQL | Application | Budget |
@@ -27,22 +27,23 @@ ont disparu et que d'autres sont apparues : il détruirait puis recréerait tout
 ressource, nouvelle adresse ».
 
 Rien de secret dans le code, dans l'état ni dans la configuration des conteneurs : PostgreSQL par jeton Entra ID,
-clé Mistral lue dans le coffre par la plateforme au démarrage, grâce à l'identité de l'application.
+clés Mistral et OVHcloud lues dans le coffre par la plateforme au démarrage, grâce à l'identité de l'application.
 
 ## Une fois pour toutes
 
-1. **Socle** (état et secrets) : `../etat/creer-socle.sh`, puis déposer la clé Mistral dans le coffre permanent
+1. **Socle** (état et secrets) : `../etat/creer-socle.sh`, puis déposer les clés Mistral et OVHcloud AI Endpoints dans le coffre permanent
    (commande dans `../etat/README.md`). Elle sert à toutes les séances suivantes.
 2. **Registre d'images** : GitHub Container Registry (gratuit pour un dépôt public, survit aux `destroy`).
    Jeton GitHub (Settings → Developer settings → Personal access tokens → Tokens (classic)) avec le droit
    `write:packages`, puis `docker login ghcr.io -u olick` (coller le jeton à l'invite).
-3. Après la première publication : rendre publics les paquets `limpide-web` et `limpide-ollama` (GitHub → profil →
+3. Après la première publication : rendre public le paquet `limpide-web` (et `limpide-ollama`, image de secours, s'il est publié) (GitHub → profil →
    Packages → le paquet → Package settings → Change visibility → Public). Azure les télécharge alors sans identifiant.
 
 ## Une séance
 
-Coût : ≈ 0,10 € de l'heure (ADR-011, tarifs relevés le 2026-10-13 : PostgreSQL B1ms 0,0167 €/h, conteneurs au repos
-≈ 0,08 $/h, en partie couverts par la franchise mensuelle gratuite de Container Apps) ; **`./detruire.sh` à la fin.**
+Coût : ≈ 0,03 € de l'heure depuis l'ADR-012 (≈ 0,10 € avec Ollama : ADR-011 ; tarifs relevés le 2026-10-13 :
+PostgreSQL B1ms 0,0167 €/h, application au repos ≈ 0,016 $/h, vectorisation ≈ 0,01 € le million de tokens) ;
+**`./detruire.sh` à la fin.**
 
 En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adresse, durées) :
 
@@ -50,7 +51,7 @@ En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adr
 cd infrastructure/terraform/azure
 ./demo.sh              # préproduction, images du commit courant, déjà publiées
 ./demo.sh --env prod   # la production
-./demo.sh --publier    # après une modification de src/, Dockerfile ou deploy/ollama : publie d'abord les images
+./demo.sh --publier    # après une modification de src/ ou du Dockerfile : publie d'abord l'image
 ./detruire.sh          # fin de séance : préproduction (./detruire.sh prod pour la production)
 ```
 
@@ -71,7 +72,7 @@ terraform output url                         # ouvrir dans le navigateur, poser 
 
 **Vérifications** :
 
-- une question reçoit une réponse avec ses extraits : base (jeton Entra ID), Ollama et clé Mistral fonctionnent ;
+- une question reçoit une réponse avec ses extraits : base (jeton Entra ID), vectorisation (OVHcloud) et clé Mistral fonctionnent ;
 - `terraform state pull | grep -ci mistral` → 0 (dans `environnements/<env>`) ; aucun mot de passe dans l'état ;
 - journaux : portail → `ca-web` → Monitoring → Log stream (ou `az containerapp logs show -n ca-web -g rg-limpide-preprod`).
 
@@ -92,10 +93,10 @@ long ; sans effet sur la connexion.
 - **Registre** : GitHub Container Registry (gratuit, images conservées, CI de la S7 sur GitHub) ; Azure Container
   Registry (≈ 5 € par mois, détruit à chaque séance) écarté ; à l'étape « Migration cloud », le registre suivra
   l'hébergeur cible (Scaleway, OVHcloud).
-- **Embeddings** : Ollama + bge-m3 dans l'environnement, image avec le modèle inclus (`deploy/ollama/Dockerfile`,
-  2,4 Go sans les bibliothèques GPU) ; vecteurs identiques à ceux du poste (écart 0,0, vérifié) : ni recalcul du
-  corpus, ni recalibrage du seuil. Alternatives (API d'embeddings ; Ollama du VPS mutualisé) : ADR sur l'hébergement
-  des modèles.
+- **Embeddings** : d'abord Ollama + bge-m3 dans l'environnement (image avec le modèle inclus, `deploy/ollama/`,
+  2,4 Go) ; **remplacé le 2026-10-13 (ADR-012) par bge-m3 chez OVHcloud AI Endpoints** : mêmes vecteurs (cosinus
+  0,99998), même évaluation (7/10, MRR 0,52), ≈ 80 % du coût des conteneurs en moins, un conteneur de moins.
+  L'image Ollama reste en secours (`deploy/publier-images.sh --avec-ollama`).
 - **Réseau** : accès public filtré (règle « services Azure » + poste), l'authentification Entra ID étant la vraie
   barrière ; réseau privé (VNet) : voie de production, dans l'ADR.
 - **Secrets** : coffre permanent du socle (la clé Mistral déposée une fois) au lieu d'un coffre par environnement

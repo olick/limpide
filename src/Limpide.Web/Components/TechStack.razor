@@ -43,8 +43,9 @@
         ("Recherche et IA", [
             new("PostgreSQL", "base de données", "postgresql"),
             new("pgvector", "recherche par le sens, dans PostgreSQL", null),
-            new("Ollama", "fait tourner le modèle de vectorisation sur le serveur", "ollama"),
             new("bge-m3", "modèle multilingue qui transforme un texte en vecteur", null),
+            new("OVHcloud AI Endpoints", "fait tourner bge-m3 en France, à la demande", "ovh"),
+            new("Ollama", "fait tourner bge-m3 sur le poste de développement, et en secours", "ollama"),
             new("Mistral AI", "rédaction des réponses (Medium 3.5), hébergé en Europe", "mistralai"),
         ]),
         ("Données et pipeline", [
@@ -56,14 +57,15 @@
         ("Hébergement et sécurité", [
             new("OVHcloud", "serveur en France", "ovh"),
             new("Debian", "système du serveur", "debian"),
-            new("Terraform", "infrastructure décrite en code (zone DNS)", "terraform"),
+            new("Terraform", "infrastructure décrite en code : zone DNS, environnements Azure", "terraform"),
+            new("Microsoft Azure", "vitrine recréée à la demande : Container Apps, PostgreSQL géré, Key Vault, sans aucun mot de passe", null),
             new("Caddy", "serveur web, HTTPS automatique", "caddy"),
             new("Let's Encrypt", "certificats HTTPS", "letsencrypt"),
             new("OpenID Connect", "connexion au back office (Microsoft Entra ID)", "openid"),
             new("Discord", "alertes du pipeline", "discord"),
         ]),
         ("Code", [
-            new("GitHub", "dépôt public, sous licence Apache 2.0", "github"),
+            new("GitHub", "dépôt public, sous licence Apache 2.0 ; registre des images Docker", "github"),
         ]),
     ];
 }

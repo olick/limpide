@@ -1,13 +1,19 @@
 # Démo en ligne (ADR-006) : une seule machine, 4 Go de mémoire.
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm ingestion <commande>
-# Seul Caddy est exposé ; PostgreSQL et Ollama restent sur le réseau interne (Ollama n'a pas d'authentification).
+# Seul Caddy est exposé ; PostgreSQL reste sur le réseau interne.
+# Vectorisation (ADR-012) : bge-m3 servi par OVHcloud AI Endpoints (mêmes vecteurs qu'Ollama, mesuré) ; Ollama reste
+# disponible en secours (profil « ollama », voir plus bas).
 # Projet distinct de l'environnement de développement (docker-compose.yml) : volumes séparés.
 name: limpide-prod
 
 x-app-env: &app-env
   ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=${POSTGRES_USER:-rag};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}"
-  Embedding__Endpoint: "http://ollama:11434"
+  # bge-m3 par l'API d'OVHcloud (France). Secours : EMBEDDING_PROVIDER=Ollama, EMBEDDING_ENDPOINT=http://ollama:11434
+  # et « --profile ollama up -d » (mêmes vecteurs : rien à recalculer).
+  Embedding__Provider: "${EMBEDDING_PROVIDER:-OpenAI}"
+  Embedding__Endpoint: "${EMBEDDING_ENDPOINT:-https://oai.endpoints.kepler.ai.cloud.ovh.net/v1}"
+  Embedding__ApiKey: "${OVH_AI_ENDPOINTS_KEY:-}"
   Mistral__ApiKey: "${MISTRAL_API_KEY:?MISTRAL_API_KEY manquant dans .env.prod}"
 
 services:
@@ -47,8 +53,6 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      ollama-model:
-        condition: service_completed_successfully
     mem_limit: 512m
 
   # Back office : seulement la base (ni clé Mistral, ni Ollama). Connexion OpenID Connect ; fournisseur et
@@ -90,8 +94,10 @@ services:
       retries: 10
     mem_limit: 512m
 
+  # Secours (ADR-012) : jamais démarré par « up » ; « --profile ollama up -d » avec EMBEDDING_PROVIDER=Ollama.
   ollama:
     image: ollama/ollama:latest
+    profiles: ["ollama"]
     restart: unless-stopped
     environment:
       # Modèle gardé en mémoire indéfiniment : pas de démarrage à froid entre deux visites.
@@ -108,6 +114,7 @@ services:
   # Télécharge bge-m3 au premier démarrage (≈ 1,2 Go), puis ne fait plus rien : le modèle reste dans le volume.
   ollama-model:
     image: ollama/ollama:latest
+    profiles: ["ollama"]
     environment:
       OLLAMA_HOST: "ollama:11434"
     entrypoint: ["ollama", "pull", "bge-m3"]

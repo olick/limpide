@@ -43,9 +43,11 @@ debut=$SECONDS
 etape "1. Vérifications"
 az account show --output none 2>/dev/null || echec "pas de session Azure : az login"
 echo "Abonnement : $(az account show --query name -o tsv)"
-[[ "$(az keyvault secret list --vault-name "$COFFRE" --query "[?name=='mistral-api-key'] | length(@)" -o tsv 2>/dev/null)" == "1" ]] \
-  || echec "clé Mistral absente du coffre $COFFRE (infrastructure/terraform/etat/README.md)"
-for image in limpide-web limpide-ollama; do
+for secret in mistral-api-key ovh-ai-endpoints-key; do
+  [[ "$(az keyvault secret list --vault-name "$COFFRE" --query "[?name=='$secret'] | length(@)" -o tsv 2>/dev/null)" == "1" ]] \
+    || echec "secret $secret absent du coffre $COFFRE (infrastructure/terraform/etat/README.md)"
+done
+for image in limpide-web; do
   docker manifest inspect "$REGISTRE/$image:$TAG" >/dev/null 2>&1 \
     || echec "$REGISTRE/$image:$TAG introuvable ou privée : ./demo.sh --publier, puis rendre le paquet public"
 done
