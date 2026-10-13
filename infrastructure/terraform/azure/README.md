@@ -31,6 +31,17 @@ clé Mistral lue dans le coffre par la plateforme au démarrage, grâce à l'ide
 Coût : ≈ 0,25 € de l'heure (PostgreSQL ≈ 2 centimes, Ollama 2 vCPU / 4 Go et l'application 0,5 vCPU / 1 Go
 toujours allumés pendant la séance) ; **`./detruire.sh` à la fin.**
 
+En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adresse, durées) :
+
+```bash
+cd infrastructure/terraform/azure
+./demo.sh              # images du commit courant, déjà publiées
+./demo.sh --publier    # après une modification du code : publie d'abord les images du commit courant
+./detruire.sh          # fin de séance (utilisable depuis un nouveau terminal)
+```
+
+Le détail, étape par étape (ce que fait `demo.sh`) :
+
 ```bash
 deploy/publier-images.sh                     # depuis la racine du dépôt, seulement si le code a changé ; affiche la version
 cd infrastructure/terraform/azure
@@ -81,6 +92,10 @@ long ; sans effet sur la connexion.
 
 ## Mesures
 
+- Session 4 (2026-10-13) : premier `apply` complet 22 min 16 s, arrêté par deux erreurs de configuration (destination
+  des journaux ; nom d'administrateur tronqué par Azure qui forçait son remplacement), corrigées ; les 3 ressources
+  restantes créées ensuite. Application testée par Alexandre : réponses correctes (PostgreSQL par jeton Entra ID,
+  Ollama interne, clé Mistral lue dans le coffre).
 - Session 3 (2026-10-13, première création) : `apply` ≈ 10 min (PostgreSQL l'essentiel) ; `destroy` en deux temps
   (échec ci-dessus) : 1 min 55 s puis 1 min 56 s, soit au moins 4 min. Base vérifiée : 4 migrations, pgvector 0.8.2,
   1 377 passages dont 1 130 servis ; aucun secret dans l'état.

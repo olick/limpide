@@ -220,7 +220,12 @@ pare-feu « services Azure » (accès public filtré, Entra ID = vraie barrière
 (`deploy/publier-images.sh`, version = empreinte du commit), `deploy/ollama/Dockerfile` (bge-m3 inclus, sans
 bibliothèques GPU : 2,4 Go au lieu de 11,5 ; vecteurs identiques au poste). Code : `DatabaseOptions`
 (`Database:Authentication` = `Password` par défaut | `EntraId`, jeton Entra ID par `UsePeriodicPasswordProvider`,
-Azure.Identity 1.21.0). Ingestion sur Azure (jobs) reportée : stockage derrière une interface d'abord.
+Azure.Identity 1.21.0). Ingestion sur Azure (jobs) reportée : stockage derrière une interface d'abord. **Session 4 faite (2026-10-13)** : Limpide tourne sur
+Azure, testé par Alexandre (réponses correctes). Premier `apply` 22 min 16 s ; deux corrections (`logs_destination`
+obligatoire en azurerm 5 ; `principal_name` tronqué à 63 caractères par Azure → `ignore_changes`, sinon remplacement
+donc DROP ROLE). `azure/demo.sh` monte tout (vérifications, plan confirmé, apply, base, test HTTP, durées) ;
+`detruire.sh` utilisable depuis un nouveau terminal. Reste en S6 : sessions 5 (modules, deux environnements, budget en
+Terraform) et 6 (ADR : Container Apps/AKS, Airflow, modèles ; schéma). Un épisode LinkedIn 23 (S6) à proposer.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de

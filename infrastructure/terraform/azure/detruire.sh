@@ -11,6 +11,12 @@ set -euo pipefail
 cd "$(dirname "$0")"
 ADMIN="azurerm_postgresql_flexible_server_active_directory_administrator.admin"
 
+# Variables exigées par la configuration, sans effet sur une destruction : utilisable depuis un nouveau terminal.
+export ARM_SUBSCRIPTION_ID="${ARM_SUBSCRIPTION_ID:-$(az account show --query id -o tsv)}"
+export TF_VAR_admin_principal_name="${TF_VAR_admin_principal_name:-$(az ad signed-in-user show --query userPrincipalName -o tsv)}"
+export TF_VAR_poste_ipv4="${TF_VAR_poste_ipv4:-0.0.0.0}"
+export TF_VAR_image_tag="${TF_VAR_image_tag:-sans-objet}"
+
 terraform plan -destroy -input=false | grep -E "will be destroyed|^Plan:" || true
 read -rp "Détruire l'environnement ci-dessus ? (oui/non) " reponse
 [[ "$reponse" == "oui" ]] || { echo "Rien n'est détruit."; exit 1; }
