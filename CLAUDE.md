@@ -224,8 +224,12 @@ Azure.Identity 1.21.0). Ingestion sur Azure (jobs) reportée : stockage derrièr
 Azure, testé par Alexandre (réponses correctes). Premier `apply` 22 min 16 s ; deux corrections (`logs_destination`
 obligatoire en azurerm 5 ; `principal_name` tronqué à 63 caractères par Azure → `ignore_changes`, sinon remplacement
 donc DROP ROLE). `azure/demo.sh` monte tout (vérifications, plan confirmé, apply, base, test HTTP, durées) ;
-`detruire.sh` utilisable depuis un nouveau terminal. Reste en S6 : sessions 5 (modules, deux environnements, budget en
-Terraform) et 6 (ADR : Container Apps/AKS, Airflow, modèles ; schéma). Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
+`detruire.sh` utilisable depuis un nouveau terminal. Session 5, code fait (2026-10-13) : `azure/modules/` (identite, donnees,
+stockage, secrets, app, budget) et `azure/environnements/{preprod,prod}` (états `azure-preprod.tfstate` /
+`azure-prod.tfstate`, tailles et budgets différents : B1ms/10 € contre B2s/20 €), `moved.tf` en préproduction (adresses
+passées dans les modules ; plan : 18 ressources par environnement) ; `demo.sh --env`, `detruire.sh <env>`,
+`initialiser-base.sh <env>`. Reste : test final chronométré (`demo.sh` sur environnement vide, puis `detruire.sh`) ;
+session 6 (ADR : Container Apps/AKS, Airflow, modèles ; comparatif de coûts ; schéma). Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de

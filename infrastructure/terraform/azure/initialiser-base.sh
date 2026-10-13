@@ -8,15 +8,25 @@
 # Aucun mot de passe : chaque connexion utilise un jeton d'accès Entra ID de la personne connectée (`az login`),
 # valable environ une heure, jamais affiché ni écrit sur le disque.
 #
-# Usage, depuis infrastructure/terraform/azure : ./initialiser-base.sh [--avec-corpus]
+# Usage, depuis infrastructure/terraform/azure : ./initialiser-base.sh [preprod|prod] [--avec-corpus]
 set -euo pipefail
 
 ICI="$(cd "$(dirname "$0")" && pwd)"
 DEPOT="$(cd "$ICI/../../.." && pwd)"
+ENV="preprod"
+CORPUS=""
+for arg in "$@"; do
+  case "$arg" in
+    preprod|prod) ENV="$arg" ;;
+    --avec-corpus) CORPUS=1 ;;
+    *) echo "argument inconnu : $arg" >&2; exit 1 ;;
+  esac
+done
+TF="$ICI/environnements/$ENV"
 IMAGE_PSQL="pgvector/pgvector:pg17"   # déjà présente pour la pile locale : fournit psql
 
-HOTE="$(terraform -chdir="$ICI" output -raw postgresql_hote)"
-ROLE_APP="$(terraform -chdir="$ICI" output -raw identite_app_nom)"
+HOTE="$(terraform -chdir="$TF" output -raw postgresql_hote)"
+ROLE_APP="$(terraform -chdir="$TF" output -raw identite_app_nom)"
 ADMIN="$(az ad signed-in-user show --query userPrincipalName -o tsv)"
 export PGPASSWORD="$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)"
 
@@ -26,7 +36,7 @@ psql_azure() { # $1 = base ; la suite = arguments de psql
     psql "host=$HOTE dbname=$base user=$ADMIN sslmode=require" -v ON_ERROR_STOP=1 -q "$@"
 }
 
-echo "Serveur : $HOTE"
+echo "Environnement : $ENV ; serveur : $HOTE"
 
 echo "1. Rôle de l'application ($ROLE_APP)"
 if [[ "$(psql_azure postgres -tA -c "select count(*) from pg_roles where rolname = '$ROLE_APP'")" == "0" ]]; then
@@ -53,7 +63,7 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE O
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO "$ROLE_APP";
 SQL
 
-if [[ "${1:-}" == "--avec-corpus" ]]; then
+if [[ -n "$CORPUS" ]]; then
   echo "4. Corpus copié depuis la base locale"
   if [[ "$(psql_azure rag -tA -c "select count(*) from chunks")" != "0" ]]; then
     echo "   la base Azure contient déjà des passages : rien n'est copié"

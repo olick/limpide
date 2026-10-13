@@ -1,17 +1,30 @@
 # Environnement Azure de Limpide (vitrine, option B)
 
 S6. La démo publique reste sur le VPS ; cet environnement montre la version « cloud » de Limpide, décrite en code,
-**recréée à chaque séance** (`apply` au début, `./detruire.sh` à la fin). État : blob `azure-preprod.tfstate` du
-socle (`../etat`). Organisation par rôle, en attendant les modules (session 5) :
+**recréée à chaque séance** (`./demo.sh` au début, `./detruire.sh` à la fin).
 
-| Fichier | Contenu |
+Depuis la session 5 : des **modules** (blocs réutilisables, un par rôle) et **deux environnements** qui les appellent
+avec des tailles différentes, chacun avec son propre état (`azure-preprod.tfstate`, `azure-prod.tfstate`, dans le
+socle `../etat`).
+
+| Module (`modules/`) | Contenu |
 |---|---|
-| `main.tf` | groupe de ressources, étiquettes, suffixe des noms uniques |
-| `identite.tf` | identité managée de l'application (aucun secret : Azure l'authentifie) |
-| `donnees.tf` | PostgreSQL 17 managé, pgvector autorisé, base `rag`, **connexion par Entra ID seulement** (aucun mot de passe) ; pare-feu : poste de l'administrateur et services Azure |
-| `stockage.tf` | compte de stockage des documents bruts (conteneur `brut`), sans clés d'accès ; l'application y écrit |
-| `secrets.tf` | droit de l'application de lire les secrets du **coffre permanent du socle** |
-| `conteneurs.tf` | journaux (Log Analytics), environnement Container Apps, Ollama + bge-m3 (interne), application web (publique) |
+| `identite` | identité managée de l'application (aucun secret : Azure l'authentifie) |
+| `donnees` | PostgreSQL 17 managé, pgvector autorisé, base `rag`, **connexion par Entra ID seulement** ; pare-feu : poste de l'administrateur et services Azure |
+| `stockage` | compte de stockage des documents bruts (conteneur `brut`), sans clés d'accès ; l'application y écrit |
+| `secrets` | droit de l'application de lire les secrets du **coffre permanent du socle** |
+| `app` | journaux (Log Analytics), environnement Container Apps, Ollama + bge-m3 (interne), application web (publique) |
+| `budget` | alerte de budget de l'environnement (50, 80, 100 % ; propriétaires de l'abonnement) |
+
+| Environnement (`environnements/`) | PostgreSQL | Application | Budget |
+|---|---|---|---|
+| `preprod` | B1ms (1 vCore partagé, 2 Go), sauvegardes 7 j | 0,5 vCPU / 1 Go, 1 instance | 10 € / mois |
+| `prod` | B2s (2 vCores, 4 Go), sauvegardes 14 j | 1 vCPU / 2 Go, 1 à 3 instances | 20 € / mois |
+
+`environnements/preprod/moved.tf` : les ressources ont changé d'adresse en passant dans des modules
+(`azurerm_container_app.web` → `module.app.azurerm_container_app.web`). Sans bloc `moved`, Terraform croirait qu'elles
+ont disparu et que d'autres sont apparues : il détruirait puis recréerait tout, base comprise. Le bloc dit « même
+ressource, nouvelle adresse ».
 
 Rien de secret dans le code, dans l'état ni dans la configuration des conteneurs : PostgreSQL par jeton Entra ID,
 clé Mistral lue dans le coffre par la plateforme au démarrage, grâce à l'identité de l'application.
@@ -35,30 +48,31 @@ En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adr
 
 ```bash
 cd infrastructure/terraform/azure
-./demo.sh              # images du commit courant, déjà publiées
+./demo.sh              # préproduction, images du commit courant, déjà publiées
+./demo.sh --env prod   # la production
 ./demo.sh --publier    # après une modification du code : publie d'abord les images du commit courant
-./detruire.sh          # fin de séance (utilisable depuis un nouveau terminal)
+./detruire.sh          # fin de séance : préproduction (./detruire.sh prod pour la production)
 ```
 
 Le détail, étape par étape (ce que fait `demo.sh`) :
 
 ```bash
 deploy/publier-images.sh                     # depuis la racine du dépôt, seulement si le code a changé ; affiche la version
-cd infrastructure/terraform/azure
+cd infrastructure/terraform/azure/environnements/preprod
 export ARM_SUBSCRIPTION_ID=$(az account show --query id -o tsv)
 export TF_VAR_admin_principal_name="$(az ad signed-in-user show --query userPrincipalName -o tsv)"
 export TF_VAR_poste_ipv4="$(curl -s https://api.ipify.org)"
 export TF_VAR_image_tag=<version affichée par publier-images.sh>
 terraform init
 terraform apply                              # ≈ 10 min ou plus (PostgreSQL, puis les conteneurs)
-./initialiser-base.sh --avec-corpus          # rôle de l'application, migrations, droits, corpus
+../../initialiser-base.sh preprod --avec-corpus   # rôle de l'application, migrations, droits, corpus
 terraform output url                         # ouvrir dans le navigateur, poser une question
 ```
 
 **Vérifications** :
 
 - une question reçoit une réponse avec ses extraits : base (jeton Entra ID), Ollama et clé Mistral fonctionnent ;
-- `terraform state pull | grep -ci mistral` → 0 ; aucun mot de passe dans l'état ;
+- `terraform state pull | grep -ci mistral` → 0 (dans `environnements/<env>`) ; aucun mot de passe dans l'état ;
 - journaux : portail → `ca-web` → Monitoring → Log stream (ou `az containerapp logs show -n ca-web -g rg-limpide-preprod`).
 
 **Fin de séance** :

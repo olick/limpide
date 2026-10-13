@@ -82,7 +82,11 @@ verrou vérifié. Détail : `infrastructure/terraform/etat/README.md`.
 **Terminé quand** : la démo tourne sur Azure (environnement recréé à la demande), déployée uniquement par Terraform ;
 la démo publique, elle, reste sur le VPS (option B).
 
-## Session 5 : modules et environnements (≈ 2 h)
+## Session 5 : modules et environnements (≈ 2 h) — code fait le 2026-10-13
+
+Modules `identite`, `donnees`, `stockage`, `secrets`, `app`, `budget` ; environnements `preprod` et `prod` (états
+séparés), blocs `moved` ; scripts `demo.sh --env`, `detruire.sh <env>`. Reste : le test final chronométré.
+Détail : `infrastructure/terraform/azure/README.md`.
 
 1. Factoriser en modules : `data`, `app`, `network`, `secrets`.
 2. Deux environnements, préproduction et production, avec des tailles différentes (la préproduction au minimum).
