@@ -96,6 +96,10 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   gardé**. **Tâche notée en S7** : passer la vectorisation à Qwen3-Embedding-8B si le jeu de 50 questions confirme
   (seuil, réglages, bascule sans interruption, ADR-012 révisé) et écrire l'épisode LinkedIn à ce moment (note P). Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
   locales `rag_mistral`, `rag_qwen`.
+- ADR-013 (proposé) : Airflow **allégé** (LocalExecutor, `pipelines/airflow/docker-compose.leger.yaml`) sur le VPS de la
+  démo, interface par tunnel SSH ; mesuré : 0,70 Go au repos, 0,88 Go au pic (officiel Celery : 1,77 Go) ; VPS : 2,97 Go
+  disponibles ; Airflow géré ≈ 300–350 $/mois écarté ; repli : minuteur système. Mise en œuvre à faire = première
+  ingestion réelle en production.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code

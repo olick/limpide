@@ -1,0 +1,48 @@
+# Variante allégée d'Airflow (mesure de la S6, ADR sur l'hébergement d'Airflow) : LocalExecutor au lieu de Celery.
+# Les tâches s'exécutent dans l'ordonnanceur : ni Redis, ni worker, ni triggerer (aucun opérateur différé dans les DAG).
+#   docker compose -f docker-compose.yaml -f docker-compose.override.yaml -f docker-compose.leger.yaml \
+#     up -d --wait postgres airflow-apiserver airflow-scheduler airflow-dag-processor
+x-leger-env: &leger-env
+  AIRFLOW__CORE__EXECUTOR: LocalExecutor
+  # Une exécution d'ingestion à la fois suffit (une tâche par semaine) : peu de processus en parallèle.
+  AIRFLOW__CORE__PARALLELISM: "4"
+
+services:
+  airflow-init:
+    environment: *leger-env
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+
+  airflow-apiserver:
+    environment: *leger-env
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  airflow-dag-processor:
+    environment: *leger-env
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
+
+  # L'ordonnanceur exécute les tâches : il reçoit ce que l'override donnait au worker (socket Docker, variables).
+  airflow-scheduler:
+    environment:
+      <<: *leger-env
+      AIRFLOW_VAR_LIMPIDE_DB_PASSWORD: "${LIMPIDE_DB_PASSWORD:?LIMPIDE_DB_PASSWORD manquant dans .env}"
+      AIRFLOW_VAR_LIMPIDE_DATA_DIR: "${LIMPIDE_DATA_DIR:?LIMPIDE_DATA_DIR manquant dans .env}"
+      AIRFLOW_VAR_DISCORD_WEBHOOK_SECRET: "${DISCORD_WEBHOOK_URL:-}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    group_add:
+      - "${DOCKER_GID:?DOCKER_GID manquant dans .env (getent group docker)}"
+    depends_on: !override
+      postgres:
+        condition: service_healthy
+      airflow-init:
+        condition: service_completed_successfully
