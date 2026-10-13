@@ -108,7 +108,8 @@ long ; sans effet sur la connexion.
 
 - **Test final de la S6** (2026-10-13, session 5, préproduction vide, `./demo.sh`) : infrastructure **9 min 10 s**
   (18 ressources), base **28 s** (rôle, migrations, droits, corpus), total **11 min 12 s** vérifications et
-  confirmation comprises ; aucune intervention manuelle. Vérifié : réponse 200, budget `budget-limpide-preprod`
+  confirmation comprises ; aucune intervention manuelle. **Destruction complète d'un trait (`./detruire.sh`) :
+  13 min 5 s**, plus longue que la création (suppression du serveur PostgreSQL et de l'environnement Container Apps). Vérifié : réponse 200, budget `budget-limpide-preprod`
   (10 €) créé, bge-m3 chargé en 2,5 s au démarrage de l'application. Avertissement attendu : clés DataProtection non
   persistées.
 

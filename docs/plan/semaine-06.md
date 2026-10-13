@@ -86,7 +86,8 @@ la démo publique, elle, reste sur le VPS (option B).
 
 Modules `identite`, `donnees`, `stockage`, `secrets`, `app`, `budget` ; environnements `preprod` et `prod` (états
 séparés), blocs `moved` ; scripts `demo.sh --env`, `detruire.sh <env>`. Test final (2026-10-13) : `demo.sh` sur environnement vide, 11 min 12 s au total (infrastructure 9 min 10 s,
-base 28 s), sans intervention manuelle.
+base 28 s), sans intervention manuelle ; destruction complète 13 min 5 s. Pour la S7 : un cycle complet ≈ 25 min,
+mais la destruction peut se faire après le verdict de l'évaluation, sans le retarder.
 Détail : `infrastructure/terraform/azure/README.md`.
 
 1. Factoriser en modules : `data`, `app`, `network`, `secrets`.
