@@ -49,7 +49,8 @@ la question (pas devant les passages) : `Embedding:QueryInstruction`.
 | Meilleur score, 4 questions hors sujet | 0,291 à 0,467 | — | 0,311 à 0,446 |
 | « Règles sur l'IA aux États-Unis » / « certification ISO 42001 » | 0,655 / — | — | 0,684 / 0,550 |
 | Vectorisation du corpus | ≈ 41 ms par passage (API OVHcloud, bge-m3) | 506 ms par passage, 9 min 36 s | idem |
-| Latence d'une question (6 questions, depuis le poste) | ≈ 184 ms | — | **médiane 3,9 s, max 11,6 s** |
+| Latence d'une question, 1re mesure (6 questions, ≈ 21 h 30) | ≈ 184 ms | — | médiane 3,9 s, max 11,6 s |
+| Latence d'une question, 2e mesure (10 questions, 22 h 12) | médiane 188 ms, max 277 ms | — | **médiane 218 ms, max 581 ms** |
 | Prix | 0,01 € le million de tokens | 0,10 € le million de tokens (≈ 0,03 € pour tout le corpus) | idem |
 
 Consigne utilisée : « Instruct: Étant donné une question, retrouver les passages des textes juridiques qui y
@@ -61,15 +62,17 @@ Constats :
   considérants (q06 Article 99, q07 Article 53, q08 Article 27 en 1re position), la faiblesse notée dès la S1.
 - **Le seuil de pertinence deviendrait bien plus sûr** : écart d'environ 0,32 entre le hors sujet (≤ 0,45) et les
   questions légitimes (≥ 0,77), contre 0,07 avec bge-m3. À recalibrer (autour de 0,60).
-- **La latence est rédhibitoire en l'état** : ≈ 4 s de plus par question, jusqu'à 11 s. À remesurer (charge du
-  service ce soir-là ?) avant de conclure.
+- **Latence** : la 1re mesure (3,9 s en médiane) n'a pas résisté à la 2e, 40 minutes plus tard (218 ms en médiane,
+  30 ms de plus que bge-m3 au même moment). Le service a connu un ralentissement passager : un risque à surveiller
+  (les journaux de la S8 le montreront), pas un défaut du modèle.
 - **Limite** : 10 questions écrites par l'auteur ; le jeu de 50 questions de la S7 doit confirmer.
 
 ## Pistes
 
 - Rédaction : relire les réponses de gpt-oss-120b (fidélité) ; s'il est fidèle, le coût est divisé par 13, mais
   l'attente est multipliée par 9 : le choix dépend de ce qu'on veut montrer (démo réactive ou coût minimal).
-- Vectorisation : remesurer la latence de Qwen3-Embedding-8B à d'autres moments ; si elle reste élevée, chercher un
-  modèle de la même famille plus petit, ou l'auto-héberger.
+- Vectorisation : Qwen3-Embedding-8B devient le candidat sérieux à la place de bge-m3 (recherche nettement meilleure,
+  latence comparable hors incident, ≈ 0,03 € pour revectoriser le corpus) ; à confirmer sur le jeu de 50 questions de
+  la S7, puis décision dans une révision de l'ADR-012 (nouveau seuil, recalcul du corpus en production).
 - Les modèles d'origine chinoise ou américaine tournent ici chez OVHcloud, en France : aucune donnée ne part chez leur
   éditeur ; poids ouverts, donc pas de dépendance à l'éditeur (discussion du 2026-10-13, à reprendre dans la révision de l'ADR-004 ou de l'ADR-012).
