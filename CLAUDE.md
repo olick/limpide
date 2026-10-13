@@ -233,7 +233,11 @@ stockage, secrets, app, budget) et `azure/environnements/{preprod,prod}` (états
 passées dans les modules ; plan : 18 ressources par environnement) ; `demo.sh --env`, `detruire.sh <env>`,
 `initialiser-base.sh <env>`. **Test final fait (2026-10-13)** : `demo.sh` sur préproduction vide = infrastructure 9 min 10 s, base 28 s,
 total 11 min 12 s, sans intervention (critère de la S6 atteint) ; `detruire.sh` complet : 13 min 5 s. Reste :
-session 6 (ADR : Container Apps/AKS, Airflow, modèles ; comparatif de coûts ; schéma). Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
+session 6 : ADR-011 (Container Apps) et comparatif de coûts (`docs/notes/comparatif-couts-hebergement.md`,
+2026-10-13 : services gérés 75 à 108 €/mois contre 4 à 6 € pour un VPS ; Ollama ≈ 80 % du coût des conteneurs ; Azure
+moins cher que Scaleway pour un service toujours allumé grâce à son tarif au repos ; Scaleway = cible de migration la
+plus cohérente, une instance + Compose recréée par Terraform la moins chère) faits ; restent ADR Airflow, ADR modèles,
+schéma. Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
