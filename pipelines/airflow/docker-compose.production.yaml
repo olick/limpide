@@ -25,7 +25,7 @@ services:
   airflow-dag-processor:
     environment:
       <<: *production-dag-env
-    mem_limit: 384m
+    mem_limit: 512m  # 300 Mo mesurés au démarrage sur le serveur : 384 Mo laissaient trop peu de marge
 
   # Les tâches tournent dans l'ordonnanceur (LocalExecutor) : la mémoire des conteneurs d'ingestion, elle, est
   # comptée à part (512 Mo au plus, un à la fois).
