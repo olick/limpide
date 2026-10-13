@@ -252,6 +252,46 @@ Les retours n'alimentent **jamais** le corpus : seulement l'évaluation.
 Lien : le post LinkedIn du jour 10 (`.vscode/linkedin-limpide.md`) annonce « Chaque retour devient une question de
 test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 
+
+## Après le projet · Mise à l'échelle (demandée le 2026-10-13)
+
+Hors calendrier de certification : une fois les 10 semaines bouclées. Objectif : passer d'une démo sur un échantillon
+(AI Act + fiches IA de la CNIL) à un outil utile sur **l'ensemble des textes qui encadrent l'AI Act**, nettement plus
+pertinent, et qui serve **autant à un juriste qu'à une entreprise**.
+
+**Corpus** : inventaire en début d'étape, source par source, avec licence et langue vérifiées (`docs/sources.md`) :
+actes délégués et d'exécution, lignes directrices de la Commission, code de bonnes pratiques des modèles d'usage
+général, questions-réponses du Bureau de l'IA, modifications du règlement (versions consolidées et dates
+d'application), autres publications des autorités (CNIL, CEPD). Contraintes déjà rencontrées : certains textes
+n'existent qu'en anglais (S5 : lignes directrices écartées faute de version française, décision à prendre sur le
+multilingue) ; les normes harmonisées sont payantes, donc probablement citées sans être reproduites.
+
+**Volume et architecture** : probablement quelques milliers à quelques dizaines de milliers de passages, encore loin
+des « millions » de l'ADR-001. La mesure décidera : relever la latence de recherche, puis seulement réviser l'ADR-001
+(réglages de pgvector d'abord, base dédiée type Qdrant ensuite). Vectorisation : 816 ms par passage sur CPU (ADR-002),
+soit ≈ 4 h 30 pour 20 000 passages ; à rapprocher de l'ADR sur l'hébergement des modèles (S6).
+
+**Pertinence, mesurée** : objectifs chiffrés fixés au départ, sur le jeu de questions de la S7 élargi.
+Pistes à mesurer une par une, jamais ajoutées sans mesure : reclassement des résultats (reranking), reformulation de
+la question, distinction articles (qui font foi) et considérants (aide à l'interprétation), renvois entre textes
+(article 6 → annexe III, règlement → lignes directrices), filtres par source et par date.
+
+**Deux publics** :
+
+- **Juriste** : citation précise (article, paragraphe, point), texte en vigueur à une date donnée, renvois entre
+  textes, distinction de ce qui oblige et de ce qui éclaire.
+- **Entreprise** : formulation simple, entrée par rôle (fournisseur, déployeur, importateur, distributeur) et par
+  type de système, obligations rattachées aux textes.
+- **Règle inchangée** : Limpide ne qualifie pas la situation de l'utilisateur (garde-fou `qualification-juridique`).
+  Pour une entreprise, il montre les obligations attachées à chaque rôle selon les textes ; c'est elle qui se situe.
+  Cette frontière est la difficulté principale de l'étape : à trancher dans un ADR, avant le code.
+
+**Évaluation** : questions par public, comportements attendus (répondre, refuser, ne pas qualifier) ; relecture
+**par un juriste**, pas seulement par un modèle (limite assumée jusqu'ici, ADR-004).
+
+**Livrables** : corpus élargi et documenté, ADR (périmètre du corpus et langues, deux publics, révision de l'ADR-001 si
+la mesure l'exige), scores avant/après publiés, démo mise à jour.
+
 ---
 
 ## Correspondance avec la RNCP41993

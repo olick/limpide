@@ -265,6 +265,10 @@ vitrine des technologies. État local (reconstructible par les blocs `import`). 
   `openid profile`, pages protégées → Microsoft. Première connexion en production par Alexandre le 2026-10-12 : tout
   fonctionne. Épisode 22 écrit.
 
+**Après le projet : mise à l'échelle** (ajoutée au plan global le 2026-10-13) : toute la législation qui encadre
+l'AI Act, pertinence mesurée nettement meilleure, deux publics (juriste et entreprise) sans jamais qualifier la
+situation de l'utilisateur ; détail dans `docs/plan/plan-global.md`.
+
 En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
 
 **S3 terminée** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
