@@ -119,9 +119,9 @@ Plan global (10 semaines, ADR prévus, correspondance RNCP) : `docs/plan/plan-gl
 Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la semaine en cours.
 
 **Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09, réorganisé le 2026-10-12) : **une seule
-série, dans l'ordre réel du projet**. Épisodes 1 à 22 écrits (S1 à S5, jusqu'au 2026-10-12 ; épisode 2 « Pourquoi ne pas simplement poser la question à une IA ? » inséré le 2026-10-12, suivants renumérotés) ; lancement publié le
+série, dans l'ordre réel du projet**. Épisodes 1 à 23 écrits (S1 à S6 en cours, jusqu'au 2026-10-13 ; épisode 2 « Pourquoi ne pas simplement poser la question à une IA ? » inséré le 2026-10-12, suivants renumérotés) ; lancement publié le
 2026-10-08, épisode 1 le 2026-10-09 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
-**proposer à Alexandre l'épisode suivant** (23 : S6) et l'ajouter à la suite. Règles :
+**proposer à Alexandre l'épisode suivant** (24 : suite de la S6) et l'ajouter à la suite. Règles :
 
 - un épisode ne raconte qu'une tâche faite, à sa place dans la chronologie ; récit : problème, enjeu, piste essayée,
   résultat, analyse, décision, leçon, question au lecteur ; 1 500 à 2 200 caractères ; pied « ◀ Épisode précédent /
@@ -225,7 +225,7 @@ Azure, testé par Alexandre (réponses correctes). Premier `apply` 22 min 16 s ;
 obligatoire en azurerm 5 ; `principal_name` tronqué à 63 caractères par Azure → `ignore_changes`, sinon remplacement
 donc DROP ROLE). `azure/demo.sh` monte tout (vérifications, plan confirmé, apply, base, test HTTP, durées) ;
 `detruire.sh` utilisable depuis un nouveau terminal. Reste en S6 : sessions 5 (modules, deux environnements, budget en
-Terraform) et 6 (ADR : Container Apps/AKS, Airflow, modèles ; schéma). Un épisode LinkedIn 23 (S6) à proposer.
+Terraform) et 6 (ADR : Container Apps/AKS, Airflow, modèles ; schéma). Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
