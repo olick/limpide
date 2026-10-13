@@ -196,7 +196,12 @@ Session 1 en cours : Terraform 1.16.5 installé (dépôt HashiCorp) ; exercice D
 fournisseur `ovh/ovh` 2.22.0, jeton d'API limité à la zone dans `~/.ovh.conf`) : inventaire par sources de données
 (12 entrées), import de `@`, `www`, `admin` (plan sans changement), entrée erronée `limpide-ia.fr.limpide-ia.fr`
 supprimée par le code (2026-10-12) ; entrées posées par OVH (NS, MX, SPF, ftp, TXT) non gérées. Terraform ajouté à la
-vitrine des technologies. État local (reconstructible par les blocs `import`). Suite : Azure (alerte de budget d'abord).
+vitrine des technologies. État local (reconstructible par les blocs `import`). Azure (2026-10-13) : abonnement
+« Azure subscription 1 », budget « Limpide » 10 €/mois (alerte seulement), Azure CLI 2.91 (dépôt `azure-cli` bookworm, clé
+`/usr/share/keyrings/microsoft.gpg`) ; exercice `infrastructure/terraform/apprentissage/azure/` (azurerm 5.9.0, random
+3.9.1 ; `ARM_SUBSCRIPTION_ID` par l'environnement ; `resource_providers_to_register` car azurerm 5 n'active plus rien :
+`Microsoft.Storage` activé) fait par Alexandre : création, dérive d'étiquette (`~`), remplacement en cascade lu,
+clé d'accès en clair dans l'état, `destroy` (rien ne reste). Suite : session 2, état distant.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
