@@ -50,7 +50,7 @@ En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adr
 cd infrastructure/terraform/azure
 ./demo.sh              # préproduction, images du commit courant, déjà publiées
 ./demo.sh --env prod   # la production
-./demo.sh --publier    # après une modification du code : publie d'abord les images du commit courant
+./demo.sh --publier    # après une modification de src/, Dockerfile ou deploy/ollama : publie d'abord les images
 ./detruire.sh          # fin de séance : préproduction (./detruire.sh prod pour la production)
 ```
 

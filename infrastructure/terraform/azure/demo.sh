@@ -6,10 +6,11 @@
 #   4. vérification que l'application répond ; adresse et durées.
 #
 # Usage, depuis infrastructure/terraform/azure :
-#   ./demo.sh                 préproduction, version des images = commit courant (déjà publiée)
+#   ./demo.sh                 préproduction, images de la version courante du code (déjà publiées)
 #   ./demo.sh --env prod      la production (vitrine ; plus grande, budget plus élevé)
-#   ./demo.sh --publier       publie d'abord les images du commit courant (deploy/publier-images.sh)
-#   ./demo.sh --tag <version> une version déjà publiée, autre que le commit courant
+#   ./demo.sh --publier       publie d'abord les images (deploy/publier-images.sh), après une modification du code
+#   ./demo.sh --tag <version> une autre version déjà publiée
+# Version courante : dernier commit qui touche src/, Dockerfile ou deploy/ollama (même règle que publier-images.sh).
 # Coût pendant la séance : ≈ 0,25 € de l'heure. Ne pas oublier ./detruire.sh.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -22,7 +23,7 @@ etape() { printf '\n== %s\n' "$1"; }
 duree() { printf '%d min %02d s' $(( $1 / 60 )) $(( $1 % 60 )); }
 echec() { echo "ARRÊT : $1" >&2; exit 1; }
 
-TAG="$(git -C "$DEPOT" rev-parse --short=12 HEAD)"
+TAG="$(git -C "$DEPOT" log -1 --format=%h --abbrev=12 -- src Dockerfile deploy/ollama)"
 ENV="preprod"
 PUBLIER=""
 while [[ $# -gt 0 ]]; do
