@@ -25,6 +25,21 @@ public sealed class EmbeddingOptions
     /// <summary>Doit correspondre à la colonne <c>chunks.embedding vector(1024)</c>.</summary>
     public int Dimensions { get; set; } = 1024;
 
+    /// <summary>
+    /// Demander <see cref="Dimensions"/> à l'API (fournisseur <c>OpenAI</c>) : pour les modèles à taille réglable
+    /// (Qwen3-Embedding : 4 096 par défaut, réduit à 1 024). Inutile pour bge-m3, toujours en 1 024.
+    /// </summary>
+    public bool RequestDimensions { get; set; }
+
+    /// <summary>
+    /// Consigne placée devant la question seulement (jamais devant les passages), pour les modèles qui l'attendent
+    /// (Qwen3-Embedding : « Instruct: …\nQuery: »). Vide : la question telle quelle (bge-m3).
+    /// </summary>
+    public string? QueryInstruction { get; set; }
+
+    public string QueryText(string question) =>
+        QueryInstruction is { Length: > 0 } instruction ? $"{instruction}{question}" : question;
+
     /// <summary>Passages envoyés par appel ; chaque lot est enregistré dès qu'il est calculé.</summary>
     public int BatchSize { get; set; } = 16;
 

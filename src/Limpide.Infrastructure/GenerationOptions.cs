@@ -4,7 +4,7 @@ namespace Limpide.Infrastructure;
 
 /// <summary>
 /// Section « Generation » de la configuration : LLM qui rédige les réponses (Mistral, inférence UE, ADR-004).
-/// La clé d'API se lit à part, sous « Mistral:ApiKey » (user-secrets en local, Key Vault ensuite).
+/// La clé d'API se lit à part, sous « Generation:ApiKey » ou, à défaut, « Mistral:ApiKey » (user-secrets, coffre).
 /// </summary>
 public sealed class GenerationOptions
 {

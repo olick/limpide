@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
     /// <summary>
     /// Base PostgreSQL (pgvector), embeddings, recherche de passages et génération des réponses, partagés par la
     /// console et l'application web. Lit « ConnectionStrings:Rag », les sections « Database », « Embedding » et
-    /// « Generation », et la clé « Mistral:ApiKey ».
+    /// « Generation », et la clé « Generation:ApiKey » (à défaut « Mistral:ApiKey »).
     /// </summary>
     public static IServiceCollection AddLimpideInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
@@ -57,7 +57,8 @@ public static class ServiceCollectionExtensions
                 new ApiKeyCredential(embedding.ApiKey is { Length: > 0 } key
                     ? key
                     : throw new InvalidOperationException("Clé « Embedding:ApiKey » absente (fournisseur OpenAI).")),
-                new OpenAIClientOptions { Endpoint = embedding.Endpoint }).AsIEmbeddingGenerator(),
+                new OpenAIClientOptions { Endpoint = embedding.Endpoint })
+                .AsIEmbeddingGenerator(embedding.RequestDimensions ? embedding.Dimensions : null),
             _ => throw new InvalidOperationException(
                 $"Embedding:Provider « {embedding.Provider} » inconnu (attendu : {EmbeddingOptions.Ollama} ou {EmbeddingOptions.OpenAI})."),
         });
@@ -74,14 +75,18 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(generation.ToSettings());
         // Clé exigée seulement quand on génère une réponse : les commandes d'ingestion s'en passent.
         services.AddSingleton<IChatClient>(_ =>
-            new ChatClient(generation.Model, new ApiKeyCredential(MistralApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
+            new ChatClient(generation.Model, new ApiKeyCredential(GenerationApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
                 .AsIChatClient());
         services.AddSingleton<AnswerService>();
         return services;
     }
 
-    private static string MistralApiKey(IConfiguration configuration) =>
-        configuration["Mistral:ApiKey"] is { Length: > 0 } apiKey
+    /// <summary>
+    /// Clé de l'API de rédaction : « Generation:ApiKey » pour un autre fournisseur compatible OpenAI (OVHcloud AI
+    /// Endpoints, mesure de la S6), sinon « Mistral:ApiKey » (Mistral, ADR-004).
+    /// </summary>
+    private static string GenerationApiKey(IConfiguration configuration) =>
+        (configuration["Generation:ApiKey"] is { Length: > 0 } key ? key : configuration["Mistral:ApiKey"]) is { Length: > 0 } apiKey
             ? apiKey
             : throw new InvalidOperationException(
                 "Clé « Mistral:ApiKey » absente (dotnet user-secrets set \"Mistral:ApiKey\" ... --project src/Limpide.Ingestion).");

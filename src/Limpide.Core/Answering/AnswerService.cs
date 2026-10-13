@@ -48,7 +48,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             ct);
         generation.Stop();
 
-        var answer = response.Text.Trim();
+        var answer = ModelText.Clean(response.Text);
         // Refus = la phrase seule (guillemets éventuels mis à part). Une réponse sur le fond suivie de la phrase
         // de refus n'est pas un refus : elle est signalée (« reponse-ambigue »).
         var mentionsDecline = answer.Contains(AnswerPrompt.Decline, StringComparison.Ordinal);

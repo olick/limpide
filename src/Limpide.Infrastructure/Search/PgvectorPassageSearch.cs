@@ -99,7 +99,7 @@ public sealed class PgvectorPassageSearch(
     public async Task<SearchOutcome> SearchAsync(string question, int limit, CancellationToken ct)
     {
         var watch = Stopwatch.StartNew();
-        var query = await generator.GenerateVectorAsync(question, cancellationToken: ct);
+        var query = await generator.GenerateVectorAsync(embedding.QueryText(question), cancellationToken: ct);
         var embeddingDuration = watch.Elapsed;
         watch.Restart();
 

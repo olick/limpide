@@ -87,6 +87,11 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   et en secours (profil `ollama` du VPS, `deploy/ollama`). **En production le 2026-10-13** : clé `OVH_AI_ENDPOINTS_KEY` dans le
   `.env.prod` du serveur, `web` redéployé, conteneurs Ollama supprimés (volume gardé), mémoire disponible 1 508 → 3 007 Mo ;
   clé `ovh-ai-endpoints-key` dans le coffre permanent Azure.
+  Mesures du 2026-10-13 (`docs/notes/observations-modeles-ovh.md`) : rédaction par modèles ouverts chez OVHcloud
+  (`Generation:Endpoint`, `Generation:ApiKey` générique) : gpt-oss-120b 11/15, 0,04 centime mais 14 s ; Llama 3.3 tranche
+  la situation ; Qwen3.5-397B plus cher que Medium (réflexion). `ModelText.Clean` retire les caractères invisibles
+  (U+200B de gpt-oss dans « [P5] »). Vectorisation Qwen3-Embedding-8B (`RequestDimensions`, `QueryInstruction`) :
+  top 5 10/10, MRR 0,80, mais 3,9 s par question : à remesurer. Bases d'essai locales `rag_mistral`, `rag_qwen`.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code
