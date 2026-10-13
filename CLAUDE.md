@@ -22,7 +22,8 @@ Ne pas ajouter de fonctionnalités (multimodal, GraphRAG…) qui éloignent de c
 
 Alexandre, architecte / tech lead .NET, 16 ans d'expérience, indépendant.
 
-- Maîtrise : .NET, architecture, PostgreSQL, Docker, Kubernetes.
+- Maîtrise : .NET, architecture, Docker, Kubernetes. PostgreSQL : familier (usage courant), **pas expert** —
+  ne pas écrire qu'il le maîtrise (précisé le 2026-10-13).
 - **N'a jamais utilisé Terraform ni Airflow** : les introduire en expliquant les concepts, pas en boîte noire.
 - Poste : Debian 13 (trixie).
 - Style attendu : direct, honnête, itératif. Signaler les problèmes plutôt que rassurer.

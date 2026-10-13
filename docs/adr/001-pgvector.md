@@ -7,7 +7,8 @@
 
 Le corpus est petit (quelques milliers de passages au plus). Il faut stocker des métadonnées relationnelles
 (sources, documents, versions) et des vecteurs, avec une traçabilité forte entre une réponse et la version
-exacte d'un document. Je maîtrise PostgreSQL ; je n'ai pas d'expérience d'exploitation d'une base vectorielle dédiée.
+exacte d'un document. PostgreSQL m'est familier (usage courant, sans en être expert ; formulation corrigée le 2026-10-13) ; je n'ai
+aucune expérience d'exploitation d'une base vectorielle dédiée.
 
 ## Options envisagées
 
