@@ -85,7 +85,8 @@ la démo publique, elle, reste sur le VPS (option B).
 ## Session 5 : modules et environnements (≈ 2 h) — code fait le 2026-10-13
 
 Modules `identite`, `donnees`, `stockage`, `secrets`, `app`, `budget` ; environnements `preprod` et `prod` (états
-séparés), blocs `moved` ; scripts `demo.sh --env`, `detruire.sh <env>`. Reste : le test final chronométré.
+séparés), blocs `moved` ; scripts `demo.sh --env`, `detruire.sh <env>`. Test final (2026-10-13) : `demo.sh` sur environnement vide, 11 min 12 s au total (infrastructure 9 min 10 s,
+base 28 s), sans intervention manuelle.
 Détail : `infrastructure/terraform/azure/README.md`.
 
 1. Factoriser en modules : `data`, `app`, `network`, `secrets`.

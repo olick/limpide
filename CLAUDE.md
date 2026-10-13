@@ -228,7 +228,8 @@ donc DROP ROLE). `azure/demo.sh` monte tout (vérifications, plan confirmé, app
 stockage, secrets, app, budget) et `azure/environnements/{preprod,prod}` (états `azure-preprod.tfstate` /
 `azure-prod.tfstate`, tailles et budgets différents : B1ms/10 € contre B2s/20 €), `moved.tf` en préproduction (adresses
 passées dans les modules ; plan : 18 ressources par environnement) ; `demo.sh --env`, `detruire.sh <env>`,
-`initialiser-base.sh <env>`. Reste : test final chronométré (`demo.sh` sur environnement vide, puis `detruire.sh`) ;
+`initialiser-base.sh <env>`. **Test final fait (2026-10-13)** : `demo.sh` sur préproduction vide = infrastructure 9 min 10 s, base 28 s,
+total 11 min 12 s, sans intervention (critère de la S6 atteint ; durée du `detruire.sh` à relever). Reste :
 session 6 (ADR : Container Apps/AKS, Airflow, modèles ; comparatif de coûts ; schéma). Épisode LinkedIn 23 écrit (2026-10-13 : Terraform, option B, deux échecs du cycle réel).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans

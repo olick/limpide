@@ -106,6 +106,12 @@ long ; sans effet sur la connexion.
 
 ## Mesures
 
+- **Test final de la S6** (2026-10-13, session 5, préproduction vide, `./demo.sh`) : infrastructure **9 min 10 s**
+  (18 ressources), base **28 s** (rôle, migrations, droits, corpus), total **11 min 12 s** vérifications et
+  confirmation comprises ; aucune intervention manuelle. Vérifié : réponse 200, budget `budget-limpide-preprod`
+  (10 €) créé, bge-m3 chargé en 2,5 s au démarrage de l'application. Avertissement attendu : clés DataProtection non
+  persistées.
+
 - Session 4 (2026-10-13) : premier `apply` complet 22 min 16 s, arrêté par deux erreurs de configuration (destination
   des journaux ; nom d'administrateur tronqué par Azure qui forçait son remplacement), corrigées ; les 3 ressources
   restantes créées ensuite. Application testée par Alexandre : réponses correctes (PostgreSQL par jeton Entra ID,
