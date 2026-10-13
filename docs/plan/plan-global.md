@@ -385,7 +385,7 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 
 | Sujet | Semaine |
 |---|---|
-| Container Apps plutôt qu'AKS | S6 |
+| Container Apps plutôt qu'AKS (ADR-011, écrit le 2026-10-13) | S6 |
 | Hébergement d'Airflow | S6 |
 | Hébergement des modèles : LLM par API ou auto-hébergé sur GPU, embeddings | S6 |
 | Métriques et seuils d'évaluation | S7 |

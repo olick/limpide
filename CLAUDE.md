@@ -77,6 +77,9 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   jusqu'à 3 fausses versions CNIL par jour ; 11 à 19 s par passage sans changement).
 - ADR-010 : découpage structurel, **mesuré** contre la taille fixe (1 000 / 200) sur le corpus élargi : top 5 7/10
   contre 5/10, MRR 0,52 contre 0,37 ; `FixedSizeChunker` gardé, activable (`--Ingestion:ChunkingStrategy=FixedSize`).
+- ADR-011 : Azure Container Apps (plan Consommation) plutôt qu'AKS (tarifs relevés le 2026-10-13 : ≈ 0,08 $/h en
+  séance, ≈ 55 $/mois permanent, contre ≈ 65 €/mois pour AKS avec un nœud B2ms) ; AKS = voie de montée en charge,
+  et de sortie si l'hébergeur cible n'a pas d'équivalent.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code

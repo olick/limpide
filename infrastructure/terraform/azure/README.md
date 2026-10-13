@@ -41,8 +41,8 @@ clé Mistral lue dans le coffre par la plateforme au démarrage, grâce à l'ide
 
 ## Une séance
 
-Coût : ≈ 0,25 € de l'heure (PostgreSQL ≈ 2 centimes, Ollama 2 vCPU / 4 Go et l'application 0,5 vCPU / 1 Go
-toujours allumés pendant la séance) ; **`./detruire.sh` à la fin.**
+Coût : ≈ 0,10 € de l'heure (ADR-011, tarifs relevés le 2026-10-13 : PostgreSQL B1ms 0,0167 €/h, conteneurs au repos
+≈ 0,08 $/h, en partie couverts par la franchise mensuelle gratuite de Container Apps) ; **`./detruire.sh` à la fin.**
 
 En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adresse, durées) :
 

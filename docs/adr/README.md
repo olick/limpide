@@ -18,3 +18,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [008](008-cycle-de-vie-des-versions.md) | Cycle de vie des versions (candidate → publiée) et migrations du schéma | 2026-10-10 |
 | [009](009-batch-incremental.md) | Mise à jour du corpus en batch incrémental hebdomadaire, pas en flux continu | 2026-10-11 |
 | [010](010-decoupage-structurel.md) | Découpage structurel (article, considérant, section) plutôt qu'à taille fixe, mesuré | 2026-10-11 |
+| [011](011-container-apps-plutot-qu-aks.md) | Azure Container Apps (plan Consommation) plutôt qu'AKS pour exécuter Limpide sur Azure | 2026-10-13 |
