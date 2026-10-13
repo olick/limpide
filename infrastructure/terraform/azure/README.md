@@ -54,8 +54,14 @@ de l'état ; aucun mot de passe dans l'état.
 **Fin de séance** :
 
 ```bash
-terraform destroy     # noter la durée ; le coffre est purgé, l'état reste dans ../etat
+./detruire.sh         # affiche ce qui sera détruit, demande « oui », détruit, donne la durée
 ```
+
+Pas de `terraform destroy` direct : Terraform supprimerait l'administrateur Entra ID de PostgreSQL avant le serveur,
+ce qui revient à un `DROP ROLE` d'un rôle propriétaire des tables, refusé par PostgreSQL (échec du premier `destroy`,
+2026-10-13, après la suppression des autres ressources). Le script le retire d'abord de l'état ; la suppression du
+serveur emporte tout. Au passage : le nom de ce rôle est tronqué à 63 caractères (limite de PostgreSQL), l'UPN d'un
+compte Microsoft personnel invité étant plus long ; sans effet sur la connexion.
 
 ## Pourquoi sans mot de passe
 
