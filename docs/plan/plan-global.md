@@ -241,6 +241,10 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 
 Rattrapage du retard accumulé, finitions, préparation d'un support de soutenance si la certification se confirme.
 
+**À la fin du plan initial** (reporté le 2026-10-13, avant les étapes ajoutées) : validation de la page d'accueil par
+2 ou 3 personnes non techniques (critère de l'étape intermédiaire), message à Jedha, 2 ou 3 testeurs extérieurs ;
+retours notés dans le bilan.
+
 **Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
 projet) : **étude de migration vers un cloud souverain**, en
 partant du comparatif de coûts de la S6 (alternative la moins chère qui tient les exigences de la démo).

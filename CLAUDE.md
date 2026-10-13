@@ -120,7 +120,7 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 
 **Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09, réorganisé le 2026-10-12) : **une seule
 série, dans l'ordre réel du projet**. Épisodes 1 à 23 écrits (S1 à S6 en cours, jusqu'au 2026-10-13 ; épisode 2 « Pourquoi ne pas simplement poser la question à une IA ? » inséré le 2026-10-12, suivants renumérotés) ; lancement publié le
-2026-10-08, épisode 1 le 2026-10-09 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
+2026-10-08, épisode 1 le 2026-10-09, épisode 2 le 2026-10-12 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
 **proposer à Alexandre l'épisode suivant** (24 : suite de la S6) et l'ajouter à la suite. Règles :
 
 - un épisode ne raconte qu'une tâche faite, à sa place dans la chronologie ; récit : problème, enjeu, piste essayée,
@@ -300,7 +300,10 @@ des identités managées (à compenser). Puis **mise à l'échelle** (ajoutée a
 l'AI Act, pertinence mesurée nettement meilleure, deux publics (juriste et entreprise) sans jamais qualifier la
 situation de l'utilisateur ; détail dans `docs/plan/plan-global.md`.
 
-En suspens (Alexandre) : message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande `feedback`).
+En suspens (Alexandre), **reporté à la fin du plan initial** (décision du 2026-10-13 : une fois les tâches du plan
+faites, avant les étapes ajoutées « migration cloud » et « mise à l'échelle ») : validation de la page d'accueil par 2
+ou 3 personnes non techniques, message à Jedha, 2 ou 3 testeurs extérieurs (retours via le formulaire, commande
+`feedback`). Ne plus les relancer d'ici là.
 
 **S3 terminée** (`docs/plan/semaine-03.md`) — mise en ligne de la démo
 
