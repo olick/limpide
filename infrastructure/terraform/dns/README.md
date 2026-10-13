@@ -79,7 +79,9 @@ au lieu de vide). Importée avec les autres, puis son bloc retiré de `zone.tf` 
 Règle à partir de maintenant : les entrées `@`, `www`, `admin` ne se modifient plus dans l'espace client OVH, sinon
 le prochain `plan` signale une dérive.
 
-## Limite
+## État
 
-L'état est local (`terraform.tfstate`, ignoré par Git, sur le poste d'Alexandre). Perdu, il se reconstruit par les
-blocs `import` (les identifiants y sont) : rien n'est détruit. État distant et verrouillé : S6, session 2.
+Distant depuis le 2026-10-13 (S6, session 2) : blob `dns.tfstate` du coffre `stlimpidetf024b1e9f` (`backend.tf`,
+`../etat/README.md`), accès par identité Microsoft, verrou pendant chaque opération (vérifié : un second `plan` est
+refusé pendant un `apply`). Prérequis sur un nouveau poste : `az login`, le droit sur le conteneur, `terraform init`.
+Perdu malgré tout, il se reconstruirait par les blocs `import` (les identifiants y sont) : rien ne serait détruit.

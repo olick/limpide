@@ -201,7 +201,12 @@ vitrine des technologies. État local (reconstructible par les blocs `import`). 
 `/usr/share/keyrings/microsoft.gpg`) ; exercice `infrastructure/terraform/apprentissage/azure/` (azurerm 5.9.0, random
 3.9.1 ; `ARM_SUBSCRIPTION_ID` par l'environnement ; `resource_providers_to_register` car azurerm 5 n'active plus rien :
 `Microsoft.Storage` activé) fait par Alexandre : création, dérive d'étiquette (`~`), remplacement en cascade lu,
-clé d'accès en clair dans l'état, `destroy` (rien ne reste). Suite : session 2, état distant.
+clé d'accès en clair dans l'état, `destroy` (rien ne reste). Session 2 faite (2026-10-13) : coffre de l'état
+`rg-limpide-tfstate` / `stlimpidetf024b1e9f` / conteneur `tfstate`, créé par `infrastructure/terraform/etat/creer-coffre-etat.sh`
+(hors Terraform ; clés d'accès désactivées, accès par Entra ID, « Storage Blob Data Contributor » sur le conteneur
+seul, versions et suppression récupérable 30 jours) ; **seule ressource Azure permanente** (exception à l'option B).
+État DNS migré (`dns/backend.tf`, `dns.tfstate`), plan sans changement, verrou vérifié par Alexandre. Les exercices
+d'apprentissage gardent un état local. Suite : session 3 (données et secrets).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de

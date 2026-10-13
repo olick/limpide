@@ -47,7 +47,10 @@ Option B : le cycle s'apprend sur Docker, gratuitement, avant tout compte Azure.
 
 **Terminé quand** : tu as fait le cycle complet et observé une dérive.
 
-## Session 2 : l'état distant (≈ 1 h 30)
+## Session 2 : l'état distant (≈ 1 h 30) — faite le 2026-10-13
+
+Coffre créé par `infrastructure/terraform/etat/creer-coffre-etat.sh` (Azure CLI) ; état de la zone DNS migré ;
+verrou vérifié. Détail : `infrastructure/terraform/etat/README.md`.
 
 1. Créer à la main (ou avec un petit script à part) le compte de stockage qui hébergera l'état.
 2. Configurer le backend `azurerm` : état distant, verrouillage pendant les opérations.
