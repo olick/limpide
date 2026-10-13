@@ -84,7 +84,9 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
 - ADR-012 : génération par API Mistral (GPU rentable seulement vers 3 800 questions/jour face à Medium, et avec un
   modèle moins bon) ; vectorisation par **bge-m3 chez OVHcloud AI Endpoints** (0,01 €/million de tokens, France, mêmes
   vecteurs et même évaluation qu'Ollama ; mistral-embed mesuré et écarté : top 5 5/10, MRR 0,31) ; Ollama sur le poste
-  et en secours (profil `ollama` du VPS, `deploy/ollama`).
+  et en secours (profil `ollama` du VPS, `deploy/ollama`). **En production le 2026-10-13** : clé `OVH_AI_ENDPOINTS_KEY` dans le
+  `.env.prod` du serveur, `web` redéployé, conteneurs Ollama supprimés (volume gardé), mémoire disponible 1 508 → 3 007 Mo ;
+  clé `ovh-ai-endpoints-key` dans le coffre permanent Azure.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code
