@@ -6,7 +6,7 @@ Azure, dans un coffre dédié.
 
 ## Le coffre
 
-`creer-coffre-etat.sh` (Azure CLI, relançable sans risque) crée :
+`creer-socle.sh` (Azure CLI, relançable sans risque) crée :
 
 | Élément | Réglage | Pourquoi |
 |---|---|---|
@@ -17,17 +17,28 @@ Azure, dans un coffre dédié.
 | Conteneur `tfstate` | un fichier (blob) par dossier Terraform : `dns.tfstate`... | |
 | Droit « Storage Blob Data Contributor » | sur ce conteneur seulement, pour la personne connectée | Être propriétaire de l'abonnement ne donne pas accès aux données d'un compte de stockage |
 
+**Coffre à secrets permanent** (ajouté en session 4) : `kvlimpide<8 caractères>` (`kvlimpide024b1e9f`), même groupe,
+droits Azure (RBAC), suppression réversible 90 jours et protection contre la purge ; « Key Vault Secrets Officer »
+pour la personne connectée. Les secrets y sont déposés **une fois** et survivent aux environnements recréés à chaque
+séance, qui les lisent par leur identité managée (sans lui, la clé Mistral serait à redéposer après chaque `apply`,
+une intervention manuelle contraire au critère de la S6) :
+
+```bash
+read -rsp "Clé Mistral : " CLE && echo     # saisie sans affichage
+az keyvault secret set --vault-name kvlimpide024b1e9f --name mistral-api-key --value "$CLE" --output none && unset CLE
+```
+
 Pourquoi un script et pas Terraform : Terraform ne peut pas ranger son état dans une ressource qu'il crée lui-même
 (l'œuf et la poule). Le script est court, versionné et relançable.
 
-**Exception à l'option B** : ce coffre ne se détruit jamais (seule ressource Azure permanente du projet) ; coût :
-quelques centimes par mois (fichiers de quelques Ko).
+**Exception à l'option B** : ce socle (état et secrets) ne se détruit jamais (seules ressources Azure permanentes du
+projet) ; coût : quelques centimes par mois (fichiers de quelques Ko, quelques lectures de secrets).
 
 ## Mise en place (une fois)
 
 ```bash
 cd infrastructure/terraform/etat
-./creer-coffre-etat.sh
+./creer-socle.sh
 ```
 
 Le nom du compte affiché à la fin doit être celui de `../dns/backend.tf` (`stlimpidetf024b1e9f`).

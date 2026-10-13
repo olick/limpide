@@ -15,8 +15,9 @@ output "identite_app_client_id" {
   value = azurerm_user_assigned_identity.app.client_id
 }
 
-output "coffre" {
-  value = azurerm_key_vault.kv.name
+output "url" {
+  description = "Adresse publique de Limpide sur Azure."
+  value       = "https://${azurerm_container_app.web.ingress[0].fqdn}"
 }
 
 output "stockage" {

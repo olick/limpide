@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
-# Coffre de l'état Terraform sur Azure (S6, session 2). Créé hors de Terraform : Terraform ne peut pas ranger son état
-# dans une ressource qu'il crée lui-même. Relançable sans risque (chaque étape vérifie ou met à jour l'existant).
+# Socle permanent de Limpide sur Azure, créé hors de Terraform et jamais détruit (exception à l'option B).
+# Relançable sans risque (chaque étape vérifie ou met à jour l'existant). Coût : quelques centimes par mois.
+#   - le coffre de l'état Terraform (S6, session 2) : Terraform ne peut pas ranger son état dans une ressource qu'il
+#     crée lui-même ;
+#   - le coffre à secrets permanent (S6, session 4) : les secrets déposés une fois (clé Mistral) survivent aux
+#     environnements recréés à chaque séance, qui les lisent par leur identité managée ; sans lui, il faudrait les
+#     redéposer à la main après chaque `apply`.
 #
-# Seule ressource Azure permanente du projet (exception à l'option B) : la détruire perdrait l'état. Coût : quelques
-# centimes par mois.
-#
-# Prérequis : `az login` sur l'abonnement de Limpide. Usage : ./creer-coffre-etat.sh
+# Prérequis : `az login` sur l'abonnement de Limpide. Usage : ./creer-socle.sh
 set -euo pipefail
 
 LOCATION="francecentral"
@@ -13,8 +15,10 @@ RESOURCE_GROUP="rg-limpide-tfstate"
 CONTAINER="tfstate"
 # Nom unique dans tout Azure, stable pour un abonnement : dérivé de son identifiant (sans le révéler).
 SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
-ACCOUNT="stlimpidetf$(printf '%s\n' "$SUBSCRIPTION_ID" | sha256sum | cut -c1-8)"
-TAGS=(projet=limpide usage=etat-terraform gere_par=script permanent=oui)
+SUFFIX="$(printf '%s\n' "$SUBSCRIPTION_ID" | sha256sum | cut -c1-8)"
+ACCOUNT="stlimpidetf$SUFFIX"
+VAULT="kvlimpide$SUFFIX"
+TAGS=(projet=limpide usage=socle gere_par=script permanent=oui)
 
 echo "Abonnement : $(az account show --query name -o tsv)"
 echo "Compte de stockage : $ACCOUNT ($RESOURCE_GROUP, $LOCATION)"
@@ -53,7 +57,21 @@ if [[ -z "$(az role assignment list --assignee "$USER_ID" --role "Storage Blob D
   echo "Droit accordé ; il peut mettre quelques minutes à s'appliquer."
 fi
 
+# Coffre à secrets permanent : droits Azure (RBAC), suppression réversible 90 jours et protection contre la purge
+# (un secret supprimé par erreur se récupère ; personne ne peut l'effacer définitivement avant ce délai).
+if ! az keyvault show --name "$VAULT" --resource-group "$RESOURCE_GROUP" --output none 2>/dev/null; then
+  az keyvault create --name "$VAULT" --resource-group "$RESOURCE_GROUP" --location "$LOCATION" \
+    --enable-rbac-authorization true --retention-days 90 --enable-purge-protection true \
+    --tags "${TAGS[@]}" --output none
+fi
+VAULT_ID="$(az keyvault show --name "$VAULT" --resource-group "$RESOURCE_GROUP" --query id -o tsv)"
+if [[ -z "$(az role assignment list --assignee "$USER_ID" --role "Key Vault Secrets Officer" --scope "$VAULT_ID" --query '[].id' -o tsv)" ]]; then
+  az role assignment create --assignee-object-id "$USER_ID" --assignee-principal-type User \
+    --role "Key Vault Secrets Officer" --scope "$VAULT_ID" --output none
+  echo "Droit de dépôt des secrets accordé ; il peut mettre quelques minutes à s'appliquer."
+fi
+
 echo
-echo "Coffre prêt. Configuration du backend (backend.tf de chaque dossier Terraform) :"
-echo "  storage_account_name = \"$ACCOUNT\""
-echo "  container_name       = \"$CONTAINER\""
+echo "Socle prêt."
+echo "  état Terraform  : storage_account_name = \"$ACCOUNT\", container_name = \"$CONTAINER\" (backend.tf)"
+echo "  secrets         : coffre \"$VAULT\" (variable coffre_permanent de ../azure)"

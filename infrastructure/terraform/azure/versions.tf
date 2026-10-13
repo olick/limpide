@@ -30,9 +30,11 @@ provider "azurerm" {
   # azurerm 5 n'active aucun service sur l'abonnement : chaque service utilisé se déclare.
   resource_provider_registrations = "none"
   resource_providers_to_register = [
+    "Microsoft.App",
     "Microsoft.DBforPostgreSQL",
     "Microsoft.KeyVault",
     "Microsoft.ManagedIdentity",
+    "Microsoft.OperationalInsights",
     "Microsoft.Storage",
   ]
 }

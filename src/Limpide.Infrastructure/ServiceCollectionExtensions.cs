@@ -1,4 +1,6 @@
 using System.ClientModel;
+using Azure.Core;
+using Azure.Identity;
 using Limpide.Core.Answering;
 using Limpide.Core.Search;
 using Limpide.Infrastructure.Migrations;
@@ -20,12 +22,13 @@ public static class ServiceCollectionExtensions
 {
     /// <summary>
     /// Base PostgreSQL (pgvector), embeddings, recherche de passages et génération des réponses, partagés par la
-    /// console et l'application web. Lit « ConnectionStrings:Rag », les sections « Embedding » et « Generation »,
-    /// et la clé « Mistral:ApiKey ».
+    /// console et l'application web. Lit « ConnectionStrings:Rag », les sections « Database », « Embedding » et
+    /// « Generation », et la clé « Mistral:ApiKey ».
     /// </summary>
     public static IServiceCollection AddLimpideInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         var embedding = configuration.GetSection("Embedding").Get<EmbeddingOptions>() ?? new EmbeddingOptions();
+        var database = configuration.GetSection("Database").Get<DatabaseOptions>() ?? new DatabaseOptions();
         var connectionString = configuration.GetConnectionString("Rag")
             ?? throw new InvalidOperationException("Chaîne de connexion « ConnectionStrings:Rag » absente.");
 
@@ -37,6 +40,8 @@ public static class ServiceCollectionExtensions
             // écrivent « libgssapi_krb5.so.2: cannot open shared object file » à chaque démarrage.
             dataSource.ConnectionStringBuilder.GssEncryptionMode = GssEncryptionMode.Disable;
             dataSource.UseVector();
+            if (database.UsesEntraId)
+                UseEntraIdToken(dataSource, database);
             return dataSource.Build();
         });
 
@@ -66,5 +71,22 @@ public static class ServiceCollectionExtensions
         });
         services.AddSingleton<AnswerService>();
         return services;
+    }
+
+    /// <summary>
+    /// Azure (S6) : le « mot de passe » de chaque nouvelle connexion est un jeton Entra ID de l'identité de
+    /// l'application, renouvelé toutes les 30 minutes (il en vaut au moins 60) ; aucun secret dans la configuration.
+    /// </summary>
+    private static void UseEntraIdToken(NpgsqlDataSourceBuilder dataSource, DatabaseOptions database)
+    {
+        TokenCredential credential = database.ManagedIdentityClientId is { Length: > 0 } clientId
+            ? new ManagedIdentityCredential(ManagedIdentityId.FromUserAssignedClientId(clientId))
+            : new DefaultAzureCredential();
+        var postgres = new TokenRequestContext(["https://ossrdbms-aad.database.windows.net/.default"]);
+
+        dataSource.UsePeriodicPasswordProvider(
+            async (_, ct) => (await credential.GetTokenAsync(postgres, ct)).Token,
+            successRefreshInterval: TimeSpan.FromMinutes(30),
+            failureRefreshInterval: TimeSpan.FromSeconds(10));
     }
 }

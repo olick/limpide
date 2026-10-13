@@ -45,6 +45,17 @@ resource "azurerm_postgresql_flexible_server_database" "rag" {
   collation = "en_US.utf8"
 }
 
+# Session 4 (réseau, choix argumenté dans l'ADR d'infrastructure) : accès public filtré plutôt qu'un réseau privé.
+# Cette règle Azure (0.0.0.0) ouvre la base aux services hébergés sur Azure, dont Container Apps, dont les adresses
+# de sortie ne sont pas fixes ; elle les ouvre aussi à ceux des autres clients d'Azure. La vraie barrière est
+# l'authentification : Entra ID seulement, aucun mot de passe à deviner. Réseau privé (VNet) : voie de production.
+resource "azurerm_postgresql_flexible_server_firewall_rule" "services_azure" {
+  name             = "services-azure"
+  server_id        = azurerm_postgresql_flexible_server.db.id
+  start_ip_address = "0.0.0.0"
+  end_ip_address   = "0.0.0.0"
+}
+
 resource "azurerm_postgresql_flexible_server_firewall_rule" "poste" {
   name             = "poste-administrateur"
   server_id        = azurerm_postgresql_flexible_server.db.id

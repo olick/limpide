@@ -202,7 +202,7 @@ vitrine des technologies. État local (reconstructible par les blocs `import`). 
 3.9.1 ; `ARM_SUBSCRIPTION_ID` par l'environnement ; `resource_providers_to_register` car azurerm 5 n'active plus rien :
 `Microsoft.Storage` activé) fait par Alexandre : création, dérive d'étiquette (`~`), remplacement en cascade lu,
 clé d'accès en clair dans l'état, `destroy` (rien ne reste). Session 2 faite (2026-10-13) : coffre de l'état
-`rg-limpide-tfstate` / `stlimpidetf024b1e9f` / conteneur `tfstate`, créé par `infrastructure/terraform/etat/creer-coffre-etat.sh`
+`rg-limpide-tfstate` / `stlimpidetf024b1e9f` / conteneur `tfstate`, créé par `infrastructure/terraform/etat/creer-socle.sh`
 (hors Terraform ; clés d'accès désactivées, accès par Entra ID, « Storage Blob Data Contributor » sur le conteneur
 seul, versions et suppression récupérable 30 jours) ; **seule ressource Azure permanente** (exception à l'option B).
 État DNS migré (`dns/backend.tf`, `dns.tfstate`), plan sans changement, verrou vérifié par Alexandre. Les exercices
@@ -213,8 +213,14 @@ Alexandre administrateur, identité managée `id-limpide-preprod` = rôle créé
 la main), stockage `brut` sans clés. Vérifié : 1 377 passages (1 130 servis), clé absente de l'état, aucun mot de
 passe. **`apply` ≈ 10 min**, `destroy` ≥ 4 min (données pour la préproduction éphémère de la S7). Premier `destroy`
 en échec (administrateur Entra supprimé avant le serveur = `DROP ROLE` refusé) : `detruire.sh` le retire de l'état
-d'abord ; toujours détruire par ce script. Suite : session 4 (Container Apps,
-réseau, embeddings).
+d'abord ; toujours détruire par ce script. Session 4 préparée (2026-10-13) : socle renommé `etat/creer-socle.sh`
+(+ coffre à secrets **permanent** `kvlimpide024b1e9f` : clé Mistral déposée une fois ; le coffre par environnement de
+la session 3 est retiré), `conteneurs.tf` (Log Analytics, Container Apps : `ca-ollama` interne, `ca-web` public),
+pare-feu « services Azure » (accès public filtré, Entra ID = vraie barrière), images sur GitHub Container Registry
+(`deploy/publier-images.sh`, version = empreinte du commit), `deploy/ollama/Dockerfile` (bge-m3 inclus, sans
+bibliothèques GPU : 2,4 Go au lieu de 11,5 ; vecteurs identiques au poste). Code : `DatabaseOptions`
+(`Database:Authentication` = `Password` par défaut | `EntraId`, jeton Entra ID par `UsePeriodicPasswordProvider`,
+Azure.Identity 1.21.0). Ingestion sur Azure (jobs) reportée : stockage derrière une interface d'abord.
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
