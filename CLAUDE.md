@@ -93,7 +93,8 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   (U+200B de gpt-oss dans « [P5] »). Vectorisation Qwen3-Embedding-8B (`RequestDimensions`, `QueryInstruction`) :
   top 5 10/10, MRR 0,80 ; latence remesurée 218 ms (3,9 s = ralentissement passager) : candidat à confirmer sur 50
   questions (S7). Relecture de gpt-oss : 4 erreurs + 1 qualification invisibles au contrôle automatique → **Medium
-  gardé**. Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
+  gardé**. **Tâche notée en S7** : passer la vectorisation à Qwen3-Embedding-8B si le jeu de 50 questions confirme
+  (seuil, réglages, bascule sans interruption, ADR-012 révisé) et écrire l'épisode LinkedIn à ce moment (note P). Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
   locales `rag_mistral`, `rag_qwen`.
 - Licence du dépôt : Apache 2.0.
 

@@ -189,6 +189,20 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 
 - **Back office, v2** : transformer un retour de visiteur en cas de test ; résultats d'évaluation par version
 
+- **Passer la vectorisation à Qwen3-Embedding-8B** (ajouté le 2026-10-13, après la mesure de la S6 :
+  `docs/notes/observations-modeles-ovh.md`) : top 5 10/10 et MRR 0,80 contre 7/10 et 0,52 pour bge-m3, sur 10
+  questions. Étapes :
+  1. confirmer sur le jeu de 50 questions (bge-m3 contre Qwen3-Embedding avec consigne) ; abandonner si l'écart ne
+     tient pas ;
+  2. recalibrer le seuil de pertinence (autour de 0,60 mesuré) et l'écrire dans la configuration ;
+  3. réglages : `Embedding:Model=Qwen3-Embedding-8B`, `Embedding:RequestDimensions=true`,
+     `Embedding:QueryInstruction` ; révision de l'ADR-012 (et de l'ADR-002) ;
+  4. **bascule sans interruption** à concevoir : les vecteurs sont dans une seule colonne, et la recherche ne compare
+     que des vecteurs du même modèle ; revectoriser en place couperait la recherche ≈ 10 minutes (colonne de vecteurs
+     par modèle, ou copie de la base puis bascule) ;
+  5. production (VPS) et Azure ; vitrine des technologies (bge-m3 → Qwen3-Embedding) ;
+  6. **épisode LinkedIn** à écrire à ce moment-là (note de travail P du journal).
+
 **Terminé quand** : une modification du prompt qui dégrade les scores est bloquée automatiquement.
 **ADR** : métriques et seuils d'évaluation
 **Blocs RNCP** : BC04

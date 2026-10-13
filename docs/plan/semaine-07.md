@@ -97,6 +97,13 @@ déploiement en production (validation manuelle)
 
 **Terminé quand** : le blocage est démontré et la page d'évaluation est en ligne.
 
+## Tâche ajoutée : vectorisation par Qwen3-Embedding-8B (après la session 1)
+
+Dès que le jeu de 50 questions existe : comparer bge-m3 et Qwen3-Embedding-8B avec consigne (mesure de la S6 sur 10
+questions : top 5 10/10, MRR 0,80 contre 7/10, 0,52). Si l'écart tient : seuil recalibré, réglages, révision de
+l'ADR-012, bascule sans interruption (à concevoir : une seule colonne de vecteurs aujourd'hui), production et Azure,
+vitrine, épisode LinkedIn (note P). Détail : plan global, S7.
+
 ---
 
 ## Pièges à éviter
