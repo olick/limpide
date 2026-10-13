@@ -33,6 +33,23 @@ Constats :
   et toutes les réponses de gpt-oss sont à relire comme en S2 (relecture par un modèle, pas par un juriste) avant
   toute décision : Small 4 passait aussi le contrôle automatique et déformait des textes.
 
+**Relecture de gpt-oss-120b** (2026-10-13, par Claude, comme en S2 : relecture par un modèle, pas par un juriste ;
+verdicts dans le rapport `2026-10-13-1918-gpt-oss-120b.md`) : fidèles q02, q06, q09 ; réserves mineures q04, q07,
+q10 ; **erreurs q01** (liste présentée comme exhaustive alors que deux interdictions manquent), **q05** (article 6,
+paragraphe 1, pris pour des obligations de transparence ; entrée en vigueur confondue avec application), **q08**
+(analyse d'impact étendue à « tout système à haut risque ») ; **qualification q03** (« Oui », le logiciel de
+l'utilisateur est à haut risque, non détecté par le garde-fou) ; **trompeur t05**. Mistral Medium 3.5 : aucune
+déformation à la relecture du 2026-10-11.
+
+**Conclusion pour la rédaction** : on garde Mistral Medium 3.5 (ADR-004 inchangé). gpt-oss-120b coûte 13 fois moins
+cher mais déforme des textes que le contrôle automatique laisse passer : le même défaut que Small en S2. Llama 3.3 et
+Qwen3.5 n'ont pas été relus en entier (Llama tranche déjà q03 ; Qwen3.5 coûte plus que Medium). Une nouvelle mesure
+aurait du sens avec des consignes adaptées au modèle, ou avec le jeu de 50 questions de la S7.
+
+**Garde-fou à renforcer (S8, garde-fous v2)** : un « Oui » en tête de réponse à une question sur la situation de
+l'utilisateur (« Mon logiciel… est-il… ? ») est une qualification que l'heuristique `qualification-juridique` ne voit
+pas.
+
 ## Vectorisation : Qwen3-Embedding-8B (`evaluate`, 10 questions)
 
 Copie de la base (`rag_qwen`), corpus revectorisé (« titre + texte ») : `Embedding:Provider=OpenAI`,

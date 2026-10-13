@@ -91,7 +91,10 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   (`Generation:Endpoint`, `Generation:ApiKey` générique) : gpt-oss-120b 11/15, 0,04 centime mais 14 s ; Llama 3.3 tranche
   la situation ; Qwen3.5-397B plus cher que Medium (réflexion). `ModelText.Clean` retire les caractères invisibles
   (U+200B de gpt-oss dans « [P5] »). Vectorisation Qwen3-Embedding-8B (`RequestDimensions`, `QueryInstruction`) :
-  top 5 10/10, MRR 0,80, mais 3,9 s par question : à remesurer. Bases d'essai locales `rag_mistral`, `rag_qwen`.
+  top 5 10/10, MRR 0,80 ; latence remesurée 218 ms (3,9 s = ralentissement passager) : candidat à confirmer sur 50
+  questions (S7). Relecture de gpt-oss : 4 erreurs + 1 qualification invisibles au contrôle automatique → **Medium
+  gardé**. Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
+  locales `rag_mistral`, `rag_qwen`.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code
