@@ -132,10 +132,15 @@ normés. **Ce sont les mêmes vecteurs** : aucun recalcul du corpus, seuil de pe
 | Questions, 100 par jour | ≈ 0,001 € par mois |
 | Questions, 10 000 par jour | ≈ 0,08 € par mois |
 
+**Évaluation avec une clé** (2026-10-13, `evaluate`, vecteurs des questions par OVHcloud, corpus inchangé) : **mêmes
+rangs pour les 10 questions** qu'avec Ollama ; top 1 4/10, top 5 7/10, MRR 0,52 ; scores identiques à 0,001 près.
+**Latence** de la vectorisation d'une question, 8 questions courtes depuis le poste : OVHcloud médiane 184 ms
+(maximum 324 ms) ; Ollama sur le poste médiane 65 ms (maximum 1 893 ms : premier appel, chargement du modèle).
+Environ 120 ms de plus par question, négligeable devant la génération (plusieurs secondes).
+
 Conséquence : le conteneur Ollama (≈ 80 % du coût des conteneurs gérés, et 2,3 Go des 4 Go du VPS) peut disparaître,
-sans perte de qualité, chez un hébergeur français. Reste à confirmer le classement des 10 questions avec une clé
-(`evaluate` : 10 requêtes, au-delà de la limite sans clé), et à trancher dans l'ADR (dépendance de plus envers un
-service extérieur ; Ollama gardé pour le poste et en secours).
+sans perte de qualité, chez un hébergeur français. À trancher dans l'ADR (dépendance de plus envers un service
+extérieur ; Ollama gardé pour le poste et en secours).
 
 Autres fournisseurs de bge-m3 relevés (agrégateurs, non vérifiés) : DeepInfra, OpenRouter, Cloudflare Workers AI,
 ≈ 0,01 $ par million de tokens, hébergés aux États-Unis : écartés (les questions des visiteurs quitteraient l'UE,
