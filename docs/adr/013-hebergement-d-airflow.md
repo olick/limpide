@@ -1,6 +1,6 @@
 # ADR-013 : Hébergement d'Airflow — une version allégée sur le serveur de la démo
 
-- **Statut** : proposé (mise en œuvre à faire : ingestion en production)
+- **Statut** : accepté, en production depuis le 2026-10-13
 - **Date** : 2026-10-13
 
 ## Contexte
@@ -53,6 +53,17 @@ production), un à la fois.
 **Option A : Airflow allégé (LocalExecutor) sur le serveur de la démo**, interface accessible seulement par tunnel
 SSH. C'est sans surcoût, la mémoire le permet (mesuré), et c'est le pipeline réel qui met à jour la démo réelle.
 Repli si la marge ne tient pas en production : option D, avec les mêmes commandes.
+
+## Mise en production (2026-10-13)
+
+- Fichiers bruts et extraits du corpus copiés dans le volume `limpide-prod_ingestion_data` (152 fichiers, 15 Mo) :
+  `validate` retrouve enfin les textes des 18 versions publiées (« texte extrait absent » jusque-là).
+- Airflow allégé démarré (`pipelines/airflow/docker-compose.production.yaml`) ; au repos sur le serveur : interface
+  261 Mo, analyse des DAG 300 Mo (limite relevée de 384 à 512 Mo), ordonnanceur 297 Mo, base 72 Mo ; mémoire
+  disponible 2,0 Go.
+- **Première ingestion réelle en production** (échéance du lundi 12 octobre, lancée à la sortie de pause) : réussie ;
+  17 pages de la CNIL collectées avec un HTML nouveau, **toutes écartées** (« texte identique à la version publiée »),
+  AI Act inchangé, aucune publication ; mémoire disponible au plus bas 1,9 Go pendant l'exécution.
 
 ## Conséquences
 

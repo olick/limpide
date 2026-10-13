@@ -98,8 +98,10 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   locales `rag_mistral`, `rag_qwen`.
 - ADR-013 (proposé) : Airflow **allégé** (LocalExecutor, `pipelines/airflow/docker-compose.leger.yaml`) sur le VPS de la
   démo, interface par tunnel SSH ; mesuré : 0,70 Go au repos, 0,88 Go au pic (officiel Celery : 1,77 Go) ; VPS : 2,97 Go
-  disponibles ; Airflow géré ≈ 300–350 $/mois écarté ; repli : minuteur système. Mise en œuvre à faire = première
-  ingestion réelle en production.
+  disponibles ; Airflow géré ≈ 300–350 $/mois écarté ; repli : minuteur système. **En production le 2026-10-13** : fichiers du corpus
+  copiés dans le volume, `.env` d'Airflow sur le serveur (secrets tirés au hasard ou copiés de `.env.prod`, rien
+  affiché), DAG paramétré par `LIMPIDE_*` (`docker-compose.production.yaml`) ; première ingestion réelle réussie :
+  17 fausses versions CNIL écartées, rien publié, mémoire disponible ≥ 1,9 Go. Interface : tunnel SSH vers 8080.
 - Licence du dépôt : Apache 2.0.
 
 ## Règles à respecter dans le code
@@ -205,7 +207,7 @@ valeurs réelles (durées, meilleur score, seuil `MinScore`, passages cités, ga
 2026-10-12 ; premier déploiement de `web` sans erreur « antiforgery » (clés DataProtection dans le volume `web_keys`).
 **Reste** : validation par 2 ou 3 personnes non techniques (critère : expliquer sans aide ce que fait Limpide et ce
 que montre le panneau), retours à noter dans `docs/plan/bilan-phase-1.md`. **S6 terminée (2026-10-13)** (`docs/plan/semaine-06.md`) — Terraform et Azure ; schéma `docs/architecture-physique.md` ;
-reste hors S6 : mise en œuvre de l'ADR-013 (Airflow et première ingestion en production). Rappel de la S6 : Alexandre ne connaît pas Terraform : concepts
+ADR-013 mis en œuvre le 2026-10-13 (Airflow et première ingestion en production). Rappel de la S6 : Alexandre ne connaît pas Terraform : concepts
 d'abord. **Option B décidée le 2026-10-12** : la démo publique reste sur le VPS ; Azure = vitrine d'architecture
 recréée à la demande (`apply` / `destroy` par session, alerte de budget), apprentissage d'abord sans frais
 (fournisseurs `docker`, puis `ovh` pour la zone DNS). Terraform ne demande pas d'abonnement ; seul le fournisseur

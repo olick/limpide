@@ -183,9 +183,10 @@ Sans ces valeurs, l'application démarre et l'accueil indique « connexion non c
 
 ## Versions en quarantaine
 
-**Limite actuelle** : l'ingestion ne tourne pas en production (Airflow est sur le poste de développement, S6). Le corpus
-de production vient d'une sauvegarde de la base ; le volume `data/` du serveur est vide, donc `validate` y échoue
-(« texte extrait absent »). Les commandes ci-dessous serviront quand l'ingestion tournera ici.
+**Ingestion en production depuis le 2026-10-13** (ADR-013) : Airflow allégé sur ce serveur lance la chaîne chaque
+lundi à 4 h UTC (procédure : `pipelines/airflow/README.md`, « Production » ; interface par tunnel SSH :
+`ssh -L 8080:127.0.0.1:8080 debian@57.129.175.88`). Les fichiers bruts et extraits sont dans le volume
+`limpide-prod_ingestion_data`. Une quarantaine envoie une alerte Discord.
 
 Les contrôles qualité (`validate`) bloquent une version douteuse ; la version publiée reste en service. Décision
 humaine, après lecture du texte (procédure complète : `pipelines/airflow/README.md`, « Quarantaine ») :
