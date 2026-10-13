@@ -4,16 +4,20 @@ namespace Limpide.Infrastructure;
 public sealed class EmbeddingOptions
 {
     public const string Ollama = "Ollama";
-    public const string Mistral = "Mistral";
+    public const string OpenAI = "OpenAI";
 
     /// <summary>
-    /// <c>Ollama</c> (défaut : bge-m3 sur la machine, ADR-002) ou <c>Mistral</c> (API d'embeddings, clé
-    /// <c>Mistral:ApiKey</c>, adresse <c>Generation:Endpoint</c>) : expérience de la S6, ADR sur l'hébergement des modèles.
+    /// <c>Ollama</c> (défaut : bge-m3 sur la machine, ADR-002) ou <c>OpenAI</c> : toute API d'embeddings compatible
+    /// OpenAI (OVHcloud AI Endpoints, Mistral…), à l'adresse <see cref="Endpoint"/>, avec la clé <see cref="ApiKey"/>.
+    /// Mesures de la S6 : docs/notes/comparatif-couts-hebergement.md.
     /// </summary>
     public string Provider { get; set; } = Ollama;
 
-    /// <summary>Adresse d'Ollama (fournisseur <c>Ollama</c> seulement).</summary>
+    /// <summary>Adresse d'Ollama, ou adresse de base de l'API (ex. https://oai.endpoints.kepler.ai.cloud.ovh.net/v1).</summary>
     public Uri Endpoint { get; set; } = new("http://localhost:11434");
+
+    /// <summary>Clé de l'API (fournisseur <c>OpenAI</c>) : user-secrets ou coffre, jamais dans un fichier versionné.</summary>
+    public string? ApiKey { get; set; }
 
     /// <summary>Nom du modèle, enregistré sur chaque passage (<c>chunks.embedding_model</c>).</summary>
     public string Model { get; set; } = "bge-m3";

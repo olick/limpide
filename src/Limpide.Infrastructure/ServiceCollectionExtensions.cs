@@ -52,11 +52,14 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => embedding.Provider switch
         {
             EmbeddingOptions.Ollama => new OllamaApiClient(embedding.Endpoint, embedding.Model),
-            // API d'embeddings de Mistral, compatible OpenAI, à la même adresse (UE) que la génération.
-            EmbeddingOptions.Mistral => new EmbeddingClient(embedding.Model, new ApiKeyCredential(MistralApiKey(configuration)),
-                new OpenAIClientOptions { Endpoint = generation.Endpoint }).AsIEmbeddingGenerator(),
+            // API compatible OpenAI : même modèle bge-m3 chez OVHcloud (vecteurs identiques, mesuré), ou un autre modèle.
+            EmbeddingOptions.OpenAI => new EmbeddingClient(embedding.Model,
+                new ApiKeyCredential(embedding.ApiKey is { Length: > 0 } key
+                    ? key
+                    : throw new InvalidOperationException("Clé « Embedding:ApiKey » absente (fournisseur OpenAI).")),
+                new OpenAIClientOptions { Endpoint = embedding.Endpoint }).AsIEmbeddingGenerator(),
             _ => throw new InvalidOperationException(
-                $"Embedding:Provider « {embedding.Provider} » inconnu (attendu : {EmbeddingOptions.Ollama} ou {EmbeddingOptions.Mistral})."),
+                $"Embedding:Provider « {embedding.Provider} » inconnu (attendu : {EmbeddingOptions.Ollama} ou {EmbeddingOptions.OpenAI})."),
         });
 
         services.AddSingleton(provider => new DatabaseMigrator(connectionString, provider.GetRequiredService<ILogger<DatabaseMigrator>>()));

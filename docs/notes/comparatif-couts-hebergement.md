@@ -88,7 +88,8 @@ Ce qu'elle coûte autrement :
   d'enregistrement ; le libellé `embedding_model` change, donc `embed` recalcule tout de lui-même.
 
 **Mesure du 2026-10-13** (copie de la base locale `rag_mistral`, mêmes 1 130 passages servis, même texte vectorisé
-« titre + texte », mêmes 10 questions ; `Embedding:Provider=Mistral`, `Embedding:Model=mistral-embed`) :
+« titre + texte », mêmes 10 questions ; `Embedding:Provider=OpenAI`, `Embedding:Endpoint=https://api.eu.mistral.ai/v1`,
+`Embedding:Model=mistral-embed`, clé Mistral) :
 
 | | bge-m3 (Ollama, CPU) | mistral-embed (API) |
 |---|---|---|
@@ -111,6 +112,34 @@ Ce qu'elle coûte autrement :
   `vector(1024)` et de la limite d'index de pgvector pour ce type ; possible en demi-précision, `halfvec`, au prix d'une
   migration et d'une nouvelle mesure), ou Ollama mis à zéro hors usage.
 - Décision formelle : ADR sur l'hébergement des modèles.
+
+## bge-m3 servi par une API : OVHcloud AI Endpoints
+
+Relevé le 2026-10-13 dans le catalogue public d'OVHcloud (`ai-endpoints.bge-m3-input_tokens`) et le catalogue
+d'AI Endpoints (`catalog.endpoints.ai.ovh.net/rest/v1/models_v2`) : **bge-m3, 0,01 € par million de tokens**,
+hébergé en France (Gravelines), adresse compatible OpenAI `https://oai.endpoints.kepler.ai.cloud.ovh.net/v1`, modèle
+`bge-m3`, 8 192 tokens par texte, 25 textes par requête ; 400 requêtes par minute avec une clé (projet Public Cloud
+avec moyen de paiement), 2 par minute sans clé ; requêtes « ni conservées ni partagées » selon la documentation.
+
+**Mesure** (sans clé, une requête de 25 textes : 24 passages « titre + texte » et une question) : similarité cosinus
+entre les vecteurs d'OVHcloud et ceux d'Ollama sur le poste **de 0,99998 à 0,99999**, 1 024 dimensions, vecteurs
+normés. **Ce sont les mêmes vecteurs** : aucun recalcul du corpus, seuil de pertinence inchangé, libellé
+`bge-m3+titre` conservé.
+
+| | Coût |
+|---|---|
+| Vectoriser tout le corpus (≈ 300 000 tokens) | ≈ 0,003 € |
+| Questions, 100 par jour | ≈ 0,001 € par mois |
+| Questions, 10 000 par jour | ≈ 0,08 € par mois |
+
+Conséquence : le conteneur Ollama (≈ 80 % du coût des conteneurs gérés, et 2,3 Go des 4 Go du VPS) peut disparaître,
+sans perte de qualité, chez un hébergeur français. Reste à confirmer le classement des 10 questions avec une clé
+(`evaluate` : 10 requêtes, au-delà de la limite sans clé), et à trancher dans l'ADR (dépendance de plus envers un
+service extérieur ; Ollama gardé pour le poste et en secours).
+
+Autres fournisseurs de bge-m3 relevés (agrégateurs, non vérifiés) : DeepInfra, OpenRouter, Cloudflare Workers AI,
+≈ 0,01 $ par million de tokens, hébergés aux États-Unis : écartés (les questions des visiteurs quitteraient l'UE,
+contraire à l'ADR-004).
 
 ## Pistes pour l'étape « Migration cloud »
 
