@@ -31,11 +31,13 @@ flowchart LR
     M --> DB[(PostgreSQL<br/>+ pgvector)]
     U((Visiteur)) -->|HTTPS| P[Caddy]
     P --> W[Application web<br/>Blazor Server]
-    W -->|question vectorisée| O[Ollama<br/>bge-m3]
+    W -->|question vectorisée| O[bge-m3<br/>OVHcloud AI Endpoints, France]
     W -->|5 passages les plus proches| DB
     W -->|passages + question| L[Mistral Medium<br/>API, inférence UE]
     W --> G{{Contrôles :<br/>citations, seuil,<br/>qualification juridique}}
 ```
+
+Architecture physique (serveur de la démo, vitrine Azure, flux et secrets) : [`docs/architecture-physique.md`](docs/architecture-physique.md).
 
 Une question : vectorisation (bge-m3, sur le serveur) → recherche des 5 passages les plus proches (pgvector) →
 si aucun n'est assez proche, « je ne sais pas » sans appeler le modèle → sinon réponse rédigée par Mistral à partir
@@ -44,7 +46,7 @@ de ces seuls passages → contrôles déterministes (citations vérifiées, qual
 | Composant | Choix | Pourquoi (décision détaillée) |
 |---|---|---|
 | Base | PostgreSQL + pgvector | une seule base pour les données et les vecteurs ([ADR-001](docs/adr/001-pgvector.md)) |
-| Embeddings | bge-m3 via Ollama, sur le serveur | multilingue, gratuit, aucune donnée ne sort ; mesuré ([ADR-002](docs/adr/002-embeddings-locaux.md)) |
+| Embeddings | bge-m3 : Ollama sur le poste, **OVHcloud AI Endpoints en production** (même modèle, vecteurs identiques) | multilingue, mesuré ([ADR-002](docs/adr/002-embeddings-locaux.md)) ; en production, un conteneur de moins et la mémoire du serveur doublée pour 0,01 € le million de tokens, en France ([ADR-012](docs/adr/012-hebergement-des-modeles.md)) |
 | Ingestion | console .NET, une commande par étape | idempotente, reprise telle quelle par Airflow en phase 2 ([ADR-003](docs/adr/003-ingestion-phase1.md)) |
 | Génération | Mistral Medium 3.5, inférence UE | retenu après mesure et relecture face à Small ([ADR-004](docs/adr/004-choix-llm.md)) |
 | Recherche | vectorielle seule, seuil de pertinence | l'hybride (plein texte) mesurée moins bonne ([ADR-005](docs/adr/005-recherche-hybride.md)) |
@@ -104,8 +106,8 @@ Deux façons de faire tourner Limpide sur un poste :
 
 | | Docker fait tourner | L'application | Adresse |
 |---|---|---|---|
-| **Développement** (`docker-compose.yml`) | PostgreSQL et Ollama seulement | lancée par `dotnet` (profil VS Code « Web » ou `dotnet run`) | http://localhost:5181 |
-| **Production en local** (`docker-compose.prod.yml`) | tout : Caddy, application, PostgreSQL, Ollama | dans un conteneur (voir `deploy/README.md`) | http://localhost:8088 |
+| **Développement** (`docker-compose.yml`) | PostgreSQL, Ollama et le back office | lancée par `dotnet` (profil VS Code « Web » ou `dotnet run`) | http://localhost:5181 |
+| **Production en local** (`docker-compose.prod.yml`) | tout : Caddy, application, back office, PostgreSQL (vectorisation par OVHcloud ; Ollama en secours) | dans un conteneur (voir `deploy/README.md`) | http://localhost:8088 |
 
 En développement :
 
@@ -167,7 +169,7 @@ Mêmes secrets que la console (user-secrets partagés) et mêmes réglages (`src
 
 ## Mise en ligne
 
-Image Docker multi-étapes (`Dockerfile`), pile `docker-compose.prod.yml` (Caddy, application, PostgreSQL, Ollama),
+Image Docker multi-étapes (`Dockerfile`), pile `docker-compose.prod.yml` (Caddy, application, PostgreSQL ; Ollama jusqu'à l'ADR-012),
 secrets dans `.env.prod` (jamais commité). Procédure complète : [`deploy/README.md`](deploy/README.md).
 
 ## Score de recherche

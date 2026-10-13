@@ -99,7 +99,11 @@ Détail : `infrastructure/terraform/azure/README.md`.
 
 **Terminé quand** : la préproduction se détruit et se recrée sans intervention.
 
-## Session 6 : décisions et documentation (≈ 2 h 30)
+## Session 6 : décisions et documentation (≈ 2 h 30) — faite le 2026-10-13
+
+ADR-011 (Container Apps), ADR-012 (modèles), ADR-013 (Airflow), comparatif de coûts
+(`docs/notes/comparatif-couts-hebergement.md`), schéma `docs/architecture-physique.md`. Reste hors session : mise en
+œuvre de l'ADR-013 (ingestion en production).
 
 1. **ADR — Container Apps plutôt qu'AKS** : coût, exploitation, compétences ; AKS comme voie de montée en charge.
 2. **ADR — hébergement d'Airflow** : service managé, conteneur dédié, ou petite machine.

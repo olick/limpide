@@ -204,7 +204,8 @@ valeurs réelles (durées, meilleur score, seuil `MinScore`, passages cités, ga
 `PlainLanguage.cs`), coût en clair, détails techniques repliés. Testé dans le navigateur par Alexandre et déployé le
 2026-10-12 ; premier déploiement de `web` sans erreur « antiforgery » (clés DataProtection dans le volume `web_keys`).
 **Reste** : validation par 2 ou 3 personnes non techniques (critère : expliquer sans aide ce que fait Limpide et ce
-que montre le panneau), retours à noter dans `docs/plan/bilan-phase-1.md`. **Puis S6** (`docs/plan/semaine-06.md`) — Terraform et Azure ; Alexandre ne connaît pas Terraform : concepts
+que montre le panneau), retours à noter dans `docs/plan/bilan-phase-1.md`. **S6 terminée (2026-10-13)** (`docs/plan/semaine-06.md`) — Terraform et Azure ; schéma `docs/architecture-physique.md` ;
+reste hors S6 : mise en œuvre de l'ADR-013 (Airflow et première ingestion en production). Rappel de la S6 : Alexandre ne connaît pas Terraform : concepts
 d'abord. **Option B décidée le 2026-10-12** : la démo publique reste sur le VPS ; Azure = vitrine d'architecture
 recréée à la demande (`apply` / `destroy` par session, alerte de budget), apprentissage d'abord sans frais
 (fournisseurs `docker`, puis `ovh` pour la zone DNS). Terraform ne demande pas d'abonnement ; seul le fournisseur
