@@ -108,7 +108,8 @@ Ce qu'elle coûte autrement :
 - **Conclusion** : pas de passage à mistral-embed ; bge-m3 reste, pour la qualité. Le gain de coût (≈ 80 % des
   conteneurs) reste à chercher autrement : bge-m3 servi par une API (aucun hébergeur trouvé pour l'instant ; Scaleway
   propose bge-multilingual-gemma2 à 0,10 € le million de tokens, mais en 3 584 dimensions, au-delà de la colonne
-  `vector(1024)` et de la limite d'index de pgvector pour ce type), ou Ollama mis à zéro hors usage.
+  `vector(1024)` et de la limite d'index de pgvector pour ce type ; possible en demi-précision, `halfvec`, au prix d'une
+  migration et d'une nouvelle mesure), ou Ollama mis à zéro hors usage.
 - Décision formelle : ADR sur l'hébergement des modèles.
 
 ## Pistes pour l'étape « Migration cloud »
