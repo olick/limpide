@@ -138,7 +138,7 @@ Un fichier par semaine : `docs/plan/semaine-NN.md`. Toujours lire celui de la se
 
 **Journal LinkedIn** (`.vscode/linkedin-limpide.md`, demandé le 2026-10-09, réorganisé le 2026-10-12) : **une seule
 série, dans l'ordre réel du projet**. Épisodes 1 à 23 écrits (S1 à S6 en cours, jusqu'au 2026-10-13 ; épisode 2 « Pourquoi ne pas simplement poser la question à une IA ? » inséré le 2026-10-12, suivants renumérotés) ; lancement publié le
-2026-10-08, épisode 1 le 2026-10-09, épisode 2 le 2026-10-12 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
+2026-10-08, épisode 1 le 2026-10-09, épisode 2 le 2026-10-12, épisode 3 le 2026-10-13 ; post hors série « À vous de le casser ». À chaque étape faite du plan,
 **proposer à Alexandre l'épisode suivant** (24 : suite de la S6) et l'ajouter à la suite. Règles :
 
 - un épisode ne raconte qu'une tâche faite, à sa place dans la chronologie ; récit : problème, enjeu, piste essayée,
