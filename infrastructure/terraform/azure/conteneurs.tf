@@ -12,9 +12,11 @@ resource "azurerm_log_analytics_workspace" "logs" {
 }
 
 resource "azurerm_container_app_environment" "env" {
-  name                       = "cae-${local.nom}"
-  resource_group_name        = azurerm_resource_group.env.name
-  location                   = azurerm_resource_group.env.location
+  name                = "cae-${local.nom}"
+  resource_group_name = azurerm_resource_group.env.name
+  location            = azurerm_resource_group.env.location
+  # azurerm 5 : sans destination explicite, les journaux sont seulement diffusés en direct, pas conservés.
+  logs_destination           = "log-analytics"
   log_analytics_workspace_id = azurerm_log_analytics_workspace.logs.id
   tags                       = local.tags
 }

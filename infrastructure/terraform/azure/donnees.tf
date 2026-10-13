@@ -29,6 +29,13 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "ad
   object_id           = data.azurerm_client_config.courant.object_id
   principal_name      = var.admin_principal_name
   principal_type      = "User"
+
+  # Azure tronque le nom à 63 caractères (limite des noms de rôle PostgreSQL) ; l'UPN d'un compte Microsoft
+  # personnel invité est plus long. Sans cette ligne, chaque `plan` voit un écart et veut remplacer l'administrateur,
+  # donc le supprimer (DROP ROLE refusé : il possède les tables). Constaté au deuxième `apply`, 2026-10-13.
+  lifecycle {
+    ignore_changes = [principal_name]
+  }
 }
 
 # pgvector : Azure n'autorise que les extensions listées ici ; la migration 0001 l'active ensuite (CREATE EXTENSION).
