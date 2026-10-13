@@ -61,6 +61,34 @@ changent (Hetzner a augmenté ses prix deux fois en 2026).
 7. **Ce qui se perd hors d'Azure** : les identités managées (clés d'API ou mots de passe à stocker et à faire tourner),
    et la connexion à PostgreSQL sans mot de passe.
 
+## Alternative à Ollama : l'API d'embeddings de Mistral
+
+Relevé le 2026-10-13 (documentation de Mistral, page du modèle) : **mistral-embed** (version 23.12), **0,10 $ par
+million de tokens** en entrée (≈ 0,11 $ avec la majoration UE de 10 % déjà appliquée à la génération, ADR-004),
+8 000 tokens au plus par texte. Dimension des vecteurs à confirmer par un appel (1 024 attendu, comme bge-m3).
+
+| Usage | Volume estimé | Coût |
+|---|---|---|
+| Vectoriser tout le corpus (1 130 passages servis, ≈ 1,1 million de caractères avec les titres) | ≈ 300 000 tokens | ≈ 0,03 $ par passage complet |
+| Questions des visiteurs (≈ 25 tokens chacune), 100 par jour | ≈ 75 000 tokens par mois | < 0,01 $ par mois |
+| Questions, 10 000 par jour | ≈ 7,5 millions de tokens par mois | ≈ 0,80 $ par mois |
+
+À comparer à Ollama allumé en permanence : ≈ 47 $ par mois sur Azure (2 vCPU, 4 Go au repos), ≈ 60 € chez Scaleway ;
+sur le VPS, 2,3 Go des 4 Go de mémoire. **L'API retire environ 80 % du coût des conteneurs** et le démarrage à froid
+du modèle.
+
+Ce qu'elle coûte autrement :
+
+- **changer de modèle** : tous les vecteurs à recalculer (quelques centimes), le seuil de pertinence `MinScore = 0,50`
+  à recalibrer (propre à bge-m3, ADR-005), la recherche à remesurer (top 5, MRR) : la qualité de mistral-embed sur le
+  vocabulaire juridique français est inconnue, et le modèle date de décembre 2023 ;
+- **une dépendance de plus envers Mistral** : si l'API est indisponible, la recherche l'est aussi (la génération
+  l'est déjà) ; les questions partent déjà chez Mistral pour la réponse : pas de nouvelle exposition des données ;
+- **le code** : `IEmbeddingGenerator` (ADR-002) permet le changement par configuration et quelques lignes
+  d'enregistrement ; le libellé `embedding_model` change, donc `embed` recalcule tout de lui-même.
+
+Décision : ADR sur l'hébergement des modèles, après mesure.
+
 ## Pistes pour l'étape « Migration cloud »
 
 - **Cible la plus cohérente** : Scaleway (conteneurs sans serveur, PostgreSQL géré avec pgvector, Secret Manager,
