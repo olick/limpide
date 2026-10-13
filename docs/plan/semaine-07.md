@@ -70,6 +70,21 @@ déploiement en production (validation manuelle)
 1. **Authentification à Azure par OIDC** (identité fédérée) : aucun secret Azure stocké dans GitHub.
 2. Les migrations de base s'appliquent dans la chaîne, avant le déploiement de l'application.
 3. Le rapport d'évaluation est publié comme artefact et résumé dans la pull request.
+4. **Terraform dans la chaîne** (ajouté le 2026-10-13) :
+   - à chaque pull request : `terraform fmt -check`, `validate`, `plan` ; le plan est résumé dans la PR et relu
+     avant la fusion (un `-/+` sur une base de données se voit avant, pas après) ;
+   - après la fusion : `apply` en préproduction, puis en production avec validation manuelle ;
+   - prérequis : état distant et verrouillé (S6, session 2), identité OIDC autorisée sur l'état et les ressources ;
+   - la zone DNS OVH reste hors chaîne : OVH n'a pas d'OIDC, il faudrait stocker son jeton dans GitHub ; elle change
+     rarement, `apply` manuel (à dire dans l'ADR).
+5. **Préproduction et option B** : avec l'option B, la préproduction Azure n'existe pas en permanence (détruite à
+   chaque fin de séance). Option à valider en S6, d'après la durée de création mesurée : **préproduction éphémère**
+   créée par la chaîne à chaque pull request : `apply` → déploiement → données restaurées depuis une sauvegarde
+   (stockage Azure, quelques secondes, plutôt que l'ingestion : 30 à 40 min) → évaluation → `destroy`, même en cas
+   d'échec. Coûts à mesurer : durée de la chaîne (PostgreSQL managé : plusieurs minutes), coût par exécution.
+   Bénéfice : chaque modification prouve aussi que l'environnement se recrée depuis le code.
+   **Production** : la démo publique du VPS (option B), déployée par la chaîne (SSH, clé dédiée) après une évaluation
+   réussie, à la place du déploiement manuel.
 
 **Terminé quand** : un push sur la branche principale déploie en préproduction et lance l'évaluation.
 
@@ -96,7 +111,7 @@ déploiement en production (validation manuelle)
 
 - `eval/questions.jsonl` (≈ 50 questions)
 - `Limpide.Evaluation`, rapports JSON
-- `.github/workflows/` : chaîne CI/CD avec authentification OIDC
+- `.github/workflows/` : chaîne CI/CD avec authentification OIDC, Terraform (`plan` dans la PR, `apply` après fusion)
 - ADR : métriques et seuils d'évaluation
 - Démonstration de blocage enregistrée, page publique d'évaluation
 

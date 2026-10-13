@@ -85,6 +85,8 @@ la démo publique, elle, reste sur le VPS (option B).
 2. Deux environnements, préproduction et production, avec des tailles différentes (la préproduction au minimum).
 3. **Alerte de budget** décrite en Terraform, par environnement.
 4. Test final : `destroy` de la préproduction, puis `apply`, puis vérification que tout fonctionne.
+   **Chronométrer** `apply` et `destroy` (et la restauration des données) : la mesure décide de la préproduction
+   éphémère créée par la chaîne de la S7 (option B).
 
 **Terminé quand** : la préproduction se détruit et se recrée sans intervention.
 
