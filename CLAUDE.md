@@ -206,7 +206,13 @@ clé d'accès en clair dans l'état, `destroy` (rien ne reste). Session 2 faite 
 (hors Terraform ; clés d'accès désactivées, accès par Entra ID, « Storage Blob Data Contributor » sur le conteneur
 seul, versions et suppression récupérable 30 jours) ; **seule ressource Azure permanente** (exception à l'option B).
 État DNS migré (`dns/backend.tf`, `dns.tfstate`), plan sans changement, verrou vérifié par Alexandre. Les exercices
-d'apprentissage gardent un état local. Suite : session 3 (données et secrets).
+d'apprentissage gardent un état local. Session 3 faite (2026-10-13) : `infrastructure/terraform/azure/` (14 ressources,
+fichiers par rôle, état `azure-preprod.tfstate`) ; PostgreSQL 17 B1ms **sans mot de passe** (Entra ID seul,
+Alexandre administrateur, identité managée `id-limpide-preprod` = rôle créé par `pgaadauth_create_principal`),
+`initialiser-base.sh` (rôle, migrations, droits, `--avec-corpus`) ; Key Vault RBAC (clé `mistral-api-key` déposée à
+la main), stockage `brut` sans clés. Vérifié : 1 377 passages (1 130 servis), clé absente de l'état, aucun mot de
+passe. **`apply` ≈ 10 min** (donnée pour la préproduction éphémère de la S7). Suite : session 4 (Container Apps,
+réseau, embeddings).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
   `src/Limpide.Infrastructure/Migrations/` (0001 schéma, 0002 retours : anciens `db/init`, rejouables ; 0003 cycle de
