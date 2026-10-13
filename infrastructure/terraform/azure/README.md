@@ -47,7 +47,9 @@ az keyvault secret list --vault-name "$(terraform output -raw coffre)" --query "
 - `terraform state pull | grep -ci password` → seulement des noms d'attributs vides (aucun mot de passe n'existe) ;
 - le corpus : la dernière ligne de `initialiser-base.sh` donne le nombre de passages.
 
-**Mesures** (2026-10-13, première création) : `apply` ≈ 10 min (PostgreSQL l'essentiel) ; base vérifiée : 4 migrations,
+**Mesures** (2026-10-13, première création) : `apply` ≈ 10 min (PostgreSQL l'essentiel) ; `destroy` en deux temps
+(échec décrit plus bas) : la configuration `azure.extensions` seule 1 min 55 s, puis serveur et groupe 1 min 56 s,
+soit au moins 4 min (une destruction complète d'un trait reste à mesurer) ; base vérifiée : 4 migrations,
 pgvector 0.8.2, 1 377 passages dont 1 130 servis, rôle de l'application créé ; clé Mistral dans le coffre, absente
 de l'état ; aucun mot de passe dans l'état.
 

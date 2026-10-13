@@ -211,7 +211,9 @@ fichiers par rôle, état `azure-preprod.tfstate`) ; PostgreSQL 17 B1ms **sans m
 Alexandre administrateur, identité managée `id-limpide-preprod` = rôle créé par `pgaadauth_create_principal`),
 `initialiser-base.sh` (rôle, migrations, droits, `--avec-corpus`) ; Key Vault RBAC (clé `mistral-api-key` déposée à
 la main), stockage `brut` sans clés. Vérifié : 1 377 passages (1 130 servis), clé absente de l'état, aucun mot de
-passe. **`apply` ≈ 10 min** (donnée pour la préproduction éphémère de la S7). Suite : session 4 (Container Apps,
+passe. **`apply` ≈ 10 min**, `destroy` ≥ 4 min (données pour la préproduction éphémère de la S7). Premier `destroy`
+en échec (administrateur Entra supprimé avant le serveur = `DROP ROLE` refusé) : `detruire.sh` le retire de l'état
+d'abord ; toujours détruire par ce script. Suite : session 4 (Container Apps,
 réseau, embeddings).
 
 - [x] Session 1 (2026-10-10) : ADR-008. DbUp 7.0.1 (`dbup-postgresql`), migrations dans
