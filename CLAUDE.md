@@ -301,7 +301,8 @@ session 6 (ADR : Container Apps/AKS, Airflow, modèles ; comparatif de coûts ; 
 
 **Après le projet : migration cloud** (ajoutée le 2026-10-13) : quitter Azure pour un hébergeur moins cher et plus
 souverain, choisi sur critères écrits d'avance (comparatif S6, étude S10), et y migrer réellement ; perte assumée
-des identités managées (à compenser). Puis **mise à l'échelle** (ajoutée au plan global le 2026-10-13) : toute la législation qui encadre
+des identités managées (à compenser). Puis **mise à l'échelle** (dont la question d'Elasticsearch/OpenSearch comme base vectorielle et plein texte, à
+mesurer contre pgvector) (ajoutée au plan global le 2026-10-13) : toute la législation qui encadre
 l'AI Act, pertinence mesurée nettement meilleure, deux publics (juriste et entreprise) sans jamais qualifier la
 situation de l'utilisateur ; détail dans `docs/plan/plan-global.md`.
 

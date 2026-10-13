@@ -315,6 +315,22 @@ des « millions » de l'ADR-001. La mesure décidera : relever la latence de rec
 (réglages de pgvector d'abord, base dédiée type Qdrant ensuite). Vectorisation : 816 ms par passage sur CPU (ADR-002),
 soit ≈ 4 h 30 pour 20 000 passages ; à rapprocher de l'ADR sur l'hébergement des modèles (S6).
 
+**Question à instruire : Elasticsearch comme base vectorielle** (demandée le 2026-10-13). Elasticsearch (ou
+OpenSearch, son dérivé sous licence Apache 2.0) fait à la fois la recherche vectorielle (index HNSW), la recherche plein
+texte de référence (BM25, phrases exactes, synonymes, analyse du français) et leur fusion, avec des filtres riches et
+une montée en charge par répartition des données. Arguments à peser, sur mesures et pas par principe :
+
+- **pour** : un juriste cherche souvent une expression exacte ou une référence (« article 6, paragraphe 3 ») ; la
+  recherche hybride écartée par l'ADR-005 l'a été avec le plein texte de PostgreSQL, pas avec BM25 : à remesurer ;
+  filtres par source, date, type de texte ; volume ;
+- **contre** : un deuxième système à côté de PostgreSQL (synchronisation, cohérence entre versions et passages, sans
+  transaction commune), exploitation plus lourde (mémoire de la JVM : impossible sur le VPS de 4 Go), coût d'un service
+  managé ; licence d'Elasticsearch à vérifier (OpenSearch sinon) ; offre managée chez l'hébergeur souverain retenu à
+  l'étape « Migration cloud » à vérifier ;
+- **méthode** : même jeu de questions, même découpage, comparaison PostgreSQL + pgvector (avec et sans plein texte)
+  contre Elasticsearch/OpenSearch (vectoriel, BM25, hybride) : top 5, MRR, latence, coût mensuel. Décision dans la
+  révision de l'ADR-001 (et de l'ADR-005 si l'hybride redevient gagnant).
+
 **Pertinence, mesurée** : objectifs chiffrés fixés au départ, sur le jeu de questions de la S7 élargi.
 Pistes à mesurer une par une, jamais ajoutées sans mesure : reclassement des résultats (reranking), reformulation de
 la question, distinction articles (qui font foi) et considérants (aide à l'interprétation), renvois entre textes
