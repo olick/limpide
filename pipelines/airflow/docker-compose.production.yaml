@@ -1,0 +1,37 @@
+# Airflow allégé sur le serveur de la démo (ADR-013). À combiner avec la variante allégée, sans l'override du poste :
+#   docker compose -f docker-compose.yaml -f docker-compose.leger.yaml -f docker-compose.production.yaml \
+#     up -d --wait postgres airflow-apiserver airflow-scheduler airflow-dag-processor
+# Valeurs dans pipelines/airflow/.env du serveur (non versionné, droits 600) : voir README, « Production ».
+# Interface sur 127.0.0.1:8080 du serveur seulement : ssh -L 8080:127.0.0.1:8080 debian@<serveur>.
+
+x-production-dag-env: &production-dag-env
+  # Lus par le DAG à l'analyse (dag-processor) et à l'exécution (ordonnanceur) : la pile de production du serveur.
+  LIMPIDE_NETWORK: limpide-prod_default
+  LIMPIDE_DATA_MOUNT_TYPE: volume
+  LIMPIDE_INGESTION_USER: ""
+  LIMPIDE_EMBEDDING_PROVIDER: OpenAI
+  LIMPIDE_EMBEDDING_ENDPOINT: https://oai.endpoints.kepler.ai.cloud.ovh.net/v1
+
+services:
+  postgres:
+    mem_limit: 256m
+
+  airflow-init:
+    mem_limit: 768m
+
+  airflow-apiserver:
+    mem_limit: 512m
+
+  airflow-dag-processor:
+    environment:
+      <<: *production-dag-env
+    mem_limit: 384m
+
+  # Les tâches tournent dans l'ordonnanceur (LocalExecutor) : la mémoire des conteneurs d'ingestion, elle, est
+  # comptée à part (512 Mo au plus, un à la fois).
+  airflow-scheduler:
+    environment:
+      <<: *production-dag-env
+      # Clé OVHcloud AI Endpoints (vectorisation) : masquée dans l'interface et les journaux (« api_key »).
+      AIRFLOW_VAR_LIMPIDE_EMBEDDING_API_KEY: "${OVH_AI_ENDPOINTS_KEY:?OVH_AI_ENDPOINTS_KEY manquant dans .env}"
+    mem_limit: 768m

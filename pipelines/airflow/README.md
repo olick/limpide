@@ -171,6 +171,32 @@ pipelines/airflow/demo/quarantaine.sh arreter    # arrête le serveur
 la qualité de l'annotation », absente de la page tronquée. Vérifié le 2026-10-10 (deux prises, deux quarantaines,
 691 passages servis tout du long) ; `reject` et `release` vérifiés sur une copie de la base.
 
+## Production : Airflow allégé sur le serveur de la démo (ADR-013)
+
+Variante allégée (`docker-compose.leger.yaml` : LocalExecutor, 4 conteneurs, 0,70 Go au repos, 0,88 Go au pic mesurés)
+et réglages du serveur (`docker-compose.production.yaml` : réseau `limpide-prod_default`, volume
+`limpide-prod_ingestion_data`, vectorisation par OVHcloud, limites de mémoire). L'override du poste n'est pas utilisé.
+
+`pipelines/airflow/.env` du serveur (droits 600, jamais commité) : `AIRFLOW_UID` (id de `debian`), `DOCKER_GID`,
+`FERNET_KEY`, `AIRFLOW__API_AUTH__JWT_SECRET`, `_AIRFLOW_WWW_USER_USERNAME`, `_AIRFLOW_WWW_USER_PASSWORD` (tirés au
+hasard à l'installation), `LIMPIDE_DB_PASSWORD` et `OVH_AI_ENDPOINTS_KEY` (copiés de `.env.prod`),
+`LIMPIDE_DATA_DIR=limpide-prod_ingestion_data` (nom du volume), `DISCORD_WEBHOOK_URL`.
+
+```bash
+cd ~/limpide/pipelines/airflow
+A="docker compose -f docker-compose.yaml -f docker-compose.leger.yaml -f docker-compose.production.yaml"
+$A up -d --wait postgres airflow-apiserver airflow-scheduler airflow-dag-processor
+$A exec airflow-scheduler airflow dags unpause ingestion     # le lundi à 4 h UTC ; lance la dernière échéance manquée
+$A exec airflow-scheduler airflow dags list-runs ingestion
+```
+
+Interface : depuis le poste, `ssh -L 8080:127.0.0.1:8080 debian@57.129.175.88`, puis http://localhost:8080
+(identifiants : `grep _AIRFLOW_WWW_USER ~/limpide/pipelines/airflow/.env` sur le serveur). Jamais exposée sur
+Internet : le socket Docker donne à Airflow le contrôle de la machine (ADR-007).
+
+L'image d'ingestion est celle de la pile de production : après une mise à jour du code,
+`limpide --profile outils build ingestion` (deploy/README.md).
+
 ## Constats (matière de l'ADR-007 et de la S5)
 
 - **`catchup=False` lance quand même la dernière échéance manquée** : sortir le DAG de pause un jeudi a lancé

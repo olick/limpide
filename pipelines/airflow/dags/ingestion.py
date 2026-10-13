@@ -13,6 +13,8 @@ en une transaction. Une candidate au texte identique à la version publiée est 
 
 Prérequis (développement) : la pile du dépôt démarrée (`docker compose up -d` à la racine : postgres, ollama) et
 l'image construite (`docker build --target ingestion -t limpide-ingestion .`). Voir pipelines/airflow/README.md.
+En production (ADR-013), les variables d'environnement LIMPIDE_* de l'ordonnanceur et de l'analyse des DAG
+(docker-compose.production.yaml) donnent le réseau, le volume et le fournisseur d'embeddings du serveur.
 """
 
 import datetime
@@ -20,7 +22,7 @@ import json
 import os
 import urllib.parse
 import urllib.request
-from typing import Any
+from typing import Any, Literal
 
 import pendulum
 from airflow.providers.docker.exceptions import DockerContainerFailedException
@@ -29,20 +31,29 @@ from airflow.sdk import DAG, Context, Param, Variable, chain, get_current_contex
 from airflow.sdk.exceptions import AirflowException
 from docker.types import Mount
 
-# Réseau Docker de la pile locale du dépôt (projet Compose « limpide ») : les conteneurs y joignent postgres et ollama.
-NETWORK = "limpide_default"
+# Valeurs par défaut : le poste de développement. En production, l'environnement du conteneur Airflow les remplace.
+# Réseau Docker où les conteneurs d'ingestion joignent postgres (projet Compose « limpide », ou « limpide-prod »).
+NETWORK = os.environ.get("LIMPIDE_NETWORK", "limpide_default")
 IMAGE = "limpide-ingestion"
 COMMANDS = ["fetch", "extract", "chunk", "validate", "embed", "publish"]
+# data/ : dossier du dépôt monté tel quel (bind) sur le poste ; volume Docker nommé en production.
+DATA_MOUNT_TYPE: Literal["bind", "volume"] = "volume" if os.environ.get("LIMPIDE_DATA_MOUNT_TYPE") == "volume" else "bind"
+# Utilisateur des conteneurs d'ingestion : celui du poste (fichiers de data/ à son nom) ; vide = celui de l'image.
+INGESTION_USER = os.environ.get("LIMPIDE_INGESTION_USER", str(os.getuid())) or None
 
 ENVIRONMENT: dict[str, str] = {
     # Mot de passe : variable Airflow lue dans l'environnement du worker, masquée (***) dans l'interface et les logs.
     "ConnectionStrings__Rag": "Host=postgres;Port=5432;Database=rag;Username=rag;"
     "Password={{ var.value.limpide_db_password }}",
-    "Embedding__Endpoint": "http://ollama:11434",
+    # Vectorisation : Ollama sur le poste ; bge-m3 chez OVHcloud en production (ADR-012), clé masquée (« api_key »).
+    "Embedding__Provider": os.environ.get("LIMPIDE_EMBEDDING_PROVIDER", "Ollama"),
+    "Embedding__Endpoint": os.environ.get("LIMPIDE_EMBEDDING_ENDPOINT", "http://ollama:11434"),
     # Une ligne par message dans les logs d'Airflow.
     "Logging__Console__FormatterName": "simple",
     "Logging__Console__FormatterOptions__SingleLine": "true",
 }
+if ENVIRONMENT["Embedding__Provider"] != "Ollama":
+    ENVIRONMENT["Embedding__ApiKey"] = "{{ var.value.limpide_embedding_api_key }}"
 
 
 class IngestionCommand(DockerOperator):
@@ -72,10 +83,11 @@ def ingestion_task(
         command=[command],
         network_mode=NETWORK,
         environment=ENVIRONMENT | (environment or {}),
-        # data/ du dépôt (fichiers bruts et extraits), partagé avec l'ingestion lancée à la main.
-        mounts=[Mount(source="{{ var.value.limpide_data_dir }}", target="/limpide/data", type="bind")],
-        # Même UID que le worker (AIRFLOW_UID, celui du poste) : les fichiers écrits dans data/ restent les tiens.
-        user=str(os.getuid()),
+        # data/ (fichiers bruts et extraits), partagé avec l'ingestion lancée à la main : dossier du dépôt sur le poste,
+        # volume de la pile de production sur le serveur.
+        mounts=[Mount(source="{{ var.value.limpide_data_dir }}", target="/limpide/data", type=DATA_MOUNT_TYPE)],
+        # Sur le poste, même UID que le worker (AIRFLOW_UID) : les fichiers écrits dans data/ restent les tiens.
+        user=INGESTION_USER,
         # Le worker est lui-même un conteneur : son répertoire temporaire n'existe pas sur le poste, ne pas le monter.
         mount_tmp_dir=False,
         # Les logs sont déjà recopiés dans Airflow : le conteneur est supprimé, qu'il ait réussi ou non.
