@@ -87,7 +87,29 @@ Ce qu'elle coûte autrement :
 - **le code** : `IEmbeddingGenerator` (ADR-002) permet le changement par configuration et quelques lignes
   d'enregistrement ; le libellé `embedding_model` change, donc `embed` recalcule tout de lui-même.
 
-Décision : ADR sur l'hébergement des modèles, après mesure.
+**Mesure du 2026-10-13** (copie de la base locale `rag_mistral`, mêmes 1 130 passages servis, même texte vectorisé
+« titre + texte », mêmes 10 questions ; `Embedding:Provider=Mistral`, `Embedding:Model=mistral-embed`) :
+
+| | bge-m3 (Ollama, CPU) | mistral-embed (API) |
+|---|---|---|
+| Bon passage en 1re position | **4/10** | 1/10 |
+| Bon passage dans le top 5 | **7/10** | 5/10 |
+| MRR | **0,52** | 0,31 |
+| Vectorisation du corpus | ≈ 816 ms par passage (S1, CPU du poste) | **41 ms par passage, 47 s en tout** |
+| Meilleur score, questions légitimes | 0,541 à 0,705 | 0,807 à 0,887 |
+| Meilleur score, 4 questions hors sujet (VPN, météo, football, recette) | 0,291 à 0,467 | 0,715 à 0,739 |
+| « Règles sur l'IA aux États-Unis » (dans le domaine, sans réponse) | 0,655 | 0,772 |
+
+- **La qualité baisse nettement** : mistral-embed place les considérants devant les articles qui font foi (q02, q04,
+  q05, q06) et perd trois bons passages du top 5. Sur 10 questions, l'écart est trop grand pour être du bruit.
+- Le seuil resterait calibrable (écart d'environ 0,07 entre hors sujet et légitime, comme avec bge-m3), mais autour de
+  0,78 : les scores de mistral-embed sont tassés vers le haut.
+- Coût réel de l'expérience : ≈ 300 000 tokens, ≈ 0,03 $.
+- **Conclusion** : pas de passage à mistral-embed ; bge-m3 reste, pour la qualité. Le gain de coût (≈ 80 % des
+  conteneurs) reste à chercher autrement : bge-m3 servi par une API (aucun hébergeur trouvé pour l'instant ; Scaleway
+  propose bge-multilingual-gemma2 à 0,10 € le million de tokens, mais en 3 584 dimensions, au-delà de la colonne
+  `vector(1024)` et de la limite d'index de pgvector pour ce type), ou Ollama mis à zéro hors usage.
+- Décision formelle : ADR sur l'hébergement des modèles.
 
 ## Pistes pour l'étape « Migration cloud »
 

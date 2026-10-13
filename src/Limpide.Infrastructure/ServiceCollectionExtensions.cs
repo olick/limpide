@@ -14,6 +14,7 @@ using Npgsql;
 using OllamaSharp;
 using OpenAI;
 using OpenAI.Chat;
+using OpenAI.Embeddings;
 using Pgvector.Npgsql;
 
 namespace Limpide.Infrastructure;
@@ -45,8 +46,18 @@ public static class ServiceCollectionExtensions
             return dataSource.Build();
         });
 
-        // Changer de fournisseur d'embeddings = remplacer cette ligne par une autre implémentation d'IEmbeddingGenerator.
-        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => new OllamaApiClient(embedding.Endpoint, embedding.Model));
+        var generation = configuration.GetSection("Generation").Get<GenerationOptions>() ?? new GenerationOptions();
+
+        // Fournisseur d'embeddings choisi par configuration (Embedding:Provider), derrière la même interface.
+        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => embedding.Provider switch
+        {
+            EmbeddingOptions.Ollama => new OllamaApiClient(embedding.Endpoint, embedding.Model),
+            // API d'embeddings de Mistral, compatible OpenAI, à la même adresse (UE) que la génération.
+            EmbeddingOptions.Mistral => new EmbeddingClient(embedding.Model, new ApiKeyCredential(MistralApiKey(configuration)),
+                new OpenAIClientOptions { Endpoint = generation.Endpoint }).AsIEmbeddingGenerator(),
+            _ => throw new InvalidOperationException(
+                $"Embedding:Provider « {embedding.Provider} » inconnu (attendu : {EmbeddingOptions.Ollama} ou {EmbeddingOptions.Mistral})."),
+        });
 
         services.AddSingleton(provider => new DatabaseMigrator(connectionString, provider.GetRequiredService<ILogger<DatabaseMigrator>>()));
         services.AddSingleton<DocumentVersionStore>();
@@ -57,21 +68,20 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(configuration.GetSection("Search").Get<SearchOptions>() ?? new SearchOptions());
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();
 
-        var generation = configuration.GetSection("Generation").Get<GenerationOptions>() ?? new GenerationOptions();
         services.AddSingleton(generation.ToSettings());
         // Clé exigée seulement quand on génère une réponse : les commandes d'ingestion s'en passent.
         services.AddSingleton<IChatClient>(_ =>
-        {
-            var apiKey = configuration["Mistral:ApiKey"];
-            if (string.IsNullOrWhiteSpace(apiKey))
-                throw new InvalidOperationException(
-                    "Clé « Mistral:ApiKey » absente (dotnet user-secrets set \"Mistral:ApiKey\" ... --project src/Limpide.Ingestion).");
-            return new ChatClient(generation.Model, new ApiKeyCredential(apiKey), new OpenAIClientOptions { Endpoint = generation.Endpoint })
-                .AsIChatClient();
-        });
+            new ChatClient(generation.Model, new ApiKeyCredential(MistralApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
+                .AsIChatClient());
         services.AddSingleton<AnswerService>();
         return services;
     }
+
+    private static string MistralApiKey(IConfiguration configuration) =>
+        configuration["Mistral:ApiKey"] is { Length: > 0 } apiKey
+            ? apiKey
+            : throw new InvalidOperationException(
+                "Clé « Mistral:ApiKey » absente (dotnet user-secrets set \"Mistral:ApiKey\" ... --project src/Limpide.Ingestion).");
 
     /// <summary>
     /// Azure (S6) : le « mot de passe » de chaque nouvelle connexion est un jeton Entra ID de l'identité de

@@ -3,6 +3,16 @@ namespace Limpide.Infrastructure;
 /// <summary>Section « Embedding » de la configuration : fournisseur d'embeddings (Ollama en local).</summary>
 public sealed class EmbeddingOptions
 {
+    public const string Ollama = "Ollama";
+    public const string Mistral = "Mistral";
+
+    /// <summary>
+    /// <c>Ollama</c> (défaut : bge-m3 sur la machine, ADR-002) ou <c>Mistral</c> (API d'embeddings, clé
+    /// <c>Mistral:ApiKey</c>, adresse <c>Generation:Endpoint</c>) : expérience de la S6, ADR sur l'hébergement des modèles.
+    /// </summary>
+    public string Provider { get; set; } = Ollama;
+
+    /// <summary>Adresse d'Ollama (fournisseur <c>Ollama</c> seulement).</summary>
     public Uri Endpoint { get; set; } = new("http://localhost:11434");
 
     /// <summary>Nom du modèle, enregistré sur chaque passage (<c>chunks.embedding_model</c>).</summary>
