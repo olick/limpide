@@ -31,4 +31,8 @@ public class PromptLeakTests
     [Fact]
     public void Les_consignes_contiennent_la_phrase_de_refus_exacte() =>
         Assert.Contains(AnswerPrompt.Decline, System);
+
+    [Fact]
+    public void Un_exemple_de_formulation_donne_par_la_consigne_n_est_pas_une_fuite() =>
+        Assert.Null(PromptLeak.Find("Les systèmes d'IA utilisés pour le recrutement sont classés à haut risque [P2].", System));
 }

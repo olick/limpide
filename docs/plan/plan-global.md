@@ -204,7 +204,7 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
   6. **épisode LinkedIn** à écrire à ce moment-là (note de travail P du journal).
 
 **Terminé quand** : une modification du prompt qui dégrade les scores est bloquée automatiquement.
-**ADR** : métriques et seuils d'évaluation
+**ADR** : métriques et seuils d'évaluation → **ADR-014** (2026-10-15)
 **Blocs RNCP** : BC04
 
 ### S8 · Observabilité, coûts, sécurité

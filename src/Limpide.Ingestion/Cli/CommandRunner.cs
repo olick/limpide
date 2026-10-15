@@ -55,6 +55,7 @@ public static class CommandRunner
             "evaluate" => await services.GetRequiredService<EvaluateCommand>().RunAsync(ct),
             "feedback" => await services.GetRequiredService<FeedbackCommand>().RunAsync(ct),
             "evaluate-answers" => await services.GetRequiredService<EvaluateAnswersCommand>().RunAsync(ct),
+            "gate" => await services.GetRequiredService<GateCommand>().RunAsync(line.Text, ct),
             "judge-calibrate" => await services.GetRequiredService<JudgeCalibrateCommand>().RunAsync(ct),
             _ => throw new ArgumentException($"commande inconnue : {line.Name}"),
         };
@@ -91,6 +92,8 @@ public static class CommandRunner
         builder.Services.AddSingleton<EvaluateCommand>();
         builder.Services.AddSingleton<EvaluateAnswersCommand>();
         builder.Services.AddSingleton<JudgeCalibrateCommand>();
+        builder.Services.AddSingleton(builder.Configuration.GetSection("EvaluationGate").Get<EvaluationGateOptions>() ?? new EvaluationGateOptions());
+        builder.Services.AddSingleton<GateCommand>();
         builder.Services.AddSingleton<FeedbackCommand>();
 
         return builder.Build();

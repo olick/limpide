@@ -77,6 +77,18 @@ Chaque question porte une version : le jeu d'évaluation est versionné comme le
 
 **Terminé quand** : l'ADR sur les métriques est rédigé et les seuils sont en configuration.
 
+**Session 3 terminée (2026-10-15)** — ADR-014.
+
+- [x] Consignes hors du code : `src/prompts/answer/3.txt`, `src/prompts/judge/2.txt` (texte vérifié identique octet
+  pour octet), version choisie par configuration (`Generation:Prompt`, `Judge:Prompt`), copiées dans l'image ;
+  phrase de refus gardée dans le code (`{{refus}}`) ; empreintes figées par un test (un fichier publié ne change plus).
+- [x] Commande `gate` : seuils de la section `EvaluationGate` sur le rapport JSON, code 1 si bloqué, tableau Markdown
+  (aussi dans `GITHUB_STEP_SUMMARY`). Nouvelles métriques en proportions, dont la recherche mesurée dans la même passe
+  (passage attendu parmi les 5 fournis).
+- [x] Seuils posés sur 4 passes de référence (dont 2 avec le juge : 0,22 et 0,15 d'infidèles) et vérifiés sur une
+  configuration dégradée (Small 4) : référence ✅, Small ❌ par `failed` (3) et `judge.unfaithfulShare` (0,41).
+  Faux positif du détecteur de fuite trouvé au passage (l'exemple de formulation des consignes) et corrigé.
+
 ## Session 4 : la chaîne CI/CD (≈ 2 h 30)
 
 Avec GitHub Actions :

@@ -67,6 +67,11 @@ public sealed class EvaluateAnswersCommand(
         return 0;
     }
 
+    private static double? Share(int count, int total) => total == 0 ? null : Math.Round((double)count / total, 4);
+
+    private static bool Provided(AnswerCheck check) =>
+        check.Question.Expected is { } expected && check.Result.Passages.Any(p => expected.Matches(p.Passage.Anchor, p.Passage.Heading));
+
     /// <summary>
     /// Ce que la CI compare d'une passe à l'autre. Les versions disent ce qui a changé ; les métriques, l'effet.
     /// </summary>
@@ -111,7 +116,13 @@ public sealed class EvaluateAnswersCommand(
                 Failed = checks.Count(c => c.Status == CheckStatus.Failed),
                 ToReview = checks.Count(c => c.Status == CheckStatus.ToReview),
                 ExpectedPassageCited = answers.Count(c => c.CitesExpected == true),
+                // La recherche, mesurée dans la même passe : le passage attendu figure-t-il parmi ceux fournis au modèle ?
+                ExpectedPassageProvided = answers.Count(Provided),
                 AnswerQuestions = answers.Count,
+                // Proportions : le jeu grandira (retours des visiteurs) ; les seuils du gate ne doivent pas en dépendre.
+                ExpectedPassageCitedShare = Share(answers.Count(c => c.CitesExpected == true), answers.Count),
+                ExpectedPassageProvidedShare = Share(answers.Count(Provided), answers.Count),
+                CorrectDeclineShare = Share(declines.Count(c => c.Status == CheckStatus.Ok), declines.Count),
                 CorrectDeclines = declines.Count(c => c.Status == CheckStatus.Ok),
                 DeclineQuestions = declines.Count,
                 InjectionsFailed = injections.Count(c => c.Status == CheckStatus.Failed),
@@ -120,11 +131,13 @@ public sealed class EvaluateAnswersCommand(
                 Guardrails = results.SelectMany(r => r.Guardrails).GroupBy(g => g.Code).ToDictionary(g => g.Key, g => g.Count()),
                 LatencySeconds = new { Median = Percentile(totals, 0.5).TotalSeconds, P95 = Percentile(totals, 0.95).TotalSeconds },
                 CostUsd = costs.Any(c => c is null) ? (decimal?)null : costs.Sum(),
+                CostPerQuestionUsd = costs.Any(c => c is null) ? (decimal?)null : Math.Round(costs.Sum()!.Value / checks.Count, 6),
                 ModelCalls = results.Count(r => r.Timings.Generation > TimeSpan.Zero),
                 Judge = new
                 {
                     Judged = judgments.Count,
                     Unfaithful = judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful),
+                    UnfaithfulShare = Share(judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful), judgments.Count),
                     Unreadable = judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unreadable),
                     CostUsd = judgments.Values.Any(j => j.Usage.EstimatedCost is null) ? null : (decimal?)judgments.Values.Sum(j => j.Usage.EstimatedCost),
                 },

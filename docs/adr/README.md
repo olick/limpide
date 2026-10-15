@@ -21,3 +21,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [011](011-container-apps-plutot-qu-aks.md) | Azure Container Apps (plan Consommation) plutôt qu'AKS pour exécuter Limpide sur Azure | 2026-10-13 |
 | [012](012-hebergement-des-modeles.md) | Génération par API (pas de GPU) ; vectorisation par bge-m3 chez OVHcloud AI Endpoints, Ollama en secours | 2026-10-13 |
 | [013](013-hebergement-d-airflow.md) | Airflow allégé (LocalExecutor) sur le serveur de la démo, interface par tunnel SSH (proposé) | 2026-10-13 |
+| [014](014-metriques-et-seuils-d-evaluation.md) | Métriques d'évaluation et seuils de blocage (barrière `gate`, juge en métrique agrégée) | 2026-10-15 |

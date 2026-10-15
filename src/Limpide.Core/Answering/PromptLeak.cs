@@ -14,8 +14,10 @@ public static partial class PromptLeak
     /// <summary>Premier passage de la consigne <paramref name="system"/> retrouvé dans la réponse, ou null.</summary>
     public static string? Find(string answer, string system)
     {
-        // La phrase de refus figure dans la consigne et doit pouvoir apparaître dans une réponse : on l'en retire.
-        var systemWindows = Windows(system.Replace(AnswerPrompt.Decline, " ")).ToHashSet();
+        // Ce que la consigne cite entre guillemets (phrase de refus, « d'après les passages consultés », exemple de
+        // formulation correcte) peut apparaître dans une bonne réponse : on l'en retire. Faux positif du 2026-10-15 :
+        // « les systèmes d'IA utilisés pour le recrutement sont classés à haut risque [P2] » (Small 4, t05).
+        var systemWindows = Windows(Quoted().Replace(system, " ")).ToHashSet();
         return Windows(answer).FirstOrDefault(systemWindows.Contains);
     }
 
@@ -28,4 +30,7 @@ public static partial class PromptLeak
 
     [GeneratedRegex(@"[\p{L}\p{N}]+")]
     private static partial Regex Word();
+
+    [GeneratedRegex("«[^»]*»")]
+    private static partial Regex Quoted();
 }
