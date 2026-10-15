@@ -33,6 +33,8 @@ public static class PlainLanguage
         "reponse-ambigue" => ("Réponse hésitante",
             "Le modèle donne des éléments, puis dit ne pas savoir : à lire avec prudence."),
         "reponse-vide" => ("Pas de réponse", "Le modèle n'a rien répondu."),
+        "consigne-divulguee" => ("Consignes divulguées",
+            "La réponse recopie une partie des instructions données à l'assistant : la question cherchait sans doute à le détourner."),
         _ => (code, ""),
     };
 

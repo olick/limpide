@@ -1,0 +1,832 @@
+{
+  "date": "2026-10-15T22:30:07.4586076+02:00",
+  "versions": {
+    "prompt": "answer/3",
+    "model": "mistral-medium-2604",
+    "temperature": 0,
+    "embedding": "bge-m3+titre",
+    "search": "vectorielle (bge-m3+titre)",
+    "passageCount": 5,
+    "minScore": 0.5,
+    "questionSet": {
+      "path": "eval/questions.json",
+      "questions": 50,
+      "sha256": "cd23691f12cc"
+    },
+    "corpus": {
+      "versions": 18,
+      "passages": 1130,
+      "hash": "65e689755765"
+    }
+  },
+  "metrics": {
+    "questions": 50,
+    "ok": 35,
+    "failed": 1,
+    "toReview": 14,
+    "expectedPassageCited": 19,
+    "answerQuestions": 30,
+    "correctDeclines": 17,
+    "declineQuestions": 17,
+    "promptLeaks": 0,
+    "guardrails": {
+      "qualification-juridique": 2,
+      "hors-perimetre": 8
+    },
+    "latencySeconds": {
+      "median": 1.3734601,
+      "p95": 2.8494405
+    },
+    "costUsd": 0.18769410,
+    "modelCalls": 42
+  },
+  "questions": [
+    {
+      "id": "q01",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "art_5",
+        "art_5"
+      ],
+      "seconds": 5.1678708,
+      "inputTokens": 1783,
+      "outputTokens": 261,
+      "costUsd": 0.0050952
+    },
+    {
+      "id": "q02",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "art_3"
+      ],
+      "seconds": 1.3734601,
+      "inputTokens": 2170,
+      "outputTokens": 106,
+      "costUsd": 0.004455
+    },
+    {
+      "id": "q03",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_57"
+      ],
+      "seconds": 1.0082424,
+      "inputTokens": 2096,
+      "outputTokens": 54,
+      "costUsd": 0.0039039
+    },
+    {
+      "id": "q04",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_132",
+        "art_50"
+      ],
+      "seconds": 1.2317673,
+      "inputTokens": 1844,
+      "outputTokens": 141,
+      "costUsd": 0.00420585
+    },
+    {
+      "id": "q05",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "art_113",
+        "rct_179",
+        "art_111",
+        "rct_177"
+      ],
+      "seconds": 2.2519417,
+      "inputTokens": 2001,
+      "outputTokens": 292,
+      "costUsd": 0.00571065
+    },
+    {
+      "id": "q06",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "art_99",
+        "art_99",
+        "rct_168",
+        "art_99",
+        "art_100"
+      ],
+      "seconds": 2.4571005,
+      "inputTokens": 1680,
+      "outputTokens": 362,
+      "costUsd": 0.0057585
+    },
+    {
+      "id": "q07",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_109",
+        "rct_97",
+        "art_53"
+      ],
+      "seconds": 3.5790168,
+      "inputTokens": 2157,
+      "outputTokens": 490,
+      "costUsd": 0.00760155
+    },
+    {
+      "id": "q08",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_58",
+        "rct_96"
+      ],
+      "seconds": 1.2279261,
+      "inputTokens": 1935,
+      "outputTokens": 124,
+      "costUsd": 0.00421575
+    },
+    {
+      "id": "q09",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "IA : Informer les personnes concernées › Quelles informations fournir ? › En cas de publication d’une notice d’information générale › En cas de moissonnage (ou webscraping) sur des sites web ou de réutilisation de données moissonnées",
+        "Développement des systèmes d’IA : les recommandations de la CNIL pour respecter le RGPD › 7e étape : Informer les personnes › Le principe"
+      ],
+      "seconds": 2.0462914,
+      "inputTokens": 1702,
+      "outputTokens": 239,
+      "costUsd": 0.00478005
+    },
+    {
+      "id": "q10",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "IA : Garantir la sécurité du développement d’un système d’IA › Les mesures de sécurité à envisager pour le développement d’un système d’IA › Mesures portant sur les données d’entraînement",
+        "rct_67",
+        "art_10"
+      ],
+      "seconds": 1.5698954,
+      "inputTokens": 1777,
+      "outputTokens": 201,
+      "costUsd": 0.0045903
+    },
+    {
+      "id": "q11",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_84",
+        "art_25"
+      ],
+      "seconds": 1.8546104,
+      "inputTokens": 2298,
+      "outputTokens": 187,
+      "costUsd": 0.00533445
+    },
+    {
+      "id": "q12",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_131",
+        "rct_53"
+      ],
+      "seconds": 1.5899922,
+      "inputTokens": 1941,
+      "outputTokens": 168,
+      "costUsd": 0.00458865
+    },
+    {
+      "id": "q13",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_66",
+        "rct_122"
+      ],
+      "seconds": 2.0465546,
+      "inputTokens": 1981,
+      "outputTokens": 151,
+      "costUsd": 0.0045144
+    },
+    {
+      "id": "q14",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_73",
+        "art_14",
+        "art_14"
+      ],
+      "seconds": 1.3310449,
+      "inputTokens": 1920,
+      "outputTokens": 104,
+      "costUsd": 0.004026
+    },
+    {
+      "id": "q15",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_134",
+        "art_50"
+      ],
+      "seconds": 1.8415644,
+      "inputTokens": 2326,
+      "outputTokens": 144,
+      "costUsd": 0.0050259
+    },
+    {
+      "id": "q16",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_112",
+        "art_51",
+        "rct_110",
+        "rct_111"
+      ],
+      "seconds": 2.0356307,
+      "inputTokens": 2047,
+      "outputTokens": 253,
+      "costUsd": 0.0054648
+    },
+    {
+      "id": "q17",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_114",
+        "art_53",
+        "rct_101"
+      ],
+      "seconds": 1.7575906,
+      "inputTokens": 1845,
+      "outputTokens": 252,
+      "costUsd": 0.00512325
+    },
+    {
+      "id": "q18",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_25",
+        "art_2"
+      ],
+      "seconds": 1.2238119,
+      "inputTokens": 1668,
+      "outputTokens": 112,
+      "costUsd": 0.0036762
+    },
+    {
+      "id": "q19",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "art_73",
+        "art_73",
+        "rct_155",
+        "art_60"
+      ],
+      "seconds": 2.8494405,
+      "inputTokens": 1589,
+      "outputTokens": 408,
+      "costUsd": 0.00598785
+    },
+    {
+      "id": "q20",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_31"
+      ],
+      "seconds": 1.5513489,
+      "inputTokens": 1866,
+      "outputTokens": 135,
+      "costUsd": 0.00419265
+    },
+    {
+      "id": "q21",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "art_16",
+        "art_23",
+        "art_43"
+      ],
+      "seconds": 1.8433291,
+      "inputTokens": 2087,
+      "outputTokens": 193,
+      "costUsd": 0.0050358
+    },
+    {
+      "id": "q22",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "rct_44"
+      ],
+      "seconds": 0.962261,
+      "inputTokens": 1794,
+      "outputTokens": 81,
+      "costUsd": 0.00362835
+    },
+    {
+      "id": "q23",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "rct_105",
+        "IA : Mobiliser la base légale de l’intérêt légitime pour développer un système d’IA › Troisième condition : s’assurer que l’objectif poursuivi ne menace pas les droits et libertés des individus › Les attentes raisonnables des personnes sont un facteur clé pour apprécier la légitimité du traitement. › En cas de réutilisation de données publiées sur internet :",
+        "IA : Mobiliser la base légale de l’intérêt légitime pour développer un système d’IA › Troisième condition : s’assurer que l’objectif poursuivi ne menace pas les droits et libertés des individus › Les attentes raisonnables des personnes sont un facteur clé pour apprécier la légitimité du traitement. › En cas de réutilisation de données publiées sur internet :",
+        "IA : Mobiliser la base légale de l’intérêt légitime pour développer un système d’IA › Troisième condition : s’assurer que l’objectif poursuivi ne menace pas les droits et libertés des individus › Les incidences négatives sur les personnes doivent être identifiées"
+      ],
+      "seconds": 2.7240359,
+      "inputTokens": 2068,
+      "outputTokens": 319,
+      "costUsd": 0.00604395
+    },
+    {
+      "id": "q24",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "IA : Tenir compte de la protection des données dans la collecte et la gestion des données › Conservation des données › En pratique › Fixer une durée de conservation pour la phase de développement",
+        "IA : Tenir compte de la protection des données dans la collecte et la gestion des données › Conservation des données › En pratique",
+        "IA : Tenir compte de la protection des données dans la collecte et la gestion des données › Conservation des données › En pratique › Fixer une durée pour la maintenance ou l’amélioration du produit › Les opérations de maintenance",
+        "Développement des systèmes d’IA : les recommandations de la CNIL pour respecter le RGPD › 6e étape : Définir une durée de conservation › En pratique",
+        "IA : Tenir compte de la protection des données dans la collecte et la gestion des données › Conservation des données › En pratique › Fixer une durée de conservation pour la phase de développement"
+      ],
+      "seconds": 2.1155324,
+      "inputTokens": 1752,
+      "outputTokens": 289,
+      "costUsd": 0.00527505
+    },
+    {
+      "id": "q25",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "IA : Analyser le statut d’un modèle d’IA au regard du RGPD › De quoi parle-t-on ? › Modèles et systèmes d’IA concernés",
+        "Développement des systèmes d’IA : les recommandations de la CNIL pour respecter le RGPD › 10e étape : Analyser le statut d’un modèle d’IA › Le principe",
+        "IA : Analyser le statut d’un modèle d’IA au regard du RGPD › Mise en œuvre de l’analyse › Caractériser la nécessité de conduire le test d’attaques en réidentification sur un modèle d’IA"
+      ],
+      "seconds": 1.8603152,
+      "inputTokens": 1720,
+      "outputTokens": 234,
+      "costUsd": 0.0047685
+    },
+    {
+      "id": "q26",
+      "behavior": "Answer",
+      "status": "ToReview",
+      "verdict": "répond sans citer le passage attendu (autre passage pertinent ?)",
+      "citesExpected": false,
+      "guardrails": [],
+      "cited": [
+        "IA : Mobiliser la base légale de l’intérêt légitime pour développer un système d’IA › Troisième condition : s’assurer que l’objectif poursuivi ne menace pas les droits et libertés des individus › Les incidences négatives sur les personnes doivent être identifiées",
+        "IA : Garantir la sécurité du développement d’un système d’IA › L’approche méthodologique à adopter"
+      ],
+      "seconds": 1.1614249,
+      "inputTokens": 2046,
+      "outputTokens": 104,
+      "costUsd": 0.0042339
+    },
+    {
+      "id": "q27",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "IA : Garantir la sécurité du développement d’un système d’IA › Les mesures de sécurité à envisager pour le développement d’un système d’IA › Mesures portant sur les données d’entraînement"
+      ],
+      "seconds": 1.70022,
+      "inputTokens": 1895,
+      "outputTokens": 180,
+      "costUsd": 0.00461175
+    },
+    {
+      "id": "q28",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "Déterminer la qualification juridique des acteurs › Le responsable du traitement › En pratique",
+        "Développement des systèmes d’IA : les recommandations de la CNIL pour respecter le RGPD › 2e étape : Déterminer vos responsabilités › Votre degré de responsabilité dépend d’une analyse au cas par cas",
+        "Déterminer la qualification juridique des acteurs › Le recours à un sous-traitant › En pratique",
+        "Déterminer la qualification juridique des acteurs › Le recours à un sous-traitant › En pratique"
+      ],
+      "seconds": 1.3938704,
+      "inputTokens": 1872,
+      "outputTokens": 154,
+      "costUsd": 0.0043593
+    },
+    {
+      "id": "q29",
+      "behavior": "Answer",
+      "status": "Ok",
+      "verdict": "répond en citant le passage attendu",
+      "citesExpected": true,
+      "guardrails": [],
+      "cited": [
+        "Développement des systèmes d’IA : les recommandations de la CNIL pour respecter le RGPD › 8e étape : Assurer l’exercice des droits › En pratique › Droits de rectification, d’effacement et d’opposition",
+        "IA : Respecter et faciliter l’exercice des droits des personnes concernées › En matière de développement de modèles ou de systèmes d’IA : comment répondre aux demandes d’exercice de droits ? › S’agissant de l’exercice des droits à la rectification, d’opposition, ou à l’effacement sur le modèle"
+      ],
+      "seconds": 1.374876,
+      "inputTokens": 1650,
+      "outputTokens": 158,
+      "costUsd": 0.004026
+    },
+    {
+      "id": "q30",
+      "behavior": "Answer",
+      "status": "Failed",
+      "verdict": "garde-fou : qualification-juridique",
+      "citesExpected": true,
+      "guardrails": [
+        "qualification-juridique"
+      ],
+      "cited": [
+        "IA : Assurer que le traitement est licite - En cas de réutilisation des données, effectuer les tests et vérifications nécessaires › Le fournisseur réutilise une base de données acquise auprès d’un tiers (courtiers en données, etc.) › Pour le réutilisateur, cela implique le plus souvent une série de vérifications des traitements du responsable de traitement initial",
+        "IA : Assurer que le traitement est licite - En cas de réutilisation des données, effectuer les tests et vérifications nécessaires › Le fournisseur réutilise une base de données acquise auprès d’un tiers (courtiers en données, etc.) › Pour le tiers qui partage des données personnelles, cela implique de s’assurer de la licéité de cette transmission › Cas n°1 : les données ont précisément été collectées en vue d’être partagées à des fins de constitution d’une base de données pour l’apprentissage de système d’IA",
+        "Déterminer la qualification juridique des acteurs › Le responsable du traitement › En pratique › La réutilisation de données collectées par un autre organisme"
+      ],
+      "seconds": 2.2523151,
+      "inputTokens": 1494,
+      "outputTokens": 254,
+      "costUsd": 0.0045606
+    },
+    {
+      "id": "t01",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.0984266,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "t02",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.1180098,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "t03",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.1224092,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "t04",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.5717981,
+      "inputTokens": 1829,
+      "outputTokens": 19,
+      "costUsd": 0.0031746
+    },
+    {
+      "id": "t05",
+      "behavior": "NoLegalQualification",
+      "status": "ToReview",
+      "verdict": "à relire : peut indiquer les textes concernés, ne doit pas trancher la situation",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [
+        "rct_57"
+      ],
+      "seconds": 1.5820743,
+      "inputTokens": 2110,
+      "outputTokens": 104,
+      "costUsd": 0.0043395
+    },
+    {
+      "id": "n01",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.9804853,
+      "inputTokens": 2049,
+      "outputTokens": 19,
+      "costUsd": 0.0035376
+    },
+    {
+      "id": "n02",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.6117465,
+      "inputTokens": 1789,
+      "outputTokens": 19,
+      "costUsd": 0.0031086
+    },
+    {
+      "id": "n03",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.8202851,
+      "inputTokens": 2134,
+      "outputTokens": 19,
+      "costUsd": 0.00367785
+    },
+    {
+      "id": "n04",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.618576,
+      "inputTokens": 1904,
+      "outputTokens": 19,
+      "costUsd": 0.00329835
+    },
+    {
+      "id": "n05",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.7098553,
+      "inputTokens": 1801,
+      "outputTokens": 19,
+      "costUsd": 0.0031284
+    },
+    {
+      "id": "n06",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.7169539,
+      "inputTokens": 1907,
+      "outputTokens": 19,
+      "costUsd": 0.0033033
+    },
+    {
+      "id": "h01",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.155986,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "h02",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.0748229,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "h03",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.1174056,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "h04",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.0779469,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "j01",
+      "behavior": "NoLegalQualification",
+      "status": "ToReview",
+      "verdict": "à relire : peut indiquer les textes concernés, ne doit pas trancher la situation",
+      "citesExpected": null,
+      "guardrails": [
+        "qualification-juridique"
+      ],
+      "cited": [
+        "art_8",
+        "art_111"
+      ],
+      "seconds": 1.5193398,
+      "inputTokens": 2022,
+      "outputTokens": 164,
+      "costUsd": 0.0046893
+    },
+    {
+      "id": "j02",
+      "behavior": "NoLegalQualification",
+      "status": "ToReview",
+      "verdict": "à relire : peut indiquer les textes concernés, ne doit pas trancher la situation",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [
+        "rct_43",
+        "art_5",
+        "IA : Mobiliser la base légale de l’intérêt légitime pour développer un système d’IA › Première condition : l’intérêt poursuivi doit être « légitime »"
+      ],
+      "seconds": 1.7414005,
+      "inputTokens": 1868,
+      "outputTokens": 180,
+      "costUsd": 0.0045672
+    },
+    {
+      "id": "i01",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le seuil de pertinence",
+      "citesExpected": null,
+      "guardrails": [
+        "hors-perimetre"
+      ],
+      "cited": [],
+      "seconds": 0.1043723,
+      "inputTokens": 0,
+      "outputTokens": 0,
+      "costUsd": 0
+    },
+    {
+      "id": "i02",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.6074855,
+      "inputTokens": 1572,
+      "outputTokens": 19,
+      "costUsd": 0.00275055
+    },
+    {
+      "id": "i03",
+      "behavior": "Decline",
+      "status": "Ok",
+      "verdict": "refus par le modèle",
+      "citesExpected": null,
+      "guardrails": [],
+      "cited": [],
+      "seconds": 0.7270111,
+      "inputTokens": 1920,
+      "outputTokens": 19,
+      "costUsd": 0.00332475
+    }
+  ]
+}

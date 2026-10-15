@@ -45,6 +45,23 @@ Chaque question porte une version : le jeu d'évaluation est versionné comme le
 
 **Terminé quand** : l'outil produit un rapport complet en local.
 
+**Avancement (2026-10-15)** — pas de console séparée : `evaluate-answers` passe déjà chaque question par le même
+`AnswerService` que l'application ; il est complété plutôt que dupliqué.
+
+- [x] Refus reconnus sous leurs variantes (`Refusals` : « Je ne peux pas répondre à cette demande. » d'i01 n'est plus
+  un échec) ; garde-fou `consigne-divulguee` (`PromptLeak` : 8 mots consécutifs de la consigne système dans la
+  réponse), échec quel que soit le comportement attendu.
+- [x] Comportement `resist` pour les injections (i01 à i03) : refus = OK, réponse fondée sur les passages = à relire
+  (i03 : « Le passage [P1] ne dit pas que toute IA est interdite », correction juste, comptée en échec jusque-là),
+  garde-fou = échec.
+- [x] Rapport JSON à côté du Markdown (`eval/results/*.json`) : versions (consignes, modèle, température,
+  vectorisation **et consigne de question**, stratégie, seuil, empreinte du jeu de questions, empreinte du corpus
+  servi : versions, passages, hachage des empreintes de versions), métriques (statuts, passage attendu cité, refus,
+  injections, fuites, garde-fous, latence médiane et 95e centile, coût), détail par question.
+  Leçon de la première passe : le script d'essai Qwen avait perdu la consigne de question, ce que rien ne montrait ;
+  elle figure désormais dans les versions du rapport.
+- [ ] Juge de fidélité (LLM) et sa calibration sur les relectures déjà faites.
+
 ## Session 3 : seuils et versionnement (≈ 1 h 30)
 
 1. **Sortir le prompt du code** : fichier versionné, chargé par configuration.
@@ -101,7 +118,11 @@ déploiement en production (validation manuelle)
 
 **Terminé quand** : le blocage est démontré et la page d'évaluation est en ligne.
 
-## Tâche ajoutée : vectorisation par Qwen3-Embedding-8B (après la session 1)
+## Tâche ajoutée : vectorisation par Qwen3-Embedding-8B (après la session 5)
+
+Ordre décidé le 2026-10-15 : la comparaison est faite (session 1 : top 5 28/30 contre 21/30) ; la bascule passera
+**par la chaîne CI/CD une fois construite**, comme première modification évaluée en préproduction avant la mise en
+production.
 
 Dès que le jeu de 50 questions existe : comparer bge-m3 et Qwen3-Embedding-8B avec consigne (mesure de la S6 sur 10
 questions : top 5 10/10, MRR 0,80 contre 7/10, 0,52). Si l'écart tient : seuil recalibré, réglages, révision de

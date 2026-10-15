@@ -52,8 +52,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         // Refus = la phrase seule (guillemets éventuels mis à part). Une réponse sur le fond suivie de la phrase
         // de refus n'est pas un refus : elle est signalée (« reponse-ambigue »).
         var mentionsDecline = answer.Contains(AnswerPrompt.Decline, StringComparison.Ordinal);
-        var declined = mentionsDecline && answer.Trim('«', '»', '"', ' ', '\n').Length <= AnswerPrompt.Decline.Length + 2;
         var citations = Citations.Check(answer, found.Passages.Count);
+        // Refus : la phrase prévue, seule ; ou une autre formule de refus, courte et sans citation (Refusals).
+        var declined = (mentionsDecline && answer.Trim('«', '»', '"', ' ', '\n').Length <= AnswerPrompt.Decline.Length + 2)
+            || Refusals.IsRefusal(answer, citations.Cited.Count);
 
         var passages = found.Passages
             .Select((p, i) => new SourcePassage(AnswerPrompt.Id(i), p, citations.Cited.Contains(i + 1)))
@@ -104,6 +106,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         if (mentionsDecline && !declined)
             triggered.Add(new Guardrail("reponse-ambigue",
                 "La réponse donne des éléments puis déclare ne pas savoir : à lire avec prudence."));
+
+        if (PromptLeak.Find(answer) is { } leak)
+            triggered.Add(new Guardrail("consigne-divulguee",
+                $"La réponse reprend un passage des consignes de l'assistant : « {leak} »."));
 
         if (LegalQualification.Find(answer) is { } verdict)
             triggered.Add(new Guardrail("qualification-juridique",

@@ -1,18 +1,30 @@
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
 using Limpide.Core.Answering;
 using Limpide.Core.Evaluation;
+using Limpide.Infrastructure;
+using Limpide.Infrastructure.Storage;
 
 namespace Limpide.Ingestion.Search;
 
 /// <summary>
 /// Pose tout le jeu de questions à la chaîne complète (recherche, seuil, modèle, contrôles), vérifie ce qui peut
 /// l'être automatiquement, et écrit un rapport Markdown dans eval/results/ avec le texte de chaque réponse,
-/// pour la relecture (fidélité au texte, absence de qualification juridique).
+/// pour la relecture (fidélité au texte, absence de qualification juridique), et un rapport JSON lisible par la CI
+/// (S7) : versions de tout ce qui influence la qualité, métriques, détail par question.
 /// </summary>
-public sealed class EvaluateAnswersCommand(AnswerService service, GenerationSettings generation, IngestionOptions options)
+public sealed class EvaluateAnswersCommand(
+    AnswerService service, GenerationSettings generation, IngestionOptions options, EmbeddingOptions embedding, ChunkStore chunks)
 {
     private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+    private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
+    {
+        WriteIndented = true,
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+    };
 
     public async Task<int> RunAsync(CancellationToken ct)
     {
@@ -35,8 +47,82 @@ public sealed class EvaluateAnswersCommand(AnswerService service, GenerationSett
         var path = Path.Combine(options.ResultsPath, $"{DateTime.Now:yyyy-MM-dd-HHmm}-{generation.Model}.md");
         Directory.CreateDirectory(options.ResultsPath);
         await File.WriteAllTextAsync(path, Report(checks, summary), ct);
+        var json = Path.ChangeExtension(path, ".json");
+        await File.WriteAllTextAsync(json, JsonSerializer.Serialize(await JsonReport(checks, ct), Json), ct);
         Console.WriteLine($"Rapport (réponses complètes, à relire) : {path}");
+        Console.WriteLine($"Rapport JSON (CI) : {json}");
         return 0;
+    }
+
+    /// <summary>
+    /// Ce que la CI compare d'une passe à l'autre. Les versions disent ce qui a changé ; les métriques, l'effet.
+    /// </summary>
+    private async Task<object> JsonReport(List<AnswerCheck> checks, CancellationToken ct)
+    {
+        var results = checks.Select(c => c.Result).ToList();
+        var totals = results.Select(r => r.Timings.Total).ToList();
+        var costs = results.Select(r => r.Usage.EstimatedCost).ToList();
+        var answers = checks.Where(c => c.Question.Behavior == ExpectedBehavior.Answer).ToList();
+        var declines = checks.Where(c => c.Question.Behavior == ExpectedBehavior.Decline).ToList();
+        var injections = checks.Where(c => c.Question.Behavior == ExpectedBehavior.Resist).ToList();
+        var corpus = await chunks.FingerprintAsync(ct);
+        var questionsFile = await File.ReadAllBytesAsync(options.QuestionsPath, ct);
+
+        return new
+        {
+            Date = DateTimeOffset.Now,
+            Versions = new
+            {
+                Prompt = results[0].PromptVersion,
+                Model = generation.Model,
+                Temperature = generation.Temperature,
+                Embedding = embedding.Label,
+                // Ne s'applique qu'aux questions : absente du libellé des vecteurs, mais change la recherche.
+                embedding.QueryInstruction,
+                Search = results[0].SearchStrategy,
+                generation.PassageCount,
+                generation.MinScore,
+                QuestionSet = new
+                {
+                    Path = options.QuestionsPath,
+                    Questions = checks.Count,
+                    Sha256 = Convert.ToHexStringLower(SHA256.HashData(questionsFile))[..12],
+                },
+                Corpus = corpus,
+            },
+            Metrics = new
+            {
+                Questions = checks.Count,
+                Ok = checks.Count(c => c.Status == CheckStatus.Ok),
+                Failed = checks.Count(c => c.Status == CheckStatus.Failed),
+                ToReview = checks.Count(c => c.Status == CheckStatus.ToReview),
+                ExpectedPassageCited = answers.Count(c => c.CitesExpected == true),
+                AnswerQuestions = answers.Count,
+                CorrectDeclines = declines.Count(c => c.Status == CheckStatus.Ok),
+                DeclineQuestions = declines.Count,
+                InjectionsFailed = injections.Count(c => c.Status == CheckStatus.Failed),
+                InjectionQuestions = injections.Count,
+                PromptLeaks = checks.Count(c => c.Result.Guardrails.Any(g => g.Code == "consigne-divulguee")),
+                Guardrails = results.SelectMany(r => r.Guardrails).GroupBy(g => g.Code).ToDictionary(g => g.Key, g => g.Count()),
+                LatencySeconds = new { Median = Percentile(totals, 0.5).TotalSeconds, P95 = Percentile(totals, 0.95).TotalSeconds },
+                CostUsd = costs.Any(c => c is null) ? (decimal?)null : costs.Sum(),
+                ModelCalls = results.Count(r => r.Timings.Generation > TimeSpan.Zero),
+            },
+            Questions = checks.Select(c => new
+            {
+                c.Question.Id,
+                Behavior = c.Question.Behavior.ToString(),
+                Status = c.Status.ToString(),
+                c.Verdict,
+                c.CitesExpected,
+                Guardrails = c.Result.Guardrails.Select(g => g.Code),
+                Cited = c.Result.CitedPassages.Select(p => p.Passage.Anchor ?? p.Passage.Heading),
+                Seconds = c.Result.Timings.Total.TotalSeconds,
+                c.Result.Usage.InputTokens,
+                c.Result.Usage.OutputTokens,
+                CostUsd = c.Result.Usage.EstimatedCost,
+            }),
+        };
     }
 
     private static string Summary(List<AnswerCheck> checks)
@@ -51,7 +137,8 @@ public sealed class EvaluateAnswersCommand(AnswerService service, GenerationSett
             $"Passage attendu cité : {checks.Count(c => c.CitesExpected == true)}/{checks.Count(c => c.CitesExpected is not null)}",
             $"Coût total : {(costs.Any(c => c is null) ? "inconnu" : Cost(costs.Sum()))}"
             + $" · modèle appelé pour {called.Count}/{results.Count} questions",
-            $"Durée totale par question : médiane {Seconds(Median(results.Select(r => r.Timings.Total)))},"
+            $"Durée totale par question : médiane {Seconds(Percentile(results.Select(r => r.Timings.Total).ToList(), 0.5))},"
+            + $" 95e centile {Seconds(Percentile(results.Select(r => r.Timings.Total).ToList(), 0.95))},"
             + $" max {Seconds(results.Max(r => r.Timings.Total))}");
     }
 
@@ -132,6 +219,7 @@ public sealed class EvaluateAnswersCommand(AnswerService service, GenerationSett
     {
         ExpectedBehavior.Decline => "refus",
         ExpectedBehavior.NoLegalQualification => "pas de qualification juridique",
+        ExpectedBehavior.Resist => "résister à l'injection",
         _ => "réponse citée",
     };
 
@@ -139,9 +227,10 @@ public sealed class EvaluateAnswersCommand(AnswerService service, GenerationSett
 
     private static string Cost(decimal? cost) => cost is { } c ? $"{c.ToString("0.000000", French)} $" : "inconnu";
 
-    private static TimeSpan Median(IEnumerable<TimeSpan> values)
+    /// <summary>Centile par la méthode du rang le plus proche (0,5 : médiane ; 0,95 : 95e centile).</summary>
+    private static TimeSpan Percentile(IReadOnlyCollection<TimeSpan> values, double p)
     {
         var sorted = values.Order().ToList();
-        return sorted.Count == 0 ? TimeSpan.Zero : sorted[sorted.Count / 2];
+        return sorted.Count == 0 ? TimeSpan.Zero : sorted[Math.Clamp((int)Math.Ceiling(p * sorted.Count) - 1, 0, sorted.Count - 1)];
     }
 }

@@ -96,7 +96,8 @@ sujet, jamais par un numéro réservé (convention du 2026-10-10). Index : `docs
   gardé**. **Tâche notée en S7** : passer la vectorisation à Qwen3-Embedding-8B si le jeu de 50 questions confirme
   (seuil, réglages, bascule sans interruption, ADR-012 révisé) et écrire l'épisode LinkedIn à ce moment (note P). **S7 commencée (2026-10-15)** : jeu de 50 questions (`jeu/2`, rédigé par Claude, à relire par Alexandre) ; Qwen3-Embedding
   confirmé : recherche top 5 28/30 contre 21/30, MRR 0,72 contre 0,51 ; réponses 44/50 contre 35/50, passage attendu
-  cité 28/30 contre 19/30 ; deux « échecs » = limites du contrôle (refus non reconnu i01, faux positif q30). Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
+  cité 28/30 contre 19/30 ; deux « échecs » = limites du contrôle (refus non reconnu i01, faux positif q30). Ordre : sessions 2 à 5 (CI), puis
+  bascule Qwen par la CI. Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
   locales `rag_mistral`, `rag_qwen`.
 - ADR-013 (proposé) : Airflow **allégé** (LocalExecutor, `pipelines/airflow/docker-compose.leger.yaml`) sur le VPS de la
   démo, interface par tunnel SSH ; mesuré : 0,70 Go au repos, 0,88 Go au pic (officiel Celery : 1,77 Go) ; VPS : 2,97 Go
