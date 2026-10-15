@@ -94,7 +94,7 @@ Avec ce dispositif :
   (`GITHUB_STEP_SUMMARY`). On relit alors les réponses que le juge signale. Le juge sert à **trier** la relecture ;
   il ne la remplace pas.
 - **Coût** : environ 0,29 $ par passe. La CI ne lancera l'évaluation que si ce qui influence la qualité a changé
-  (session 4). Les tests unitaires, eux, tournent à chaque modification.
+  (session 4b). Les tests unitaires, eux, tournent à chaque modification.
 - **Limites, dites partout où on cite un résultat** :
   - les relectures de référence sont faites par un modèle, pas par un juriste ;
   - 9 erreurs connues seulement pour calibrer le juge, et ses consignes ont été ajustées sur ce même jeu ;

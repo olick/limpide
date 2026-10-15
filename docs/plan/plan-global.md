@@ -174,9 +174,12 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 - **CI (GitHub Actions)** : build, tests, évaluation. Le déploiement est bloqué si les scores baissent
 - **CD** : déploiement automatique en préproduction, puis production après validation.
   Authentification à Azure par OIDC, sans secret stocké dans GitHub
-- **Terraform dans la chaîne** (ajouté le 2026-10-13) : `fmt`, `validate` et `plan` à chaque pull request (plan
-  affiché dans la PR, relu avant la fusion) ; `apply` après la fusion, validation manuelle pour la production.
-  Prérequis : état distant et verrouillé (S6), OIDC. Zone DNS OVH hors chaîne (pas d'OIDC chez OVH : `apply` manuel)
+- **Terraform dans la chaîne** (ajouté le 2026-10-13, revu le 2026-10-15) : **OVHcloud permanent, Azure à la
+  demande**. OVHcloud (zone DNS, VPS importé) : `plan` dans la PR, relu avant la fusion, puis `apply` avec validation
+  manuelle ; deux comptes de service OVH (lecture pour le `plan`, écriture protégée pour l'`apply`), faute d'OIDC chez
+  OVH. Azure : `fmt` et `validate` dans la PR, création à la demande (vitrine) et préproduction éphémère, pas
+  d'`apply` après la fusion tant qu'Azure n'est pas permanent (`semaine-07.md`, session 4).
+  Prérequis : état distant et verrouillé (S6), OIDC vers Azure
 - **Option B et préproduction** : la préproduction Azure n'existe pas en permanence. Option à valider en S6, après
   mesure de la durée de création : **préproduction éphémère** créée par la chaîne (`apply`, déploiement, données
   restaurées depuis une sauvegarde du stockage Azure, évaluation, `destroy`). La production reste la démo du VPS :
