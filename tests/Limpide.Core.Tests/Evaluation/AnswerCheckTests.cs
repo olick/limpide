@@ -95,7 +95,7 @@ public class AnswerCheckTests
             .Select((p, i) => new SourcePassage($"P{i + 1}", p, cited?.Contains(p) == true))
             .ToList();
         return new AnswerResult("?", declined ? AnswerPrompt.Decline : "Réponse [P1].", declined, passages, "test", "modele",
-            AnswerPrompt.Version, new AnswerTimings(TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero),
+            TestPrompts.AnswerVersion, new AnswerTimings(TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero),
             new TokenUsage(0, 0, 0m), guardrails ?? []);
     }
 }

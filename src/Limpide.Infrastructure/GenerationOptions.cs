@@ -14,6 +14,9 @@ public sealed class GenerationOptions
     /// <summary>Version datée, jamais un alias « -latest » qui changerait de modèle sans prévenir.</summary>
     public string Model { get; set; } = "mistral-medium-2604";
 
+    /// <summary>Consignes système : « answer/3 » = src/prompts/answer/3.txt (<see cref="PromptFiles"/>). Obligatoire.</summary>
+    public string? Prompt { get; set; }
+
     public int PassageCount { get; set; } = 5;
 
     /// <summary>0 : réponses aussi reproductibles que possible, pour comparer les mesures entre elles.</summary>

@@ -78,6 +78,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IChatClient>(_ =>
             new ChatClient(generation.Model, new ApiKeyCredential(GenerationApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
                 .AsIChatClient());
+        // Lues à la première question, pas au démarrage : le back office enregistre ces services sans s'en servir.
+        services.AddSingleton(_ => AnswerInstructions.FromTemplate(Required(generation.Prompt, "Generation:Prompt"),
+            PromptFiles.Read(generation.Prompt!)));
         services.AddSingleton<AnswerService>();
 
         // Juge de fidélité (évaluation, S7) : un autre modèle que celui qui rédige, configuré à part (section « Judge »).
@@ -85,9 +88,13 @@ public static class ServiceCollectionExtensions
         services.AddSingleton(_ => new FaithfulnessJudge(
             new ChatClient(judge.Model, new ApiKeyCredential(JudgeApiKey(configuration)), new OpenAIClientOptions { Endpoint = judge.Endpoint })
                 .AsIChatClient(),
-            judge.ToSettings()));
+            judge.ToSettings(),
+            new JudgeInstructions(Required(judge.Prompt, "Judge:Prompt"), PromptFiles.Read(judge.Prompt!).TrimEnd())));
         return services;
     }
+
+    private static string Required(string? value, string key) =>
+        value is { Length: > 0 } ? value : throw new InvalidOperationException($"Réglage « {key} » absent (version des consignes, ex. answer/3).");
 
     /// <summary>« Judge:ApiKey » si le juge est chez un autre fournisseur, sinon la clé Mistral (pas « Generation:ApiKey »,
     /// qui peut viser OVHcloud pendant un essai de rédaction).</summary>

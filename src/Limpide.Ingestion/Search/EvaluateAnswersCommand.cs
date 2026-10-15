@@ -102,7 +102,7 @@ public sealed class EvaluateAnswersCommand(
                     Sha256 = Convert.ToHexStringLower(SHA256.HashData(questionsFile))[..12],
                 },
                 Corpus = corpus,
-                Judge = options.JudgeAnswers ? new { judge.Model, Prompt = FaithfulnessJudge.PromptVersion } : null,
+                Judge = options.JudgeAnswers ? new { judge.Model, Prompt = judge.PromptVersion } : null,
             },
             Metrics = new
             {
@@ -183,7 +183,7 @@ public sealed class EvaluateAnswersCommand(
             .AppendLine($"- Recherche : {first.SearchStrategy}, {generation.PassageCount} passages, seuil de pertinence {generation.MinScore.ToString(French)}")
             .AppendLine($"- Jeu : `{options.QuestionsPath}`")
             .AppendLine(options.JudgeAnswers
-                ? $"- Juge de fidélité : `{judge.Model}`, consignes `{FaithfulnessJudge.PromptVersion}` (calibré : `judge-calibrate`)"
+                ? $"- Juge de fidélité : `{judge.Model}`, consignes `{judge.PromptVersion}` (calibré : `judge-calibrate`)"
                 : "- Juge de fidélité : désactivé")
             .AppendLine()
             .AppendLine("## Synthèse")

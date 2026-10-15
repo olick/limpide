@@ -22,7 +22,7 @@ public sealed record GenerationSettings(
     double MinScore = 0);
 
 /// <summary>Question → recherche → génération → contrôles. Ne dépend que d'interfaces.</summary>
-public sealed class AnswerService(IPassageSearch search, IChatClient chat, GenerationSettings settings)
+public sealed class AnswerService(IPassageSearch search, IChatClient chat, GenerationSettings settings, AnswerInstructions instructions)
 {
     public async Task<AnswerResult> AskAsync(string question, CancellationToken ct)
     {
@@ -36,7 +36,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         var generation = Stopwatch.StartNew();
         var response = await chat.GetResponseAsync(
             [
-                new ChatMessage(ChatRole.System, AnswerPrompt.System),
+                new ChatMessage(ChatRole.System, instructions.System),
                 new ChatMessage(ChatRole.User, AnswerPrompt.UserMessage(question, found.Passages)),
             ],
             new ChatOptions
@@ -68,7 +68,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             passages,
             search.Strategy,
             settings.Model,
-            AnswerPrompt.Version,
+            instructions.Version,
             new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, generation.Elapsed, total.Elapsed),
             Usage(response.Usage),
             Guardrails(answer, declined, mentionsDecline, citations, response.FinishReason));
@@ -82,7 +82,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         found.Passages.Select((p, i) => new SourcePassage(AnswerPrompt.Id(i), p, Cited: false)).ToList(),
         search.Strategy,
         Model: "(non appelé)",
-        AnswerPrompt.Version,
+        instructions.Version,
         new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, TimeSpan.Zero, elapsed),
         new TokenUsage(0, 0, 0m),
         [new Guardrail("hors-perimetre",
@@ -98,7 +98,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         return new TokenUsage(input, output, cost);
     }
 
-    private static List<Guardrail> Guardrails(
+    private List<Guardrail> Guardrails(
         string answer, bool declined, bool mentionsDecline, CitationCheck citations, ChatFinishReason? finish)
     {
         var triggered = new List<Guardrail>();
@@ -107,7 +107,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             triggered.Add(new Guardrail("reponse-ambigue",
                 "La réponse donne des éléments puis déclare ne pas savoir : à lire avec prudence."));
 
-        if (PromptLeak.Find(answer) is { } leak)
+        if (PromptLeak.Find(answer, instructions.System) is { } leak)
             triggered.Add(new Guardrail("consigne-divulguee",
                 $"La réponse reprend un passage des consignes de l'assistant : « {leak} »."));
 

@@ -32,6 +32,9 @@ public sealed record FaithfulnessJudgment(
     TokenUsage Usage,
     TimeSpan Duration);
 
+/// <summary>Consignes du juge, lues par l'infrastructure dans src/prompts/judge/N.txt.</summary>
+public sealed record JudgeInstructions(string Version, string System);
+
 /// <summary>Un passage tel que l'assistant l'a cité : identifiant dans la réponse (« P1 »), titre, texte.</summary>
 public sealed record JudgedPassage(string Id, string Heading, string Text);
 
@@ -41,56 +44,14 @@ public sealed record JudgedPassage(string Id, string Heading, string Text);
 /// Utile mais imparfait : il ne connaît que les passages (une omission du corpus lui échappe), et il se trompe ;
 /// sa justesse se mesure sur des réponses déjà relues (commande judge-calibrate).
 /// </summary>
-public sealed class FaithfulnessJudge(IChatClient chat, GenerationSettings settings)
+public sealed class FaithfulnessJudge(IChatClient chat, GenerationSettings settings, JudgeInstructions instructions)
 {
-    /// <summary>Toute modification des consignes incrémente la version (comme pour la rédaction).</summary>
-    public const string PromptVersion = "judge/2";
+    /// <summary>« judge/2 » : fichier src/prompts/judge/2.txt ; enregistrée dans chaque rapport d'évaluation.</summary>
+    public string PromptVersion => instructions.Version;
 
     public string Model => settings.Model;
 
-    // judge/2 (2026-10-15), après calibration de judge/1 (accord 17/37) : test de gravité explicite (le lecteur se
-    // tromperait-il ?), simplification = mineur, qualification = classer le cas concret de l'utilisateur.
-    public const string System = """
-        Tu relis les réponses d'un assistant qui aide à naviguer dans l'AI Act et les fiches pratiques IA de la CNIL.
-        On te donne la question, la réponse de l'assistant et les passages qu'il cite ([P1], [P2]…).
-        Tu juges seulement la fidélité de la réponse aux passages cités : ni le style, ni la longueur, ni ce qui aurait
-        pu être ajouté.
-
-        Pour chaque phrase qui s'écarte des passages, pose-toi une seule question : un lecteur qui se fie à cette
-        phrase se tromperait-il sur ce que dit le texte (qui est visé, ce qui est obligatoire, interdit ou permis, à
-        partir de quand, à quelles conditions) ?
-        - Si oui, c'est un problème grave, d'un de ces types :
-          - « deforme » : sens contraire ou différent du passage (exception appliquée hors de son champ, recommandation
-            ou « attention particulière » devenue interdiction, réserve devenue obligation, notions confondues comme
-            l'entrée en vigueur et l'application, article présenté comme portant sur un autre objet) ;
-          - « non-soutenu » : règle ou fait juridique qu'aucun passage cité ne contient ;
-          - « exhaustivite » : liste ou règle présentée comme complète (« les seules », « uniquement », « tout
-            système ») alors que les passages ne permettent pas de l'affirmer ;
-          - « qualification » : la réponse classe le cas concret de l'utilisateur (son logiciel, son entreprise, son
-            projet) dans une catégorie juridique ou se prononce sur sa conformité (« Oui, votre logiciel est à haut
-            risque », « Oui, un logiciel qui trie les CV comme le vôtre est classé à haut risque », « vous n'êtes pas en
-            infraction »).
-        - Si non, c'est « mineur » : simplification, nuance ou condition secondaire omise, détail ajouté sans
-          conséquence, reformulation un peu plus large ou plus étroite que le texte, passage cité un peu à côté.
-
-        Ne sont pas des problèmes : une reformulation fidèle ; rapporter une obligation générale telle que le texte la
-        pose, même adressée au lecteur (« vous devez informer les utilisateurs qu'ils échangent avec une IA, sauf
-        si… ») ; rapporter une classification du texte (« les systèmes utilisés pour le recrutement sont classés à haut
-        risque ») sans dire que le système de l'utilisateur en relève ; un renvoi vers un professionnel ; dire que les
-        passages ne suffisent pas.
-
-        Vérifie chaque problème grave contre le texte exact du passage avant de le retenir : si le passage dit bien
-        ce que dit la réponse, ce n'est pas un problème.
-
-        Verdict :
-        - « fidele » : rien à signaler ;
-        - « reserve » : seulement des problèmes « mineur » ;
-        - « infidele » : au moins un problème grave.
-
-        Réponds uniquement par un objet JSON, problèmes d'abord, verdict ensuite :
-        {"problemes":[{"extrait":"phrase de la réponse","type":"deforme","explication":"ce que dit vraiment le passage"}],"verdict":"infidele"}
-        """;
-
+    /// <summary>Format du message : le modifier change ce que voit le juge, donc impose une nouvelle version des consignes.</summary>
     public static string UserMessage(string question, string answer, IEnumerable<JudgedPassage> passages)
     {
         var text = new StringBuilder($"Question : {question}\n\nPassages cités :\n");
@@ -105,7 +66,7 @@ public sealed class FaithfulnessJudge(IChatClient chat, GenerationSettings setti
         var clock = Stopwatch.StartNew();
         var response = await chat.GetResponseAsync(
             [
-                new ChatMessage(ChatRole.System, System),
+                new ChatMessage(ChatRole.System, instructions.System),
                 new ChatMessage(ChatRole.User, UserMessage(question, answer, passages)),
             ],
             new ChatOptions
@@ -124,7 +85,7 @@ public sealed class FaithfulnessJudge(IChatClient chat, GenerationSettings setti
         decimal? cost = settings.Price is { } price && input is not null && output is not null
             ? (input.Value * price.InputPerMillion + output.Value * price.OutputPerMillion) / 1_000_000m
             : null;
-        return new FaithfulnessJudgment(verdict, issues, settings.Model, PromptVersion, new TokenUsage(input, output, cost), clock.Elapsed);
+        return new FaithfulnessJudgment(verdict, issues, settings.Model, instructions.Version, new TokenUsage(input, output, cost), clock.Elapsed);
     }
 
     /// <summary>

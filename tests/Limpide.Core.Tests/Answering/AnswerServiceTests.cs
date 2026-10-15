@@ -39,7 +39,7 @@ public class AnswerServiceTests
         Assert.Equal(["P1"], result.CitedPassages.Select(p => p.Id));
         Assert.Equal((2_000 * 1m + 500 * 2m) / 1_000_000m, result.Usage.EstimatedCost);
         Assert.Empty(result.Guardrails);
-        Assert.Equal(AnswerPrompt.Version, result.PromptVersion);
+        Assert.Equal(TestPrompts.Answer.Version, result.PromptVersion);
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class AnswerServiceTests
     [Fact]
     public async Task Cost_is_unknown_rather_than_guessed_when_the_price_is_not_configured()
     {
-        var service = new AnswerService(new FakeSearch(Article5), new FakeChatClient("[P1]"), Settings with { Price = null });
+        var service = new AnswerService(new FakeSearch(Article5), new FakeChatClient("[P1]"), Settings with { Price = null }, TestPrompts.Answer);
 
         var result = await service.AskAsync("?", CancellationToken.None);
 
@@ -101,7 +101,7 @@ public class AnswerServiceTests
     public async Task Below_the_relevance_threshold_the_model_is_not_called()
     {
         var chat = new FakeChatClient("[P1]");
-        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.8 }); // score 0,7
+        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.8 }, TestPrompts.Answer); // score 0,7
 
         var result = await service.AskAsync("Quelle est la recette de la tarte tatin ?", CancellationToken.None);
 
@@ -117,7 +117,7 @@ public class AnswerServiceTests
     public async Task At_the_relevance_threshold_the_model_is_called()
     {
         var chat = new FakeChatClient("Interdit [P1].");
-        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.7 }); // score 0,7
+        var service = new AnswerService(new FakeSearch(Article5), chat, Settings with { MinScore = 0.7 }, TestPrompts.Answer); // score 0,7
 
         var result = await service.AskAsync("?", CancellationToken.None);
 
@@ -133,7 +133,7 @@ public class AnswerServiceTests
         Assert.Equal(AnswerPrompt.Disclaimer, result.Disclaimer);
     }
 
-    private static AnswerService Service(FakeChatClient chat) => new(new FakeSearch(Article5, Recital29), chat, Settings);
+    private static AnswerService Service(FakeChatClient chat) => new(new FakeSearch(Article5, Recital29), chat, Settings, TestPrompts.Answer);
 
     private static RetrievedPassage Passage(string heading, string anchor, string content) =>
         new(heading, anchor, content, 0.7, "EUR-Lex", "AI Act", "https://eur-lex.europa.eu", DateTimeOffset.UnixEpoch, "Décision 2011/833/UE",

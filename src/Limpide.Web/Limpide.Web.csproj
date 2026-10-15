@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <None Include="..\appsettings.shared.json" Link="appsettings.shared.json" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\prompts\**\*.txt" Link="prompts\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
