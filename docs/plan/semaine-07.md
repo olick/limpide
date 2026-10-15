@@ -155,3 +155,17 @@ vitrine, épisode LinkedIn (note P). Détail : plan global, S7.
 | Taux de « je ne sais pas » | S8 : suivi de la dérive en production |
 | Questions d'injection | S8 : garde-fous v2 |
 | Démonstration de blocage | S9 : vidéo, soutenance BC04 |
+
+---
+
+## Journal de réalisation
+
+Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde que l'état courant, les règles et les pièges ; le détail des sessions vit ici).
+
+État noté dans la puce ADR-012 de CLAUDE.md :
+
+**S7 commencée (2026-10-15)** : jeu de 50 questions (`jeu/2`, rédigé par Claude, à relire par Alexandre) ; Qwen3-Embedding
+  confirmé : recherche top 5 28/30 contre 21/30, MRR 0,72 contre 0,51 ; réponses 44/50 contre 35/50, passage attendu
+  cité 28/30 contre 19/30 ; deux « échecs » = limites du contrôle (refus non reconnu i01, faux positif q30). Ordre : sessions 2 à 5 (CI), puis
+  bascule Qwen par la CI. Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
+  locales `rag_mistral`, `rag_qwen`.

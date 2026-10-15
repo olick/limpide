@@ -117,3 +117,79 @@ ni passage vide, ni article coupé au milieu d'une phrase, ni menu de navigation
 | 10 questions de test | S7 : jeu d'évaluation en CI |
 | Mesures de temps d'ingestion | S8 : FinOps, dimensionnement |
 | ADR-001 à 003 | Dossier de soutenance |
+
+---
+
+## Journal de réalisation
+
+Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde que l'état courant, les règles et les pièges ; le détail des sessions vit ici).
+
+**S1 terminée** (`docs/plan/semaine-01.md`) :
+
+- [x] Session 1 : Docker, pgvector, Ollama, solution .NET créée
+- [x] Session 2 : corpus (`corpus.json`) et commande `fetch`
+- [x] Session 3 : commandes `extract` et `chunk`, extracteurs et découpeurs AI Act / CNIL testés
+- [x] Session 4 : commande `embed`, mesures dans l'ADR-002 (691 passages, 9 min 31 s sur CPU, 816 ms par passage)
+- [x] Session 5 : `search`, `evaluate`, 10 questions (`eval/questions.json`), score dans le README :
+  top 5 = 5/10 (texte seul) puis **8/10 (titre + texte, retenu)**
+
+Constats de la semaine 1 à reprendre en S2 (détail : `docs/notes/observations-decoupage.md`) :
+les considérants évincent les articles en tête des résultats (recherche hybride, ADR-005) ; le vocabulaire
+des utilisateurs diffère de celui du règlement (« grands modèles de langage » contre « modèles d'IA à usage général »).
+`evaluate` donne le score à chaque modification de la recherche : le relancer avant/après, noter dans le README.
+Observations de découpage à compléter au fil de l'eau : `docs/notes/observations-decoupage.md` (matière de l'ADR-010).
+
+Notes de la session 2 :
+
+- EUR-Lex bloque les scripts (défi AWS WAF, `202` vide) : l'AI Act est téléchargé via l'API CELLAR
+  (`fetchUrl` dans `corpus.json`). Le fichier brut est du XHTML Formex/CONVEX, pas la page EUR-Lex :
+  en tenir compte pour l'extraction.
+- `fetch` exige un `200` non vide et le bon type de contenu : un blocage ne crée jamais de version.
+- Mot de passe PostgreSQL local dans `dotnet user-secrets` (projet Ingestion), jamais dans `appsettings.json`.
+
+Choix de la session 3 (voir la discussion du 2026-09-29) :
+
+- Deux commandes `extract` puis `chunk`, qui échangent via `data/extracted/<source>/<sha256>.json` :
+  le texte extrait se relit à l'œil, et on peut comparer des découpages sans réextraire (futur ADR).
+- Chaque extracteur et découpeur a une version (`cnil-html/1`...) enregistrée avec son résultat :
+  la changer relance l'étape, sinon la commande ne refait rien.
+- Extracteurs dans Core (AngleSharp, sans E/S), choisis selon la source. Ils ne produisent que du texte présent
+  dans la source ; seuls les espaces sont normalisés. Blocs : titre (niveau), paragraphe, élément de liste
+  (profondeur), avec l'ancre ELI pour l'AI Act (`art_5`, `005.001`, `rct_1`, `anx_III`).
+- AI Act : titre, en-tête et pied du JO, notes, formule finale et signatures écartés ; considérants gardés.
+- Découpeurs (`ai-act/1`, `cnil-sections/1`) : unités article / considérant / annexe / préambule pour l'AI Act,
+  section pour la CNIL ; `Packer` commun (500 à 1 500 caractères, coupe entre groupes, puis blocs, puis phrases,
+  jamais dans une phrase). Modifier `Packer` impose d'incrémenter la version des deux découpeurs.
+- Table `chunks` : `anchor` (`art_5`, `rct_12`, `anx_III`, clé des questions de test), `extractor_version`
+  et `chunker_version` ; `chunk` remplace tous les passages d'une version dans une transaction (COPY binaire).
+- Pour recréer la base sans perdre bge-m3 : `docker compose rm -sf postgres && docker volume rm limpide_pgdata`,
+  jamais `docker compose down -v` (efface aussi le volume Ollama) ; puis `migrate` (le schéma n'est plus créé au
+  démarrage du conteneur depuis la S5).
+- La fiche CNIL « Annoter les données » contient un paragraphe en double dans la page elle-même : laissé tel quel.
+- **Fausses nouvelles versions CNIL** (constaté le 2026-09-29) : le HTML brut contient des identifiants aléatoires
+  (menu, jeton `form_build_id`) qui changent d'un jour à l'autre ; chaque `fetch` crée une version dont le texte
+  extrait est identique. Sans gravité tant que la collecte est manuelle ; à traiter en S5 avec le cycle de vie
+  des versions : ne publier une version que si son texte extrait diffère de la version publiée.
+
+Console (`src/Limpide.Ingestion/Cli/`) : sans argument, mode interactif (`limpide>`, `help`, `exit`) ;
+avec une commande, exécution unique et code de sortie (mode d'Airflow en S4, à préserver). La liste des
+commandes (`CommandCatalog`) alimente l'aide et la validation : toute nouvelle commande s'y déclare.
+Configuration et services reconstruits à chaque commande, pour que `--Section:Cle=valeur` ne vaille que pour elle.
+VS Code : profils `Debug` / `Release` (`.vscode/launch.json`), `DOTNET_ENVIRONMENT=Development` pour user-secrets.
+
+Choix de la session 4 :
+
+- `embed` traite les passages des versions courantes sans embedding **ou** calculés avec un autre modèle que
+  `Embedding:Model` : changer de modèle en configuration relance le calcul. Lots enregistrés un par un
+  (reprise après interruption). Configuration : section `Embedding` d'`appsettings.json`
+  (`--Embedding:BatchSize=32` en ligne de commande pour essayer une autre taille de lot).
+- Ollama tourne sur CPU : le GPU du poste n'est pas exposé au conteneur (pas de NVIDIA Container Toolkit).
+  Volontaire : c'est la configuration la plus proche de l'hébergement probable. Question ouverte dans l'ADR-002 :
+  où tourne le modèle qui vectorise les questions en ligne, et combien il coûte au repos (ADR-006, puis l'ADR sur l'hébergement des modèles, S6).
+
+Choix de la session 5 :
+
+- `evaluate` : rang du premier bon passage sur 10 résultats ; top 1, top 5, MRR. Passage attendu par `anchor`
+  (AI Act) ou morceau du titre de rattachement (CNIL, sans ancre). Questions formulées sans reprendre les mots du titre.
+- `Embedding:IncludeHeading = true` : on vectorise « titre + texte » ; `embedding_model = bge-m3+titre`.
+  La recherche ne compare que des vecteurs de même libellé.

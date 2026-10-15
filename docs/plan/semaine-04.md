@@ -104,3 +104,33 @@ Point clé : **Airflow orchestre, il ne traite pas les données.** Le travail re
 | Alertes d'échec | S5 : alerte de quarantaine |
 | Conteneur d'ingestion | S6 : exécution dans Azure |
 | Scénarios de panne | Soutenance BC03 : fiabilité des pipelines |
+
+---
+
+## Journal de réalisation
+
+Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde que l'état courant, les règles et les pièges ; le détail des sessions vit ici).
+
+**S4 terminée** (`docs/plan/semaine-04.md`) — Airflow ; Alexandre ne le connaît pas : concepts d'abord.
+Détail et constats : `pipelines/airflow/README.md`.
+
+- [x] Session 1 : Airflow 3.3.1 en local (compose officiel dans `pipelines/airflow/`, ports sur 127.0.0.1, exemples
+  désactivés, `FERNET_KEY`), DAG d'apprentissage `decouverte`. **Reste** : exercices dans l'interface par Alexandre.
+- [x] Session 2 : image `ingestion` (déjà faite en S3) testée par `docker run` sur la pile locale : 4 commandes OK,
+  `fetch` deux fois de suite = inchangé. Ajouts : résumé JSON en dernière ligne de chaque commande (`CommandSummary`,
+  écrit après fermeture de l'hôte pour passer après les journaux) ; chiffrement GSS désactivé dans Npgsql
+  (« libgssapi_krb5.so.2 » écrit sur stderr par les images .NET).
+- [x] Session 3 : DAG `ingestion` (`DockerOperator`, réseau `limpide_default`, `data/` monté, UID du worker), lundi
+  4 h UTC, sans rattrapage, 1 exécution à la fois, 2 relances à 5 min ; ajouts Limpide dans
+  `docker-compose.override.yaml` (socket Docker pour le worker seul, `AIRFLOW_VAR_*` : mot de passe masqué `***`,
+  vérifié). Vérifié le 2026-10-08 sur une vraie nouvelle version CNIL : passages et vecteurs identiques au bit près à
+  ceux d'une ingestion manuelle. Sortir le DAG de pause a lancé aussitôt la dernière échéance manquée, malgré
+  `catchup=False`. Règle locale : `psql` sur la base locale autorisé sans confirmation (`.claude/settings.local.json`).
+- [x] Session 4 : étapes en `all_done` + tâche `bilan` (une alerte Discord par exécution, avec la cause de chaque
+  échec ; webhook dans `pipelines/airflow/.env`, variable `discord_webhook_secret`) ; `IngestionCommand` fait des
+  lignes d'erreur de la console le message d'échec. Trois pannes testées le 2026-10-08 (source en 404, Ollama arrêté,
+  base arrêtée) : relances, alerte, réparation sans doublon. Constat clé pour la S5 : pendant la panne d'Ollama, les
+  fiches CNIL ont été **absentes de la recherche ≈ 17 min** (version courante dès `fetch`). Fausses versions CNIL :
+  3 dans la journée. Pylance strict : `pipelines/airflow/.venv` (Airflow 3.3.1) + `pyrightconfig.json`, 0 erreur.
+- [x] Session 5 : ADR-007 (`docs/adr/007-airflow-taches-conteneurisees.md`), schéma `docs/pipeline-ingestion.md`.
+  **Reste (Alexandre)** : exercices dans l'interface (onglet XCom, « Réinitialiser » = Clear).

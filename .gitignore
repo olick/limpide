@@ -21,7 +21,8 @@ pipelines/airflow/config/
 pipelines/airflow/plugins/
 __pycache__/
 
-.claude
+.claude/*
+!.claude/rules/
 .venv/
 
 # Terraform : dossier de travail et état (l'état peut contenir des secrets en clair ; distant à partir de la S6).
