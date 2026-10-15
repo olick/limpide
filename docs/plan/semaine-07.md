@@ -11,7 +11,11 @@ Une modification du prompt qui dégrade les scores est **bloquée avant la produ
 
 ---
 
-## Session 1 : le jeu d'évaluation (≈ 2 h)
+## Session 1 : le jeu d'évaluation (≈ 2 h) — faite le 2026-10-15
+
+50 questions dans `eval/questions.json` (format JSON gardé : l'outil existant le lit ; version `jeu/2` par
+question, champ `category` pour les pièges). Mesures : `docs/notes/observations-modeles-ovh.md`, dernière section.
+Reste : relecture du jeu par Alexandre.
 
 Partir des 15 questions de la semaine 2 et arriver à environ 50, dans `eval/questions.jsonl` :
 
