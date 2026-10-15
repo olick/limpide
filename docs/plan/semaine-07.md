@@ -60,7 +60,14 @@ Chaque question porte une version : le jeu d'évaluation est versionné comme le
   injections, fuites, garde-fous, latence médiane et 95e centile, coût), détail par question.
   Leçon de la première passe : le script d'essai Qwen avait perdu la consigne de question, ce que rien ne montrait ;
   elle figure désormais dans les versions du rapport.
-- [ ] Juge de fidélité (LLM) et sa calibration sur les relectures déjà faites.
+- [x] Juge de fidélité (`FaithfulnessJudge`, consignes `judge/2`, Mistral Medium 3.5) dans `evaluate-answers`
+  (verdict et motifs par réponse, dans les deux rapports) ; calibration (`judge-calibrate`) sur **37 réponses déjà
+  relues** (`eval/calibration/fidelite.json`) : 8/9 erreurs connues détectées, 1 à 2 fausses alertes sur 13 ; Large 3
+  moins bon (5/9), Large 4 illisible par le client. Sur le jeu de 50 questions : 7 réponses signalées, aucune erreur
+  grave confirmée à la relecture → **juge = tri de la relecture et métrique agrégée, pas blocage réponse par
+  réponse** (à fixer en session 3). Détail : `docs/notes/observations-evaluation.md`.
+
+**Session 2 terminée (2026-10-15)** : rapport complet en local (`eval/results/2026-10-15-2252-mistral-medium-2604.json`).
 
 ## Session 3 : seuils et versionnement (≈ 1 h 30)
 

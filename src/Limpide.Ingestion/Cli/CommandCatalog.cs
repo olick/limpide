@@ -31,6 +31,7 @@ public static class CommandCatalog
         new("trace", "trace <question>", "lignage : pour chaque passage trouvé, sa version, son fichier brut, ses contrôles", Search, RequiresText: true),
         new("evaluate", "evaluate", "score de la recherche seule sur le jeu de questions (eval/questions.json)", Search),
         new("evaluate-answers", "evaluate-answers", "pose tout le jeu de questions (recherche + Mistral), rapport dans eval/results/", Search),
+        new("judge-calibrate", "judge-calibrate", "mesure le juge de fidélité sur des réponses déjà relues (eval/calibration/)", Search),
         new("feedback", "feedback", "affiche les retours des visiteurs (Markdown, redirigeable vers un fichier)", Search),
         new("help", "help", "affiche cette aide", Session),
         new("exit", "exit", "quitte (aussi : quit, Ctrl+D)", Session),

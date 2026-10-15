@@ -2,6 +2,7 @@ using System.ClientModel;
 using Azure.Core;
 using Azure.Identity;
 using Limpide.Core.Answering;
+using Limpide.Core.Evaluation;
 using Limpide.Core.Search;
 using Limpide.Infrastructure.Migrations;
 using Limpide.Infrastructure.Search;
@@ -78,8 +79,22 @@ public static class ServiceCollectionExtensions
             new ChatClient(generation.Model, new ApiKeyCredential(GenerationApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
                 .AsIChatClient());
         services.AddSingleton<AnswerService>();
+
+        // Juge de fidélité (évaluation, S7) : un autre modèle que celui qui rédige, configuré à part (section « Judge »).
+        var judge = configuration.GetSection("Judge").Get<GenerationOptions>() ?? new GenerationOptions();
+        services.AddSingleton(_ => new FaithfulnessJudge(
+            new ChatClient(judge.Model, new ApiKeyCredential(JudgeApiKey(configuration)), new OpenAIClientOptions { Endpoint = judge.Endpoint })
+                .AsIChatClient(),
+            judge.ToSettings()));
         return services;
     }
+
+    /// <summary>« Judge:ApiKey » si le juge est chez un autre fournisseur, sinon la clé Mistral (pas « Generation:ApiKey »,
+    /// qui peut viser OVHcloud pendant un essai de rédaction).</summary>
+    private static string JudgeApiKey(IConfiguration configuration) =>
+        (configuration["Judge:ApiKey"] is { Length: > 0 } key ? key : configuration["Mistral:ApiKey"]) is { Length: > 0 } apiKey
+            ? apiKey
+            : throw new InvalidOperationException("Clé du juge absente : « Judge:ApiKey » ou « Mistral:ApiKey ».");
 
     /// <summary>
     /// Clé de l'API de rédaction : « Generation:ApiKey » pour un autre fournisseur compatible OpenAI (OVHcloud AI

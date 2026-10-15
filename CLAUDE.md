@@ -168,8 +168,10 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 | **S7** | **en cours** | Évaluation et CI/CD (`docs/plan/semaine-07.md`) |
 | S8–S10 | à venir | Observabilité et coûts, gouvernance, marge |
 
-**S7** : session 1 faite (jeu de 50 questions `jeu/2`, Qwen3-Embedding confirmé) ; session 2 faite sauf le juge de
-fidélité (en cours : `judge-calibrate`). Ensuite : session 3 (prompt hors du code, seuils, ADR métriques),
+**S7** : session 1 faite (jeu de 50 questions `jeu/2`, Qwen3-Embedding confirmé) ; session 2 faite le 2026-10-15
+(rapport JSON versionné ; juge de fidélité Medium 3.5, `judge/2`, calibré sur 37 réponses relues : 8/9 erreurs,
+1–2/13 fausses alertes ; sur 50 questions, 7 alertes sans erreur grave confirmée → tri et métrique agrégée, pas
+blocage par réponse ; `docs/notes/observations-evaluation.md`). Ensuite : session 3 (prompt hors du code, seuils, ADR métriques),
 session 4 (GitHub Actions, OIDC, Terraform dans la chaîne), session 5 (blocage démontré, page publique), puis
 bascule de la vectorisation sur Qwen3-Embedding-8B **par la CI**. Bases locales d'essai : `rag_mistral`, `rag_qwen`.
 
