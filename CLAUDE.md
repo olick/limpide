@@ -107,9 +107,12 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 | **S7** | **en cours** | Évaluation et CI/CD (`docs/plan/semaine-07.md`) |
 | S8–S10 | à venir | Observabilité et coûts, gouvernance, marge |
 
-**S7** : sessions 1 et 2 faites (jeu `jeu/2`, Qwen3-Embedding confirmé, rapport JSON, juge de fidélité calibré).
-Prochaine : session 3 (prompt hors du code, seuils, ADR métriques), puis 4 (GitHub Actions, OIDC, Terraform dans
-la chaîne), 5 (blocage démontré, page publique), puis bascule de la vectorisation sur Qwen3-Embedding-8B **par la CI**.
+**S7** : sessions 1 à 3 faites (jeu `jeu/2`, Qwen3-Embedding confirmé, rapport JSON, juge de fidélité calibré ;
+consignes dans `src/prompts/` (fichier publié figé par empreinte : nouveau texte = nouveau fichier), commande `gate`
+(seuils `EvaluationGate`, code 1 si bloqué), ADR-014 : référence passe, Small 4 bloqué). Prochaine : session 4
+(GitHub Actions, OIDC, Terraform dans la chaîne ; évaluation ≈ 0,29 $ par passe, seulement si ce qui influe a
+changé), 5 (blocage d'un prompt dégradé démontré, page publique), puis bascule de la vectorisation sur
+Qwen3-Embedding-8B **par la CI** (relever les seuils de recherche, effet cliquet).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.
