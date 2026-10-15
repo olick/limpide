@@ -2,6 +2,7 @@
 paths:
   - "src/Limpide.Web/**"
   - "src/Limpide.Admin/**"
+  - "src/Limpide.Core/Protection/**"
 ---
 
 # Interfaces web (démo et back office)
@@ -13,7 +14,7 @@ paths:
 - Question limitée à 500 caractères, 60 s maximum par réponse ; quota (`QuestionQuota`) appliqué dans `Home.razor`
   avant l'appel au modèle, IP relevée dans `App.razor`, jamais journalisée.
 - **Vitrine des technologies** (`Components/TechStack.razor`, icônes Simple Icons dans `wwwroot/tech/`, aucune
-  requête vers un tiers) : à tenir à jour à chaque technologie adoptée (GitHub Actions en S7, OpenTelemetry en S8…).
+  requête vers un tiers) : à tenir à jour à chaque technologie adoptée (par exemple GitHub Actions, OpenTelemetry).
 - **Back office** : seul `AdminAuthentication.cs` connaît OpenID Connect ; accès par identifiant complet
   « émetteur#sujet » (≈ 119 caractères, pas un GUID du portail) ; décisions écrites dans `admin_actions`, dans la
   transaction de la décision. Réglages en lecture seule (modifiés par Git).

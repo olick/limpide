@@ -43,7 +43,7 @@ qu'il le maîtrise). Découvre Terraform et Airflow avec ce projet : expliquer l
 - **Changer de modèle d'embedding impose de recalibrer `Generation:MinScore`** (0,50, propre à bge-m3+titre) et de
   relancer l'évaluation.
 - **Vitrine des technologies** (`src/Limpide.Web/Components/TechStack.razor`) : à mettre à jour à chaque technologie
-  adoptée (GitHub Actions en S7, OpenTelemetry en S8…).
+  adoptée (par exemple GitHub Actions, OpenTelemetry).
 - Jamais commités : `.env`, `.env.*`, `data/`, état Terraform.
 
 Décisions : `docs/adr/README.md` (index). Un numéro d'ADR s'attribue **à l'écriture** ; une décision à venir se

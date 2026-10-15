@@ -16,8 +16,9 @@ Alexandre ne connaissait pas Airflow avant la S4 : concepts d'abord. Détail et 
   développement ; `AIRFLOW_VAR_*`, webhook Discord dans `pipelines/airflow/.env`). Réseau `limpide_default`.
 - Production (ADR-013) : `docker-compose.leger.yaml` + `docker-compose.production.yaml` (LocalExecutor, DAG
   paramétré par `LIMPIDE_*`), interface par tunnel SSH vers 8080.
-- Démonstration de quarantaine : `demo/quarantaine.sh`.
-- Pylance strict : `pipelines/airflow/.venv` + `pyrightconfig.json` (`.venv/bin/pyright` depuis la racine).
+- Démonstration de quarantaine : `pipelines/airflow/demo/quarantaine.sh`.
+- Pylance strict : `pipelines/airflow/.venv` + `pyrightconfig.json` (`pipelines/airflow/.venv/bin/pyright` depuis la
+  racine).
 
 Pièges :
 
