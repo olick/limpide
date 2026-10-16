@@ -82,3 +82,35 @@ Un verrou resté bloqué (session coupée en plein `apply`) se libère par `terr
 **Terminé quand** : l'état DNS est sur Azure, `plan` sans changement, le verrou a refusé une seconde opération.
 
 Les exercices d'apprentissage (`apprentissage/`) gardent un état local : ils sont détruits à chaque fois.
+
+## Identités de la chaîne CI/CD (S7, session 4a)
+
+`creer-identites-ci.sh` (relançable) ajoute au socle deux **identités managées**, auxquelles GitHub Actions se
+connecte par **OIDC** : aucun secret Azure n'est stocké dans GitHub.
+
+Le mécanisme : à chaque exécution, GitHub signe un jeton qui décrit le job ; son **sujet** dit d'où il vient
+(`repo:olick@5882236/limpide@1392935325:pull_request`, ou `…:environment:production`). Les identifiants numériques
+du compte et du dépôt sont immuables : un dépôt supprimé puis recréé sous le même nom n'hérite pas de la confiance
+d'Azure. La documentation annonce encore `repo:olick/limpide:…` ; le premier essai a été refusé (AADSTS700213),
+avec le sujet réellement présenté dans le message. Chaque identité porte une
+**relation de confiance** (« identité fédérée ») qui n'accepte que les jetons signés par GitHub avec exactement ce
+sujet, et les échange contre un jeton Azure d'environ une heure. Rien à voler, rien à faire tourner.
+
+| Identité | Sujet accepté | Droit, sur le conteneur `tfstate` seulement | Usage |
+|---|---|---|---|
+| `id-limpide-ci-lecture` | `pull_request` | Storage Blob Data Reader | `terraform plan -lock=false` dans les PR |
+| `id-limpide-ci-production` | `environment:production` | Storage Blob Data Contributor | `terraform apply` après la fusion, validé à la main |
+
+- **`-lock=false` dans les PR** : poser le verrou, c'est écrire. Le `plan` d'une PR peut lire un état en cours de
+  modification, mais ne modifie jamais rien : c'est le prix d'une identité de PR en lecture seule.
+- **Dépôt public** : GitHub ne délivre pas de jeton OIDC aux PR venues d'un fork.
+- **Le sujet cloisonne** : une PR ne peut pas obtenir l'identité de `production`, qui n'est délivrée qu'à un job de
+  l'environnement GitHub `production` (relecteur requis).
+- Identités managées plutôt qu'inscriptions d'application Entra : de simples ressources Azure du groupe permanent,
+  rien à gérer dans l'annuaire.
+- La préproduction éphémère (session 4b) aura **sa propre identité**, aux droits plus larges : on n'élargit pas
+  celles-ci.
+
+Déclaration dans GitHub : identifiants de client, de tenant et d'abonnement en **secrets** (masqués dans les journaux,
+publics sur un dépôt public), bien qu'ils ne donnent aucun accès à eux seuls ; celui de `id-limpide-ci-production`
+dans l'environnement `production` uniquement.

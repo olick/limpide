@@ -12,7 +12,9 @@ Détail : `infrastructure/terraform/*/README.md`, `docs/plan/semaine-06.md` (jou
   (`azure/demo.sh --env <env>`, puis `azure/detruire.sh <env>`), budget « Limpide » 10 €/mois (alerte seulement).
 - Ressources Azure **permanentes** (créées hors Terraform par `etat/creer-socle.sh`) : coffre de l'état
   `rg-limpide-tfstate` / `stlimpidetf024b1e9f` / conteneur `tfstate` (accès Entra ID, clés désactivées) et coffre à
-  secrets `kvlimpide024b1e9f` (clés `mistral-api-key`, `ovh-ai-endpoints-key`). Tout le reste se détruit.
+  secrets `kvlimpide024b1e9f` (clés `mistral-api-key`, `ovh-ai-endpoints-key`), identités de la CI
+  (`etat/creer-identites-ci.sh` : OIDC, `id-limpide-ci-lecture` pour les PR, `id-limpide-ci-production`). Tout le
+  reste se détruit.
 - États distants : `dns.tfstate`, `azure-preprod.tfstate`, `azure-prod.tfstate`. Les exercices d'`apprentissage/`
   gardent un état local. `.terraform/` et `*.tfstate` ignorés, `.terraform.lock.hcl` versionné.
 - `ARM_SUBSCRIPTION_ID` par l'environnement. azurerm 5 n'active plus aucun fournisseur de ressources :
