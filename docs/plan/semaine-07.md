@@ -154,6 +154,13 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
 - (4b) mode non interactif de `demo.sh` et `detruire.sh` : aujourd'hui, confirmation demandée après le plan et
   vérification d'une base locale.
 
+**Avancement (2026-10-16)**
+
+- [x] Build et tests (`.github/workflows/ci.yml`) : PR #1 au vert en 35 s (172 tests, 0 avertissement, SDK
+  10.0.402) ; actions épinglées par empreinte, jeton de la chaîne en lecture seule ; vitrine des technologies à jour.
+  Poste : `gh` installé, jeton à granularité fine limité au dépôt, **sans** la permission Administration (protection
+  de `main` et relecteurs de `production` réglés à la main : le jeton utilisé par Claude ne peut pas les contourner).
+
 1. **Build et tests** à chaque pull request et à chaque push sur `main` (`dotnet build`, `dotnet test` : seul
    `Limpide.Core.Tests`, sans base ni réseau).
 2. **Analyse des images** (vulnérabilités), outil à choisir à ce moment-là.
