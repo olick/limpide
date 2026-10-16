@@ -4,8 +4,9 @@ using Limpide.Core.Search;
 namespace Limpide.Core.Answering;
 
 /// <summary>
-/// Consignes et message envoyés au modèle. Les passages sont numérotés [P1], [P2]... dans l'ordre de la recherche ;
-/// leur texte est transmis tel quel.
+/// Message envoyé au modèle et textes fixes (refus, hors sujet, avertissement). Les consignes système sont dans un
+/// fichier versionné (src/prompts/answer/N.txt, <see cref="AnswerInstructions"/>). Les passages sont numérotés [P1],
+/// [P2]... dans l'ordre de la recherche ; leur texte est transmis tel quel.
 /// </summary>
 public static class AnswerPrompt
 {
@@ -27,31 +28,8 @@ public static class AnswerPrompt
         "Limpide aide à naviguer dans les textes ; il ne qualifie pas votre situation juridique. "
         + "Pour l'appréciation de votre cas, adressez-vous à un professionnel du droit.";
 
-    /// <summary>Version des consignes, enregistrée avec chaque réponse : la changer peut changer la qualité mesurée.</summary>
-    public const string Version = "answer/3";
-
-    public static readonly string System = $"""
-        Tu es Limpide, un assistant qui aide à naviguer dans le règlement européen sur l'intelligence artificielle
-        (AI Act) et dans les fiches pratiques IA de la CNIL.
-
-        Règles :
-        1. Réponds uniquement à partir des passages fournis, jamais à partir de tes connaissances.
-        2. Chaque affirmation est suivie de l'identifiant du passage qui la justifie, entre crochets : [P1].
-           Plusieurs passages : [P1][P3]. N'utilise que les identifiants fournis, tels quels :
-           écris [P1], jamais [P1a] ni [P1, point a].
-        3. Si les passages ne permettent pas de répondre, réponds exactement, et seulement :
-           « {Decline} »
-        4. Restitue fidèlement les conditions, exceptions et dérogations : ne simplifie jamais au point de changer le sens.
-           Une exception ou une condition ne vaut que dans le domaine où le passage la prévoit : ne l'applique jamais
-           à un autre domaine (une exception prévue pour la justice ne s'applique pas au recrutement).
-           Si les passages ne couvrent qu'une partie de la réponse (par exemple une liste incomplète), dis-le :
-           « d'après les passages consultés ».
-        5. Ne tranche jamais la situation de la personne qui pose la question : n'écris pas qu'elle, ou son système,
-           est ou n'est pas en infraction, conforme, interdit, autorisé ou à haut risque. Dis ce que prévoient les textes
-           et à quelles conditions (« les systèmes utilisés pour le recrutement sont classés à haut risque [P2] »),
-           puis indique qu'un professionnel du droit peut apprécier sa situation.
-        6. Réponds en français, de façon claire et concise : quelques phrases, une courte liste si nécessaire.
-        """;
+    /// <summary>Repère de la phrase de refus dans le fichier des consignes, remplacé par <see cref="Decline"/>.</summary>
+    public const string DeclinePlaceholder = "{{refus}}";
 
     /// <summary>Identifiant d'un passage dans le prompt, à partir de 1.</summary>
     public static string Id(int index) => $"P{index + 1}";
@@ -68,5 +46,26 @@ public static class AnswerPrompt
         }
 
         return text.AppendLine().Append("Question : ").Append(question).ToString();
+    }
+}
+
+/// <summary>
+/// Consignes système de la rédaction, lues par l'infrastructure dans src/prompts/answer/N.txt (S7) : modifier le
+/// texte, c'est créer un nouveau fichier, donc une nouvelle version, enregistrée avec chaque réponse et comparée par
+/// l'évaluation.
+/// </summary>
+/// <param name="Version">« answer/3 » : chemin du fichier sans extension.</param>
+public sealed record AnswerInstructions(string Version, string System)
+{
+    /// <summary>
+    /// La phrase de refus vient du code (sa détection en dépend) : le fichier la désigne par
+    /// <see cref="AnswerPrompt.DeclinePlaceholder"/>, et un fichier qui ne la contient pas est refusé au démarrage.
+    /// </summary>
+    public static AnswerInstructions FromTemplate(string version, string template)
+    {
+        if (!template.Contains(AnswerPrompt.DeclinePlaceholder, StringComparison.Ordinal))
+            throw new InvalidOperationException(
+                $"Consignes {version} : repère {AnswerPrompt.DeclinePlaceholder} absent ; sans lui, les refus ne seraient plus reconnus.");
+        return new AnswerInstructions(version, template.TrimEnd().Replace(AnswerPrompt.DeclinePlaceholder, AnswerPrompt.Decline));
     }
 }

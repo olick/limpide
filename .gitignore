@@ -21,7 +21,12 @@ pipelines/airflow/config/
 pipelines/airflow/plugins/
 __pycache__/
 
-.claude
+.claude/*
+!.claude/rules/
+!.claude/agents/
+!.claude/settings.json
+# Journal LinkedIn : notes de travail personnelles, hors du dépôt public.
+.vscode/linkedin-*.md
 .venv/
 
 # Terraform : dossier de travail et état (l'état peut contenir des secrets en clair ; distant à partir de la S6).

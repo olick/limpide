@@ -70,6 +70,24 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
     }
 
     /// <summary>Nombre de passages de la version publiée du même document ; null s'il n'y en a pas d'autre.</summary>
+    /// <summary>
+    /// Identité du corpus servi : nombre de versions publiées et de passages, empreinte des versions (SHA-256 du
+    /// contenu brut, triées). Deux évaluations au même corpus ont la même empreinte.
+    /// </summary>
+    public async Task<CorpusFingerprint> FingerprintAsync(CancellationToken ct)
+    {
+        await using var command = dataSource.CreateCommand("""
+            SELECT count(DISTINCT v.id), count(c.id),
+                   md5(coalesce(string_agg(DISTINCT v.content_hash, ',' ORDER BY v.content_hash), ''))
+            FROM document_versions v
+            LEFT JOIN chunks c ON c.document_version_id = v.id
+            WHERE v.is_current
+            """);
+        await using var reader = await command.ExecuteReaderAsync(ct);
+        await reader.ReadAsync(ct);
+        return new CorpusFingerprint(reader.GetInt64(0), reader.GetInt64(1), reader.GetString(2)[..12]);
+    }
+
     public async Task<int?> PublishedCountAsync(Guid versionId, CancellationToken ct)
     {
         await using var command = dataSource.CreateCommand("""
@@ -126,3 +144,6 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
         await tx.CommitAsync(ct);
     }
 }
+
+/// <param name="Hash">Début de l'empreinte MD5 de la liste triée des empreintes de versions publiées.</param>
+public sealed record CorpusFingerprint(long Versions, long Passages, string Hash);

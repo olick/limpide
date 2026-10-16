@@ -10,6 +10,12 @@ public sealed class IngestionOptions
     /// <summary>Rapports de evaluate-answers (Markdown, un par jour et par modèle), versionnés avec le code.</summary>
     public string ResultsPath { get; set; } = "eval/results";
 
+    /// <summary>Réponses déjà relues, avec leur verdict, pour mesurer le juge de fidélité (judge-calibrate).</summary>
+    public string JudgeCalibrationPath { get; set; } = "eval/calibration/fidelite.json";
+
+    /// <summary>evaluate-answers fait relire chaque réponse par le juge de fidélité (≈ 0,13 $ de plus pour 50 questions).</summary>
+    public bool JudgeAnswers { get; set; } = true;
+
     /// <summary>Racine des fichiers bruts. En base, <c>raw_path</c> est relatif à cette racine.</summary>
     public string RawDataPath { get; set; } = "data/raw";
 

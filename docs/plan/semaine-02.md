@@ -109,3 +109,67 @@ Tout tourne encore en local.
 | Vérification des citations | S7 : métrique de fidélité |
 | Seuil de pertinence | S8 : suivi de la dérive (taux de « je ne sais pas ») |
 | 15 questions de test | S7 : jeu d'évaluation |
+
+---
+
+## Journal de réalisation
+
+Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde que l'état courant, les règles et les pièges ; le détail des sessions vit ici).
+
+**S2 terminée** (`docs/plan/semaine-02.md`) — RAG et interface « sous le capot »
+
+- [x] Session 1 : `Limpide.Infrastructure` (code Npgsql/Ollama déplacé, `IPassageSearch` dans Core,
+  `evaluate` identique), ADR-004 (Mistral, UE)
+- [x] Session 2 : `ask` affiche l'`AnswerResult` complet (réponse, passages cités à l'identique avec source et
+  licence, stratégie, durées, tokens, coût, garde-fous). Observations : `docs/notes/observations-generation.md`.
+- [x] Session 3 : recherche hybride mesurée et écartée, seuil de pertinence calibré, avertissement fixe (ADR-005)
+- [x] Session 4 : interface Blazor, testée de bout en bout par Alexandre le 2026-10-05
+  (profil VS Code « Web », ou `dotnet run --project src/Limpide.Web --launch-profile http`, http://localhost:5181)
+- [x] Session 5 : 15 questions (10 + 5 pièges) passées par `evaluate-answers`, Small et Medium comparés et relus,
+  garde-fou `qualification-juridique`, consignes `answer/3`, démo basculée sur Medium (ADR-004).
+  Captures d'écran dans `docs/images/`, intégrées au README.
+
+Choix de la S2, session 2 :
+
+- Modèles épinglés par version datée : `mistral-small-2603` (développement), `mistral-medium-2604` (Medium 3.5,
+  démo). Changer de modèle : `--Generation:Model=mistral-medium-2604` ; le coût suit (tarifs par modèle dans
+  `Generation:Prices`, majoration UE comprise ; tarif absent = coût « inconnu », jamais deviné).
+- Clé `Mistral:ApiKey` (user-secrets), exigée seulement par `ask` : l'ingestion fonctionne sans.
+- Consignes versionnées (`AnswerPrompt.Version`, `answer/2`) et enregistrées avec chaque réponse :
+  toute modification du prompt incrémente la version.
+- Garde-fous déterministes : `citation-inventee`, `sans-citation` (sauf « je ne sais pas »), `reponse-tronquee`,
+  `reponse-vide`. Les modèles citent `[P1a]` malgré la consigne : le contrôle l'accepte comme P1.
+- Température 0 pour des mesures comparables ; 5 passages ; ≈ 1 800 tokens en entrée par question.
+
+Choix de la S2, session 3 :
+
+- Garde-fous v1 : seuil de pertinence (`hors-perimetre`, réponse fixe `AnswerPrompt.OutOfScope`, LLM non appelé) ;
+  avertissement juridique fixe (`AnswerPrompt.Disclaimer`), jamais généré, sur toute réponse.
+- Deux lignes de défense : seuil pour le hors sujet ; « je ne sais pas » du LLM pour les questions proches du sujet
+  sans réponse dans le corpus (aucun seuil ne les sépare : « règles sur l'IA aux États-Unis » score 0,655).
+- Le seuil (0,50) est propre à bge-m3+titre : le recalibrer à tout changement d'embedding.
+
+Choix de la S2, session 4 :
+
+- Réponse du modèle = texte non fiable : rendu Markdown (Markdig) avec HTML brut, liens, images et liens
+  automatiques **désactivés** (un `[x](javascript:...)` passait sinon, constaté au test). Seuls liens : les
+  citations `[P1]`/`[P1a]`, ajoutées après coup vers l'extrait cité (`AnswerMarkdown`).
+- Réponse (encadré bleu, sans-serif) et textes officiels (fond papier, filet doré, serif) visuellement distincts.
+- Panneau « sous le capot » ouvert d'office quand un garde-fou s'est déclenché.
+- Question limitée à 500 caractères ; délai maximal de 60 s par réponse.
+- Pas d'outil d'automatisation de navigateur sur le poste : interaction testée à la main.
+
+Choix de la S2, session 5 :
+
+- `eval/questions.json` : champ `behavior` (`answer` par défaut, `decline`, `noLegalQualification`) ; pièges t01–t05
+  distincts des questions de calibrage du seuil. `evaluate` (recherche) ne compte que les questions `answer`.
+- `evaluate-answers` : chaîne complète, contrôle automatique (`AnswerChecks` : OK / ÉCHEC / À RELIRE), rapport Markdown
+  daté par modèle dans `eval/results/` (versionné : preuve et base de comparaison).
+- Citations : renvois précis acceptés (`[P1a]`, `[P5.1.a]`, `[P4.c]`, `[P1, point a]`) ; refus = phrase seule,
+  sinon garde-fou `reponse-ambigue`.
+- Relecture complète faite par Claude (Alexandre l'a déléguée ; relecture par modèle, pas de juriste) : Small déforme
+  2 textes sans que rien ne le détecte (q03, q10) ; Medium tranchait la situation (q03, t05), corrigé par `answer/3`.
+- Garde-fou `qualification-juridique` (`LegalQualification`) : phrase en « vous/votre » + verdict, hors conditionnel et
+  renvois ; heuristique qui signale sans bloquer ; affichée dans la réponse dans l'interface web.
+- Rapports avec le texte des passages cités sous chaque réponse (relecture sans quitter le fichier), nommés
+  `AAAA-MM-JJ-HHmm-<modèle>.md` (les réponses varient d'une passe à l'autre : ne pas écraser).
