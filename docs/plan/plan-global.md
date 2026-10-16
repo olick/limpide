@@ -278,7 +278,7 @@ proposition : à chaque retour accompagné de sa question (avec l'accord du visi
 une validation humaine dans le back office ; validé, il rejoint `eval/questions.json` par Git, donc passe par la CI.
 Jamais d'ajout sans relecture : un cas de test faux fausserait toutes les mesures suivantes.
 Les retours n'alimentent **jamais** le corpus : seulement l'évaluation.
-Lien : le post LinkedIn du jour 10 (`.vscode/linkedin-limpide.md`) annonce « Chaque retour devient une question de
+Lien : le post LinkedIn du jour 10 (`.linkedin/linkedin-limpide.md`) annonce « Chaque retour devient une question de
 test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 
 

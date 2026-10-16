@@ -125,7 +125,7 @@ En cas de retard, sacrifier dans cet ordre : garde-fous v2 (S8), puis reporter e
 tableaux de bord du back office. **Ne jamais sacrifier l'évaluation (S7).** Après le plan : migration cloud, puis
 mise à l'échelle (`plan-global.md`).
 
-**Journal LinkedIn** : `.vscode/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
+**Journal LinkedIn** : `.linkedin/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
 plan, **proposer l'épisode suivant** (27 : S7 ; celui sur Qwen au moment de la bascule).
 
 ## Tenue de ce fichier
