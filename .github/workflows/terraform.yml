@@ -1,0 +1,80 @@
+# Terraform dans la chaîne (S7, session 4a). Comme ci.yml, ce fichier n'orchestre que des commandes lançables en
+# local (infrastructure/terraform/*/README.md).
+#   - verifier : format et validité de chaque dossier, sans accès à Azure ni à OVH (`init -backend=false`) ;
+#   - etat : connexion à Azure par OIDC (identité id-limpide-ci-lecture, etat/creer-identites-ci.sh) et lecture de
+#     l'état de la zone DNS. Étape provisoire : le `plan -lock=false` d'OVHcloud la remplacera.
+name: Terraform
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/terraform/**"
+      - ".github/workflows/terraform.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/terraform/**"
+      - ".github/workflows/terraform.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: terraform-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verifier:
+    name: Format et validité (${{ matrix.dossier }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        dossier: [dns, azure/environnements/preprod, azure/environnements/prod]
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/${{ matrix.dossier }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - run: terraform fmt -check -recursive
+      - run: terraform init -backend=false -input=false
+      - run: terraform validate
+
+  etat:
+    name: Lecture de l'état (OIDC)
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      id-token: write # demander à GitHub le jeton OIDC que Azure échange contre un jeton d'accès
+    env:
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/dns
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - run: terraform init -input=false
+      - run: terraform state list
