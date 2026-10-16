@@ -160,6 +160,15 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
   10.0.402) ; actions épinglées par empreinte, jeton de la chaîne en lecture seule ; vitrine des technologies à jour.
   Poste : `gh` installé, jeton à granularité fine limité au dépôt, **sans** la permission Administration (protection
   de `main` et relecteurs de `production` réglés à la main : le jeton utilisé par Claude ne peut pas les contourner).
+  `main` protégée (ruleset) : PR obligatoire, contrôle « Build et tests » requis, push forcé interdit.
+- [x] OIDC vers Azure (`etat/creer-identites-ci.sh`) : identités managées `id-limpide-ci-lecture` (sujet
+  `pull_request`, lecture de l'état) et `id-limpide-ci-production` (environnement `production`, écriture), droits
+  limités au conteneur `tfstate` ; identifiants en secrets GitHub (masqués dans les journaux publics), celui de
+  production dans l'environnement seulement. **Constat** : GitHub présente un sujet à identifiants immuables
+  (`repo:olick@5882236/limpide@1392935325:…`), pas celui de la documentation (refus AADSTS700213 au premier essai).
+  PR #2 : lecture de l'état DNS par OIDC en 14 s.
+- [x] Terraform Azure et DNS en PR (`.github/workflows/terraform.yml`) : `fmt -check`, `init -backend=false`,
+  `validate` sur `dns/`, `azure/environnements/preprod` et `prod`.
 
 1. **Build et tests** à chaque pull request et à chaque push sur `main` (`dotnet build`, `dotnet test` : seul
    `Limpide.Core.Tests`, sans base ni réseau).
