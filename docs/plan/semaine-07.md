@@ -140,6 +140,20 @@ déploiement en production (validation manuelle)
 
 ### Session 4a : chaîne sans évaluation (≈ 2 h 30)
 
+**Décidé le 2026-10-16** : GitHub Actions (dépôt déjà sur GitHub, OIDC Azure natif, gratuit pour un dépôt public).
+Principe à écrire dans l'ADR de la chaîne : **la CI n'exécute que des commandes et des scripts lançables en local** ;
+le YAML ne fait qu'orchestrer, déclencher, autoriser et afficher (comme Airflow, ADR-007). Ce qui reste propre à
+GitHub (fédération OIDC, environnement `production`, filtres de chemins, `GITHUB_STEP_SUMMARY`) chiffre la
+portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Conséquences pour cette session :
+
+- `deploy/deployer.sh <version>` : tire l'image publiée (celle construite et testée par la chaîne, identifiée par son
+  commit), `migrate`, redémarrage ; appelé par SSH depuis la chaîne comme à la main. Aujourd'hui le VPS reconstruit
+  l'image après un `git pull` : l'image en production n'est pas celle de ghcr.io ;
+- `gate` reste tel quel : il ajoute déjà son tableau à `GITHUB_STEP_SUMMARY` quand la variable existe, sans effet
+  ailleurs (le tableau est aussi sur la sortie standard) ; seul couplage à GitHub dans le code .NET, assumé ;
+- (4b) mode non interactif de `demo.sh` et `detruire.sh` : aujourd'hui, confirmation demandée après le plan et
+  vérification d'une base locale.
+
 1. **Build et tests** à chaque pull request et à chaque push sur `main` (`dotnet build`, `dotnet test` : seul
    `Limpide.Core.Tests`, sans base ni réseau).
 2. **Analyse des images** (vulnérabilités), outil à choisir à ce moment-là.

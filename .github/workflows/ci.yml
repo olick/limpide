@@ -1,0 +1,39 @@
+# Chaîne d'intégration (S7, session 4a) : build et tests à chaque pull request et à chaque push sur main.
+# Principe (ADR de la chaîne, à écrire) : ce fichier n'orchestre que des commandes lançables en local ;
+# ici, exactement `dotnet build && dotnet test` (CLAUDE.md, « Environnement local »).
+# Tests : seul Limpide.Core.Tests, sans base ni réseau.
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Moindre privilège : le jeton de la chaîne ne peut que lire le dépôt.
+permissions:
+  contents: read
+
+# Un nouveau push sur la même branche annule l'exécution en cours (inutile de finir l'ancienne).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-test:
+    name: Build et tests
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      # Actions épinglées par empreinte de commit (une étiquette peut être déplacée), version en commentaire.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore
+      - run: dotnet test --configuration Release --no-build
