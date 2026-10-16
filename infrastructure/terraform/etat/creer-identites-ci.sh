@@ -4,7 +4,7 @@
 # Relançable sans risque (chaque étape crée ou met à jour l'existant). Coût : nul (une identité managée est gratuite).
 #
 # Mécanisme : à chaque exécution, GitHub signe un jeton qui décrit le job (« sujet », par exemple
-# repo:olick/limpide:pull_request). Chaque identité n'accepte que les jetons signés par GitHub dont le sujet est
+# repo:olick@5882236/limpide@1392935325:pull_request). Chaque identité n'accepte que les jetons signés par GitHub dont le sujet est
 # exactement celui déclaré ici, et les échange contre un jeton Azure d'environ une heure.
 #
 #   id-limpide-ci-lecture     sujet pull_request          lecture de l'état (terraform plan -lock=false)
@@ -19,7 +19,10 @@ set -euo pipefail
 
 RESOURCE_GROUP="rg-limpide-tfstate"
 CONTAINER="tfstate"
-REPO="olick/limpide"
+# Sujet au format de GitHub avec identifiants immuables (compte@id/dépôt@id, constaté au premier essai) : un dépôt
+# supprimé puis recréé sous le même nom n'hérite pas de la confiance d'Azure. Identifiants :
+# gh api repos/olick/limpide --jq '.owner.id, .id'
+REPO="olick@5882236/limpide@1392935325"
 ISSUER="https://token.actions.githubusercontent.com"
 SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
 TENANT_ID="$(az account show --query tenantId -o tsv)"

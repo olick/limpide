@@ -89,7 +89,10 @@ Les exercices d'apprentissage (`apprentissage/`) gardent un état local : ils so
 connecte par **OIDC** : aucun secret Azure n'est stocké dans GitHub.
 
 Le mécanisme : à chaque exécution, GitHub signe un jeton qui décrit le job ; son **sujet** dit d'où il vient
-(`repo:olick/limpide:pull_request`, ou `repo:olick/limpide:environment:production`). Chaque identité porte une
+(`repo:olick@5882236/limpide@1392935325:pull_request`, ou `…:environment:production`). Les identifiants numériques
+du compte et du dépôt sont immuables : un dépôt supprimé puis recréé sous le même nom n'hérite pas de la confiance
+d'Azure. La documentation annonce encore `repo:olick/limpide:…` ; le premier essai a été refusé (AADSTS700213),
+avec le sujet réellement présenté dans le message. Chaque identité porte une
 **relation de confiance** (« identité fédérée ») qui n'accepte que les jetons signés par GitHub avec exactement ce
 sujet, et les échange contre un jeton Azure d'environ une heure. Rien à voler, rien à faire tourner.
 
