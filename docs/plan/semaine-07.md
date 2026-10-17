@@ -294,7 +294,8 @@ fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est n
   encore à jour), droits créés quand même ; le script filtre désormais sur l'identifiant.
 - [x] `deploy/exporter-corpus.sh [--vps]` : `pg_dump` sans `feedback` ni `admin_actions`, relu par `pg_restore`,
   déposé avec ses métadonnées (source, date, empreinte). Déposé depuis la base locale : 18 versions, 1 130 passages,
-  empreinte `65e689755765` (celle des passes de référence ; celle de la production n'a pas été relevée).
+  empreinte `65e689755765` (celle des passes de référence). Celle de la production, relevée le soir même par
+  `https://www.limpide-ia.fr/sante` (4b-2) : la même. Le corpus évalué est celui que sert la démo.
 - [x] `deploy/evaluer.sh` : clés du coffre, sauvegarde restaurée dans un `pgvector/pgvector:pg17` jetable,
   `migrate`, `evaluate-answers`, `gate`. Première passe depuis le poste : **1 min 48 s, 0,28 $, barrière passée**
   (rapport `eval/results/2026-10-17-2050-mistral-medium-2604`).
@@ -303,8 +304,11 @@ fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est n
 - [x] Premier passage dans la chaîne (PR #11, qui touche `deploy/evaluer.sh` : évaluée elle-même), après création de
   l'environnement `evaluation` : **barrière passée, 2 min 30 s de script, 2 min 50 s de job** (clés 4 s, sauvegarde
   6 s, base jetable et restauration 21 s, migrations 1 s, 50 questions et juge ≈ 2 min). Aucune des deux clés en clair
-  dans le journal public (vérifié en les comparant aux valeurs du coffre, sans les afficher). Rapports en artefact.
-- [ ] Alexandre : « Évaluation » en contrôle requis du ruleset de `main` (après la fusion de #11).
+  dans le journal public (vérifié en les comparant aux valeurs du coffre, sans les afficher). Rapports en artefact
+  de l'exécution, non versionné (`2026-10-17-1951-…json`) : **0,29 $** (rédaction 0,190 $, juge 0,100 $), 0 échec,
+  part de réponses jugées infidèles 0,18 (contre 1 échec et 0,15 dans la passe locale `2050`).
+- [x] Alexandre : « Évaluation » en contrôle requis du ruleset de `main` (vérifié par l'API, à côté de « Build et
+  tests »).
 
 **Avancement 4b-2 (2026-10-17)**
 
@@ -331,7 +335,27 @@ aux droits larges ne serve jamais sans quelqu'un derrière.
   `detruire.sh --oui` en **12 min 55 s** (16 ressources ; état vide et groupe supprimé, vérifiés). Coût de l'essai :
   ≈ 0,10 €. Reste à vérifier dans la chaîne : administrateur de type `ServicePrincipal`, OIDC,
   reconnexion après l'`apply`.
-- [ ] Alexandre : création de l'identité et du verrou, environnement `azure`, premier lancement après la fusion.
+- [x] Socle : verrou `socle-ne-pas-supprimer` posé, identité `id-limpide-ci-azure` créée (condition ABAC vérifiée sur
+  l'attribution) ; environnement `azure` (`main` seulement, relecteur `olick`, vérifiés par l'API).
+- [x] PR #12 fusionnée ; déploiement validé (`/sante` en ligne sur le VPS). **Premier lancement du workflow
+  (`verifier`), tout au vert** : connexion OIDC 6 s, garde 7 s, `apply` 9 min 44 s (17 ressources, administrateur
+  PostgreSQL `id-limpide-ci-azure`, de type `ServicePrincipal`), reconnexion 1 s, base 50 s (rôle de l'application,
+  corpus restauré, 1 130 passages servis), test de fumée 6 s (`/sante` = `65e689755765`), destruction 13 min 36 s ;
+  **job : 24 min 43 s**, plus l'attente de validation. Groupe de ressources supprimé, vérifié. Coût : ≈ 0,10 €.
+
+- Relectures par les agents de Claude Code (lecture seule) : 4b-1, `relecteur-infra` puis `relecteur-regles`, une
+  passe chacun ; 4b-2, `relecteur-infra` en deux passes et `relecteur-regles` (plus une passe sur `/sante` seul).
+  Aucun bloquant. Ce qu'elles ont changé : jeton OIDC masqué ; scripts d'évaluation exclus du déploiement ;
+  l'environnement `evaluation` présenté comme une étiquette, pas une barrière ; configuration de production non
+  évaluée, écrite ; restauration en une transaction ; rôle de l'application par identifiant objet ; délais et
+  nouvelles tentatives du test de fumée ; cache de `/sante` ; délai de l'`apply` ; verrou du socle ; limites de la
+  condition ABAC (elle borne les rôles, pas leur portée) écrites. Limite : relectures faites par un modèle.
+- Épisode LinkedIn : post 17 de la série courte (brouillon le 2026-10-17).
+
+**Session 4b terminée (2026-10-17).** Critère révisé atteint : une PR qui modifie les consignes lance l'évaluation,
+publie le rapport et ne peut pas être fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est ni
+bloquée ni facturée. En plus : Azure se recrée depuis le code par la chaîne, à la demande. Reste ouvert : la clé
+Mistral de l'évaluation partage le plafond de 10 € par mois de la démo (ADR-016).
 
 ## Session 5 : démonstration du blocage et page publique (≈ 1 h 30)
 
