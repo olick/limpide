@@ -116,7 +116,7 @@ En retard : sacrifier les garde-fous v2 (S8), puis reporter en S10 le suivi en d
 back office ; **jamais l'évaluation (S7)**. Après le plan : migration cloud, puis mise à l'échelle.
 
 **Journal LinkedIn** : `.linkedin/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
-plan, **proposer l'épisode suivant** (27 : S7 ; celui sur Qwen au moment de la bascule).
+plan, **proposer l'épisode suivant** dans la série courte (`linkedin-limpide-serie-courte.md` : 17 ensuite).
 
 ## Tenue de ce fichier
 

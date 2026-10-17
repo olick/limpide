@@ -187,7 +187,20 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
 - [x] ADR-015 (2026-10-17) : GitHub Actions et scripts lançables en local, OIDC et identités, comptes de service
   OVH, VPS lu et non géré, images construites une fois, clé à commande imposée, pas d'`apply` Azure ; ce qui reste
   exposé (secrets OVH de longue durée, relecteur = auteur). Principe en règle de dossier (`.claude/rules/ci.md`).
-- [ ] **Reste de la 4a** : analyse des vulnérabilités des images (sacrifiable). Ensuite : épisode LinkedIn 27.
+  **Relu par deux agents de Claude Code** (`.claude/agents/`, une passe chacun, lecture seule) :
+  - `relecteur-infra`, sur l'ADR face aux workflows et aux scripts : faits exacts, mais trois risques sous-estimés.
+    D'abord, la clé SSH à commande imposée exécute ce que `main` contient : `deployer.sh` se met à jour par
+    `git merge`, puis lance le Compose du dépôt avec l'accès Docker (équivalent root). « Aucune autre commande » ne
+    vaut donc qu'au niveau SSH ; la vraie barrière est la fusion sur `main` puis l'approbation de `production`.
+    Ensuite, les identités Azure couvrent tout le conteneur `tfstate`. Enfin, le retour arrière ne défait pas les
+    migrations. Il signalait aussi le `workflow_dispatch` depuis une branche : `production` est déjà limité à
+    `main`, vérifié par l'API ;
+  - `relecteur-regles`, sur le diff : rien de bloquant ; la règle `ci.md` interdisait des `run:` que les workflows
+    contiennent déjà, nuancée.
+  Tout est intégré à l'ADR (« Ce qui reste exposé »). Limite : relectures faites par un modèle, en une passe.
+  Depuis, les agents sont lancés sans attendre la demande (CLAUDE.md, « Règles et interdits »).
+- [ ] **Reste de la 4a** : analyse des vulnérabilités des images (sacrifiable).
+- Épisode LinkedIn : post 16 de la série courte (brouillon le 2026-10-17).
 - À faire plus tard sur le VPS : supprimer les anciennes images construites sur place (`limpide-web:latest`,
   `limpide-admin:latest`) après quelques jours sans retour arrière.
 
