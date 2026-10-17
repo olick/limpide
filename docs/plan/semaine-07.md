@@ -184,9 +184,10 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
   site et back office vérifiés, ≈ 1,9 Go de mémoire disponible. Version en place dans `.env.version` ; alias
   `limpide` du VPS mis à jour dans `~/.bashrc`. Défaut corrigé : la version des images ignorait `corpus.json` et
   `eval/questions.json`, copiés dans l'image d'ingestion (règle unique : `deploy/version-images.sh`).
-- [ ] **Reste de la 4a** : ADR de la chaîne (GitHub Actions et commandes lançables en local, OIDC et identités,
-  comptes de service OVH, VPS lu et non géré, images construites une fois, clé à commande imposée, pas d'`apply`
-  Azure), puis analyse des vulnérabilités des images (sacrifiable). Ensuite : épisode LinkedIn 27.
+- [x] ADR-015 (2026-10-17) : GitHub Actions et scripts lançables en local, OIDC et identités, comptes de service
+  OVH, VPS lu et non géré, images construites une fois, clé à commande imposée, pas d'`apply` Azure ; ce qui reste
+  exposé (secrets OVH de longue durée, relecteur = auteur). Principe en règle de dossier (`.claude/rules/ci.md`).
+- [ ] **Reste de la 4a** : analyse des vulnérabilités des images (sacrifiable). Ensuite : épisode LinkedIn 27.
 - À faire plus tard sur le VPS : supprimer les anciennes images construites sur place (`limpide-web:latest`,
   `limpide-admin:latest`) après quelques jours sans retour arrière.
 

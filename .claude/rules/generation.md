@@ -5,12 +5,14 @@ paths:
   - "src/Limpide.Infrastructure/Search/**"
   - "src/Limpide.Infrastructure/GenerationOptions.cs"
   - "src/appsettings.shared.json"
+  - "src/prompts/**"
 ---
 
 # Recherche et génération (ADR-004, ADR-005, ADR-012)
 
-- **Consignes** versionnées (`AnswerPrompt.Version`, enregistrée avec chaque réponse) : toute modification du prompt
-  l'incrémente et garde la consigne qui empêche le modèle de trancher la situation de l'utilisateur.
+- **Consignes** dans `src/prompts/<nom>/<n>.txt`, choisies par configuration (`Generation:Prompt`, `Judge:Prompt`) ;
+  version (`answer/3`) enregistrée avec chaque réponse. Un fichier publié ne change plus (empreinte figée par un
+  test) : nouveau texte = nouveau fichier, qui garde la consigne empêchant de trancher la situation de l'utilisateur.
 - Modèles épinglés par version datée ; tarifs dans `Generation:Prices` (majoration UE comprise), tarif absent = coût
   « inconnu », jamais deviné. Température 0, 5 passages. Clé `Mistral:ApiKey` exigée seulement par les commandes qui
   appellent un modèle (`ask`, `evaluate-answers`, `judge-calibrate`) ; `Generation:Endpoint` / `Generation:ApiKey`

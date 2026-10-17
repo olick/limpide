@@ -1,5 +1,5 @@
 # Chaîne d'intégration (S7, session 4a) : build et tests à chaque pull request et à chaque push sur main.
-# Principe (ADR de la chaîne, à écrire) : ce fichier n'orchestre que des commandes lançables en local ;
+# Principe (ADR-015) : ce fichier n'orchestre que des commandes lançables en local ;
 # ici, exactement `dotnet build && dotnet test` (CLAUDE.md, « Environnement local »).
 # Tests : seul Limpide.Core.Tests, sans base ni réseau.
 name: CI

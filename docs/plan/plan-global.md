@@ -405,7 +405,8 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | Container Apps plutôt qu'AKS (ADR-011, écrit le 2026-10-13) | S6 |
 | Hébergement d'Airflow (ADR-013, écrit le 2026-10-13) | S6 |
 | Hébergement des modèles : LLM par API ou auto-hébergé sur GPU, embeddings  (ADR-012, écrit le 2026-10-13) | S6 |
-| Métriques et seuils d'évaluation | S7 |
+| Métriques et seuils d'évaluation (ADR-014, écrit le 2026-10-15) | S7 |
+| Chaîne CI/CD (ADR-015, écrit le 2026-10-17) | S7 |
 
 ## Risques du planning
 

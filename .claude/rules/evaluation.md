@@ -18,6 +18,9 @@ paths:
 - Juge de fidélité (`FaithfulnessJudge`, `judge/2`, Mistral Medium 3.5) : calibré par `judge-calibrate` sur
   `eval/calibration/` ; sert au tri et à une métrique agrégée, **pas** à bloquer une réponse
   (`docs/notes/observations-evaluation.md`).
+- Barrière `gate` (ADR-014) : seuils de la section `EvaluationGate` (appsettings de la console) sur le rapport JSON,
+  code 1 si bloqué. Seuils relevés quand une meilleure configuration est adoptée (effet cliquet), élargis seulement
+  dans un commit qui dit pourquoi, jamais désactivés.
 - Relectures faites par un modèle, pas par un juriste : le dire partout où on cite un résultat.
 - L'évaluation tourne sur le poste ou la préproduction, jamais sur la démo publique. Bases locales d'essai :
   `rag_mistral`, `rag_qwen` (comparaison bge-m3 / Qwen3-Embedding).

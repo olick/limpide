@@ -42,12 +42,15 @@ qu'il le maîtrise). Découvre Terraform et Airflow avec ce projet : expliquer l
   recherche vectorielle seule (ADR-005), découpage structurel (ADR-010).
 - **Changer de modèle d'embedding impose de recalibrer `Generation:MinScore`** (0,50, propre à bge-m3+titre) et de
   relancer l'évaluation.
-- **Vitrine des technologies** (`src/Limpide.Web/Components/TechStack.razor`) : à mettre à jour à chaque technologie
-  adoptée (par exemple GitHub Actions, OpenTelemetry).
+- **Vitrine des technologies** (`src/Limpide.Web/Components/TechStack.razor`) : à jour à chaque adoption.
 - Jamais commités : `.env`, `.env.*`, `data/`, état Terraform.
+- **Toute modification passe par une PR** (`main` protégée, « Build et tests » requis) : Alexandre fusionne ;
+  le jeton `gh` du poste n'a ni écriture du contenu, ni administration.
+- **Agents de `.claude/agents/`, lancés sans attendre la demande** : `relecteur-regles` avant chaque commit,
+  `relecteur-infra` avant une PR qui touche `.github/`, `deploy/` ou `infrastructure/terraform/`,
+  `redacteur-linkedin` quand une étape du plan est faite.
 
-Décisions : `docs/adr/README.md` (index). Un numéro d'ADR s'attribue **à l'écriture** ; une décision à venir se
-désigne par son sujet. Licence du dépôt : Apache 2.0.
+Décisions : `docs/adr/README.md` ; un numéro d'ADR s'attribue **à l'écriture**. Licence : Apache 2.0.
 
 ## Architecture
 
@@ -65,13 +68,12 @@ désigne par son sujet. Licence du dépôt : Apache 2.0.
   (`--Generation:Model=mistral-small-2603`).
 
 Conventions propres à un dossier : `.claude/rules/` (ingestion, génération, évaluation, interfaces web, Airflow,
-Terraform, production), chargées quand Claude lit un fichier du dossier.
+Terraform, production, CI), chargées quand Claude lit un fichier du dossier.
 
 ## Environnement local
 
-Première installation : README, section « Démarrage local ».
-
 ```bash
+# première installation : README, section « Démarrage local »
 docker compose up -d --wait        # postgres + ollama + back office (http://localhost:5182), ports sur 127.0.0.1
 docker compose up -d --build admin # back office après une modification de son code ; `stop admin` avant de le déboguer
 dotnet run --project src/Limpide.Ingestion -- migrate   # schéma (base neuve ou après git pull)
@@ -97,26 +99,11 @@ Production : https://www.limpide-ia.fr et https://admin.limpide-ia.fr, sur un VP
 Plan : `docs/plan/plan-global.md`. Un fichier par semaine, `docs/plan/semaine-NN.md` (plan, puis journal de
 réalisation) : **toujours lire celui de la semaine en cours**.
 
-| Semaine | État | Résultat |
-|---|---|---|
-| S1–S3 | ✅ | POC, démo en ligne le 2026-10-07 (bilan : `docs/plan/bilan-phase-1.md`) |
-| S4 | ✅ | Airflow, DAG `ingestion`, alertes Discord |
-| S5 | ✅ 2026-10-12 | Cycle de vie des versions, contrôles qualité, quarantaine, traçabilité, back office |
-| Étape « compréhensible par tous » | ✅ code | Page d'accueil et « Sous le capot » en langage clair |
-| S6 | ✅ 2026-10-13 | Terraform, Azure à la demande, Airflow et vectorisation OVHcloud en production |
-| **S7** | **en cours** | Évaluation et CI/CD (`docs/plan/semaine-07.md`) |
-| S8–S10 | à venir | Observabilité et coûts, gouvernance, marge |
-
-**S7** : sessions 1 à 3 faites (jeu `jeu/2`, Qwen3-Embedding confirmé, rapport JSON, juge de fidélité calibré ;
-consignes dans `src/prompts/` (fichier publié figé par empreinte : nouveau texte = nouveau fichier), commande `gate`
-(seuils `EvaluationGate`, code 1 si bloqué), ADR-014 : référence passe, Small 4 bloqué). Session 4a : critères
-atteints le 2026-10-17 (GitHub Actions : build et tests, OIDC Azure, Terraform OVHcloud `plan` en PR et `apply`
-validé, VPS lu et non géré, déploiement du VPS par images ghcr.io et `deploy/deployer.sh`, `main` protégée) ; reste
-l'ADR de la chaîne puis l'analyse des images (sacrifiable). Puis 4b (préproduction éphémère et évaluation ≈ 0,29 $,
-seulement si ce qui influe a changé), 5 (blocage d'un prompt dégradé démontré, page publique), puis bascule de la
-vectorisation sur Qwen3-Embedding-8B **par la CI** (relever les seuils de recherche, effet cliquet).
-**Toute modification passe par une PR** (`main` protégée : contrôle « Build et tests » requis ; Alexandre fusionne,
-le jeton `gh` du poste n'a ni écriture du contenu, ni administration).
+S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraform) ; S8–S10 à venir (observabilité
+et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 3 faites (jeu `jeu/2`, juge
+calibré, `gate`, ADR-014) ; 4a faite le 2026-10-17 (chaîne GitHub Actions jusqu'au déploiement du VPS, ADR-015),
+reste l'analyse des images (sacrifiable). Puis 4b (préproduction éphémère et évaluation ≈ 0,29 $), 5 (blocage d'un
+prompt dégradé démontré, page publique), puis bascule sur Qwen3-Embedding-8B **par la CI** (relever les seuils).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.
@@ -125,9 +112,8 @@ budget Mistral à construire ; anti-bot ; test du message à la 11e question.
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,
 enregistrement de la démonstration de quarantaine.
 
-En cas de retard, sacrifier dans cet ordre : garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les
-tableaux de bord du back office. **Ne jamais sacrifier l'évaluation (S7).** Après le plan : migration cloud, puis
-mise à l'échelle (`plan-global.md`).
+En retard : sacrifier les garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les tableaux de bord du
+back office ; **jamais l'évaluation (S7)**. Après le plan : migration cloud, puis mise à l'échelle.
 
 **Journal LinkedIn** : `.linkedin/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
 plan, **proposer l'épisode suivant** (27 : S7 ; celui sur Qwen au moment de la bascule).
