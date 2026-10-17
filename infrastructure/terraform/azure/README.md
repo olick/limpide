@@ -45,7 +45,7 @@ Coût : ≈ 0,03 € de l'heure depuis l'ADR-012 (≈ 0,10 € avec Ollama : ADR
 PostgreSQL B1ms 0,0167 €/h, application au repos ≈ 0,016 $/h, vectorisation ≈ 0,01 € le million de tokens) ;
 **`./detruire.sh` à la fin.**
 
-En une commande (vérifications, plan à confirmer, `apply`, base, test de l'adresse, durées) :
+En une commande (vérifications, plan à confirmer, `apply`, base restaurée depuis le socle, test de fumée, durées) :
 
 ```bash
 cd infrastructure/terraform/azure
@@ -66,7 +66,8 @@ export TF_VAR_poste_ipv4="$(curl -s https://api.ipify.org)"
 export TF_VAR_image_tag=<version affichée par publier-images.sh>
 terraform init
 terraform apply                              # ≈ 10 min ou plus (PostgreSQL, puis les conteneurs)
-../../initialiser-base.sh preprod --avec-corpus   # rôle de l'application, migrations, droits, corpus
+../../initialiser-base.sh preprod --avec-corpus   # rôle de l'application, corpus du socle, migrations, droits
+../../verifier.sh preprod                    # accueil et /sante (l'application lit-elle la base ?)
 terraform output url                         # ouvrir dans le navigateur, poser une question
 ```
 
@@ -87,6 +88,30 @@ ce qui revient à un `DROP ROLE` d'un rôle propriétaire des tables, refusé pa
 2026-10-13). Le script le retire d'abord de l'état ; la suppression du serveur emporte tout. Au passage : le nom de ce
 rôle est tronqué à 63 caractères (limite de PostgreSQL), l'UPN d'un compte Microsoft personnel invité étant plus
 long ; sans effet sur la connexion.
+
+## Par la chaîne (S7, session 4b-2, ADR-016)
+
+Workflow « Azure » (`.github/workflows/azure.yml`), lancé à la main depuis l'onglet Actions, puis validé
+(environnement GitHub `azure`, limité à `main`, relecteur requis) :
+
+| Action | Ce qu'il fait |
+|---|---|
+| `verifier` | préproduction créée, base, test de fumée, puis détruite même en cas d'échec ; refuse si une préproduction existe déjà (`est-vide.sh`) |
+| `vitrine` | production créée ou mise à jour, laissée en place (≈ 0,25 € de l'heure) |
+| `detruire-vitrine` | production détruite |
+
+Mêmes scripts qu'à la main, avec `--oui` (sans confirmation), `--neuf` et `--sans-base` (la chaîne se reconnecte à
+Azure entre l'`apply` et la base : le jeton OIDC de GitHub ne vit que quelques minutes). Administrateur PostgreSQL :
+l'identité de la chaîne, `id-limpide-ci-azure` (`TF_VAR_admin_principal_type=ServicePrincipal`).
+
+**Verrou d'état** : un `apply` ou un `destroy` tué brutalement (délai dépassé) laisse le bail du blob d'état ;
+la destruction suivante échoue sur « state locked » et l'environnement continue de coûter. Depuis le poste :
+
+```bash
+cd environnements/preprod && terraform init
+terraform force-unlock <identifiant du verrou affiché dans l'erreur>
+cd ../.. && ./detruire.sh preprod
+```
 
 ## Choix de la session 4
 

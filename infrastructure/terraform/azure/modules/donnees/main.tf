@@ -51,6 +51,11 @@ variable "admin_principal_name" {
   type = string
 }
 
+variable "admin_principal_type" {
+  description = "User (une personne, depuis le poste) ou ServicePrincipal (l'identité de la chaîne CI/CD, S7)."
+  type        = string
+}
+
 variable "poste_ipv4" {
   description = "Seule adresse extérieure à Azure autorisée : le poste de l'administrateur (migrations)."
   type        = string
@@ -83,7 +88,7 @@ resource "azurerm_postgresql_flexible_server_active_directory_administrator" "ad
   tenant_id           = var.tenant_id
   object_id           = var.admin_object_id
   principal_name      = var.admin_principal_name
-  principal_type      = "User"
+  principal_type      = var.admin_principal_type
 
   # Azure tronque le nom à 63 caractères (limite des noms de rôle PostgreSQL) ; l'UPN d'un compte Microsoft
   # personnel invité est plus long. Sans cette ligne, chaque `plan` voit un écart et veut remplacer l'administrateur,

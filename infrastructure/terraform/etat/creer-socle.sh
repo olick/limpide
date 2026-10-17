@@ -62,6 +62,14 @@ for container in "$CONTAINER" "$CORPUS_CONTAINER"; do
   fi
 done
 
+# Verrou « suppression impossible » sur le compte (état Terraform, sauvegarde du corpus) : l'identité de recréation
+# d'Azure est Contributeur de l'abonnement, qui ne permet pas de retirer un verrou. Sur le compte seulement : un verrou
+# s'hérite aux attributions de rôle posées dessous, et un verrou sur le coffre ou le groupe pourrait bloquer leur
+# suppression par terraform destroy (le coffre a sa propre protection : suppression réversible, purge interdite).
+az lock create --name socle-ne-pas-supprimer --lock-type CanNotDelete \
+  --resource-group "$RESOURCE_GROUP" --resource "$ACCOUNT" --resource-type Microsoft.Storage/storageAccounts \
+  --notes "Etat Terraform et sauvegarde du corpus de Limpide" --output none
+
 # Coffre à secrets permanent : droits Azure (RBAC), suppression réversible 90 jours et protection contre la purge
 # (un secret supprimé par erreur se récupère ; personne ne peut l'effacer définitivement avant ce délai).
 if ! az keyvault show --name "$VAULT" --resource-group "$RESOURCE_GROUP" --output none 2>/dev/null; then

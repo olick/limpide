@@ -11,6 +11,11 @@ output "identite_app_nom" {
   value       = module.identite.name
 }
 
+output "identite_app_object_id" {
+  description = "Identifiant objet (Entra ID) de l'identité de l'application : rôle PostgreSQL créé par identifiant, pas par nom."
+  value       = module.identite.principal_id
+}
+
 output "identite_app_client_id" {
   value = module.identite.client_id
 }

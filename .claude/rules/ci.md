@@ -12,7 +12,10 @@ paths:
 - Actions tierces épinglées par empreinte de commit, version en commentaire. `permissions: contents: read` par
   défaut ; écriture accordée job par job (`packages: write`, `id-token: write`).
 - Toute écriture en production (`apply` OVH, déploiement du VPS) passe par l'environnement `production` (relecteur
-  requis). Azure : `fmt`/`validate` seulement, pas d'`apply` après fusion (option B).
+  requis). Azure : `fmt`/`validate` en PR, pas d'`apply` après fusion (option B) ; recréation par `azure.yml`, à la
+  main seulement, environnement `azure` (limité à `main`, relecteur requis), jamais planifiée (ADR-016).
+- `az` dans un job : `.github/connexion-azure.sh` ; le jeton OIDC de GitHub expire en quelques minutes, se reconnecter
+  avant une étape qui suit une longue attente. Terraform (`ARM_USE_OIDC=true`) renouvelle seul ses jetons.
 - Identités : Azure par OIDC (`etat/creer-identites-ci.sh`, une identité par usage : on n'élargit pas les
   existantes) ; OVH par comptes de service (`limpide-ci-lecture` en PR, `limpide-ci-ecriture` dans `production`).
 - Outils tiers, surtout de sécurité (Grype) : lancés par un script depuis leur image Docker **épinglée par empreinte**,

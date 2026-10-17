@@ -1,0 +1,111 @@
+# Azure à la demande (S7, session 4b-2, ADR-016) : Azure n'existe pas en permanence (option B). Ce workflow prouve
+# que l'infrastructure se recrée depuis le code, et monte la vitrine. Lancé à la main seulement, et validé
+# (environnement « azure », relecteur requis) : l'identité qu'il utilise peut créer et détruire dans tout l'abonnement,
+# elle ne sert jamais sans quelqu'un derrière. Pas de planification : décidé avec Alexandre le 2026-10-17.
+#   verifier          préproduction créée, base initialisée depuis le socle, test de fumée (accueil et /sante), puis
+#                     détruite même en cas d'échec ; jamais un environnement qu'il n'a pas créé (est-vide.sh)
+#   vitrine           production créée (ou mise à jour) et laissée en place ; ≈ 0,25 € de l'heure jusqu'à sa destruction
+#   detruire-vitrine  production détruite
+# Pas sur le chemin de la production : la barrière de qualité est evaluation.yml.
+# Comme les autres workflows, il n'orchestre que des scripts lançables à la main (infrastructure/terraform/azure).
+name: Azure
+
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: "verifier (préproduction créée puis détruite), vitrine (production laissée en place), detruire-vitrine"
+        type: choice
+        options: [verifier, vitrine, detruire-vitrine]
+        default: verifier
+
+permissions:
+  contents: read
+
+# Un seul à la fois, jamais annulé en cours de route (un apply ou un destroy interrompu laisse un état verrouillé).
+concurrency:
+  group: azure
+  cancel-in-progress: false
+
+jobs:
+  azure:
+    name: Azure (${{ inputs.action }})
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    # Environnement limité à main, relecteur requis (réglé dans GitHub) : seul le code fusionné, et validé, obtient
+    # l'identité id-limpide-ci-azure.
+    environment: azure
+    permissions:
+      contents: read
+      id-token: write # demander à GitHub le jeton OIDC que Azure échange contre un jeton d'accès
+    env:
+      ACTION: ${{ inputs.action }}
+      ENV_AZURE: ${{ (inputs.action == 'vitrine' || inputs.action == 'detruire-vitrine') && 'prod' || 'preprod' }}
+      # Terraform (fournisseur et état) par OIDC ; az par .github/connexion-azure.sh.
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # Administrateur Entra de PostgreSQL : l'identité de la chaîne elle-même.
+      TF_VAR_admin_principal_name: id-limpide-ci-azure
+      TF_VAR_admin_principal_type: ServicePrincipal
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/azure
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # tout l'historique : la version des images est le dernier commit qui touche leurs sources
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Connexion à Azure (OIDC)
+        run: ../../../.github/connexion-azure.sh
+
+      - id: garde
+        name: Préproduction absente ?
+        if: env.ACTION == 'verifier'
+        run: ./est-vide.sh preprod
+
+      # Délai propre à l'étape (≈ 11 min mesurées) : si l'apply se bloque, il reste du temps pour la destruction avant le
+      # délai du job (un arrêt brutal laisserait l'état verrouillé : README, « Verrou d'état »).
+      - name: Infrastructure (terraform apply)
+        if: env.ACTION != 'detruire-vitrine'
+        timeout-minutes: 30
+        run: ./demo.sh --env "$ENV_AZURE" --oui --sans-base
+
+      - name: Nouvelle connexion (le jeton OIDC de GitHub a expiré pendant l'apply)
+        if: env.ACTION != 'detruire-vitrine'
+        run: ../../../.github/connexion-azure.sh
+
+      - name: Base (rôle, corpus du socle, migrations, droits)
+        if: env.ACTION != 'detruire-vitrine'
+        run: ./initialiser-base.sh "$ENV_AZURE" --avec-corpus
+
+      - name: Test de fumée (accueil, /sante)
+        if: env.ACTION != 'detruire-vitrine'
+        run: ./verifier.sh "$ENV_AZURE"
+
+      - name: Adresse de la vitrine
+        if: env.ACTION == 'vitrine'
+        run: |
+          {
+            echo "Vitrine Azure : $(terraform -chdir=environnements/prod output -raw url)"
+            echo
+            echo "**Elle coûte ≈ 0,25 € de l'heure jusqu'à sa destruction** (≈ 6 € par jour) : relancer ce workflow avec"
+            echo "\`detruire-vitrine\` en fin de séance."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      # Même en cas d'échec ou d'annulation, mais seulement si la garde a vu une préproduction absente : ce qui a été
+      # créé ici est détruit, rien d'autre.
+      - name: Destruction
+        if: ${{ always() && ((env.ACTION == 'verifier' && steps.garde.outcome == 'success') || env.ACTION == 'detruire-vitrine') }}
+        run: ./detruire.sh "$ENV_AZURE" --oui

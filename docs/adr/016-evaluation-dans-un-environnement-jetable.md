@@ -31,7 +31,7 @@ données restaurées, `evaluate-answers`, `gate`, `destroy`. En écrivant la ses
 2. **Environnement jetable sur le runner, seul.** Rapide et gratuit côté Azure. Mais plus rien ne vérifie
    régulièrement qu'Azure se recrée depuis le code.
 3. **Hybride** : l'option 2 sert de barrière ; la recréation complète d'Azure (`apply`, base, test de fumée,
-   `destroy`) devient un workflow lancé à la main et chaque semaine, hors du chemin critique. Il sert aussi la
+   `destroy`) devient un workflow lancé à la main et validé, hors du chemin critique. Il sert aussi la
    vitrine à la demande. **Retenu**, décidé avec Alexandre le 2026-10-17.
 
 ## Décision
@@ -99,6 +99,23 @@ sur l'abonnement.
   (fournisseur, adresse) ; `evaluer.sh` en recopie l'adresse. Une modification de ce fichier part en production sans
   évaluation, et le lancer ne prouverait rien puisque l'évaluation ne le lit pas. Garde-fou : la règle de l'ADR-012
   (changer de modèle d'embedding impose de recalibrer le seuil et de réévaluer), et la relecture de la PR.
+- **Recréation d'Azure (4b-2)** : workflow `azure.yml`, lancé à la main et validé (environnement `azure`, limité à
+  `main`, relecteur requis), sans planification (décidé avec Alexandre le 2026-10-17 : l'identité qu'il utilise ne
+  sert jamais sans quelqu'un derrière). Actions : `verifier` (préproduction créée, base restaurée depuis le socle, test
+  de fumée sur l'accueil et `/sante`, puis détruite, même en cas d'échec, et seulement si elle n'existait pas avant),
+  `vitrine`, `detruire-vitrine`. Identité `id-limpide-ci-azure`, administratrice PostgreSQL des environnements qu'elle
+  crée :
+  - Contributeur de l'abonnement (Terraform crée les groupes de ressources), plus le droit d'attribuer deux rôles de
+    données à des identités de service (condition ABAC) ;
+  - **ce qui reste exposé** : la condition borne les rôles, pas leur portée. L'identité peut s'attribuer la lecture du
+    coffre (clés Mistral et OVH) ou l'écriture du conteneur `corpus`. Contributeur atteint aussi le socle : réactiver
+    les clés d'accès du compte de stockage, changer le mode d'accès du coffre, ajouter une relation de confiance aux
+    autres identités. Un verrou « suppression impossible » protège le compte de l'état et du corpus (Contributeur ne
+    peut pas le retirer) ; le coffre a sa suppression réversible et sa purge interdite. Isolation complète : un
+    abonnement séparé pour le socle, à envisager avec la migration cloud ;
+  - un `apply` tué brutalement laisse l'état verrouillé, et la destruction échoue : environnement payant jusqu'à
+    `terraform force-unlock` puis `detruire.sh` (README d'`azure/`). L'étape d'`apply` a son propre délai (30 min)
+    pour laisser du temps à la destruction.
 - **Conditions de révision** :
   - **Azure devient permanent** (migration cloud, après le plan) : évaluer sur la préproduction permanente, par
     l'application déployée.

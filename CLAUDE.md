@@ -103,7 +103,7 @@ S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraf
 et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 3 faites (jeu `jeu/2`, juge
 calibré, `gate`, ADR-014) ; 4a faite le 2026-10-17 (chaîne GitHub Actions jusqu'au déploiement du VPS, analyse
 des images par Grype, ADR-015) ; 4b-1 le 2026-10-17 (évaluation sur le runner à chaque PR concernée, contrôle requis
-« Évaluation », ≈ 2 min et 0,28 $, ADR-016). Puis 4b-2 (recréation d'Azure manuelle et hebdomadaire, vitrine), 5
+« Évaluation », ≈ 2 min et 0,28 $, ADR-016). Puis 4b-2 (recréation d'Azure à la main, validée, et vitrine), 5
 (blocage d'un prompt dégradé démontré, page publique), puis bascule sur Qwen3-Embedding-8B **par la CI** (relever
 les seuils ; rafraîchir la sauvegarde du corpus, `deploy/exporter-corpus.sh`).
 

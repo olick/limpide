@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
-# Initialise la base PostgreSQL Azure après `terraform apply` (S6, session 3). Relançable sans risque.
+# Initialise la base PostgreSQL Azure après `terraform apply` (S6, session 3 ; corpus depuis le socle, S7). Relançable
+# sans risque.
 #   1. rôle PostgreSQL de l'identité managée de l'application (connexion par Entra ID, sans mot de passe) ;
-#   2. schéma par les migrations (commande `migrate`, comme partout ailleurs) ;
-#   3. droits de l'application : lire et écrire les données, rien d'autre ;
-#   4. avec --avec-corpus : copie du corpus de la base locale (données seules, sans les retours des visiteurs).
+#   2. avec --avec-corpus, sur une base neuve : sauvegarde du corpus restaurée depuis le socle (conteneur « corpus »,
+#      deploy/exporter-corpus.sh), schéma et données, sans donnée de visiteur ; la même que l'évaluation (ADR-016) ;
+#   3. migrations du code courant (commande `migrate`, comme partout ailleurs) : celles que la sauvegarde n'a pas ;
+#   4. droits de l'application : lire et écrire les données, rien d'autre.
 #
-# Aucun mot de passe : chaque connexion utilise un jeton d'accès Entra ID de la personne connectée (`az login`),
-# valable environ une heure, jamais affiché ni écrit sur le disque.
+# Aucun mot de passe : chaque connexion utilise un jeton d'accès Entra ID de l'administrateur (personne connectée par
+# `az login`, ou identité de la chaîne), valable environ une heure, jamais affiché ni écrit sur le disque.
+# Administrateur : TF_VAR_admin_principal_name s'il est défini (chaîne), sinon la personne connectée.
 #
 # Usage, depuis infrastructure/terraform/azure : ./initialiser-base.sh [preprod|prod] [--avec-corpus]
 set -euo pipefail
@@ -23,12 +26,15 @@ for arg in "$@"; do
   esac
 done
 TF="$ICI/environnements/$ENV"
-IMAGE_PSQL="pgvector/pgvector:pg17"   # déjà présente pour la pile locale : fournit psql
+IMAGE_PSQL="pgvector/pgvector:pg17"   # déjà présente pour la pile locale : fournit psql et pg_restore
+COMPTE="stlimpidetf024b1e9f"
 
 HOTE="$(terraform -chdir="$TF" output -raw postgresql_hote)"
 ROLE_APP="$(terraform -chdir="$TF" output -raw identite_app_nom)"
-ADMIN="$(az ad signed-in-user show --query userPrincipalName -o tsv)"
+OID_APP="$(terraform -chdir="$TF" output -raw identite_app_object_id)"
+ADMIN="${TF_VAR_admin_principal_name:-$(az ad signed-in-user show --query userPrincipalName -o tsv)}"
 export PGPASSWORD="$(az account get-access-token --resource-type oss-rdbms --query accessToken -o tsv)"
+[[ -n "${GITHUB_ACTIONS:-}" ]] && echo "::add-mask::$PGPASSWORD"
 
 psql_azure() { # $1 = base ; la suite = arguments de psql
   local base="$1"; shift
@@ -36,23 +42,44 @@ psql_azure() { # $1 = base ; la suite = arguments de psql
     psql "host=$HOTE dbname=$base user=$ADMIN sslmode=require" -v ON_ERROR_STOP=1 -q "$@"
 }
 
-echo "Environnement : $ENV ; serveur : $HOTE"
+echo "Environnement : $ENV ; serveur : $HOTE ; administrateur : $ADMIN"
 
 echo "1. Rôle de l'application ($ROLE_APP)"
 if [[ "$(psql_azure postgres -tA -c "select count(*) from pg_roles where rolname = '$ROLE_APP'")" == "0" ]]; then
   # Fonction propre à Azure : crée un rôle rattaché à une identité Entra ID (ni administrateur, ni création de rôles).
-  psql_azure postgres -c "select * from pgaadauth_create_principal('$ROLE_APP', false, false);" >/dev/null
+  # Par identifiant objet plutôt que par nom : un ancien principal du même nom (destruction incomplète) rendrait la
+  # recherche par nom ambiguë.
+  psql_azure postgres -c "select * from pgaadauth_create_principal_with_oid('$ROLE_APP', '$OID_APP', 'service', false, false);" >/dev/null
   echo "   créé"
 else
   echo "   déjà présent"
 fi
 
-echo "2. Migrations"
+if [[ -n "$CORPUS" ]]; then
+  echo "2. Corpus restauré depuis le socle ($COMPTE/corpus/corpus.dump)"
+  if [[ "$(psql_azure rag -tA -c "select count(*) from information_schema.tables where table_schema = 'public'")" != "0" ]]; then
+    echo "   la base contient déjà un schéma : rien n'est restauré (environnement à recréer pour repartir du socle)"
+  else
+    TMP="$(mktemp -d)"
+    trap 'rm -rf "$TMP"' EXIT
+    az storage blob download --auth-mode login --account-name "$COMPTE" --container-name corpus --name corpus.dump \
+      --file "$TMP/corpus.dump" --no-progress --output none
+    # Objets créés par l'administrateur, propriétaire de tout (comme avec les migrations) ; droits posés à l'étape 4.
+    # Une seule transaction : une erreur annule tout, au lieu de laisser un schéma à moitié restauré qui passerait
+    # ensuite pour une base déjà initialisée.
+    docker run --rm -i -e PGPASSWORD "$IMAGE_PSQL" \
+      pg_restore -d "host=$HOTE dbname=rag user=$ADMIN sslmode=require" --no-owner --no-privileges --single-transaction \
+      < "$TMP/corpus.dump"
+    psql_azure rag -tA -c "select count(*) || ' passages, dont ' || count(*) filter (where v.is_current) || ' servis' from chunks c join document_versions v on v.id = c.document_version_id"
+  fi
+fi
+
+echo "3. Migrations"
 # La chaîne de connexion passe par l'environnement (jamais en argument : visible dans la liste des processus).
 ConnectionStrings__Rag="Host=$HOTE;Port=5432;Database=rag;Username=$ADMIN;Password=$PGPASSWORD;SslMode=Require" \
-  dotnet run --project "$DEPOT/src/Limpide.Ingestion" -- migrate
+  dotnet run --project "$DEPOT/src/Limpide.Ingestion" --no-launch-profile -- migrate
 
-echo "3. Droits de l'application"
+echo "4. Droits de l'application"
 psql_azure rag <<SQL
 GRANT CONNECT ON DATABASE rag TO "$ROLE_APP";
 GRANT USAGE ON SCHEMA public TO "$ROLE_APP";
@@ -62,19 +89,5 @@ GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO "$ROLE_APP";
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO "$ROLE_APP";
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO "$ROLE_APP";
 SQL
-
-if [[ -n "$CORPUS" ]]; then
-  echo "4. Corpus copié depuis la base locale"
-  if [[ "$(psql_azure rag -tA -c "select count(*) from chunks")" != "0" ]]; then
-    echo "   la base Azure contient déjà des passages : rien n'est copié"
-  else
-    # Données seules (le schéma vient des migrations) ; ni le journal des migrations ni les retours des visiteurs.
-    docker compose -f "$DEPOT/docker-compose.yml" exec -T postgres \
-      pg_dump -U rag -d rag --data-only --no-owner \
-        --exclude-table-data=schemaversions --exclude-table-data=feedback --exclude-table-data=admin_actions \
-      | psql_azure rag
-    psql_azure rag -tA -c "select count(*) || ' passages, dont ' || count(*) filter (where v.is_current) || ' servis' from chunks c join document_versions v on v.id = c.document_version_id"
-  fi
-fi
 
 echo "Base prête."
