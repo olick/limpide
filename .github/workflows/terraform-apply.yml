@@ -1,0 +1,65 @@
+# Application de l'infrastructure permanente OVHcloud (S7, session 4a) : zone DNS limpide-ia.fr, après la fusion sur
+# main, avec validation manuelle (environnement GitHub « production », relecteur requis).
+# La validation porte sur le plan affiché dans la PR ; le job le recalcule, l'affiche et l'applique. Un écart entre
+# les deux (zone modifiée à la main entre-temps) se voit dans le résumé de ce job.
+# Le VPS n'est que lu (dns/vps.tf) : rien ici ne peut le modifier. Azure n'a pas d'apply après fusion (option B,
+# semaine-07.md, session 4b).
+name: Terraform apply
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/terraform/dns/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Jamais deux applications en même temps, et jamais d'annulation en cours d'apply.
+concurrency:
+  group: terraform-apply-dns
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    name: Apply OVHcloud (zone DNS)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      # Secrets de l'environnement production : identité Azure d'écriture de l'état, compte de service OVH
+      # limpide-ci-ecriture (écriture de la zone, lecture du VPS).
+      ARM_USE_OIDC: "true"
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+      ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      OVH_CLIENT_ID: ${{ secrets.OVH_CLIENT_ID }}
+      OVH_CLIENT_SECRET: ${{ secrets.OVH_CLIENT_SECRET }}
+    defaults:
+      run:
+        working-directory: infrastructure/terraform/dns
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: hashicorp/setup-terraform@dfe3c3f87815947d99a8997f908cb6525fc44e9e # v4.0.1
+        with:
+          terraform_version: 1.16.6
+          terraform_wrapper: false
+
+      - run: terraform init -input=false
+      - run: terraform plan -input=false -no-color -out=plan.tfplan
+      - name: Résumé du plan appliqué
+        run: |
+          {
+            echo "### Plan appliqué (zone DNS)"
+            echo '```'
+            terraform show -no-color plan.tfplan
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+      - run: terraform apply -input=false -no-color plan.tfplan

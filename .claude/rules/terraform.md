@@ -29,7 +29,9 @@ Pièges :
 - `principal_name` tronqué à 63 caractères par Azure → `ignore_changes`, sinon remplacement, donc `DROP ROLE`.
 - Lire chaque `plan` : un `-/+` sur une base de données = données perdues.
 - Durées mesurées : `demo.sh` sur environnement vide ≈ 11 min, `detruire.sh` ≈ 13 min.
-- Zone DNS OVH (`dns/`, jeton limité à la zone dans `~/.ovh.conf`) : entrées posées par OVH (NS, MX, SPF, ftp, TXT)
-  non gérées ; `apply` manuel jusqu'à la S7 (session 4a), où elle entre dans la CI avec le VPS importé (comptes de
-  service OVH : lecture pour le `plan`, écriture protégée pour l'`apply`).
+- Zone DNS OVH (`dns/`, jeton du poste dans `~/.ovh.conf` : zone + lecture du VPS) : entrées posées par OVH (NS, MX,
+  SPF, ftp, TXT) non gérées. Dans la CI depuis la S7 : `plan` en PR, `apply` après fusion validé (environnement
+  `production`) ; comptes de service OVH `limpide-ci-lecture` / `limpide-ci-ecriture`.
+- **VPS lu, jamais géré** (`data "ovh_vps"`, `dns/vps.tf`) : `resource "ovh_vps"` résilie au `destroy` et réinstalle
+  si `image_id` change. Le fournisseur avale les 403 (attributs vides) : garder la `postcondition`.
 - Secrets jamais en variables Terraform (ils finissent en clair dans l'état) : Key Vault + identités managées.
