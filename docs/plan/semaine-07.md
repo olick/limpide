@@ -304,7 +304,9 @@ fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est n
 - [x] Premier passage dans la chaîne (PR #11, qui touche `deploy/evaluer.sh` : évaluée elle-même), après création de
   l'environnement `evaluation` : **barrière passée, 2 min 30 s de script, 2 min 50 s de job** (clés 4 s, sauvegarde
   6 s, base jetable et restauration 21 s, migrations 1 s, 50 questions et juge ≈ 2 min). Aucune des deux clés en clair
-  dans le journal public (vérifié en les comparant aux valeurs du coffre, sans les afficher). Rapports en artefact.
+  dans le journal public (vérifié en les comparant aux valeurs du coffre, sans les afficher). Rapports en artefact
+  de l'exécution, non versionné (`2026-10-17-1951-…json`) : **0,29 $** (rédaction 0,190 $, juge 0,100 $), 0 échec,
+  part de réponses jugées infidèles 0,18 (contre 1 échec et 0,15 dans la passe locale `2050`).
 - [x] Alexandre : « Évaluation » en contrôle requis du ruleset de `main` (vérifié par l'API, à côté de « Build et
   tests »).
 
@@ -340,6 +342,15 @@ aux droits larges ne serve jamais sans quelqu'un derrière.
   PostgreSQL `id-limpide-ci-azure`, de type `ServicePrincipal`), reconnexion 1 s, base 50 s (rôle de l'application,
   corpus restauré, 1 130 passages servis), test de fumée 6 s (`/sante` = `65e689755765`), destruction 13 min 36 s ;
   **job : 24 min 43 s**, plus l'attente de validation. Groupe de ressources supprimé, vérifié. Coût : ≈ 0,10 €.
+
+- Relectures par les agents de Claude Code (lecture seule) : 4b-1, `relecteur-infra` puis `relecteur-regles`, une
+  passe chacun ; 4b-2, `relecteur-infra` en deux passes et `relecteur-regles` (plus une passe sur `/sante` seul).
+  Aucun bloquant. Ce qu'elles ont changé : jeton OIDC masqué ; scripts d'évaluation exclus du déploiement ;
+  l'environnement `evaluation` présenté comme une étiquette, pas une barrière ; configuration de production non
+  évaluée, écrite ; restauration en une transaction ; rôle de l'application par identifiant objet ; délais et
+  nouvelles tentatives du test de fumée ; cache de `/sante` ; délai de l'`apply` ; verrou du socle ; limites de la
+  condition ABAC (elle borne les rôles, pas leur portée) écrites. Limite : relectures faites par un modèle.
+- Épisode LinkedIn : post 17 de la série courte (brouillon le 2026-10-17).
 
 **Session 4b terminée (2026-10-17).** Critère révisé atteint : une PR qui modifie les consignes lance l'évaluation,
 publie le rapport et ne peut pas être fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est ni
