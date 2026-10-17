@@ -189,10 +189,9 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 - **Versionnement** de ce qui influence la qualité : prompt, modèle, modèle d'embedding, jeu d'évaluation
 - Page publique des résultats d'évaluation, par version
 
-- **Questions réelles des visiteurs** (formulaire de retours, avec leur accord) : source de questions écrites par
-  d'autres que l'auteur pour le jeu d'évaluation ; un retour « réponse fausse » devient un cas de test
-
-- **Back office, v2** : transformer un retour de visiteur en cas de test ; résultats d'évaluation par version
+- **Questions réelles des visiteurs** et **back office, v2** (transformer un retour en cas de test) : **reportés en
+  S10 le 2026-10-17**, voir la S10. Les résultats d'évaluation par version, prévus aussi dans le back office v2, sont
+  couverts par la page publique (session 5)
 
 - **Passer la vectorisation à Qwen3-Embedding-8B** (ajouté le 2026-10-13, après la mesure de la S6 :
   `docs/notes/observations-modeles-ovh.md`) : top 5 10/10 et MRR 0,80 contre 7/10 et 0,52 pour bge-m3, sur 10
@@ -203,8 +202,8 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
   3. réglages : `Embedding:Model=Qwen3-Embedding-8B`, `Embedding:RequestDimensions=true`,
      `Embedding:QueryInstruction` ; révision de l'ADR-012 (et de l'ADR-002) ;
   4. **bascule sans interruption** à concevoir : les vecteurs sont dans une seule colonne, et la recherche ne compare
-     que des vecteurs du même modèle ; revectoriser en place couperait la recherche ≈ 10 minutes (colonne de vecteurs
-     par modèle, ou copie de la base puis bascule) ;
+     que des vecteurs du même modèle ; revectoriser en place couperait la recherche ≈ 10 minutes. Proposition du
+     2026-10-17 : une table de vecteurs par modèle, en deux PR (`semaine-07.md`, session 6) ;
   5. production (VPS) et Azure ; vitrine des technologies (bge-m3 → Qwen3-Embedding) ;
   6. **épisode LinkedIn** à écrire à ce moment-là (note de travail P du journal).
 
@@ -263,6 +262,13 @@ Rattrapage du retard accumulé, finitions, préparation d'un support de soutenan
 **À la fin du plan initial** (reporté le 2026-10-13, avant les étapes ajoutées) : validation de la page d'accueil par
 2 ou 3 personnes non techniques (critère de l'étape intermédiaire), message à Jedha, 2 ou 3 testeurs extérieurs ;
 retours notés dans le bilan.
+
+**Reporté de la S7 le 2026-10-17** (aucune session de la S7 ne les prévoyait) : **questions réelles des visiteurs**
+(formulaire de retours, avec leur accord) comme source de questions écrites par d'autres que l'auteur pour le jeu
+d'évaluation, et **back office, v2** : un retour « réponse fausse » devient un cas de test. Placés ici, après la S8
+(politique des retours des visiteurs) et la S9 (registre des traitements) : verser les questions des visiteurs dans
+le jeu d'évaluation est une nouvelle finalité de traitement, à couvrir par l'information des visiteurs avant de
+l'outiller. Ils rejoignent les testeurs extérieurs ci-dessus, qui fourniront les premières questions.
 
 **Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
 projet) : **étude de migration vers un cloud souverain**, en

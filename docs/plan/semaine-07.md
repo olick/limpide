@@ -4,7 +4,8 @@
 Une modification du prompt qui dégrade les scores est **bloquée avant la production**.
 
 **Budget temps** : environ 10 heures, en 5 sessions ; environ 12 h 30 depuis le découpage de la session 4 (4a, 4b)
-et l'ajout de Terraform OVHcloud.
+et l'ajout de Terraform OVHcloud ; environ 16 h 30, en 6 sessions, depuis la replanification de la bascule Qwen
+(2026-10-17).
 
 **Prérequis** : infrastructure Terraform avec préproduction et production (semaine 6).
 
@@ -366,16 +367,80 @@ Mistral de l'évaluation partage le plafond de 10 € par mois de la démo (ADR-
 
 **Terminé quand** : le blocage est démontré et la page d'évaluation est en ligne.
 
-## Tâche ajoutée : vectorisation par Qwen3-Embedding-8B (après la session 5)
+## Session 6 : bascule sur Qwen3-Embedding-8B (≈ 4 h, deux PR ; replanifiée le 2026-10-17)
 
 Ordre décidé le 2026-10-15 : la comparaison est faite (session 1 : top 5 28/30 contre 21/30) ; la bascule passera
-**par la chaîne CI/CD une fois construite**, comme première modification évaluée en préproduction avant la mise en
-production.
+**par la chaîne CI/CD une fois construite**, comme première modification évaluée avant la mise en production.
+Budget de la semaine porté à ≈ 16 h 30 (était ≈ 12 h 30) : la bascule sans interruption n'était pas chiffrée.
 
-Dès que le jeu de 50 questions existe : comparer bge-m3 et Qwen3-Embedding-8B avec consigne (mesure de la S6 sur 10
-questions : top 5 10/10, MRR 0,80 contre 7/10, 0,52). Si l'écart tient : seuil recalibré, réglages, révision de
-l'ADR-012, bascule sans interruption (à concevoir : une seule colonne de vecteurs aujourd'hui), production et Azure,
-vitrine, épisode LinkedIn (note P). Détail : plan global, S7.
+### Prérequis : un espace de travail Mistral pour l'évaluation (Alexandre, avant la session)
+
+La bascule déclenche plusieurs évaluations, sur une clé qui partage aujourd'hui le plafond de 10 € par mois de la
+démo (ADR-016, « À trancher »). Chez Mistral, le plafond de dépense se règle **par espace de travail** (Workspace),
+pas par clé : une deuxième clé dans le même espace ne protège pas la démo. Le plafond d'un espace ne peut pas dépasser
+celui de l'organisation (documentation Mistral, « Manage Workspace usage and limits », consultée le 2026-10-17 : à
+confirmer dans la console avant d'agir).
+
+1. Console Mistral : créer un espace `limpide-evaluation`, plafond mensuel ≈ 3 € (une dizaine d'exécutions) ; espace
+   de la démo plafonné à 10 € ; plafond de l'organisation relevé à 13 €, sinon les deux espaces se partagent encore
+   10 €. Les limites de débit s'appliquent aussi par espace : l'évaluation ne prend plus sur celles de la démo.
+2. Créer une clé dans ce nouvel espace et remplacer la **valeur** du secret `mistral-api-key` du coffre du socle
+   (`az keyvault secret set`, la commande de création de `infrastructure/terraform/etat/README.md`). La démo du VPS
+   garde sa clé (`.env`). Même nom de secret : ni code, ni Terraform, ni
+   condition ABAC à changer. La vitrine Azure lit le même secret et consommera donc sur l'espace d'évaluation :
+   acceptable, Azure n'est pas la démo. Une vitrine encore en place ne lit la nouvelle valeur qu'au redémarrage de
+   sa révision ; recréée à la demande, elle la prend d'office.
+3. Vérifier : une évaluation au vert, sa consommation visible dans le nouvel espace et pas dans celui de la démo.
+4. Réviser l'ADR-016 (point « À trancher » → décision datée).
+
+Plafond atteint : l'évaluation échoue et la PR reste bloquée (échec fermé) ; la démo n'est pas touchée.
+
+### Conception de la bascule (proposition, à valider en début de session)
+
+Deux obstacles, tous deux dus à l'unique colonne `chunks.embedding` :
+
+- revectoriser en place retire les passages de la recherche de la démo (filtre `embedding_model = @model`) pendant
+  ≈ 10 minutes ;
+- `corpus.dump`, que l'évaluation restaure, ne porte qu'un vecteur par passage : la PR qui passe à Qwen serait
+  évaluée sur des vecteurs bge-m3 (aucun résultat).
+
+Options :
+
+- **A (recommandée) : une table de vecteurs par modèle**, `chunk_embeddings (chunk_id, embedding_model, embedding
+  vector(1024))`, clé `(chunk_id, embedding_model)`. Les deux modèles coexistent ; `embed` remplit celui de la
+  configuration sans toucher l'autre ; la recherche lit celui de la configuration. La bascule devient un changement de
+  configuration, le retour arrière aussi. La sauvegarde porte les deux modèles : la PR et `main` sont évaluées chacune
+  avec ses vecteurs. Resservira au prochain changement de modèle. Coût : une migration, et les requêtes de
+  `EmbeddingStore`, `PgvectorPassageSearch`, `DocumentVersionStore` et `ChunkStore`.
+- B : copie de la base, revectorisée, puis changement de chaîne de connexion. Pas de code, mais deux sauvegardes à
+  tenir, l'ingestion gelée pendant la bascule, et l'évaluation qui doit choisir sa sauvegarde selon la configuration.
+
+Point à mesurer avec A : avec un index HNSW commun aux deux modèles, pgvector applique le filtre sur le modèle
+**après** la recherche approchée, et peut rendre moins de passages que demandé. À 1 130 passages par modèle, la
+recherche exacte (sans index) ou un index partiel par modèle suffit : comparer les scores, pas seulement la latence.
+
+Questions à trancher avant la PR 1 :
+
+- `chunks.embedding_model` : retiré (le modèle vit dans `chunk_embeddings`) ou gardé comme modèle servi ? La règle
+  « chaque passage enregistre `embedding_model` » reste tenue par la nouvelle table ;
+- `embed` sur une version **déjà publiée** (ADR-008) : ajouter les vecteurs d'un second modèle ne change pas le texte
+  servi, mais la commande doit le permettre sans repasser par une candidate, et rester idempotente (modèle déjà
+  présent pour un passage = rien à faire) ;
+- `publish` : exiger les vecteurs du modèle configuré, pas ceux de tous les modèles présents.
+
+### Étapes (si A est retenue)
+
+1. **PR 1 (≈ 2 h)** : migration `0005` (table, copie des vecteurs bge-m3 existants ; ancienne colonne conservée),
+   code. Aucun changement de réponse attendu : l'évaluation doit redonner les mêmes scores (recherche touchée :
+   rapports avant et après gardés dans `eval/results/`). Fusion, déploiement.
+2. **Entre les deux (≈ 30 min)** : `embed` avec Qwen3-Embedding-8B en production (la démo sert toujours bge-m3), puis
+   `deploy/exporter-corpus.sh` : la sauvegarde contient les deux modèles.
+3. **PR 2 (≈ 1 h 30)** : `Embedding:Model=Qwen3-Embedding-8B`, `Embedding:RequestDimensions=true`,
+   `Embedding:QueryInstruction` ; `Generation:MinScore` recalibré (≈ 0,60 mesuré) ; seuils de `gate` relevés ;
+   révision de l'ADR-012 (et de l'ADR-002) ; vitrine des technologies (bge-m3 → Qwen3-Embedding). L'évaluation de la
+   PR tourne sur les vecteurs Qwen. Fusion, déploiement, `/sante` vérifié.
+4. **Après** : retrait des vecteurs bge-m3 et de l'ancienne colonne par une migration, une fois le retour arrière
+   jugé inutile ; vitrine Azure ; épisode LinkedIn (note P).
 
 ---
 
@@ -417,3 +482,13 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   cité 28/30 contre 19/30 ; deux « échecs » = limites du contrôle (refus non reconnu i01, faux positif q30). Ordre : sessions 2 à 5 (CI), puis
   bascule Qwen par la CI. Garde-fou à renforcer en S8 : « Oui » en tête sur la situation de l'utilisateur non détecté. Bases d'essai
   locales `rag_mistral`, `rag_qwen`.
+
+**Point d'étape (2026-10-17)**, après la session 4b :
+
+- Questions réelles des visiteurs et back office v2 : prévus au plan global de la S7, mais dans aucune session.
+  **Reportés en S10** (plan global), après la politique des retours (S8) et le registre des traitements (S9) ; les
+  résultats d'évaluation par version sont couverts par la page publique (session 5).
+- Bascule Qwen : la conception de la bascule sans interruption n'était pas chiffrée. Devenue la **session 6**
+  (≈ 4 h, deux PR, table de vecteurs par modèle proposée) ; budget de la semaine porté à ≈ 16 h 30.
+- Plafond Mistral (ADR-016) : le plafond se règle par espace de travail, pas par clé. Espace séparé pour l'évaluation,
+  à créer par Alexandre **avant la session 6** (procédure dans la session 6).
