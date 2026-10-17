@@ -101,8 +101,8 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 
 S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraform) ; S8–S10 à venir (observabilité
 et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 3 faites (jeu `jeu/2`, juge
-calibré, `gate`, ADR-014) ; 4a faite le 2026-10-17 (chaîne GitHub Actions jusqu'au déploiement du VPS, ADR-015),
-reste l'analyse des images (sacrifiable). Puis 4b (préproduction éphémère et évaluation ≈ 0,29 $), 5 (blocage d'un
+calibré, `gate`, ADR-014) ; 4a faite le 2026-10-17 (chaîne GitHub Actions jusqu'au déploiement du VPS, analyse
+des images par Grype, ADR-015). Puis 4b (préproduction éphémère et évaluation ≈ 0,29 $), 5 (blocage d'un
 prompt dégradé démontré, page publique), puis bascule sur Qwen3-Embedding-8B **par la CI** (relever les seuils).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de

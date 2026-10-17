@@ -199,7 +199,13 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
     contiennent déjà, nuancée.
   Tout est intégré à l'ADR (« Ce qui reste exposé »). Limite : relectures faites par un modèle, en une passe.
   Depuis, les agents sont lancés sans attendre la demande (CLAUDE.md, « Règles et interdits »).
-- [ ] **Reste de la 4a** : analyse des vulnérabilités des images (sacrifiable).
+- [x] Analyse des images (2026-10-17) : `deploy/analyser-images.sh` (Grype v0.120.0, image épinglée par empreinte,
+  job sans secret), avant chaque déploiement (`deploiement.yml`) et chaque lundi (`analyse-images.yml`). Bloquant :
+  élevée ou critique **avec correctif** ; exceptions dans `deploy/grype.yaml` (raison et date). Trivy écarté
+  (compromission de mars 2026, CVE-2026-33634). Point de départ sur `9a1f8414ebf1` : 0 élevée ou critique, 64
+  moyennes et 10 faibles par image, toutes dans Ubuntu 24.04, aucune corrigeable ; 2 min 14 s en local. Au passage :
+  `terraform-apply.yml` se relance aussi quand il est modifié (comme `deploiement.yml`).
+  **Session 4a terminée.**
 - Épisode LinkedIn : post 16 de la série courte (brouillon le 2026-10-17).
 - À faire plus tard sur le VPS : supprimer les anciennes images construites sur place (`limpide-web:latest`,
   `limpide-admin:latest`) après quelques jours sans retour arrière.

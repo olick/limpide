@@ -66,7 +66,8 @@
         ]),
         ("Code", [
             new("GitHub", "dépôt public, sous licence Apache 2.0 ; registre des images Docker", "github"),
-            new("GitHub Actions", "vérifie automatiquement chaque modification : compilation et tests", "githubactions"),
+            new("GitHub Actions", "vérifie chaque modification (compilation, tests), puis la met en ligne après validation", "githubactions"),
+            new("Grype", "cherche les failles connues dans les images, avant chaque mise en ligne et chaque semaine", null),
         ]),
     ];
 }

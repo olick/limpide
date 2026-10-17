@@ -66,8 +66,9 @@ le câblage propre à la chaîne (connexion à ghcr.io, clé SSH, résumé dans 
 |---|---|---|---|
 | `ci.yml` | chaque PR, push sur `main` | `dotnet build`, `dotnet test` | lecture du dépôt |
 | `terraform.yml` | PR et push qui touchent `infrastructure/terraform/` | `fmt -check`, `validate` (DNS, Azure) ; `plan` de la zone OVH en PR | identité Azure de lecture, compte OVH de lecture |
-| `terraform-apply.yml` | fusion qui touche `dns/` | `plan` puis `apply` de la zone | environnement `production` (validation manuelle) |
-| `deploiement.yml` | fusion qui touche l'application ou `deploy/` | `deploy/publier-images.sh`, puis SSH → `deploy/deployer.sh <version>` | écriture sur ghcr.io ; environnement `production` |
+| `terraform-apply.yml` | fusion qui touche `dns/` ou ce workflow | `plan` puis `apply` de la zone | environnement `production` (validation manuelle) |
+| `deploiement.yml` | fusion qui touche l'application ou `deploy/` | `deploy/publier-images.sh`, `deploy/analyser-images.sh`, puis SSH → `deploy/deployer.sh <version>` | écriture sur ghcr.io ; environnement `production` |
+| `analyse-images.yml` | chaque lundi | `deploy/analyser-images.sh` sur la version courante | aucun secret |
 
 Tous peuvent aussi être lancés à la main (`workflow_dispatch`). L'environnement `production` n'accepte que la
 branche `main` (vérifié le 2026-10-17) : un workflow modifié sur une autre branche ne peut pas obtenir ses secrets,
@@ -119,6 +120,22 @@ Les choix qui l'accompagnent :
    - `main` protégée : PR obligatoire, contrôle « Build et tests » requis, push forcé interdit.
    - Le jeton `gh` du poste, utilisé par Claude Code, n'a ni l'écriture du contenu ni l'administration : il ne
      peut ni fusionner ni contourner la protection.
+8. **Analyse des vulnérabilités des images par Grype**, avant chaque déploiement et chaque semaine
+   (`deploy/analyser-images.sh`, ajouté le 2026-10-17).
+   - **Bloquant** : une vulnérabilité élevée ou critique **dont un correctif existe**. Le reste est affiché sans
+     bloquer : une vulnérabilité sans correctif arrêterait la chaîne sans action possible, et on apprendrait à ignorer
+     l'alerte (même raisonnement que les seuils de l'ADR-014). Exceptions dans `deploy/grype.yaml`, avec une raison
+     (date comprise, par convention : Grype ne la contrôle pas), comptées à part dans le rapport.
+   - **Grype plutôt que Trivy**, l'outil le plus courant. Le 19 mars 2026, les étiquettes de `trivy-action` ont été
+     réécrites et un binaire Trivy piégé publié : le code volait les secrets de la chaîne avant de lancer l'analyse
+     normale (CVE-2026-33634). Un outil de sécurité est une cible de choix, car il tourne partout, souvent avec des
+     secrets. D'où trois précautions, qui valent pour tout outil tiers :
+     - lancé depuis son image Docker, **épinglée par empreinte**, dans une version publiée depuis au moins deux
+       semaines ;
+     - **aucune action du catalogue** ;
+     - **job sans aucun secret** : les images sont publiques et se lisent sans connexion.
+   - **Chaque semaine**, parce qu'une image vieillit : de nouvelles vulnérabilités sont publiées après son
+     déploiement.
 
 ## Conséquences
 
@@ -162,7 +179,20 @@ Les choix qui l'accompagnent :
     involontaire, pas d'une erreur de jugement. Elle prendra son sens avec l'évaluation (4b) ou un second relecteur.
     Les secrets de lecture sont accessibles aux PR venues d'une branche du dépôt, que seul l'auteur peut pousser :
     à revoir si un collaborateur rejoint le projet.
-- **Pas encore fait** : analyse des vulnérabilités des images (sacrifiable en S7) ; évaluation en préproduction
+- **Analyse des images, point de départ** (2026-10-17, version `9a1f8414ebf1`) : aucune vulnérabilité élevée ni
+  critique. Par image : 64 moyennes et 10 faibles ou négligeables, toutes dans les paquets d'Ubuntu 24.04 (image de
+  base .NET), aucune avec correctif disponible, aucune dans les paquets NuGet. Durée en local : 2 min 14 s, dont le
+  premier téléchargement de la base de vulnérabilités.
+- **Un correctif de l'image de base n'arrive qu'avec une nouvelle version** : les images de base sont désignées par
+  une étiquette mouvante (`aspnet:10.0`), mais une version déjà publiée n'est jamais reconstruite. Corriger une
+  vulnérabilité bloquante de la base demande donc un commit qui touche les sources des images. Épingler les images de
+  base par empreinte, avec une mise à jour automatique proposée en PR, rendrait ces correctifs explicites : à
+  envisager en S8. Tant qu'une version est bloquée, un commit qui ne touche que `deploy/` (correctif de
+  `deployer.sh`, par exemple) garde cette version et reste bloqué : en sortir par un commit qui reconstruit les images
+  ou, en urgence, par une exception datée.
+- **L'analyse hebdomadaire est un workflow planifié** : GitHub le désactive après 60 jours sans activité sur le dépôt,
+  sans alerte. Sans effet tant que le projet vit ; à surveiller s'il se met en sommeil.
+- **Pas encore fait** : évaluation en préproduction
   éphémère et production conditionnée à son succès (4b).
 - **Conditions de révision** :
   - **Azure devient permanent** (migration cloud, après le plan) : `plan` Azure en PR, `apply` après fusion,
