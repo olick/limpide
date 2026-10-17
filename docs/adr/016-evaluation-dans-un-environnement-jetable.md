@@ -65,7 +65,9 @@ sur l'abonnement.
   - coût : 0,28 $ (rédaction 0,185 $, juge 0,094 $) ;
   - barrière passée, avec des valeurs dans la fourchette des passes de référence de l'ADR-014 : 1 échec, 21/30
     passages attendus fournis, 19/30 cités, 0,15 de réponses jugées infidèles.
-  - Contre 25 à 30 min pour la préproduction Azure, et environ 0,10 € d'Azure en plus par exécution.
+  - dans la chaîne (PR #11) : 2 min 30 s de script, 2 min 50 s de job ;
+  - à comparer à la préproduction Azure qu'il aurait fallu à chaque PR : la recréation d'Azure, désormais manuelle,
+    prend 24 min 43 s dans la chaîne (création 9 min 44 s, destruction 13 min 36 s) et environ 0,10 €.
 - **Ce qu'on ne teste plus à chaque PR** :
   - l'image publiée : on évalue le code compilé du même commit, pas l'image qui partira en production ;
   - Azure : l'authentification Entra ID, Container Apps et la recréation de l'infrastructure. C'est le rôle du

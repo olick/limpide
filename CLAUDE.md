@@ -100,15 +100,15 @@ Plan : `docs/plan/plan-global.md`. Un fichier par semaine, `docs/plan/semaine-NN
 réalisation) : **toujours lire celui de la semaine en cours**.
 
 S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraform) ; S8–S10 à venir (observabilité
-et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 3 faites (jeu `jeu/2`, juge
-calibré, `gate`, ADR-014) ; 4a faite le 2026-10-17 (chaîne GitHub Actions jusqu'au déploiement du VPS, analyse
-des images par Grype, ADR-015) ; 4b-1 le 2026-10-17 (évaluation sur le runner à chaque PR concernée, contrôle requis
-« Évaluation », ≈ 2 min et 0,28 $, ADR-016). Puis 4b-2 (recréation d'Azure à la main, validée, et vitrine), 5
-(blocage d'un prompt dégradé démontré, page publique), puis bascule sur Qwen3-Embedding-8B **par la CI** (relever
-les seuils ; rafraîchir la sauvegarde du corpus, `deploy/exporter-corpus.sh`).
+et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 4 faites (jeu `jeu/2`, juge
+calibré, `gate`, ADR-014 ; chaîne GitHub Actions jusqu'au VPS, Grype, ADR-015 ; le 2026-10-17, évaluation sur le
+runner en contrôle requis « Évaluation », ≈ 2 min et 0,28 $, et workflow « Azure » manuel et validé, ADR-016).
+Puis 5 (blocage d'un prompt dégradé démontré, page publique), puis bascule sur Qwen3-Embedding-8B **par la CI**
+(relever les seuils ; rafraîchir la sauvegarde du corpus, `deploy/exporter-corpus.sh`).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
-budget Mistral à construire ; anti-bot ; test du message à la 11e question.
+budget Mistral à construire (la clé de l'évaluation partage le plafond de la démo) ; anti-bot ; test du message à
+la 11e question.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,
