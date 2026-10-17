@@ -206,6 +206,16 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
   moyennes et 10 faibles par image, toutes dans Ubuntu 24.04, aucune corrigeable ; 2 min 14 s en local. Au passage :
   `terraform-apply.yml` se relance aussi quand il est modifié (comme `deploiement.yml`).
   **Session 4a terminée.**
+- Déploiement de bout en bout mesuré (2026-10-17), de la fusion au site vérifié, sur deux fusions qui créaient une
+  nouvelle version (PR #8, puis #9 : badge « test » temporaire sur la page d'accueil, retiré ensuite) :
+
+  | Fusion | Images | Analyse | Attente de validation | VPS | Total |
+  |---|---|---|---|---|---|
+  | #8 (`5bd7d7b2c29b`) | 1 min 05 | 1 min 43 | ≈ 1 min | 16 s | 4 min 16 |
+  | #9 (`527f7e21a114`) | 57 s | 1 min 24 | ≈ 40 s | 17 s | 3 min 25 |
+
+  Soit environ 2 min 45 à 3 min 15 sans l'attente de validation ; l'analyse est l'étape la plus longue (base de
+  vulnérabilités téléchargée à chaque exécution). Analyse des trois images à chaque fois : 0 élevée ou critique.
 - Épisode LinkedIn : post 16 de la série courte (brouillon le 2026-10-17).
 - À faire plus tard sur le VPS : supprimer les anciennes images construites sur place (`limpide-web:latest`,
   `limpide-admin:latest`) après quelques jours sans retour arrière.
