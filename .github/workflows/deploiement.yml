@@ -1,7 +1,9 @@
 # Déploiement de la démo (S7, session 4a) : après chaque fusion sur main qui touche l'application ou sa configuration.
 #   1. images : construites une fois et publiées sur ghcr.io (deploy/publier-images.sh, version par
 #      deploy/version-images.sh ; une version déjà publiée n'est pas reconstruite) ;
-#   2. vps : après validation manuelle (environnement « production », relecteur requis), SSH vers le VPS avec une clé
+#   2. analyse : vulnérabilités des images publiées (deploy/analyser-images.sh, Grype) ; bloque le déploiement si une
+#      vulnérabilité élevée ou critique a un correctif disponible ; job sans aucun secret ;
+#   3. vps : après validation manuelle (environnement « production », relecteur requis), SSH vers le VPS avec une clé
 #      dédiée dont la seule commande permise est deploy/deployer.sh <version> (pull, migrate, redémarrage, vérification).
 # Tant que l'évaluation n'est pas dans la chaîne (session 4b), cette validation est le seul contrôle avant la
 # production : elle remplace le déploiement manuel sans rien perdre.
@@ -55,9 +57,23 @@ jobs:
 
       - run: deploy/publier-images.sh
 
+  analyse:
+    name: Analyse des images
+    needs: images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - run: deploy/analyser-images.sh "$VERSION"
+        env:
+          VERSION: ${{ needs.images.outputs.version }}
+
   vps:
     name: Déploiement sur le VPS
-    needs: images
+    needs: [images, analyse]
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     environment: production

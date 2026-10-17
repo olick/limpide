@@ -1,0 +1,12 @@
+# Configuration de Grype pour deploy/analyser-images.sh (ADR-015).
+#
+# Exceptions : une vulnérabilité bloquante qu'on accepte en connaissance de cause (composant non utilisé, correctif
+# impossible à court terme). Chaque règle porte une raison et une date, reprises dans le rapport JSON
+# (ignoredMatches) et comptées à part dans le résumé. Une exception se retire dès que le correctif est passé.
+#
+# ignore:
+#   - vulnerability: CVE-AAAA-NNNNN
+#     package:
+#       name: nom-du-paquet
+#     reason: "pourquoi on l'accepte, jusqu'à quand (AAAA-MM-JJ)"
+ignore: []

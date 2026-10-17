@@ -11,6 +11,7 @@ on:
     branches: [main]
     paths:
       - "infrastructure/terraform/dns/**"
+      - ".github/workflows/terraform-apply.yml"
   workflow_dispatch:
 
 permissions:

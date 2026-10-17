@@ -1,0 +1,28 @@
+# Analyse hebdomadaire des images (S7, session 4a, ADR-015) : une image vieillit, de nouvelles vulnérabilités sont
+# publiées après son déploiement. Analyse la version courante de main (deploy/version-images.sh) : celle que
+# deploiement.yml a publiée, en production sauf si sa validation a été refusée ou est en attente. Si sa publication a
+# échoué, l'analyse échoue aussi (image introuvable) : lire le journal avant de conclure à une vulnérabilité.
+# Un échec envoie le courriel habituel de GitHub au propriétaire.
+# Même script qu'avant le déploiement : deploy/analyser-images.sh, lançable à la main. Job sans aucun secret.
+name: Analyse des images
+
+on:
+  schedule:
+    - cron: "17 6 * * 1" # lundi, 6 h 17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  analyse:
+    name: Analyse des images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # tout l'historique : la version est le dernier commit qui touche les sources des images
+
+      - run: deploy/analyser-images.sh
