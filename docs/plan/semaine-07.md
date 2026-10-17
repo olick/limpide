@@ -176,10 +176,22 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
   `apply` validé à la main, 0 modification. **Non vérifié** : droits d'écriture d'entrées (aucune entrée à changer).
   Constats : le fournisseur 2.22.0 avale les 403 (attributs vides, d'où une `postcondition`) ; un lien `createToken`
   terminé par `/*` perd son `*` une fois cliquable (jeton incomplet, refait).
-- [ ] Déploiement sur le VPS (`deploiement.yml`, `deploy/deployer.sh`) : images construites une fois par la CI et
-  publiées sur ghcr.io, VPS sans construction, clé SSH à commande imposée, empreinte du serveur en variable.
-  Défaut corrigé : la version des images ignorait `corpus.json` et `eval/questions.json`, copiés dans l'image
-  d'ingestion (règle unique : `deploy/version-images.sh`).
+- [x] Déploiement sur le VPS (`deploiement.yml`, `deploy/deployer.sh`, PR #5, 2026-10-17) : images construites une
+  fois par la CI et publiées sur ghcr.io (jeton de l'exécution ; `admin` et `ingestion` publics d'office, hérités du
+  dépôt par le label `source`), VPS sans construction, clé SSH à commande imposée (`restrict,command=`, arguments
+  piégés refusés), empreinte du serveur en variable `VPS_KNOWN_HOSTS`. Premier déploiement validé à la main : version
+  `9a1f8414ebf1` en production (le VPS était resté au 2026-10-13 : tout le code de la S7 est parti avec), 0 migration,
+  site et back office vérifiés, ≈ 1,9 Go de mémoire disponible. Version en place dans `.env.version` ; alias
+  `limpide` du VPS mis à jour dans `~/.bashrc`. Défaut corrigé : la version des images ignorait `corpus.json` et
+  `eval/questions.json`, copiés dans l'image d'ingestion (règle unique : `deploy/version-images.sh`).
+- [ ] **Reste de la 4a** : ADR de la chaîne (GitHub Actions et commandes lançables en local, OIDC et identités,
+  comptes de service OVH, VPS lu et non géré, images construites une fois, clé à commande imposée, pas d'`apply`
+  Azure), puis analyse des vulnérabilités des images (sacrifiable). Ensuite : épisode LinkedIn 27.
+- À faire plus tard sur le VPS : supprimer les anciennes images construites sur place (`limpide-web:latest`,
+  `limpide-admin:latest`) après quelques jours sans retour arrière.
+
+**Critères de fin de la 4a atteints (2026-10-17)** : une PR affiche build, tests et plan OVHcloud ; une fusion applique
+l'infrastructure OVHcloud et déploie sur le VPS, après validation manuelle.
 
 1. **Build et tests** à chaque pull request et à chaque push sur `main` (`dotnet build`, `dotnet test` : seul
    `Limpide.Core.Tests`, sans base ni réseau).
