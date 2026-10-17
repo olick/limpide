@@ -15,7 +15,8 @@ Azure, dans un coffre dédié.
 | | HTTPS, TLS 1.2, aucun accès public, **clés d'accès désactivées** | Accès par identité Microsoft seulement : aucune clé à voler ni à faire tourner |
 | | versions conservées, suppression récupérable 30 jours | Un état abîmé ou effacé se restaure |
 | Conteneur `tfstate` | un fichier (blob) par dossier Terraform : `dns.tfstate`... | |
-| Droit « Storage Blob Data Contributor » | sur ce conteneur seulement, pour la personne connectée | Être propriétaire de l'abonnement ne donne pas accès aux données d'un compte de stockage |
+| Conteneur `corpus` (S7, session 4b) | `corpus.dump` : sauvegarde du corpus, sans donnée de visiteur | Lue par l'évaluation de la chaîne (`deploy/evaluer.sh`), déposée par `deploy/exporter-corpus.sh` |
+| Droit « Storage Blob Data Contributor » | sur chaque conteneur, pour la personne connectée | Être propriétaire de l'abonnement ne donne pas accès aux données d'un compte de stockage |
 
 **Coffre à secrets permanent** (ajouté en session 4) : `kvlimpide<8 caractères>` (`kvlimpide024b1e9f`), même groupe,
 droits Azure (RBAC), suppression réversible 90 jours et protection contre la purge ; « Key Vault Secrets Officer »
@@ -85,7 +86,7 @@ Les exercices d'apprentissage (`apprentissage/`) gardent un état local : ils so
 
 ## Identités de la chaîne CI/CD (S7, session 4a)
 
-`creer-identites-ci.sh` (relançable) ajoute au socle deux **identités managées**, auxquelles GitHub Actions se
+`creer-identites-ci.sh` (relançable) ajoute au socle trois **identités managées**, auxquelles GitHub Actions se
 connecte par **OIDC** : aucun secret Azure n'est stocké dans GitHub.
 
 Le mécanisme : à chaque exécution, GitHub signe un jeton qui décrit le job ; son **sujet** dit d'où il vient
@@ -96,10 +97,11 @@ avec le sujet réellement présenté dans le message. Chaque identité porte une
 **relation de confiance** (« identité fédérée ») qui n'accepte que les jetons signés par GitHub avec exactement ce
 sujet, et les échange contre un jeton Azure d'environ une heure. Rien à voler, rien à faire tourner.
 
-| Identité | Sujet accepté | Droit, sur le conteneur `tfstate` seulement | Usage |
+| Identité | Sujet accepté | Droits | Usage |
 |---|---|---|---|
-| `id-limpide-ci-lecture` | `pull_request` | Storage Blob Data Reader | `terraform plan -lock=false` dans les PR |
-| `id-limpide-ci-production` | `environment:production` | Storage Blob Data Contributor | `terraform apply` après la fusion, validé à la main |
+| `id-limpide-ci-lecture` | `pull_request` | Storage Blob Data Reader, conteneur `tfstate` | `terraform plan -lock=false` dans les PR |
+| `id-limpide-ci-production` | `environment:production` | Storage Blob Data Contributor, conteneur `tfstate` | `terraform apply` après la fusion, validé à la main |
+| `id-limpide-ci-evaluation` (4b) | `environment:evaluation` | Storage Blob Data Reader, conteneur `corpus` ; Key Vault Secrets User sur `mistral-api-key` et `ovh-ai-endpoints-key`, **secret par secret** | `deploy/evaluer.sh` dans les PR (ADR-016) |
 
 - **`-lock=false` dans les PR** : poser le verrou, c'est écrire. Le `plan` d'une PR peut lire un état en cours de
   modification, mais ne modifie jamais rien : c'est le prix d'une identité de PR en lecture seule.
@@ -108,9 +110,16 @@ sujet, et les échange contre un jeton Azure d'environ une heure. Rien à voler,
   l'environnement GitHub `production` (relecteur requis).
 - Identités managées plutôt qu'inscriptions d'application Entra : de simples ressources Azure du groupe permanent,
   rien à gérer dans l'annuaire.
-- La préproduction éphémère (session 4b) aura **sa propre identité**, aux droits plus larges : on n'élargit pas
-  celles-ci.
+- **Une identité par usage** : on n'élargit pas les existantes. L'évaluation a la sienne, limitée à deux secrets
+  nommés : une clé ajoutée plus tard au coffre ne lui sera pas lisible. Son sujet passe par un environnement GitHub
+  (`evaluation`, sans relecteur) plutôt que `pull_request` : il vaut aussi pour un lancement à la main, et désigne
+  clairement le job qui l'utilise. Ce n'est pas une barrière : une branche du dépôt peut déclarer cet environnement
+  dans un workflow modifié et lire les deux clés. La vraie barrière est le droit de pousser sur le dépôt (l'auteur
+  seul) et l'absence de jeton OIDC pour les forks (ADR-016).
+- Premier passage : `az role assignment list --assignee` interroge l'annuaire, qui ne connaît pas encore une identité
+  toute neuve (erreur affichée, droits créés quand même) ; le script filtre désormais sur l'identifiant.
 
 Déclaration dans GitHub : identifiants de client, de tenant et d'abonnement en **secrets** (masqués dans les journaux,
 publics sur un dépôt public), bien qu'ils ne donnent aucun accès à eux seuls ; celui de `id-limpide-ci-production`
-dans l'environnement `production` uniquement.
+dans l'environnement `production` uniquement, celui de `id-limpide-ci-evaluation` dans l'environnement `evaluation`
+uniquement.

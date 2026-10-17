@@ -22,5 +22,6 @@ paths:
   code 1 si bloqué. Seuils relevés quand une meilleure configuration est adoptée (effet cliquet), élargis seulement
   dans un commit qui dit pourquoi, jamais désactivés.
 - Relectures faites par un modèle, pas par un juriste : le dire partout où on cite un résultat.
-- L'évaluation tourne sur le poste ou la préproduction, jamais sur la démo publique. Bases locales d'essai :
+- L'évaluation tourne sur le poste ou dans la chaîne (`deploy/evaluer.sh` : base jetable, corpus du socle, ADR-016),
+  jamais sur la démo publique. Rapports de la chaîne : artefacts de l'exécution, pas versionnés. Bases locales d'essai :
   `rag_mistral`, `rag_qwen` (comparaison bge-m3 / Qwen3-Embedding).

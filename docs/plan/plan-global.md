@@ -183,7 +183,9 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 - **Option B et préproduction** : la préproduction Azure n'existe pas en permanence. Option à valider en S6, après
   mesure de la durée de création : **préproduction éphémère** créée par la chaîne (`apply`, déploiement, données
   restaurées depuis une sauvegarde du stockage Azure, évaluation, `destroy`). La production reste la démo du VPS :
-  déploiement par la chaîne (SSH) après une évaluation réussie, à la place du déploiement manuel
+  déploiement par la chaîne (SSH) après une évaluation réussie, à la place du déploiement manuel.
+  **Révisé le 2026-10-17 (ADR-016)** : l'évaluation tourne dans un environnement jetable sur le runner, à chaque PR
+  concernée (contrôle requis de `main`) ; la recréation d'Azure devient un workflow manuel et hebdomadaire
 - **Versionnement** de ce qui influence la qualité : prompt, modèle, modèle d'embedding, jeu d'évaluation
 - Page publique des résultats d'évaluation, par version
 
@@ -407,6 +409,7 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | Hébergement des modèles : LLM par API ou auto-hébergé sur GPU, embeddings  (ADR-012, écrit le 2026-10-13) | S6 |
 | Métriques et seuils d'évaluation (ADR-014, écrit le 2026-10-15) | S7 |
 | Chaîne CI/CD (ADR-015, écrit le 2026-10-17) | S7 |
+| Évaluation dans un environnement jetable sur le runner, recréation d'Azure à part (ADR-016, écrit le 2026-10-17) | S7 |
 
 ## Risques du planning
 

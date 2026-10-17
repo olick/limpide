@@ -192,8 +192,8 @@ Les choix qui l'accompagnent :
   ou, en urgence, par une exception datée.
 - **L'analyse hebdomadaire est un workflow planifié** : GitHub le désactive après 60 jours sans activité sur le dépôt,
   sans alerte. Sans effet tant que le projet vit ; à surveiller s'il se met en sommeil.
-- **Pas encore fait** : évaluation en préproduction
-  éphémère et production conditionnée à son succès (4b).
+- **Évaluation avant la production** (session 4b) : dans un environnement jetable sur le runner plutôt qu'en
+  préproduction Azure éphémère, et production conditionnée par un contrôle requis de `main` (ADR-016).
 - **Conditions de révision** :
   - **Azure devient permanent** (migration cloud, après le plan) : `plan` Azure en PR, `apply` après fusion,
     déploiement vers Container Apps à la place du VPS. Les principes restent : identités OIDC, images construites une

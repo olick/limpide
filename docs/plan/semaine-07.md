@@ -269,6 +269,41 @@ l'infrastructure OVHcloud et déploie sur le VPS, après validation manuelle.
 **Terminé quand** : une PR qui modifie les consignes crée la préproduction, lance l'évaluation, publie le rapport dans
 la PR et détruit l'environnement, même si l'évaluation échoue.
 
+**Révisée le 2026-10-17 (ADR-016, option hybride choisie par Alexandre)**. En écrivant la session : `evaluate-answers`
+appelle `AnswerService` dans son processus, sans passer par l'application déployée. Sur Azure, l'évaluation aurait
+tourné sur le runner, branchée sur la base Azure : 25 à 30 min par PR et une identité proche de propriétaire de
+l'abonnement, pour évaluer le même code sur une base moins proche de la production (le VPS : pgvector dans Docker)
+qu'un conteneur jetable. Nouveau découpage :
+
+- **4b-1, la barrière** (cette séance) : `deploy/evaluer.sh` sur le runner à chaque PR concernée (PostgreSQL
+  jetable, corpus restauré depuis le socle Azure, migrations de la PR, jeu complet, juge, `gate`), contrôle requis
+  « Évaluation » sur `main`. Points 1, 3, 4 et 5 ci-dessus.
+- **4b-2, la recréation d'Azure** (séance suivante) : workflow manuel et hebdomadaire (`apply`, base, test de fumée,
+  `destroy` même en cas d'échec), qui sert aussi la vitrine (point 7) ; modes non interactifs de `demo.sh` et
+  `detruire.sh`, administrateur PostgreSQL de type identité de service, corpus pris dans le socle plutôt que sur le
+  poste.
+
+**Terminé quand (4b-1)** : une PR qui modifie les consignes lance l'évaluation, publie le rapport et ne peut pas être
+fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est ni bloquée ni facturée.
+
+**Avancement 4b-1 (2026-10-17)**
+
+- [x] Socle : conteneur `corpus` (`etat/creer-socle.sh`) ; identité `id-limpide-ci-evaluation`
+  (`etat/creer-identites-ci.sh`, sujet `environment:evaluation`) : lecture de ce conteneur et des deux clés d'API,
+  secret par secret. Constat : `az role assignment list --assignee` sur une identité toute neuve échoue (annuaire pas
+  encore à jour), droits créés quand même ; le script filtre désormais sur l'identifiant.
+- [x] `deploy/exporter-corpus.sh [--vps]` : `pg_dump` sans `feedback` ni `admin_actions`, relu par `pg_restore`,
+  déposé avec ses métadonnées (source, date, empreinte). Déposé depuis la base locale : 18 versions, 1 130 passages,
+  empreinte `65e689755765` (celle des passes de référence ; celle de la production n'a pas été relevée).
+- [x] `deploy/evaluer.sh` : clés du coffre, sauvegarde restaurée dans un `pgvector/pgvector:pg17` jetable,
+  `migrate`, `evaluate-answers`, `gate`. Première passe depuis le poste : **1 min 48 s, 0,28 $, barrière passée**
+  (rapport `eval/results/2026-10-17-2050-mistral-medium-2604`).
+- [x] `deploy/evaluation-requise.sh` et `.github/workflows/evaluation.yml` (contrôle « Évaluation »).
+- [x] ADR-016.
+- [ ] Premier passage dans la chaîne (PR de cette séance, qui touche `deploy/evaluer.sh` : évaluée elle-même).
+- [ ] Alexandre : environnement GitHub `evaluation` et son secret `AZURE_CLIENT_ID`, puis « Évaluation » en contrôle
+  requis du ruleset de `main`.
+
 ## Session 5 : démonstration du blocage et page publique (≈ 1 h 30)
 
 1. **Démonstration** : dégrader volontairement le prompt (retirer la consigne de citation) dans une pull request.

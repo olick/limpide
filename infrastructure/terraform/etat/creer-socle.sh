@@ -6,6 +6,8 @@
 #   - le coffre à secrets permanent (S6, session 4) : les secrets déposés une fois (clé Mistral) survivent aux
 #     environnements recréés à chaque séance, qui les lisent par leur identité managée ; sans lui, il faudrait les
 #     redéposer à la main après chaque `apply`.
+#   - la sauvegarde du corpus (S7, session 4b) : conteneur « corpus » du même compte, lu par l'évaluation de la
+#     chaîne (deploy/evaluer.sh), déposé par deploy/exporter-corpus.sh ; le corpus seul, sans donnée de visiteur.
 #
 # Prérequis : `az login` sur l'abonnement de Limpide. Usage : ./creer-socle.sh
 set -euo pipefail
@@ -13,6 +15,7 @@ set -euo pipefail
 LOCATION="francecentral"
 RESOURCE_GROUP="rg-limpide-tfstate"
 CONTAINER="tfstate"
+CORPUS_CONTAINER="corpus"
 # Nom unique dans tout Azure, stable pour un abonnement : dérivé de son identifiant (sans le révéler).
 SUBSCRIPTION_ID="$(az account show --query id -o tsv)"
 SUFFIX="$(printf '%s\n' "$SUBSCRIPTION_ID" | sha256sum | cut -c1-8)"
@@ -42,20 +45,22 @@ az storage account blob-service-properties update \
   --enable-container-delete-retention true --container-delete-retention-days 30 \
   --output none
 
-# Conteneur créé par l'API de gestion (ARM) : pas besoin d'accès aux données pour cette étape.
-az storage container-rm create \
-  --storage-account "$ACCOUNT" --resource-group "$RESOURCE_GROUP" --name "$CONTAINER" \
-  --public-access off --output none
-
-# Droit de lire et d'écrire l'état, limité à ce seul conteneur, pour la personne connectée. Être propriétaire de
-# l'abonnement ne suffit pas : la lecture des données d'un compte de stockage est un droit à part.
+# Conteneurs créés par l'API de gestion (ARM) : pas besoin d'accès aux données pour cette étape. Droit de lire et
+# d'écrire, limité à chaque conteneur, pour la personne connectée. Être propriétaire de l'abonnement ne suffit pas :
+# la lecture des données d'un compte de stockage est un droit à part.
 USER_ID="$(az ad signed-in-user show --query id -o tsv)"
-SCOPE="$(az storage account show --name "$ACCOUNT" --resource-group "$RESOURCE_GROUP" --query id -o tsv)/blobServices/default/containers/$CONTAINER"
-if [[ -z "$(az role assignment list --assignee "$USER_ID" --role "Storage Blob Data Contributor" --scope "$SCOPE" --query '[].id' -o tsv)" ]]; then
-  az role assignment create --assignee-object-id "$USER_ID" --assignee-principal-type User \
-    --role "Storage Blob Data Contributor" --scope "$SCOPE" --output none
-  echo "Droit accordé ; il peut mettre quelques minutes à s'appliquer."
-fi
+ACCOUNT_ID="$(az storage account show --name "$ACCOUNT" --resource-group "$RESOURCE_GROUP" --query id -o tsv)"
+for container in "$CONTAINER" "$CORPUS_CONTAINER"; do
+  az storage container-rm create \
+    --storage-account "$ACCOUNT" --resource-group "$RESOURCE_GROUP" --name "$container" \
+    --public-access off --output none
+  SCOPE="$ACCOUNT_ID/blobServices/default/containers/$container"
+  if [[ -z "$(az role assignment list --assignee "$USER_ID" --role "Storage Blob Data Contributor" --scope "$SCOPE" --query '[].id' -o tsv)" ]]; then
+    az role assignment create --assignee-object-id "$USER_ID" --assignee-principal-type User \
+      --role "Storage Blob Data Contributor" --scope "$SCOPE" --output none
+    echo "Droit sur le conteneur $container accordé ; il peut mettre quelques minutes à s'appliquer."
+  fi
+done
 
 # Coffre à secrets permanent : droits Azure (RBAC), suppression réversible 90 jours et protection contre la purge
 # (un secret supprimé par erreur se récupère ; personne ne peut l'effacer définitivement avant ce délai).
@@ -75,3 +80,4 @@ echo
 echo "Socle prêt."
 echo "  état Terraform  : storage_account_name = \"$ACCOUNT\", container_name = \"$CONTAINER\" (backend.tf)"
 echo "  secrets         : coffre \"$VAULT\" (variable coffre_permanent de ../azure)"
+echo "  corpus          : conteneur \"$CORPUS_CONTAINER\" (deploy/exporter-corpus.sh, deploy/evaluer.sh)"
