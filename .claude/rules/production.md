@@ -10,6 +10,10 @@ paths:
 - VPS OVHcloud VPS-1 (57.129.175.88, Debian 13, utilisateur `debian`, SSH par clé, pas de root), dépôt dans
   `~/limpide`, projet Compose `limpide-prod` (Caddy, web, admin, postgres ; secrets dans `.env.prod`, jamais affichés).
   Procédure : `deploy/README.md`.
+- **Déploiement par la chaîne (S7)** : images publiées sur ghcr.io par la CI, `deploy/deployer.sh <version>` en SSH
+  (clé à commande imposée), validation manuelle ; rien n'est construit sur le serveur. Version en place dans
+  `.env.version` (alias `limpide` : `--env-file .env.prod --env-file .env.version`). Règle de version unique :
+  `deploy/version-images.sh`.
 - Vectorisation par OVHcloud AI Endpoints (`OVH_AI_ENDPOINTS_KEY`) ; Ollama en secours (profil `ollama`,
   `deploy/ollama`).
 - Sauvegarde quotidienne de la base (`deploy/backup-db.sh`, 3 h 15 UTC, `~/backups`, 7 jours).

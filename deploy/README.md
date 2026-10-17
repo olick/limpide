@@ -27,8 +27,12 @@ Limites fixées : 128 Mo, 512 Mo, 512 Mo, 2 Go.
 ## Raccourci
 
 ```bash
-alias limpide='docker compose -f docker-compose.prod.yml --env-file .env.prod'
+alias limpide='docker compose -f docker-compose.prod.yml --env-file .env.prod --env-file .env.version'
 ```
+
+`.env.version` (jamais commité) contient la version des images en place (`IMAGE_TAG=…`), écrite par
+`deploy/deployer.sh` ; sans lui, une commande `limpide` manuelle reviendrait aux images construites sur le serveur.
+Avant le premier déploiement par la chaîne, il n'existe pas : `touch .env.version`.
 
 ## Premier démarrage
 
@@ -221,12 +225,45 @@ limpide run --rm ingestion feedback        # Markdown, les plus récents d'abord
 
 ## Mettre à jour l'application
 
+**Par la chaîne CI/CD (S7)** : chaque fusion sur `main` qui touche l'application publie les images sur ghcr.io
+(`.github/workflows/deploiement.yml`), puis, après validation manuelle (environnement GitHub `production`), lance en
+SSH `deploy/deployer.sh <version>` : dépôt à jour, images tirées (rien n'est construit sur le serveur), migrations
+**avant** l'application, `web` et `admin` redémarrés (coupure de quelques secondes), image d'ingestion ré-étiquetée
+`limpide-ingestion` pour Airflow, vérification du site.
+
+À la main, même script (retour arrière : la version précédente, affichée au début de chaque déploiement) :
+
 ```bash
-git pull
-limpide --profile outils build ingestion     # image de la console (sinon elle garde l'ancienne version du code)
-limpide run --rm ingestion migrate           # schéma, AVANT l'application (voir « Schéma de la base »)
-limpide up -d --build --wait web             # l'application (coupure de quelques secondes)
+deploy/deployer.sh <version>                 # version : deploy/version-images.sh, ou l'étiquette sur ghcr.io
 ```
+
+Ce que change `deployer.sh` : Caddy n'est pas redémarré (après une modification du `Caddyfile` :
+`limpide restart caddy`).
+
+### Clé SSH de la chaîne (une fois)
+
+Une clé dédiée, qui ne permet **que** de lancer `deployer.sh` : volée, elle ne donnerait ni terminal, ni copie de
+fichiers, ni redirection de ports. Sur le poste :
+
+```bash
+ssh-keygen -t ed25519 -N "" -C "github-actions-deploiement" -f /tmp/limpide-deploiement
+cat /tmp/limpide-deploiement.pub             # à ajouter sur le serveur, voir ci-dessous
+```
+
+Sur le serveur, une ligne dans `~/.ssh/authorized_keys` (`restrict` : aucun terminal, aucune redirection ;
+`command` : la seule commande permise, l'argument transmis arrive dans `SSH_ORIGINAL_COMMAND`) :
+
+```
+restrict,command="/home/debian/limpide/deploy/deployer.sh" ssh-ed25519 AAAA… github-actions-deploiement
+```
+
+La clé privée (`/tmp/limpide-deploiement`) va dans le secret `SSH_DEPLOY_KEY` de l'environnement GitHub `production`
+(Settings → Environments → production), puis les deux fichiers sont effacés du poste. L'empreinte du serveur est
+dans la variable `VPS_KNOWN_HOSTS` (vérifiée contre `~/.ssh/known_hosts` du poste) : la chaîne refuse un autre
+serveur.
+
+Avant la chaîne (jusqu'au 2026-10-17), le serveur construisait les images : `git pull`, puis
+`limpide --profile outils build ingestion`, `limpide run --rm ingestion migrate`, `limpide up -d --build --wait web`.
 
 ## Test en local de la configuration de production
 

@@ -169,6 +169,17 @@ portabilité vers GitLab CI ou Azure Pipelines à environ une demi-journée. Con
   PR #2 : lecture de l'état DNS par OIDC en 14 s.
 - [x] Terraform Azure et DNS en PR (`.github/workflows/terraform.yml`) : `fmt -check`, `init -backend=false`,
   `validate` sur `dns/`, `azure/environnements/preprod` et `prod`.
+- [x] Terraform OVHcloud (2026-10-17) : **VPS lu, pas importé** (`data "ovh_vps"`, décidé avec Alexandre) :
+  `resource "ovh_vps"` résilie au `destroy` et réinstalle si `image_id` change, pour ne gérer presque rien ; les
+  entrées DNS prennent l'adresse du VPS. Comptes de service OVH `limpide-ci-lecture` / `limpide-ci-ecriture`
+  (politiques IAM limitées à la zone et au VPS, aucune écriture sur le VPS). PR #4 : `plan` en 16 s ; fusion :
+  `apply` validé à la main, 0 modification. **Non vérifié** : droits d'écriture d'entrées (aucune entrée à changer).
+  Constats : le fournisseur 2.22.0 avale les 403 (attributs vides, d'où une `postcondition`) ; un lien `createToken`
+  terminé par `/*` perd son `*` une fois cliquable (jeton incomplet, refait).
+- [ ] Déploiement sur le VPS (`deploiement.yml`, `deploy/deployer.sh`) : images construites une fois par la CI et
+  publiées sur ghcr.io, VPS sans construction, clé SSH à commande imposée, empreinte du serveur en variable.
+  Défaut corrigé : la version des images ignorait `corpus.json` et `eval/questions.json`, copiés dans l'image
+  d'ingestion (règle unique : `deploy/version-images.sh`).
 
 1. **Build et tests** à chaque pull request et à chaque push sur `main` (`dotnet build`, `dotnet test` : seul
    `Limpide.Core.Tests`, sans base ni réseau).
