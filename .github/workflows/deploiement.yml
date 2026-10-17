@@ -1,0 +1,82 @@
+# Déploiement de la démo (S7, session 4a) : après chaque fusion sur main qui touche l'application ou sa configuration.
+#   1. images : construites une fois et publiées sur ghcr.io (deploy/publier-images.sh, version par
+#      deploy/version-images.sh ; une version déjà publiée n'est pas reconstruite) ;
+#   2. vps : après validation manuelle (environnement « production », relecteur requis), SSH vers le VPS avec une clé
+#      dédiée dont la seule commande permise est deploy/deployer.sh <version> (pull, migrate, redémarrage, vérification).
+# Tant que l'évaluation n'est pas dans la chaîne (session 4b), cette validation est le seul contrôle avant la
+# production : elle remplace le déploiement manuel sans rien perdre.
+# Comme les autres workflows, il n'orchestre que des scripts lançables à la main.
+name: Déploiement
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "corpus.json"
+      - "eval/questions.json"
+      - "docker-compose.prod.yml"
+      - "deploy/**"
+      - ".github/workflows/deploiement.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Jamais deux déploiements en même temps, et jamais d'annulation en cours de route.
+concurrency:
+  group: deploiement
+  cancel-in-progress: false
+
+jobs:
+  images:
+    name: Images (ghcr.io)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write # publier sur ghcr.io avec le jeton de l'exécution : aucun secret à stocker
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 0 # tout l'historique : la version est le dernier commit qui touche les sources des images
+
+      - id: version
+        run: echo "version=$(deploy/version-images.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Connexion à ghcr.io
+        run: echo "$JETON" | docker login ghcr.io --username "$GITHUB_ACTOR" --password-stdin
+        env:
+          JETON: ${{ github.token }}
+
+      - run: deploy/publier-images.sh
+
+  vps:
+    name: Déploiement sur le VPS
+    needs: images
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    environment: production
+    steps:
+      # Clé privée en secret de l'environnement production ; empreinte du serveur enregistrée (variable) : la chaîne
+      # refuse de parler à un autre serveur que le VPS.
+      - name: Clé SSH et empreinte du serveur
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$CLE" > ~/.ssh/deploiement
+          chmod 600 ~/.ssh/deploiement
+          printf '%s\n' "$EMPREINTE" > ~/.ssh/known_hosts
+        env:
+          CLE: ${{ secrets.SSH_DEPLOY_KEY }}
+          EMPREINTE: ${{ vars.VPS_KNOWN_HOSTS }}
+
+      - name: deploy/deployer.sh ${{ needs.images.outputs.version }}
+        run: >
+          ssh -i ~/.ssh/deploiement -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes -o BatchMode=yes
+          debian@57.129.175.88 "$VERSION"
+        env:
+          VERSION: ${{ needs.images.outputs.version }}

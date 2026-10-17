@@ -5,6 +5,9 @@
 # Vectorisation (ADR-012) : bge-m3 servi par OVHcloud AI Endpoints (mêmes vecteurs qu'Ollama, mesuré) ; Ollama reste
 # disponible en secours (profil « ollama », voir plus bas).
 # Projet distinct de l'environnement de développement (docker-compose.yml) : volumes séparés.
+# Images (S7) : sur le VPS, celles que la chaîne CI/CD a publiées sur ghcr.io, version dans .env.version (écrit par
+# deploy/deployer.sh) ; rien n'y est construit. Sans IMAGE_TAG (test local de cette configuration), « --build »
+# construit les images sous la version « local ».
 name: limpide-prod
 
 x-app-env: &app-env
@@ -41,7 +44,7 @@ services:
     build:
       context: .
       target: web
-    image: limpide-web
+    image: ghcr.io/olick/limpide-web:${IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
       <<: *app-env
@@ -61,7 +64,7 @@ services:
     build:
       context: .
       target: admin
-    image: limpide-admin
+    image: ghcr.io/olick/limpide-admin:${IMAGE_TAG:-local}
     restart: unless-stopped
     environment:
       ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=${POSTGRES_USER:-rag};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}"
@@ -128,7 +131,7 @@ services:
     build:
       context: .
       target: ingestion
-    image: limpide-ingestion
+    image: ghcr.io/olick/limpide-ingestion:${IMAGE_TAG:-local}
     profiles: ["outils"]
     environment:
       <<: *app-env

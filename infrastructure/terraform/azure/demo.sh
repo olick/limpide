@@ -10,7 +10,7 @@
 #   ./demo.sh --env prod      la production (vitrine ; plus grande, budget plus élevé)
 #   ./demo.sh --publier       publie d'abord les images (deploy/publier-images.sh), après une modification du code
 #   ./demo.sh --tag <version> une autre version déjà publiée
-# Version courante : dernier commit qui touche src/, Dockerfile ou deploy/ollama (même règle que publier-images.sh).
+# Version courante : deploy/version-images.sh (même règle que publier-images.sh et la chaîne CI/CD).
 # Coût pendant la séance : ≈ 0,25 € de l'heure. Ne pas oublier ./detruire.sh.
 set -euo pipefail
 cd "$(dirname "$0")"
@@ -23,7 +23,7 @@ etape() { printf '\n== %s\n' "$1"; }
 duree() { printf '%d min %02d s' $(( $1 / 60 )) $(( $1 % 60 )); }
 echec() { echo "ARRÊT : $1" >&2; exit 1; }
 
-TAG="$(git -C "$DEPOT" log -1 --format=%h --abbrev=12 -- src Dockerfile deploy/ollama)"
+TAG="$("$DEPOT/deploy/version-images.sh")"
 ENV="preprod"
 PUBLIER=""
 while [[ $# -gt 0 ]]; do
