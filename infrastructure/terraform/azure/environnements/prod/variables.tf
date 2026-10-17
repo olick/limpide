@@ -9,6 +9,17 @@ variable "admin_principal_name" {
   type        = string
 }
 
+variable "admin_principal_type" {
+  description = "Type de cet administrateur : User (poste) ou ServicePrincipal (chaîne CI/CD, TF_VAR_admin_principal_type)."
+  type        = string
+  default     = "User"
+
+  validation {
+    condition     = contains(["User", "ServicePrincipal"], var.admin_principal_type)
+    error_message = "User ou ServicePrincipal."
+  }
+}
+
 variable "poste_ipv4" {
   description = "Adresse IPv4 publique du poste, autorisée à joindre la base (migrations) : TF_VAR_poste_ipv4."
   type        = string

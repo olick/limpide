@@ -185,7 +185,7 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
   restaurées depuis une sauvegarde du stockage Azure, évaluation, `destroy`). La production reste la démo du VPS :
   déploiement par la chaîne (SSH) après une évaluation réussie, à la place du déploiement manuel.
   **Révisé le 2026-10-17 (ADR-016)** : l'évaluation tourne dans un environnement jetable sur le runner, à chaque PR
-  concernée (contrôle requis de `main`) ; la recréation d'Azure devient un workflow manuel et hebdomadaire
+  concernée (contrôle requis de `main`) ; la recréation d'Azure devient un workflow lancé à la main et validé
 - **Versionnement** de ce qui influence la qualité : prompt, modèle, modèle d'embedding, jeu d'évaluation
 - Page publique des résultats d'évaluation, par version
 

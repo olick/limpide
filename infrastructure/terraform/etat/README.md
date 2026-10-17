@@ -16,6 +16,7 @@ Azure, dans un coffre dédié.
 | | versions conservées, suppression récupérable 30 jours | Un état abîmé ou effacé se restaure |
 | Conteneur `tfstate` | un fichier (blob) par dossier Terraform : `dns.tfstate`... | |
 | Conteneur `corpus` (S7, session 4b) | `corpus.dump` : sauvegarde du corpus, sans donnée de visiteur | Lue par l'évaluation de la chaîne (`deploy/evaluer.sh`), déposée par `deploy/exporter-corpus.sh` |
+| Verrou `socle-ne-pas-supprimer` (S7, 4b-2) | « suppression impossible », sur le compte seulement | L'identité de recréation d'Azure est Contributeur de l'abonnement, qui ne peut pas retirer un verrou. Pas sur le coffre ni le groupe : un verrou s'hérite aux attributions de rôle posées dessous et pourrait bloquer `terraform destroy` |
 | Droit « Storage Blob Data Contributor » | sur chaque conteneur, pour la personne connectée | Être propriétaire de l'abonnement ne donne pas accès aux données d'un compte de stockage |
 
 **Coffre à secrets permanent** (ajouté en session 4) : `kvlimpide<8 caractères>` (`kvlimpide024b1e9f`), même groupe,
@@ -86,7 +87,7 @@ Les exercices d'apprentissage (`apprentissage/`) gardent un état local : ils so
 
 ## Identités de la chaîne CI/CD (S7, session 4a)
 
-`creer-identites-ci.sh` (relançable) ajoute au socle trois **identités managées**, auxquelles GitHub Actions se
+`creer-identites-ci.sh` (relançable) ajoute au socle quatre **identités managées**, auxquelles GitHub Actions se
 connecte par **OIDC** : aucun secret Azure n'est stocké dans GitHub.
 
 Le mécanisme : à chaque exécution, GitHub signe un jeton qui décrit le job ; son **sujet** dit d'où il vient
@@ -101,6 +102,7 @@ sujet, et les échange contre un jeton Azure d'environ une heure. Rien à voler,
 |---|---|---|---|
 | `id-limpide-ci-lecture` | `pull_request` | Storage Blob Data Reader, conteneur `tfstate` | `terraform plan -lock=false` dans les PR |
 | `id-limpide-ci-production` | `environment:production` | Storage Blob Data Contributor, conteneur `tfstate` | `terraform apply` après la fusion, validé à la main |
+| `id-limpide-ci-azure` (4b-2) | `environment:azure` (limité à `main`, relecteur requis) | Contributor de l'abonnement ; Role Based Access Control Administrator de l'abonnement **sous condition** (Storage Blob Data Contributor et Key Vault Secrets User, à des identités de service seulement) ; Storage Blob Data Contributor sur `tfstate` ; Reader sur `corpus` ; Key Vault Reader (noms des secrets) | `azure.yml` : recréation d'Azure, vitrine ; limites dans l'ADR-016 |
 | `id-limpide-ci-evaluation` (4b) | `environment:evaluation` | Storage Blob Data Reader, conteneur `corpus` ; Key Vault Secrets User sur `mistral-api-key` et `ovh-ai-endpoints-key`, **secret par secret** | `deploy/evaluer.sh` dans les PR (ADR-016) |
 
 - **`-lock=false` dans les PR** : poser le verrou, c'est écrire. Le `plan` d'une PR peut lire un état en cours de

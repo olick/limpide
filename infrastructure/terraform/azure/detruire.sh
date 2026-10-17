@@ -6,10 +6,18 @@
 # objects depend on it », vu le 2026-10-13). Inutile de toute façon : supprimer le serveur supprime tout ce qu'il
 # contient. On retire donc l'administrateur de l'état (Terraform l'oublie, sans rien supprimer), puis on détruit.
 #
-# Usage, depuis infrastructure/terraform/azure : ./detruire.sh [preprod|prod]   (preprod par défaut)
+# Usage, depuis infrastructure/terraform/azure : ./detruire.sh [preprod|prod] [--oui]
+#   preprod par défaut ; --oui : sans confirmation (chaîne CI/CD, .github/workflows/azure.yml)
 set -euo pipefail
-ENV="${1:-preprod}"
-[[ "$ENV" == "preprod" || "$ENV" == "prod" ]] || { echo "environnement inconnu : $ENV" >&2; exit 1; }
+ENV="preprod"
+OUI=""
+for arg in "$@"; do
+  case "$arg" in
+    preprod|prod) ENV="$arg" ;;
+    --oui) OUI=1 ;;
+    *) echo "argument inconnu : $arg" >&2; exit 1 ;;
+  esac
+done
 cd "$(dirname "$0")/environnements/$ENV"
 ADMIN="module.donnees.azurerm_postgresql_flexible_server_active_directory_administrator.admin"
 
@@ -21,8 +29,10 @@ export TF_VAR_image_tag="${TF_VAR_image_tag:-sans-objet}"
 
 terraform init -input=false >/dev/null
 terraform plan -destroy -input=false | grep -E "will be destroyed|^Plan:" || true
-read -rp "Détruire l'environnement $ENV ci-dessus ? (oui/non) " reponse
-[[ "$reponse" == "oui" ]] || { echo "Rien n'est détruit."; exit 1; }
+if [[ -z "$OUI" ]]; then
+  read -rp "Détruire l'environnement $ENV ci-dessus ? (oui/non) " reponse
+  [[ "$reponse" == "oui" ]] || { echo "Rien n'est détruit."; exit 1; }
+fi
 
 # Après la confirmation seulement : un « non » laisse l'état intact.
 if terraform state list | grep -qx "$ADMIN"; then

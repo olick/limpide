@@ -9,7 +9,9 @@ Alexandre ne connaissait pas Terraform avant la S6 : expliquer les concepts, pas
 Détail : `infrastructure/terraform/*/README.md`, `docs/plan/semaine-06.md` (journal de réalisation).
 
 - **Option B** : la démo publique reste sur le VPS ; Azure = vitrine recréée à la demande
-  (`azure/demo.sh --env <env>`, puis `azure/detruire.sh <env>`), budget « Limpide » 10 €/mois (alerte seulement).
+  (`azure/demo.sh --env <env>`, puis `azure/detruire.sh <env>`, ou le workflow `azure.yml`), budget « Limpide »
+  10 €/mois (alerte seulement). Corpus restauré depuis le socle (`corpus.dump`), test de fumée `azure/verifier.sh`
+  (accueil, `/sante`). La chaîne ne détruit jamais un environnement qu'elle n'a pas créé (`azure/est-vide.sh`).
 - Ressources Azure **permanentes** (créées hors Terraform par `etat/creer-socle.sh`) : coffre de l'état
   `rg-limpide-tfstate` / `stlimpidetf024b1e9f` / conteneurs `tfstate` et `corpus` (sauvegarde pour l'évaluation ;
   accès Entra ID, clés désactivées) et coffre à secrets `kvlimpide024b1e9f` (clés `mistral-api-key`,

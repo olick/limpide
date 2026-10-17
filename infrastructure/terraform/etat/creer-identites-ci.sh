@@ -13,6 +13,11 @@
 #   id-limpide-ci-evaluation  sujet environment:evaluation lecture de la sauvegarde du corpus (conteneur corpus) et
 #                                                          des deux clés d'API (Mistral, OVHcloud AI Endpoints), une
 #                                                          par une : rien d'autre dans le coffre (S7, session 4b)
+#   id-limpide-ci-azure       sujet environment:azure      recréation des environnements Azure (S7, session 4b-2) :
+#                                                          Contributeur de l'abonnement, attribution de deux rôles de
+#                                                          données seulement (condition), écriture de l'état, lecture
+#                                                          du corpus et des noms des secrets ; environnement GitHub
+#                                                          limité à main, relecteur requis (réglé dans GitHub)
 #
 # GitHub ne délivre pas de jeton OIDC aux pull requests venues d'un fork : un inconnu ne peut pas lire l'état.
 # Une identité par usage : on n'élargit pas les existantes.
@@ -77,6 +82,25 @@ identite id-limpide-ci-evaluation github-evaluation "repo:$REPO:environment:eval
   "Storage Blob Data Reader" "$CORPUS_SCOPE" \
   "Key Vault Secrets User" "$VAULT_ID/secrets/mistral-api-key" \
   "Key Vault Secrets User" "$VAULT_ID/secrets/ovh-ai-endpoints-key"
+
+# Recréation d'Azure : Terraform crée groupes de ressources, PostgreSQL, Container Apps, identité de l'application, et
+# attribue à celle-ci deux rôles de données (stockage, lecture des secrets). D'où un droit large, « Contributeur » de
+# l'abonnement, et un droit d'attribuer des rôles borné par une condition (ABAC) : seulement ces deux rôles, seulement
+# à des identités de service. Il ne peut pas se donner « Propriétaire », ni donner quoi que ce soit à une personne.
+ROLES_DONNEES="ba92f5b4-2d11-453d-a403-e96b0029c9fe, 4633458b-17de-408a-b874-0445c86b69e6" # Storage Blob Data Contributor, Key Vault Secrets User
+CONDITION="((!(ActionMatches{'Microsoft.Authorization/roleAssignments/write'})) OR (@Request[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$ROLES_DONNEES} AND @Request[Microsoft.Authorization/roleAssignments:PrincipalType] ForAnyOfAnyValues:StringEqualsIgnoreCase {'ServicePrincipal'})) AND ((!(ActionMatches{'Microsoft.Authorization/roleAssignments/delete'})) OR (@Resource[Microsoft.Authorization/roleAssignments:RoleDefinitionId] ForAnyOfAnyValues:GuidEquals {$ROLES_DONNEES}))"
+identite id-limpide-ci-azure github-azure "repo:$REPO:environment:azure" \
+  "Contributor" "/subscriptions/$SUBSCRIPTION_ID" \
+  "Storage Blob Data Contributor" "$STATE_SCOPE" \
+  "Storage Blob Data Reader" "$CORPUS_SCOPE" \
+  "Key Vault Reader" "$VAULT_ID"
+principal="$(az identity show --name id-limpide-ci-azure --resource-group "$RESOURCE_GROUP" --query principalId -o tsv)"
+if [[ -z "$(az role assignment list --role "Role Based Access Control Administrator" --scope "/subscriptions/$SUBSCRIPTION_ID" --query "[?principalId=='$principal'].id" -o tsv)" ]]; then
+  az role assignment create --assignee-object-id "$principal" --assignee-principal-type ServicePrincipal \
+    --role "Role Based Access Control Administrator" --scope "/subscriptions/$SUBSCRIPTION_ID" \
+    --condition "$CONDITION" --condition-version "2.0" --output none
+  echo "  id-limpide-ci-azure : attribution des deux rôles de données accordée (condition ABAC)."
+fi
 
 echo
 echo "Identités prêtes. Identifiants à déclarer dans GitHub (ce ne sont pas des secrets) :"

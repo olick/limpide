@@ -46,6 +46,7 @@ module "donnees" {
   tenant_id             = data.azurerm_client_config.courant.tenant_id
   admin_object_id       = data.azurerm_client_config.courant.object_id
   admin_principal_name  = var.admin_principal_name
+  admin_principal_type  = var.admin_principal_type
   poste_ipv4            = var.poste_ipv4
 }
 

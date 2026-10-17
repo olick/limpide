@@ -278,7 +278,7 @@ qu'un conteneur jetable. Nouveau découpage :
 - **4b-1, la barrière** (cette séance) : `deploy/evaluer.sh` sur le runner à chaque PR concernée (PostgreSQL
   jetable, corpus restauré depuis le socle Azure, migrations de la PR, jeu complet, juge, `gate`), contrôle requis
   « Évaluation » sur `main`. Points 1, 3, 4 et 5 ci-dessus.
-- **4b-2, la recréation d'Azure** (séance suivante) : workflow manuel et hebdomadaire (`apply`, base, test de fumée,
+- **4b-2, la recréation d'Azure** (séance suivante) : workflow lancé à la main et validé (`apply`, base, test de fumée,
   `destroy` même en cas d'échec), qui sert aussi la vitrine (point 7) ; modes non interactifs de `demo.sh` et
   `detruire.sh`, administrateur PostgreSQL de type identité de service, corpus pris dans le socle plutôt que sur le
   poste.
@@ -300,9 +300,38 @@ fusionnée si la barrière échoue ; une PR sans effet sur les réponses n'est n
   (rapport `eval/results/2026-10-17-2050-mistral-medium-2604`).
 - [x] `deploy/evaluation-requise.sh` et `.github/workflows/evaluation.yml` (contrôle « Évaluation »).
 - [x] ADR-016.
-- [ ] Premier passage dans la chaîne (PR de cette séance, qui touche `deploy/evaluer.sh` : évaluée elle-même).
-- [ ] Alexandre : environnement GitHub `evaluation` et son secret `AZURE_CLIENT_ID`, puis « Évaluation » en contrôle
-  requis du ruleset de `main`.
+- [x] Premier passage dans la chaîne (PR #11, qui touche `deploy/evaluer.sh` : évaluée elle-même), après création de
+  l'environnement `evaluation` : **barrière passée, 2 min 30 s de script, 2 min 50 s de job** (clés 4 s, sauvegarde
+  6 s, base jetable et restauration 21 s, migrations 1 s, 50 questions et juge ≈ 2 min). Aucune des deux clés en clair
+  dans le journal public (vérifié en les comparant aux valeurs du coffre, sans les afficher). Rapports en artefact.
+- [ ] Alexandre : « Évaluation » en contrôle requis du ruleset de `main` (après la fusion de #11).
+
+**Avancement 4b-2 (2026-10-17)**
+
+Décidé avec Alexandre : **pas de planification** (proposée par Claude dans l'option hybride sans être argumentée à
+part) ; lancement à la main, validé (environnement `azure` limité à `main`, relecteur requis), pour qu'une identité
+aux droits larges ne serve jamais sans quelqu'un derrière.
+
+- [x] `.github/workflows/azure.yml` : `verifier` (préproduction créée puis détruite, jamais une préproduction qui
+  existait avant : `est-vide.sh`), `vitrine`, `detruire-vitrine` ; reconnexion d'az entre l'`apply` et la base
+  (`.github/connexion-azure.sh`) ; délai de 30 min sur l'`apply` pour garder du temps à la destruction.
+- [x] Scripts : `demo.sh --oui --neuf --sans-base`, `detruire.sh --oui` ; corpus restauré depuis le socle (plus de
+  dépendance à la base du poste), en une transaction ; rôle de l'application créé par identifiant objet ;
+  `verifier.sh` (accueil et `/sante`) ; administrateur PostgreSQL de type `ServicePrincipal` possible.
+- [x] `GET /sante` dans l'application : empreinte du corpus lue en base, gardée 30 s. Le test de fumée prouve ainsi
+  que l'application lit la base par son identité managée, ce qu'un code 200 sur l'accueil ne prouvait pas.
+- [x] Identité `id-limpide-ci-azure` écrite (`creer-identites-ci.sh`) : Contributeur de l'abonnement, attribution de
+  deux rôles de données à des identités de service seulement (condition ABAC) ; verrou « suppression impossible » sur
+  le compte de stockage du socle (`creer-socle.sh`). Limites écrites dans l'ADR-016 (la condition borne les rôles,
+  pas leur portée).
+- [x] Essai depuis le poste (session d'Alexandre, image web poussée sous l'étiquette `essai-4b2` pour ne pas
+  publier la version officielle hors de la chaîne) : `demo.sh --oui --neuf` en **10 min 37 s** (infrastructure
+  9 min 30 s, 17 ressources ; base 23 s : corpus restauré depuis le socle, 1 130 passages servis, aucune migration à
+  jouer ; test de fumée : accueil 200, `/sante` = empreinte `65e689755765`, celle de la sauvegarde), puis
+  `detruire.sh --oui` en **12 min 55 s** (16 ressources ; état vide et groupe supprimé, vérifiés). Coût de l'essai :
+  ≈ 0,10 €. Reste à vérifier dans la chaîne : administrateur de type `ServicePrincipal`, OIDC,
+  reconnexion après l'`apply`.
+- [ ] Alexandre : création de l'identité et du verrou, environnement `azure`, premier lancement après la fusion.
 
 ## Session 5 : démonstration du blocage et page publique (≈ 1 h 30)
 
