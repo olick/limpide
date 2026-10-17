@@ -109,10 +109,14 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 
 **S7** : sessions 1 à 3 faites (jeu `jeu/2`, Qwen3-Embedding confirmé, rapport JSON, juge de fidélité calibré ;
 consignes dans `src/prompts/` (fichier publié figé par empreinte : nouveau texte = nouveau fichier), commande `gate`
-(seuils `EvaluationGate`, code 1 si bloqué), ADR-014 : référence passe, Small 4 bloqué). Prochaine : session 4a
-(GitHub Actions : build, tests, OIDC, Terraform OVHcloud `plan` en PR et `apply` validé, déploiement VPS), 4b
-(préproduction éphémère et évaluation ≈ 0,29 $, seulement si ce qui influe a changé), 5 (blocage d'un prompt dégradé démontré, page publique), puis bascule de la vectorisation sur
-Qwen3-Embedding-8B **par la CI** (relever les seuils de recherche, effet cliquet).
+(seuils `EvaluationGate`, code 1 si bloqué), ADR-014 : référence passe, Small 4 bloqué). Session 4a : critères
+atteints le 2026-10-17 (GitHub Actions : build et tests, OIDC Azure, Terraform OVHcloud `plan` en PR et `apply`
+validé, VPS lu et non géré, déploiement du VPS par images ghcr.io et `deploy/deployer.sh`, `main` protégée) ; reste
+l'ADR de la chaîne puis l'analyse des images (sacrifiable). Puis 4b (préproduction éphémère et évaluation ≈ 0,29 $,
+seulement si ce qui influe a changé), 5 (blocage d'un prompt dégradé démontré, page publique), puis bascule de la
+vectorisation sur Qwen3-Embedding-8B **par la CI** (relever les seuils de recherche, effet cliquet).
+**Toute modification passe par une PR** (`main` protégée : contrôle « Build et tests » requis ; Alexandre fusionne,
+le jeton `gh` du poste n'a ni écriture du contenu, ni administration).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.
