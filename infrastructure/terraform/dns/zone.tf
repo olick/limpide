@@ -15,7 +15,7 @@ resource "ovh_domain_zone_record" "apex" {
   zone      = var.zone
   subdomain = ""
   fieldtype = "A"
-  target    = var.vps_ipv4
+  target    = local.vps_ipv4
 }
 
 # La démo publique (S3, 2026-10-07).
@@ -28,7 +28,7 @@ resource "ovh_domain_zone_record" "www" {
   zone      = var.zone
   subdomain = "www"
   fieldtype = "A"
-  target    = var.vps_ipv4
+  target    = local.vps_ipv4
 }
 
 # Le back office (S5, 2026-10-12).
@@ -41,7 +41,7 @@ resource "ovh_domain_zone_record" "admin" {
   zone      = var.zone
   subdomain = "admin"
   fieldtype = "A"
-  target    = var.vps_ipv4
+  target    = local.vps_ipv4
 }
 
 # Supprimée par Terraform le 2026-10-12 : limpide-ia.fr.limpide-ia.fr (A), erreur de saisie de la S5 (sous-domaine

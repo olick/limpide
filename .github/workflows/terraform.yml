@@ -1,8 +1,8 @@
 # Terraform dans la chaîne (S7, session 4a). Comme ci.yml, ce fichier n'orchestre que des commandes lançables en
 # local (infrastructure/terraform/*/README.md).
 #   - verifier : format et validité de chaque dossier, sans accès à Azure ni à OVH (`init -backend=false`) ;
-#   - etat : connexion à Azure par OIDC (identité id-limpide-ci-lecture, etat/creer-identites-ci.sh) et lecture de
-#     l'état de la zone DNS. Étape provisoire : le `plan -lock=false` d'OVHcloud la remplacera.
+#   - plan (PR) : plan de l'infrastructure permanente OVHcloud (zone DNS, VPS lu), résumé dans l'exécution ; un plan
+#     vide est le cas normal. Application après la fusion : terraform-apply.yml.
 name: Terraform
 
 on:
@@ -50,8 +50,8 @@ jobs:
       - run: terraform init -backend=false -input=false
       - run: terraform validate
 
-  etat:
-    name: Lecture de l'état (OIDC)
+  plan:
+    name: Plan OVHcloud (zone DNS)
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -59,10 +59,14 @@ jobs:
       contents: read
       id-token: write # demander à GitHub le jeton OIDC que Azure échange contre un jeton d'accès
     env:
+      # État : identité Azure de lecture (OIDC, etat/creer-identites-ci.sh).
       ARM_USE_OIDC: "true"
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
       ARM_SUBSCRIPTION_ID: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      # OVHcloud : compte de service limpide-ci-lecture (lecture de la zone et du VPS ; OVH n'a pas d'OIDC).
+      OVH_CLIENT_ID: ${{ secrets.OVH_CLIENT_ID }}
+      OVH_CLIENT_SECRET: ${{ secrets.OVH_CLIENT_SECRET }}
     defaults:
       run:
         working-directory: infrastructure/terraform/dns
@@ -77,4 +81,13 @@ jobs:
           terraform_wrapper: false
 
       - run: terraform init -input=false
-      - run: terraform state list
+      # Sans verrou : poser le verrou, c'est écrire, et l'identité des PR ne fait que lire.
+      - run: terraform plan -input=false -lock=false -no-color -out=plan.tfplan
+      - name: Résumé du plan
+        run: |
+          {
+            echo "### Plan Terraform OVHcloud (zone DNS)"
+            echo '```'
+            terraform show -no-color plan.tfplan
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
