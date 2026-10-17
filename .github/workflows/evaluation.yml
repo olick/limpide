@@ -1,0 +1,85 @@
+# Évaluation de la chaîne de réponse (S7, session 4b, ADR-016) : la barrière de qualité avant la production.
+#   1. requise : deploy/evaluation-requise.sh dit si la PR touche ce qui peut changer les réponses ou leur mesure ;
+#   2. evaluation : deploy/evaluer.sh sur le runner (PostgreSQL jetable, corpus restauré depuis le socle Azure,
+#      jeu complet, juge de fidélité, gate) ; rapports publiés comme artefact, tableau du gate dans le résumé.
+# « Évaluation » est un contrôle requis de main : une PR qui échoue à la barrière ne peut pas être fusionnée, donc
+# n'atteint jamais la production (deploiement.yml ne part que d'une fusion). Un job sauté par sa condition compte comme
+# réussi : une PR sans effet sur les réponses n'est pas bloquée et ne coûte rien.
+# Comme les autres workflows, il n'orchestre que des scripts lançables à la main.
+name: Évaluation
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Un nouveau push sur la PR annule l'évaluation en cours : inutile de payer celle d'un code déjà remplacé.
+concurrency:
+  group: evaluation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  requise:
+    name: Évaluation nécessaire ?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      requise: ${{ steps.requise.outputs.requise }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+          fetch-depth: 2 # commit de fusion de la PR et son premier parent, la base
+
+      # En PR : modifications depuis la base (HEAD^1) ; lancé à la main : toujours.
+      - id: requise
+        run: echo "requise=$(deploy/evaluation-requise.sh ${BASE:+"$BASE"})" >> "$GITHUB_OUTPUT"
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && 'HEAD^1' || '' }}
+
+  evaluation:
+    name: Évaluation
+    needs: requise
+    # Dans le doute, on évalue : si la détection échoue, sa sortie est vide, différente de « non ».
+    if: ${{ !cancelled() && needs.requise.outputs.requise != 'non' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    # Environnement sans relecteur : il ne sert qu'à désigner l'identité Azure (sujet OIDC environment:evaluation).
+    environment: evaluation
+    permissions:
+      contents: read
+      id-token: write # demander à GitHub le jeton OIDC que Azure échange contre un jeton d'accès
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.x
+
+      # Identité id-limpide-ci-evaluation (etat/creer-identites-ci.sh) : lecture de la sauvegarde du corpus et des deux
+      # clés d'API, rien d'autre. Aucun abonnement : elle n'a de droits que sur ces données.
+      - name: Connexion à Azure (OIDC)
+        run: |
+          jeton="$(curl -fsS -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" \
+            "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=api://AzureADTokenExchange" | jq -r .value)"
+          # Masqué comme le ferait azure/login : une erreur qui recopierait la ligne de commande ne l'afficherait pas.
+          echo "::add-mask::$jeton"
+          az login --service-principal --username "$CLIENT_ID" --tenant "$TENANT_ID" --federated-token "$jeton" \
+            --allow-no-subscriptions --output none
+        env:
+          CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+      - run: deploy/evaluer.sh --resultats resultats-evaluation
+
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ !cancelled() }}
+        with:
+          name: evaluation-${{ github.run_number }}
+          path: resultats-evaluation/
+          if-no-files-found: ignore
+          retention-days: 90

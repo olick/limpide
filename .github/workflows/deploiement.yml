@@ -5,8 +5,8 @@
 #      vulnérabilité élevée ou critique a un correctif disponible ; job sans aucun secret ;
 #   3. vps : après validation manuelle (environnement « production », relecteur requis), SSH vers le VPS avec une clé
 #      dédiée dont la seule commande permise est deploy/deployer.sh <version> (pull, migrate, redémarrage, vérification).
-# Tant que l'évaluation n'est pas dans la chaîne (session 4b), cette validation est le seul contrôle avant la
-# production : elle remplace le déploiement manuel sans rien perdre.
+# La qualité des réponses est contrôlée avant la fusion (evaluation.yml, ADR-016) : avec « Évaluation » en contrôle
+# requis de main, ce workflow ne part que de code qui a passé la barrière, ou qui n'y touche pas.
 # Comme les autres workflows, il n'orchestre que des scripts lançables à la main.
 name: Déploiement
 
@@ -20,6 +20,10 @@ on:
       - "eval/questions.json"
       - "docker-compose.prod.yml"
       - "deploy/**"
+      # Scripts de l'évaluation, sans effet sur le VPS : leur modification ne redéploie pas (ADR-016).
+      - "!deploy/evaluer.sh"
+      - "!deploy/evaluation-requise.sh"
+      - "!deploy/exporter-corpus.sh"
       - ".github/workflows/deploiement.yml"
   workflow_dispatch:
 

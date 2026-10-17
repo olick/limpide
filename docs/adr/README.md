@@ -23,3 +23,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [013](013-hebergement-d-airflow.md) | Airflow allégé (LocalExecutor) sur le serveur de la démo, interface par tunnel SSH (proposé) | 2026-10-13 |
 | [014](014-metriques-et-seuils-d-evaluation.md) | Métriques d'évaluation et seuils de blocage (barrière `gate`, juge en métrique agrégée) | 2026-10-15 |
 | [015](015-chaine-ci-cd.md) | Chaîne CI/CD par GitHub Actions, qui n'orchestre que des scripts lançables en local | 2026-10-17 |
+| [016](016-evaluation-dans-un-environnement-jetable.md) | Évaluation avant la production dans un environnement jetable sur le runner ; recréation d'Azure à part | 2026-10-17 |

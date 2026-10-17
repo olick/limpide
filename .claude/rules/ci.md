@@ -18,6 +18,10 @@ paths:
 - Outils tiers, surtout de sécurité (Grype) : lancés par un script depuis leur image Docker **épinglée par empreinte**,
   dans une version publiée depuis au moins deux semaines, dans un job sans secret quand c'est possible ; pas d'action
   du catalogue (compromission de `trivy-action`, mars 2026).
+- **Évaluation (ADR-016)** : `evaluation.yml` → `deploy/evaluer.sh` sur le runner (PostgreSQL jetable, corpus du
+  socle, jeu complet, `gate`) ; le job « Évaluation » est un contrôle requis de `main`. Ce qui déclenche :
+  `deploy/evaluation-requise.sh`, liste large ; un nouveau fichier qui influe sur les réponses ou leur mesure doit y
+  entrer. Corpus évalué = sauvegarde (`deploy/exporter-corpus.sh`), à rafraîchir après chaque publication.
 - Version des images : `deploy/version-images.sh`, règle unique. Ajouter un fichier copié dans une image = l'ajouter
   à cette règle **et** aux filtres de chemins de `deploiement.yml`.
 - Dépôt public : rien de secret dans les journaux ni dans `GITHUB_STEP_SUMMARY` (un `terraform show` y est affiché).
