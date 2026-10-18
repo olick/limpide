@@ -58,7 +58,8 @@ Le résultat est enregistré dans `quality_report` : chaque contrôle, sa valeur
    - l'alerte reçue.
 4. Procédure pour lever une quarantaine après vérification manuelle.
 
-**Terminé quand** : la démonstration fonctionne de bout en bout. Enregistre-la : elle servira dans la vidéo.
+**Terminé quand** : la démonstration fonctionne de bout en bout. Enregistre-la : elle servira dans la vidéo
+(enregistrement reporté à la fin du plan, 2026-10-18).
 
 ## Session 4 : traçabilité et élargissement du corpus (≈ 2 h)
 
@@ -92,7 +93,7 @@ Le résultat est enregistré dans `quality_report` : chaque contrôle, sa valeur
 
 - Outil de migrations et migration `002`
 - Commande `validate`, rapports de qualité, tâche Airflow associée
-- Démonstration de quarantaine enregistrée
+- Démonstration de quarantaine enregistrée (reporté à la fin du plan, 2026-10-18)
 - Corpus élargi, `docs/sources.md` à jour
 - ADR : stratégie de découpage, batch incrémental plutôt que streaming (le cycle de vie des versions a pris le n° 008, session 1)
 

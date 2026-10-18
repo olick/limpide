@@ -59,19 +59,21 @@ Dans `docs/gouvernance/` :
 
 **Terminé quand** : une personne extérieure relit le README et sait dire ce que fait le projet.
 
-## Session 4 : vidéo de démonstration (≈ 2 h)
+## Session 4 : script de la vidéo de démonstration (≈ 45 min)
 
-Deux à trois minutes, avec un script écrit à l'avance :
+Le tournage est reporté à la fin du plan, avec tous les enregistrements de démonstration (2026-10-18). Ici,
+le script de deux à trois minutes :
 
 1. Le problème en une phrase, et ce que Limpide fait différemment.
 2. Une question : la réponse, les extraits cités, le panneau « sous le capot ».
 3. Une question hors sujet et une question sans réponse : les garde-fous.
-4. Une source corrompue bloquée par la quarantaine (enregistrement de la semaine 5).
-5. Une modification de prompt bloquée par l'évaluation (enregistrement de la semaine 7).
+4. Une source corrompue bloquée par la quarantaine (démonstration de la semaine 5, à tourner).
+5. Une modification de prompt bloquée par l'évaluation (PR de démonstration de la semaine 7, à tourner).
 6. Une trace et le coût d'une requête.
 7. Conclusion : les choix d'architecture en trois points.
 
-**Terminé quand** : la vidéo est publiée et liée depuis le README.
+**Terminé quand** : le script est écrit, scène par scène ; tournage, publication et lien depuis le README à la fin
+du plan.
 
 ## Session 5 : diffusion (≈ 2 h)
 
@@ -97,5 +99,5 @@ Deux à trois minutes, avec un script écrit à l'avance :
 - `docs/gouvernance/` : classification, RACI, sources, RGPD, classification AI Act, registre des risques, fiche système, procédure d'incident
 - ADR relus et à jour
 - README final
-- Vidéo de démonstration
+- Script de la vidéo de démonstration (tournage à la fin du plan)
 - Profils mis à jour, version « rendez-vous client »

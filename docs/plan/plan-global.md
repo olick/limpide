@@ -249,7 +249,8 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 - Relecture et mise à jour de tous les ADR
 - README final : démo, architecture, résultats d'évaluation, choix et limites
 - **Vidéo de 2 à 3 minutes** : une question, le panneau « sous le capot », une source corrompue bloquée,
-  un déploiement bloqué par l'évaluation
+  un déploiement bloqué par l'évaluation. **Tournage reporté à la fin du plan** (2026-10-18), avec tous les
+  enregistrements de démonstration ; la S9 en prépare le script
 - Mise à jour du profil (Malt, LinkedIn) avec le lien
 
 **Terminé quand** : quelqu'un qui ne connaît pas le projet comprend en 5 minutes ce qu'il fait, comment, et pourquoi ces choix.
