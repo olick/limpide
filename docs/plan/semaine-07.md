@@ -396,7 +396,7 @@ confirmer dans la console avant d'agir).
 
 Plafond atteint : l'évaluation échoue et la PR reste bloquée (échec fermé) ; la démo n'est pas touchée.
 
-### Conception de la bascule (proposition, à valider en début de session)
+### Conception de la bascule (validée le 2026-10-18 : option A, ADR-017)
 
 Deux obstacles, tous deux dus à l'unique colonne `chunks.embedding` :
 
@@ -435,7 +435,16 @@ Questions à trancher avant la PR 1 :
    code. Aucun changement de réponse attendu : l'évaluation doit redonner les mêmes scores (recherche touchée :
    rapports avant et après gardés dans `eval/results/`). Fusion, déploiement.
 2. **Entre les deux (≈ 30 min)** : `embed` avec Qwen3-Embedding-8B en production (la démo sert toujours bge-m3), puis
-   `deploy/exporter-corpus.sh` : la sauvegarde contient les deux modèles.
+   `deploy/exporter-corpus.sh` : la sauvegarde contient les deux modèles. Précisions (relecture du 2026-10-18) :
+   - **suspendre le DAG `ingestion`** d'abord, jusqu'au déploiement de la PR 2 (ADR-017) ; à sa remise en route,
+     `catchup=False` lance quand même la dernière échéance manquée ;
+   - surcharger **tout ce qui fait le libellé**, sinon il ne sera pas celui de la PR 2 et `missingEmbeddings` ne
+     tombera pas à 0 : `embed --Embedding:Model=Qwen3-Embedding-8B --Embedding:RequestDimensions=true`
+     (`IncludeHeading` reste à `true` : libellé `Qwen3-Embedding-8B+titre`) ; `QueryInstruction` ne sert qu'aux
+     questions ;
+   - l'export doit afficher les deux modèles à 1 130 (« Vecteurs servis (sur 1130 passages) ») ; une PR 2 évaluée
+     sur l'ancienne sauvegarde n'aurait aucun vecteur Qwen. À envisager en PR 2 : faire échouer `evaluer.sh` si des
+     passages servis n'ont pas de vecteur du modèle configuré.
 3. **PR 2 (≈ 1 h 30)** : `Embedding:Model=Qwen3-Embedding-8B`, `Embedding:RequestDimensions=true`,
    `Embedding:QueryInstruction` ; `Generation:MinScore` recalibré (≈ 0,60 mesuré) ; seuils de `gate` relevés, dont
    celui du passage cité (franchi à une question près par la démonstration de la session 5) ;
@@ -555,7 +564,39 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
 - [x] ADR-016 révisé (« À trancher » → décision datée, plafonds, exposition de la clé dans l'environnement
   `evaluation`).
 
-**Session 6, avant la PR 1 : faux positif de `consigne-divulguee` (2026-10-18)** :
+**Session 6, PR 1 : vecteurs par modèle (2026-10-18)** :
+
+- Conception validée avec Alexandre : option A (ADR-017). Deux constats ont changé le plan :
+  - **le risque HNSW ne se pose pas** : le planificateur n'utilise pas `chunks_embedding_hnsw` (`EXPLAIN ANALYZE`
+    sur la base locale : parcours des 1 270 passages, ≈ 7 ms à chaud, 88 ms à froid). La démo sert déjà une recherche
+    exacte ; la nouvelle table n'a pas d'index vectoriel. À vérifier en lecture seule sur le VPS ;
+  - **deux des trois questions étaient réglées par le code** : `embed` couvre déjà les versions publiées
+    (`v.is_current`), et `MarkEmbeddedAsync` n'exige déjà que le modèle configuré.
+- Décisions : `chunks.embedding_model` et `chunks.embedding` ne sont plus lus ni écrits, et seront retirés après
+  la bascule, sans colonne « modèle servi » (c'est la configuration). Trou que le plan ne voyait pas : une version
+  publiée entre le calcul des vecteurs Qwen et le déploiement de la PR 2 n'aurait que des vecteurs bge-m3, et
+  disparaîtrait de la recherche. Remède : DAG `ingestion` suspendu pendant la fenêtre, plus `missingEmbeddings` sur
+  `/sante`. Même limite pour le retour arrière (configuration **puis** `embed`).
+- [x] Migration `0005_vecteurs_par_modele.sql` (table `chunk_embeddings`, copie des vecteurs) ; requêtes de
+  `EmbeddingStore`, `PgvectorPassageSearch` (vectorielle et hybride), `MarkEmbeddedAsync`, `LineageAsync`
+  (`trace` : « vecteurs » liste les modèles présents), `/sante` (`embeddingModel`, `missingEmbeddings`) ;
+  `exporter-corpus.sh` affiche les vecteurs servis par modèle.
+- [x] Vérifié sur une copie de la base locale (`rag_s6`, supprimée ensuite) : 1 270 vecteurs copiés ; top 10 de
+  100 requêtes, ancienne requête contre nouvelle, 0 différence sur 1 000 lignes ; `evaluate` identique ligne à
+  ligne (10/30, 21/30, MRR 0,51) ; second libellé (`bge-m3`, sans titre) : `embed` ne calcule que les 5 passages
+  manquants, empreinte des vecteurs `bge-m3+titre` inchangée ; candidate factice prête à publier seulement avec
+  les vecteurs du libellé de la commande ; `/sante` à 0 puis à 3 passages sans vecteur. Tests : 172/172 (Core ; les
+  requêtes SQL n'ont pas de tests automatisés).
+- **Constat, recherche hybride** (non servie, ADR-005) : `evaluate --Search:Strategy=Hybrid` avant et après diffère
+  d'une question (q30, rang 3 → 2 ; MRR 0,43 → 0,44). Cause : ex aequo dans le classement plein texte (q30 :
+  18 sommes d'idf distinctes pour 40 candidats), que `row_number()` départage selon l'ordre de lecture, donc selon
+  le plan d'exécution, changé par la nouvelle jointure. Défaut antérieur, révélé et non introduit. Non corrigé :
+  `rank()` changerait la recherche ; à mesurer si l'hybride revient un jour.
+- **Écart au plan** : pas de rapports « avant et après » dans `eval/results/`. `evaluate` n'écrit pas de rapport,
+  et la PR ne change pas la configuration (la page `/evaluation` n'en attend pas). La preuve d'équivalence de la
+  recherche, ce sont les comparaisons ci-dessus ; l'évaluation des réponses est celle de la PR.
+
+**Session 6, PR 1 bloquée : faux positif de `consigne-divulguee`, PR #21 (2026-10-18)** :
 
 - L'évaluation de la PR #20 (vecteurs par modèle) a été **bloquée** par `promptLeaks` = 1, pour un seuil de 0. Le
   reste était au vert, et la recherche inchangée (passage attendu fourni 21/30). Cause : q11 se termine par « Un

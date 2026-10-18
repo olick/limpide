@@ -8,11 +8,11 @@ namespace Limpide.Infrastructure.Storage;
 /// <summary>Lignage d'un passage : de la version publiée jusqu'au fichier collecté (commande trace).</summary>
 public sealed record PassageLineage(
     Guid ChunkId, int Ordinal, string Url, string VersionHash, string Status, DateTimeOffset FetchedAt,
-    DateTimeOffset? PublishedAt, string RawPath, string ExtractorVersion, string ChunkerVersion, string? EmbeddingModel,
+    DateTimeOffset? PublishedAt, string RawPath, string ExtractorVersion, string ChunkerVersion, string? EmbeddingModels,
     bool? QualityPassed);
 
 /// <summary>Passages d'une version, dans la table chunks.</summary>
-public sealed class ChunkStore(NpgsqlDataSource dataSource)
+public sealed class ChunkStore(NpgsqlDataSource dataSource, EmbeddingOptions embedding)
 {
     /// <summary>Vrai si la version a déjà des passages, tous produits par ces versions d'extracteur et de découpeur.</summary>
     public async Task<bool> IsUpToDateAsync(Guid versionId, string extractorVersion, string chunkerVersion, CancellationToken ct)
@@ -33,7 +33,10 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
     {
         await using var command = dataSource.CreateCommand("""
             SELECT c.id, c.ordinal, d.url, v.content_hash, v.status, v.fetched_at, v.published_at, v.raw_path,
-                   c.extractor_version, c.chunker_version, c.embedding_model, (v.quality_report ->> 'passed')::boolean
+                   c.extractor_version, c.chunker_version,
+                   (SELECT string_agg(e.embedding_model, ', ' ORDER BY e.embedding_model)
+                    FROM chunk_embeddings e WHERE e.chunk_id = c.id),
+                   (v.quality_report ->> 'passed')::boolean
             FROM chunks c
             JOIN document_versions v ON v.id = c.document_version_id
             JOIN documents d ON d.id = v.document_id
@@ -78,14 +81,18 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
     {
         await using var command = dataSource.CreateCommand("""
             SELECT count(DISTINCT v.id), count(c.id),
-                   md5(coalesce(string_agg(DISTINCT v.content_hash, ',' ORDER BY v.content_hash), ''))
+                   md5(coalesce(string_agg(DISTINCT v.content_hash, ',' ORDER BY v.content_hash), '')),
+                   count(c.id) FILTER (WHERE NOT EXISTS (
+                       SELECT 1 FROM chunk_embeddings e WHERE e.chunk_id = c.id AND e.embedding_model = @model))
             FROM document_versions v
             LEFT JOIN chunks c ON c.document_version_id = v.id
             WHERE v.is_current
             """);
+        command.Parameters.AddWithValue("model", embedding.Label);
         await using var reader = await command.ExecuteReaderAsync(ct);
         await reader.ReadAsync(ct);
-        return new CorpusFingerprint(reader.GetInt64(0), reader.GetInt64(1), reader.GetString(2)[..12]);
+        return new CorpusFingerprint(
+            reader.GetInt64(0), reader.GetInt64(1), reader.GetString(2)[..12], embedding.Label, reader.GetInt64(3));
     }
 
     public async Task<int?> PublishedCountAsync(Guid versionId, CancellationToken ct)
@@ -146,4 +153,9 @@ public sealed class ChunkStore(NpgsqlDataSource dataSource)
 }
 
 /// <param name="Hash">Début de l'empreinte MD5 de la liste triée des empreintes de versions publiées.</param>
-public sealed record CorpusFingerprint(long Versions, long Passages, string Hash);
+/// <param name="EmbeddingModel">Vecteurs lus par la recherche (<see cref="EmbeddingOptions.Label"/>).</param>
+/// <param name="MissingEmbeddings">
+/// Passages servis sans vecteur de ce modèle, donc absents de la recherche : 0 attendu, à vérifier après un
+/// changement de modèle (ADR-017).
+/// </param>
+public sealed record CorpusFingerprint(long Versions, long Passages, string Hash, string EmbeddingModel, long MissingEmbeddings);

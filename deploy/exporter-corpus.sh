@@ -51,6 +51,15 @@ read -r versions passages hachage < <(dans_postgres "psql -U \"\$POSTGRES_USER\"
 hachage="${hachage:0:12}"
 echo "Base $SOURCE : $versions versions servies, $passages passages, empreinte $hachage"
 
+# Vecteurs des passages servis, par modèle (ADR-017) : l'évaluation d'une PR qui change de modèle lit les siens ici,
+# et un passage sans vecteur de ce modèle y est absent de la recherche. Échec si la base n'a pas la table (pas migrée).
+SQL="SELECT string_agg(embedding_model || chr(58) || chr(32) || n, chr(44) || chr(32) ORDER BY embedding_model)
+     FROM (SELECT e.embedding_model, count(*) AS n FROM chunk_embeddings e JOIN chunks c ON c.id = e.chunk_id
+           JOIN document_versions v ON v.id = c.document_version_id AND v.is_current GROUP BY 1) m"
+vecteurs="$(dans_postgres "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -v ON_ERROR_STOP=1 -tA -c \"$SQL\"")"
+[[ -n "$vecteurs" ]] || { echo "Aucun vecteur pour les passages servis : lancer embed avant d'exporter" >&2; exit 1; }
+echo "Vecteurs servis (sur $passages passages) : $vecteurs"
+
 dans_postgres "pg_dump -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -Fc --no-owner --no-privileges \
   --exclude-table-data=feedback --exclude-table-data=admin_actions" > "$TMP/$BLOB"
 # Une sauvegarde jamais relue n'est pas une sauvegarde (comme deploy/backup-db.sh).

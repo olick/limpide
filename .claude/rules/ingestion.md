@@ -26,7 +26,11 @@ paths:
   `FixedSizeChunker` gardé pour comparer (`--Ingestion:ChunkingStrategy=FixedSize`).
   Modifier `Packer` impose d'incrémenter la version des deux découpeurs. `chunk` remplace tous les passages d'une
   version dans une transaction.
-- **Vectorisation** : « titre + texte » (`embedding_model = bge-m3+titre`) ; la recherche ne compare que des vecteurs
-  de même libellé ; `embed` recalcule ce qui manque ou vient d'un autre modèle, lot par lot (reprise possible).
+- **Vectorisation** : « titre + texte » (libellé `bge-m3+titre`) ; un vecteur par passage **et par modèle**
+  (`chunk_embeddings`, ADR-017) : `embed` calcule ceux du modèle configuré qui manquent, sans toucher les autres, lot
+  par lot (reprise possible) ; la recherche et le passage d'une candidate en `embedded` (seul statut que `publish` accepte) ne regardent que le
+  modèle configuré. Un modèle pas encore
+  servi : `embed --Embedding:Model=…`. Changer le modèle servi : suspendre le DAG `ingestion` entre ce calcul et le
+  déploiement, puis `missingEmbeddings = 0` sur `/sante`.
 - Contrôles qualité (`QualityValidator`) : seuils en configuration (section `Quality`), calibrés dans
   `docs/notes/observations-qualite.md`.

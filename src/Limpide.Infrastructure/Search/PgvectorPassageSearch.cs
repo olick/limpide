@@ -13,7 +13,8 @@ namespace Limpide.Infrastructure.Search;
 /// <item>hybride : la vectorielle et une recherche plein texte sont fusionnées par leurs rangs (RRF).</item>
 /// </list>
 /// Dans les deux cas, <see cref="RetrievedPassage.Score"/> reste la similarité cosinus : c'est elle que le seuil
-/// de pertinence compare, quel que soit l'ordre des résultats.
+/// de pertinence compare, quel que soit l'ordre des résultats. Seuls les vecteurs du modèle configuré sont lus
+/// (chunk_embeddings, ADR-017) ; un passage qui n'en a pas est absent des deux recherches.
 /// </summary>
 public sealed class PgvectorPassageSearch(
     IEmbeddingGenerator<string, Embedding<float>> generator,
@@ -22,23 +23,24 @@ public sealed class PgvectorPassageSearch(
     SearchOptions options) : IPassageSearch
 {
     private const string Columns = """
-        c.heading, c.anchor, c.content, 1 - (c.embedding <=> @query) AS score,
+        c.heading, c.anchor, c.content, 1 - (e.embedding <=> @query) AS score,
         s.name, d.title, d.url, v.fetched_at, s.reuse_terms,
         c.id, v.content_hash, c.extractor_version, c.chunker_version
         """;
 
     private const string Current = """
-        FROM chunks c
+        FROM chunk_embeddings e
+        JOIN chunks c ON c.id = e.chunk_id
         JOIN document_versions v ON v.id = c.document_version_id AND v.is_current
         JOIN documents d ON d.id = v.document_id
         JOIN sources s ON s.id = d.source_id
-        WHERE c.embedding_model = @model
+        WHERE e.embedding_model = @model
         """;
 
     private const string VectorSql = $"""
         SELECT {Columns}
         {Current}
-        ORDER BY c.embedding <=> @query
+        ORDER BY e.embedding <=> @query
         LIMIT @limit
         """;
 
@@ -51,9 +53,9 @@ public sealed class PgvectorPassageSearch(
     /// </summary>
     private const string HybridSql = $"""
         WITH vec AS (
-            SELECT c.id, row_number() OVER (ORDER BY c.embedding <=> @query) AS rank
+            SELECT c.id, row_number() OVER (ORDER BY e.embedding <=> @query) AS rank
             {Current}
-            ORDER BY c.embedding <=> @query
+            ORDER BY e.embedding <=> @query
             LIMIT @candidates
         ),
         corpus AS (SELECT count(*)::float AS total FROM chunks),
@@ -70,7 +72,7 @@ public sealed class PgvectorPassageSearch(
             FROM chunks c
             JOIN document_versions v ON v.id = c.document_version_id AND v.is_current
             JOIN terms t ON t.word = ANY (tsvector_to_array(to_tsvector('french', coalesce(c.heading, '')) || c.content_tsv))
-            WHERE c.embedding_model = @model
+            WHERE EXISTS (SELECT 1 FROM chunk_embeddings e WHERE e.chunk_id = c.id AND e.embedding_model = @model)
             GROUP BY c.id
             ORDER BY sum(t.idf) DESC
             LIMIT @candidates
@@ -83,6 +85,7 @@ public sealed class PgvectorPassageSearch(
         SELECT {Columns}
         FROM fused f
         JOIN chunks c ON c.id = f.id
+        JOIN chunk_embeddings e ON e.chunk_id = c.id AND e.embedding_model = @model
         JOIN document_versions v ON v.id = c.document_version_id
         JOIN documents d ON d.id = v.document_id
         JOIN sources s ON s.id = d.source_id

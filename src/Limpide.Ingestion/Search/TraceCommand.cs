@@ -34,7 +34,7 @@ public sealed class TraceCommand(IPassageSearch search, ChunkStore chunks, Inges
             Console.WriteLine($"              collectée {Date(l.FetchedAt)}, publiée {(l.PublishedAt is { } p ? Date(p) : "—")}");
             Console.WriteLine($"    brut      {Path.Combine(options.RawDataPath, l.RawPath)} {Present(options.RawDataPath, l.RawPath)}");
             Console.WriteLine($"    extrait   {Path.Combine(options.ExtractedDataPath, extracted)} {Present(options.ExtractedDataPath, extracted)}");
-            Console.WriteLine($"    produit   extracteur {l.ExtractorVersion}, découpeur {l.ChunkerVersion}, embedding {l.EmbeddingModel ?? "—"}");
+            Console.WriteLine($"    produit   extracteur {l.ExtractorVersion}, découpeur {l.ChunkerVersion}, vecteurs {l.EmbeddingModels ?? "—"}");
             Console.WriteLine($"    qualité   {l.QualityPassed switch { true => "contrôles réussis", false => "contrôles en échec", null => "pas de rapport" }}\n");
         }
 

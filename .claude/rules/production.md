@@ -21,6 +21,7 @@ paths:
 - Mémoire : lire `free -m` (available), pas le graphique d'OVH. Swap de 2 Go.
 - Quota : 10 questions/h par IP, 60/jour (`QuestionQuota`) ; plafond Mistral 10 €/mois.
 - `GET /sante` : empreinte du corpus servi (lue en base, gardée 30 s), test de fumée d'Azure (`azure/verifier.sh`) et
-  du VPS ; 500 si l'application ne lit pas la base.
+  du VPS ; 500 si l'application ne lit pas la base. `missingEmbeddings` : passages servis sans vecteur du modèle
+  configuré, donc absents de la recherche (0 attendu, ADR-017).
 - `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` : l'application voit l'IP réelle et le HTTPS derrière Caddy.
 - Airflow : `.claude/rules/airflow.md` (tunnel SSH vers 8080).
