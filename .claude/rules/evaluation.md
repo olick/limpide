@@ -23,5 +23,6 @@ paths:
   dans un commit qui dit pourquoi, jamais désactivés.
 - Relectures faites par un modèle, pas par un juriste : le dire partout où on cite un résultat.
 - L'évaluation tourne sur le poste ou dans la chaîne (`deploy/evaluer.sh` : base jetable, corpus du socle, ADR-016),
-  jamais sur la démo publique. Rapports de la chaîne : artefacts de l'exécution, pas versionnés. Bases locales d'essai :
-  `rag_mistral`, `rag_qwen` (comparaison bge-m3 / Qwen3-Embedding).
+  jamais sur la démo publique. Rapports de la chaîne : artefacts de l'exécution, pas versionnés ; exception : un
+  rapport qui sert de preuve (blocage démontré, PR #16) est versionné, l'artefact expirant à 90 jours. Bases locales
+  d'essai : `rag_mistral`, `rag_qwen` (comparaison bge-m3 / Qwen3-Embedding).
