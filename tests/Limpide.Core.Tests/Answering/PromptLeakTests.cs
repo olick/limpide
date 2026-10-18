@@ -35,4 +35,10 @@ public class PromptLeakTests
     [Fact]
     public void Un_exemple_de_formulation_donne_par_la_consigne_n_est_pas_une_fuite() =>
         Assert.Null(PromptLeak.Find("Les systèmes d'IA utilisés pour le recrutement sont classés à haut risque [P2].", System));
+
+    // Faux positif du 2026-10-18 (answer/3, Medium 3.5, q11, PR #20) : la règle 5 demandait cette phrase sans la
+    // mettre entre guillemets, et le modèle l'a reprise mot pour mot. Entre guillemets depuis answer/5.
+    [Fact]
+    public void Le_renvoi_vers_un_professionnel_demande_par_la_consigne_n_est_pas_une_fuite() =>
+        Assert.Null(PromptLeak.Find("Un professionnel du droit peut apprécier sa situation.", System));
 }
