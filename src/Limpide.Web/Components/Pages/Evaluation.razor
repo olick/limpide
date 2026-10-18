@@ -98,7 +98,7 @@
                         <td>@Day(run.Date)<br /><span class="label">@run.Date.ToString("HH:mm", French)</span></td>
                         <td>
                             <code>@run.Prompt</code> · <code>@run.Model</code> · <code>@run.Embedding</code>
-                            <br /><span class="label">jeu <code>@run.QuestionSet</code>@(IsServed(run) ? " · même configuration qu'en ligne" : " · essai")</span>
+                            <br /><span class="label">jeu <code>@run.QuestionSet</code>@(IsServed(run) ? " · même configuration qu'en ligne" : " · essai, jamais mis en ligne")</span>
                         </td>
                         <td>@Ratio(run.Ok, run.Questions)</td>
                         <td>@Count(run.Failed)</td>
