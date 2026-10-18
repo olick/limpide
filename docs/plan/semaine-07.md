@@ -537,3 +537,20 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   quels : écris [P1], jamais [P1a] ni [P1, point a]. » Exemple resté (règle 4 d'`answer/4`) : « les systèmes
   utilisés pour le recrutement sont classés à haut risque [P2] ». Explication des 16/30 non testée (hypothèse).
 - Page `/evaluation` en ligne après la fusion de la PR #17 (2026-10-18).
+
+**Prérequis de la session 6 : espace de travail Mistral pour l'évaluation (2026-10-18)** :
+
+- [x] Espace `limpide-evaluation` créé par Alexandre. **Écart au plan** : la console refuse un plafond d'espace
+  inférieur à 10 € (3 € visés). Plafonds retenus : `limpide-evaluation` 10 €, espace par défaut (démo) 10 € (il
+  n'en avait pas : seul le plafond de l'organisation protégeait la démo), organisation 20 € (était 10 €), somme des deux
+  espaces : isolation complète (15 €, essayés d'abord, laissaient la démo à la merci d'un emballement au-delà de
+  5 €). Consommation de l'espace par défaut au moment de la bascule : 2,84 € (démo et évaluations de la CI).
+- [x] Clé de l'espace d'évaluation déposée dans le coffre du socle (`mistral-api-key`, nouvelle version du
+  2026-10-18 13:42 UTC). La version du 2026-10-13, clé de la démo, est désactivée : le droit « Key Vault Secrets
+  User » de l'identité de l'évaluation porte sur toutes les versions du secret. La démo du VPS garde sa clé (`.env`).
+- [x] Vérification : évaluation lancée à la main sur `main` (exécution 39132830482), au vert en 2 min 40 s de job,
+  0,28 $ (rédaction 0,186 $, juge 0,093 $). Barrière passée : 0 échec, passage attendu fourni 21/30 et cité 19/30,
+  infidèles 3 sur 33 jugées (0,09). Console Mistral (Alexandre) : la consommation apparaît dans
+  `limpide-evaluation`, celle de l'espace par défaut n'a pas bougé.
+- [x] ADR-016 révisé (« À trancher » → décision datée, plafonds, exposition de la clé dans l'environnement
+  `evaluation`).

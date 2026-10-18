@@ -2,6 +2,7 @@
 
 - **Statut** : accepté
 - **Date** : 2026-10-17
+- **Révision** : 2026-10-18, espace de travail Mistral séparé pour l'évaluation (« Conséquences »)
 
 ## Contexte
 
@@ -83,9 +84,28 @@ sur l'abonnement.
 - **La sauvegarde contient le texte des documents** (CNIL en CC-BY-ND, EUR-Lex) dans un conteneur privé : copie de
   travail, jamais redistribuée. Elle ne contient ni les retours des visiteurs ni le journal du back office.
 - **Coût Mistral** : environ 0,29 $ à chaque push sur une PR concernée (un nouveau push annule l'exécution en
-  cours). Le plafond de 10 € par mois chez Mistral est **partagé avec la démo**, dont le quota peut à lui seul
-  consommer environ 9 € : des évaluations nombreuses pourraient couper la démo en fin de mois. À trancher : clé
-  séparée avec son propre plafond, ou plafond relevé.
+  cours). Jusqu'au 2026-10-18, le plafond de 10 € par mois était **partagé avec la démo**, dont le quota peut à lui
+  seul consommer environ 9 € : des évaluations nombreuses pouvaient couper la démo en fin de mois.
+- **Espace de travail Mistral séparé** (révision du 2026-10-18, décidée avec Alexandre) : chez Mistral, le plafond de
+  dépense et les limites de débit se règlent par espace de travail, pas par clé ; une deuxième clé dans le même espace
+  n'aurait rien protégé. Le secret `mistral-api-key` du coffre porte désormais une clé de l'espace
+  `limpide-evaluation` ; la démo du VPS garde la sienne (`.env`), dans l'espace par défaut. Même nom de secret : ni
+  code, ni Terraform, ni droit à changer. L'ancienne version du secret (clé de la démo) est **désactivée** : le droit
+  de lecture de `id-limpide-ci-evaluation` porte sur toutes les versions du secret, et une version active resterait
+  lisible par son identifiant.
+
+  | Niveau | Plafond mensuel |
+  |---|---|
+  | Organisation | 20 € (était 10 €) : la somme des deux espaces |
+  | Espace par défaut (démo) | 10 € (n'en avait pas) |
+  | `limpide-evaluation` | 10 € (minimum accepté par la console ; 3 € visés) |
+
+  - isolation complète : quoi que dépense l'évaluation, la démo garde ses 10 €. Prix : une exposition maximale de
+    20 € par mois au lieu de 10 € (un plafond, pas une dépense attendue : ≈ 0,26 € par évaluation) ;
+  - plafond de l'évaluation atteint : elle échoue et la PR reste bloquée (échec fermé) ; la démo n'est pas touchée ;
+  - les limites de débit de l'évaluation ne prennent plus sur celles de la démo ;
+  - la vitrine Azure lit le même secret et consomme sur l'espace d'évaluation : acceptable, ce n'est pas la démo ;
+  - le plafond borne, il ne suit pas : la dépense réelle relève de l'alerte de budget (S8).
 - **Résultats variables d'une passe à l'autre** : les seuils ont une tolérance (ADR-014). Un échec isolé reste
   possible : relancer le job. Si cela devient fréquent, revoir les seuils dans un commit qui dit pourquoi, jamais
   les désactiver.
@@ -93,8 +113,9 @@ sur l'abonnement.
   fusionnable telle quelle. Acceptable avec un seul auteur.
 - **L'environnement `evaluation` n'est pas une barrière** (relecture du 2026-10-17) : sans relecteur ni restriction
   de branche, une branche du dépôt peut modifier le workflow ou `evaluer.sh` et lire les deux clés d'API. La vraie
-  barrière est le droit de pousser sur le dépôt, que l'auteur est seul à avoir. Un deuxième contributeur changerait
-  l'analyse : clés propres à l'évaluation, plafonnées, ou relecteur sur l'environnement.
+  barrière est le droit de pousser sur le dépôt, que l'auteur est seul à avoir. Depuis le 2026-10-18, la clé
+  Mistral exposée est celle de l'évaluation, plafonnée, et non celle de la démo ; la clé OVHcloud reste partagée.
+  Un deuxième contributeur changerait l'analyse : clé OVHcloud propre, ou relecteur sur l'environnement.
 - **La liste des fichiers qui déclenchent l'évaluation se tient à la main.** Un oubli laisserait passer une
   modification non évaluée ; elle est donc large exprès (tout `Limpide.Ingestion`, par exemple, même la collecte).
 - **La configuration de production n'est pas évaluée** : `docker-compose.prod.yml` fixe la vectorisation du VPS
