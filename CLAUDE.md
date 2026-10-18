@@ -105,7 +105,7 @@ et coûts, gouvernance, marge). **S7 faite**, évaluation et CI/CD : sessions 1 
 calibré, `gate`, ADR-014 ; chaîne GitHub Actions jusqu'au VPS, Grype, ADR-015 ; le 2026-10-17, évaluation sur le
 runner en contrôle requis « Évaluation », ≈ 2 min et 0,28 $, et workflow « Azure » manuel et validé, ADR-016).
 Sessions 5 et 6 faites le 2026-10-18 (blocage démontré, page `/evaluation` ; bascule sur Qwen3-Embedding-8B par la
-CI, ADR-017). Après son déploiement : `/sante` (`missingEmbeddings` 0), puis réactiver le DAG `ingestion` (suspendu).
+CI, ADR-017, déployée ; fidélité jugée à surveiller, journal de la S7).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.
@@ -118,8 +118,7 @@ En retard : sacrifier les garde-fous v2 (S8), puis reporter en S10 le suivi en d
 back office ; **jamais l'évaluation (S7)**. Après le plan : migration cloud, puis mise à l'échelle.
 
 **Journal LinkedIn** : `.linkedin/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
-plan, **proposer l'épisode suivant** dans la série courte (`linkedin-limpide-serie-courte.md`), dont celui sur
-Qwen au moment de la bascule.
+plan, **proposer l'épisode suivant** dans la série courte (`linkedin-limpide-serie-courte.md`).
 
 ## Tenue de ce fichier
 
