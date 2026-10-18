@@ -112,7 +112,7 @@ budget Mistral à construire ; anti-bot ; test du message à la 11e question.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,
-enregistrement de la démonstration de quarantaine.
+**tous les enregistrements** de démonstration (quarantaine, blocage par l'évaluation, vidéo de la S9).
 
 En retard : sacrifier les garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les tableaux de bord du
 back office ; **jamais l'évaluation (S7)**. Après le plan : migration cloud, puis mise à l'échelle.

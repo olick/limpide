@@ -361,7 +361,8 @@ Mistral de l'évaluation partage le plafond de 10 € par mois de la démo (ADR-
 ## Session 5 : démonstration du blocage et page publique (≈ 1 h 30)
 
 1. **Démonstration** : dégrader volontairement le prompt (retirer la consigne de citation) dans une pull request.
-   Vérifier que la chaîne bloque le déploiement, avec le rapport qui explique pourquoi. L'enregistrer pour la vidéo.
+   Vérifier que la chaîne bloque le déploiement, avec le rapport qui explique pourquoi. La PR, fermée sans fusion,
+   reste la preuve ; l'enregistrement est reporté à la fin du plan, avec tous les autres (décision du 2026-10-18).
 2. **Page publique d'évaluation** dans Limpide : résultats par version, évolution dans le temps, limites connues.
 3. Mettre à jour le README et `CLAUDE.md`.
 
@@ -458,7 +459,7 @@ Questions à trancher avant la PR 1 :
 - `Limpide.Evaluation`, rapports JSON
 - `.github/workflows/` : chaîne CI/CD avec authentification OIDC, Terraform (`plan` dans la PR, `apply` après fusion)
 - ADR : métriques et seuils d'évaluation
-- Démonstration de blocage enregistrée, page publique d'évaluation
+- Démonstration de blocage (PR fermée sans fusion ; enregistrement à la fin du plan), page publique d'évaluation
 
 ## Ce qui prépare la suite
 
