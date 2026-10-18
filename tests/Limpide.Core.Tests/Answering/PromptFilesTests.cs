@@ -11,6 +11,7 @@ public class PromptFilesTests
     private static readonly Dictionary<string, string> Frozen = new()
     {
         ["answer/3"] = "aba69c5e5308d425b6d2928b2cd4268aa57f38d5ede278ac503aa4fc5da7f25f",
+        ["answer/5"] = "5168c3c036f2ada4fdced9376b1d5dc969c1c7747997c715ee019a637ff16f78",
         ["judge/2"] = "aad4887216d54ce732a8a0da8cfa694af09f4ea68d5c00036faa2197d35abbce",
     };
 

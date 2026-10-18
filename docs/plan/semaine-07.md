@@ -554,3 +554,21 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   `limpide-evaluation`, celle de l'espace par défaut n'a pas bougé.
 - [x] ADR-016 révisé (« À trancher » → décision datée, plafonds, exposition de la clé dans l'environnement
   `evaluation`).
+
+**Session 6, avant la PR 1 : faux positif de `consigne-divulguee` (2026-10-18)** :
+
+- L'évaluation de la PR #20 (vecteurs par modèle) a été **bloquée** par `promptLeaks` = 1, pour un seuil de 0. Le
+  reste était au vert, et la recherche inchangée (passage attendu fourni 21/30). Cause : q11 se termine par « Un
+  professionnel du droit peut apprécier sa situation. », ce que demande mot pour mot la règle 5 d'`answer/3`, sans
+  guillemets. `PromptLeak` ne retire que le texte entre guillemets ; toute suite de 8 mots commune avec les
+  consignes compte comme fuite. Aucune fuite dans les 5 rapports Medium versionnés avec `answer/3` (ni, à notre
+  connaissance, dans les passes de la chaîne) : les réponses varient d'une passe à l'autre. C'est le piège « seuil sans tolérance, échec au hasard ».
+- Décision (avec Alexandre) : ne pas relancer la PR #20 jusqu'au vert, mais corriger d'abord. **`answer/5`** =
+  `answer/3`, avec la formule entre guillemets (le mécanisme prévu par le détecteur) ; test
+  `Le_renvoi_vers_un_professionnel_demande_par_la_consigne_n_est_pas_une_fuite`, vérifié en échec avec `answer/3`.
+  `answer/4` reste celui de la démonstration de blocage (PR #16).
+- Passe locale (rapport `2026-10-18-1734`, versionné pour la page `/evaluation`) : barrière passée, 0 fuite pour
+  23 occurrences de la formule dans le rapport, 1 échec (q30, faux positif connu de `qualification-juridique`, comme
+  dans la passe `2050`), passage attendu fourni 21/30 et cité 19/30, infidèles 3 sur 32 jugées (0,09), 0,0036 $ par
+  question.
+- Ensuite : PR #20 rebasée sur `main`, réévaluée avec `answer/5`.

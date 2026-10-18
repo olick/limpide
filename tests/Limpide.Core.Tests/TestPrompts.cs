@@ -6,7 +6,7 @@ namespace Limpide.Core.Tests;
 /// <summary>Les vrais fichiers de consignes (src/prompts) : les tests vérifient ce que le modèle reçoit réellement.</summary>
 public static class TestPrompts
 {
-    public const string AnswerVersion = "answer/3";
+    public const string AnswerVersion = "answer/5";
 
     public static readonly AnswerInstructions Answer = AnswerInstructions.FromTemplate(AnswerVersion, Read(AnswerVersion));
 
