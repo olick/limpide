@@ -394,7 +394,8 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
                 WHERE v.status = @ready
                   AND EXISTS (SELECT 1 FROM chunks c WHERE c.document_version_id = v.id)
                   AND NOT EXISTS (SELECT 1 FROM chunks c WHERE c.document_version_id = v.id
-                                  AND (c.embedding IS NULL OR c.embedding_model IS DISTINCT FROM @model))
+                                  AND NOT EXISTS (SELECT 1 FROM chunk_embeddings e
+                                                  WHERE e.chunk_id = c.id AND e.embedding_model = @model))
                 RETURNING v.document_id, v.content_hash)
             SELECT {Describe.Replace("v.content_hash", "changed.content_hash")}
             JOIN changed ON changed.document_id = d.id

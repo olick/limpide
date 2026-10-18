@@ -19,10 +19,10 @@ public sealed class EmbeddingOptions
     /// <summary>Clé de l'API (fournisseur <c>OpenAI</c>) : user-secrets ou coffre, jamais dans un fichier versionné.</summary>
     public string? ApiKey { get; set; }
 
-    /// <summary>Nom du modèle, enregistré sur chaque passage (<c>chunks.embedding_model</c>).</summary>
+    /// <summary>Nom du modèle, enregistré avec chaque vecteur (<c>chunk_embeddings.embedding_model</c>, via <see cref="Label"/>).</summary>
     public string Model { get; set; } = "bge-m3";
 
-    /// <summary>Doit correspondre à la colonne <c>chunks.embedding vector(1024)</c>.</summary>
+    /// <summary>Doit correspondre à la colonne <c>chunk_embeddings.embedding vector(1024)</c>.</summary>
     public int Dimensions { get; set; } = 1024;
 
     /// <summary>
@@ -50,8 +50,9 @@ public sealed class EmbeddingOptions
     public bool IncludeHeading { get; set; } = true;
 
     /// <summary>
-    /// Ce qui a produit un vecteur (modèle et texte vectorisé), enregistré dans <c>chunks.embedding_model</c> :
-    /// deux réglages différents ne se mélangent jamais, et changer de réglage relance le calcul.
+    /// Ce qui a produit un vecteur (modèle et texte vectorisé), enregistré dans <c>chunk_embeddings.embedding_model</c> :
+    /// deux réglages différents ne se mélangent jamais ; un nouveau réglage a ses propres vecteurs, calculés par embed
+    /// à côté des autres (ADR-017).
     /// </summary>
     public string Label => IncludeHeading ? $"{Model}+titre" : Model;
 

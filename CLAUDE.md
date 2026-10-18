@@ -32,8 +32,8 @@ qu'il le maîtrise). Découvre Terraform et Airflow avec ce projet : expliquer l
   `publish`) ; les étapes échangent via le stockage (fichiers bruts, base), jamais en mémoire.
 - **Versionnement** : empreinte SHA-256 du contenu brut, même empreinte = rien à faire. Passer l'ancienne version à
   `is_current = false` **avant** d'insérer la nouvelle (index unique partiel). Chaque passage est rattaché à une
-  version et enregistre `embedding_model`. `fetch` crée une **candidate** ; la version publiée reste servie jusqu'à
-  `publish` (ADR-008).
+  version ; chaque vecteur, à son modèle (`chunk_embeddings`, un par modèle, ADR-017). `fetch` crée une
+  **candidate** ; la version publiée reste servie jusqu'à `publish` (ADR-008).
 - Schéma : uniquement par une nouvelle migration SQL numérotée (`src/Limpide.Infrastructure/Migrations/`, DbUp,
   commande `migrate`), **jamais** au démarrage du web.
 - Pas de LLM local (génération par API Mistral, ADR-004/012). Pas de code métier en Python : Airflow ne fait

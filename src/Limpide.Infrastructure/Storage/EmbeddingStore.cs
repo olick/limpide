@@ -6,15 +6,16 @@ namespace Limpide.Infrastructure.Storage;
 public sealed record PendingChunk(Guid Id, string Heading, string Content);
 
 /// <summary>
-/// Embeddings des passages des versions publiées et des candidates prêtes à vectoriser. Un passage est « à calculer »
-/// s'il n'a pas d'embedding ou si son embedding vient d'un autre modèle que celui configuré.
+/// Embeddings des passages des versions publiées et des candidates prêtes à vectoriser, un vecteur par modèle
+/// (table chunk_embeddings, ADR-017). Un passage est « à calculer » s'il n'a pas de vecteur du modèle configuré ;
+/// les vecteurs des autres modèles ne sont pas touchés.
 /// </summary>
 public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
 {
     private const string Pending = """
         FROM chunks c
         JOIN document_versions v ON v.id = c.document_version_id AND (v.is_current OR v.status IN (@ready, 'embedded'))
-        WHERE c.embedding IS NULL OR c.embedding_model IS DISTINCT FROM @model
+        WHERE NOT EXISTS (SELECT 1 FROM chunk_embeddings e WHERE e.chunk_id = c.id AND e.embedding_model = @model)
         """;
 
     public async Task<int> CountPendingAsync(string model, CancellationToken ct)
@@ -48,16 +49,20 @@ public sealed class EmbeddingStore(NpgsqlDataSource dataSource)
 
         foreach (var (id, vector) in embeddings)
         {
-            var update = new NpgsqlBatchCommand("UPDATE chunks SET embedding = $1, embedding_model = $2 WHERE id = $3");
-            update.Parameters.Add(new NpgsqlParameter { Value = new Vector(vector) });
-            update.Parameters.Add(new NpgsqlParameter { Value = model });
-            update.Parameters.Add(new NpgsqlParameter { Value = id });
-            batch.BatchCommands.Add(update);
+            // Un passage supprimé entre-temps (redécoupé) fait échouer le lot par la clé étrangère.
+            var upsert = new NpgsqlBatchCommand("""
+                INSERT INTO chunk_embeddings (chunk_id, embedding_model, embedding) VALUES ($1, $2, $3)
+                ON CONFLICT (chunk_id, embedding_model) DO UPDATE SET embedding = excluded.embedding
+                """);
+            upsert.Parameters.Add(new NpgsqlParameter { Value = id });
+            upsert.Parameters.Add(new NpgsqlParameter { Value = model });
+            upsert.Parameters.Add(new NpgsqlParameter { Value = new Vector(vector) });
+            batch.BatchCommands.Add(upsert);
         }
 
-        var updated = await batch.ExecuteNonQueryAsync(ct);
-        if (updated != embeddings.Count)
-            throw new InvalidOperationException($"{updated} passage(s) mis à jour sur {embeddings.Count}");
+        var saved = await batch.ExecuteNonQueryAsync(ct);
+        if (saved != embeddings.Count)
+            throw new InvalidOperationException($"{saved} vecteur(s) enregistrés sur {embeddings.Count}");
 
         await tx.CommitAsync(ct);
     }
