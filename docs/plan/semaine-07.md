@@ -542,9 +542,9 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
 
 - [x] Espace `limpide-evaluation` créé par Alexandre. **Écart au plan** : la console refuse un plafond d'espace
   inférieur à 10 € (3 € visés). Plafonds retenus : `limpide-evaluation` 10 €, espace par défaut (démo) 10 € (il
-  n'en avait pas : seul le plafond de l'organisation protégeait la démo), organisation 15 € (était 10 €). L'isolation
-  complète demandait 20 € ; à 15 €, l'évaluation peut dépenser 5 € dans le mois (≈ 19 exécutions) sans effet sur la
-  démo. Consommation de l'espace par défaut au moment de la bascule : 2,84 € (démo et évaluations de la CI).
+  n'en avait pas : seul le plafond de l'organisation protégeait la démo), organisation 20 € (était 10 €), somme des deux
+  espaces : isolation complète (15 €, essayés d'abord, laissaient la démo à la merci d'un emballement au-delà de
+  5 €). Consommation de l'espace par défaut au moment de la bascule : 2,84 € (démo et évaluations de la CI).
 - [x] Clé de l'espace d'évaluation déposée dans le coffre du socle (`mistral-api-key`, nouvelle version du
   2026-10-18 13:42 UTC). La version du 2026-10-13, clé de la démo, est désactivée : le droit « Key Vault Secrets
   User » de l'identité de l'évaluation porte sur toutes les versions du secret. La démo du VPS garde sa clé (`.env`).

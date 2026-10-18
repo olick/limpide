@@ -96,12 +96,12 @@ sur l'abonnement.
 
   | Niveau | Plafond mensuel |
   |---|---|
-  | Organisation | 15 € (était 10 €) |
+  | Organisation | 20 € (était 10 €) : la somme des deux espaces |
   | Espace par défaut (démo) | 10 € (n'en avait pas) |
   | `limpide-evaluation` | 10 € (minimum accepté par la console ; 3 € visés) |
 
-  - l'évaluation peut dépenser 5 € dans le mois (≈ 19 exécutions) sans effet sur la démo ; au-delà, la démo n'a plus
-    que ce qui reste des 15 €. Isolation complète : organisation à 20 €, écartée pour borner l'exposition ;
+  - isolation complète : quoi que dépense l'évaluation, la démo garde ses 10 €. Prix : une exposition maximale de
+    20 € par mois au lieu de 10 € (un plafond, pas une dépense attendue : ≈ 0,26 € par évaluation) ;
   - plafond de l'évaluation atteint : elle échoue et la PR reste bloquée (échec fermé) ; la démo n'est pas touchée ;
   - les limites de débit de l'évaluation ne prennent plus sur celles de la démo ;
   - la vitrine Azure lit le même secret et consomme sur l'espace d'évaluation : acceptable, ce n'est pas la démo ;
