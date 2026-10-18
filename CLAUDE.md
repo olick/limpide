@@ -103,9 +103,8 @@ S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraf
 et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 4 faites (jeu `jeu/2`, juge
 calibré, `gate`, ADR-014 ; chaîne GitHub Actions jusqu'au VPS, Grype, ADR-015 ; le 2026-10-17, évaluation sur le
 runner en contrôle requis « Évaluation », ≈ 2 min et 0,28 $, et workflow « Azure » manuel et validé, ADR-016).
-Session 5 le 2026-10-18 : blocage démontré (PR #16), page `/evaluation`. Puis 6 : bascule sur Qwen3-Embedding-8B
-**par la CI**, en deux PR (table de vecteurs par modèle proposée, à valider ; prérequis : espace de travail Mistral
-séparé pour l'évaluation, à créer par Alexandre). Questions des visiteurs et back office v2 reportés en S10 (2026-10-17).
+Session 5 faite le 2026-10-18 (blocage démontré, page `/evaluation`, espace Mistral `limpide-evaluation`). Reste la
+6 : bascule Qwen3-Embedding-8B **par la CI**, en deux PR (table de vecteurs par modèle, à valider en début de session).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.
