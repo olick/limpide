@@ -20,6 +20,8 @@
   <ItemGroup>
     <None Include="..\appsettings.shared.json" Link="appsettings.shared.json" CopyToOutputDirectory="PreserveNewest" />
     <None Include="..\prompts\**\*.txt" Link="prompts\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Page publique d'évaluation (S7, session 5) : rapports JSON versionnés du dépôt, lus au démarrage. -->
+    <None Include="..\..\eval\results\*.json" Link="evaluation\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

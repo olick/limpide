@@ -6,14 +6,15 @@
 #
 # Ce qui entre dans les images (Dockerfile) : src/ (code et consignes), corpus.json et eval/questions.json (image
 # d'ingestion), deploy/ollama (image de secours). Les deux fichiers JSON manquaient jusqu'au 2026-10-17 : modifier le
-# jeu de questions gardait la même version pour une image au contenu différent.
+# jeu de questions gardait la même version pour une image au contenu différent. eval/results/*.json (rapports
+# d'évaluation, image web : page /evaluation) depuis le 2026-10-18.
 #
 # Usage : deploy/version-images.sh [--verifier]
 #   --verifier  refuse des modifications non commitées de ces fichiers (une version doit désigner un commit précis)
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-SOURCES=(src Dockerfile corpus.json eval/questions.json deploy/ollama)
+SOURCES=(src Dockerfile corpus.json eval/questions.json 'eval/results/*.json' deploy/ollama)
 
 if [[ "${1:-}" == "--verifier" && -n "$(git status --porcelain -- "${SOURCES[@]}")" ]]; then
   echo "Modifications non commitées dans ${SOURCES[*]} : commiter avant de publier (la version doit désigner un commit)." >&2

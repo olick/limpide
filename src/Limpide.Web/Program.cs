@@ -13,6 +13,8 @@ builder.Services.AddHostedService<Limpide.Web.EmbeddingWarmup>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(builder.Configuration.GetSection("Protection").Get<QuotaOptions>() ?? new QuotaOptions());
 builder.Services.AddSingleton<QuestionQuota>();
+// Page publique d'évaluation : rapports versionnés copiés avec l'application (dossier evaluation).
+builder.Services.AddSingleton<Limpide.Web.EvaluationReports>();
 // Anti-spam du formulaire de retours : 5 envois par heure et par visiteur, 200 par jour au total.
 builder.Services.AddKeyedSingleton("feedback", (services, _) =>
     new QuestionQuota(new QuotaOptions(PerClientPerHour: 5, GlobalPerDay: 200), services.GetRequiredService<TimeProvider>()));

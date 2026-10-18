@@ -9,6 +9,8 @@ data/
 docs/
 tests/
 eval/results/
+# sauf les rapports JSON : page publique d'évaluation (image web)
+!eval/results/*.json
 scripts/
 db/
 *.md

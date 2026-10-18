@@ -1,0 +1,165 @@
+@page "/evaluation"
+@using System.Globalization
+@using Limpide.Infrastructure
+@inject EvaluationReports Reports
+@inject AnswerInstructions Instructions
+@inject GenerationSettings Generation
+@inject EmbeddingOptions Embedding
+
+<PageTitle>Évaluation — Limpide</PageTitle>
+
+<header class="hero">
+    <p class="back"><a href="/">← Poser une question</a></p>
+    <h1>Évaluation</h1>
+    <p class="tagline">
+        Comment on mesure la qualité des réponses de Limpide, ce que donnent les mesures, et ce qu'elles ne disent pas.
+    </p>
+</header>
+
+<section class="eval-section">
+    <h2>La méthode</h2>
+    <p>
+        Un jeu de 50 questions est posé à Limpide, par la même chaîne que cette démo : 30 questions dont la réponse se
+        trouve dans les textes (avec le passage qui doit être cité), 14 auxquelles il doit refuser de répondre (hors du
+        sujet, ou sans réponse dans les textes), 3 qui l'invitent à juger la situation de quelqu'un, et 3 tentatives de
+        détourner ses consignes.
+    </p>
+    <p>
+        Chaque réponse passe un <strong>contrôle automatique</strong> : <em>vérifiée</em> (le passage attendu est cité,
+        ou le refus attendu a eu lieu), <em>échec</em> (un garde-fou s'est déclenché, une consigne n'a pas été suivie)
+        ou <em>à relire</em> (la réponse cite d'autres passages que celui attendu : peut-être pertinents, à trancher
+        par une relecture). Un second modèle, le <strong>juge de fidélité</strong>, vérifie ensuite que la réponse ne
+        déforme pas les textes cités ; il sert au tri des réponses à relire, pas à décider seul.
+    </p>
+    <p>
+        <strong>Chaque modification qui peut changer les réponses</strong> (consignes, modèle, recherche, jeu de
+        questions) relance l'évaluation, en quelques minutes et pour environ 0,30 $. Si un seuil n'est pas tenu, la
+        modification ne peut pas être mise en ligne. Exemple : une consigne volontairement dégradée, sans obligation
+        de citer les textes,
+        <a href="https://github.com/olick/limpide/pull/16" target="_blank" rel="noopener noreferrer">bloquée le 18 octobre 2026</a>.
+        Seuils et raisons :
+        <a href="https://github.com/olick/limpide/blob/main/docs/adr/014-metriques-et-seuils-d-evaluation.md" target="_blank" rel="noopener noreferrer">décision d'architecture n° 14</a>.
+    </p>
+</section>
+
+<section class="eval-section">
+    <h2>La version en ligne</h2>
+    @if (Current is { } current)
+    {
+        <p class="muted">
+            Évaluation du @Day(current.Date) : consignes <code>@current.Prompt</code>, modèle <code>@current.Model</code>,
+            recherche <code>@current.Embedding</code>.
+            <a href="@ReportUrl(current)" target="_blank" rel="noopener noreferrer">Rapport complet, réponse par réponse</a>.
+            Aucun juriste n'a relu ces résultats : contrôles et relectures sont faits par des modèles (voir plus bas).
+        </p>
+        <dl class="scorecards">
+            <div><dt>Réponses vérifiées automatiquement</dt><dd>@Ratio(current.Ok, current.Questions)</dd></div>
+            <div><dt>Échecs du contrôle</dt><dd>@Count(current.Failed)</dd></div>
+            <div><dt>À relire</dt><dd>@Count(current.ToReview)</dd></div>
+            <div><dt>Passage attendu cité</dt><dd>@Ratio(current.ExpectedPassageCited, current.AnswerQuestions)</dd></div>
+            <div><dt>Refus attendus obtenus</dt><dd>@Ratio(current.CorrectDeclines, current.DeclineQuestions)</dd></div>
+            <div><dt>Détournements de consignes obéis</dt><dd>@Ratio(current.InjectionsFailed, current.InjectionQuestions)</dd></div>
+            <div><dt>Réponses jugées infidèles aux textes</dt><dd>@Ratio(current.Unfaithful, current.Judged)</dd></div>
+            <div><dt>Coût moyen par question</dt><dd>@Dollars(current.CostPerQuestionUsd)</dd></div>
+            <div><dt>Durée médiane d'une réponse</dt><dd>@Seconds(current.MedianSeconds)</dd></div>
+        </dl>
+    }
+    else
+    {
+        <p class="warning">
+            Aucune évaluation publiée ne correspond encore à la version en ligne (consignes <code>@Instructions.Version</code>,
+            modèle <code>@Generation.Model</code>, recherche <code>@Embedding.Label</code>). Elle a passé la barrière avant
+            sa mise en ligne, mais son rapport n'a pas encore été ajouté ici.
+        </p>
+    }
+</section>
+
+<section class="eval-section">
+    <h2>Historique</h2>
+    <p class="muted">
+        Toutes les évaluations versionnées dans le dépôt, de la plus récente à la plus ancienne. Celles que la chaîne
+        lance à chaque modification n'y figurent pas (rapports d'exécution, non conservés). « — » : mesure ajoutée à
+        l'outil après cette évaluation. « jeu » : empreinte du jeu de questions (elle change quand une question change).
+        Les rapports reproduisent les extraits cités, à l'identique : AI Act (EUR-Lex, décision 2011/833/UE) et
+        fiches de la CNIL (CC-BY-ND 4.0).
+    </p>
+    <div class="table-scroll">
+        <table class="passages runs">
+            <thead>
+                <tr>
+                    <th>Date</th><th>Configuration</th><th>Vérifiées</th><th>Échecs</th><th>À relire</th>
+                    <th>Passage cité</th><th>Infidèles</th><th>Coût / question</th><th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var run in Reports.Runs)
+                {
+                    <tr class="@(IsServed(run) ? "served" : "")">
+                        <td>@Day(run.Date)<br /><span class="label">@run.Date.ToString("HH:mm", French)</span></td>
+                        <td>
+                            <code>@run.Prompt</code> · <code>@run.Model</code> · <code>@run.Embedding</code>
+                            <br /><span class="label">jeu <code>@run.QuestionSet</code>@(IsServed(run) ? " · même configuration qu'en ligne" : " · essai")</span>
+                        </td>
+                        <td>@Ratio(run.Ok, run.Questions)</td>
+                        <td>@Count(run.Failed)</td>
+                        <td>@Count(run.ToReview)</td>
+                        <td>@Ratio(run.ExpectedPassageCited, run.AnswerQuestions)</td>
+                        <td>@Ratio(run.Unfaithful, run.Judged)</td>
+                        <td>@Dollars(run.CostPerQuestionUsd)</td>
+                        <td><a href="@ReportUrl(run)" target="_blank" rel="noopener noreferrer">Rapport</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<section class="eval-section">
+    <h2>Ce que ces mesures ne disent pas</h2>
+    <ul>
+        <li>
+            <strong>Aucun juriste n'a relu ces résultats.</strong> Les questions ont été rédigées par un modèle (Claude)
+            à partir des textes et ne sont pas encore relues par l'auteur ; les relectures des réponses sont, elles aussi,
+            faites par un modèle. Ni le contrôle automatique ni le juge ne vérifient la justesse juridique d'une réponse.
+        </li>
+        <li>
+            <strong>Le juge est un modèle qui juge un modèle.</strong> Il a été calibré sur 37 réponses relues : 8 des
+            9 erreurs connues détectées, mais aussi 1 à 2 fausses alertes sur 13 réponses fidèles. L'échantillon est
+            petit ; ses alertes servent au tri, pas de preuve.
+        </li>
+        <li>
+            <strong>« À relire » n'est pas tranché.</strong> Une réponse qui cite un autre passage que celui attendu peut
+            être juste ; elle n'est comptée ni comme vérifiée, ni comme échec.
+        </li>
+        <li>
+            <strong>50 questions sont un échantillon.</strong> Un écart d'une ou deux questions entre deux versions n'est
+            pas significatif, d'autant que les réponses varient légèrement d'une exécution à l'autre, même réglage égal.
+        </li>
+        <li>
+            <strong>Le coût affiché</strong> est celui de la rédaction des réponses, sans celui du juge.
+        </li>
+    </ul>
+</section>
+
+@code {
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    private EvaluationRun? Current => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
+
+    private bool IsServed(EvaluationRun run) =>
+        EvaluationReports.IsServed(run, Instructions.Version, Generation.Model, Embedding.Label);
+
+    private static string ReportUrl(EvaluationRun run) =>
+        $"https://github.com/olick/limpide/blob/main/eval/results/{Uri.EscapeDataString(run.Name)}.md";
+
+    private static string Day(DateTimeOffset date) => date.ToString("d MMMM yyyy", French);
+
+    private static string Count(int? value) => value?.ToString(French) ?? "—";
+
+    private static string Ratio(int? value, int? total) =>
+        value is { } v && total is > 0 ? $"{v}/{total} ({Math.Round(100.0 * v / total.Value)} %)" : "—";
+
+    private static string Dollars(double? value) => value is { } v ? v.ToString("0.0000", French) + " $" : "—";
+
+    private static string Seconds(double? value) => value is { } v ? v.ToString("0.0", French) + " s" : "—";
+}

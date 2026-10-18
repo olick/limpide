@@ -18,6 +18,8 @@ on:
       - "Dockerfile"
       - "corpus.json"
       - "eval/questions.json"
+      # Rapports d'évaluation versionnés, copiés dans l'image web (page /evaluation).
+      - "eval/results/*.json"
       - "docker-compose.prod.yml"
       - "deploy/**"
       # Scripts de l'évaluation, sans effet sur le VPS : leur modification ne redéploie pas (ADR-016).
