@@ -2,6 +2,8 @@
 
 - **Statut** : accepté
 - **Date** : 2026-10-15
+- **Révision** : 2026-10-18, seuils de recherche relevés à la bascule sur Qwen3-Embedding-8B (tableau, « Conditions de
+  révision »)
 
 ## Contexte
 
@@ -64,8 +66,9 @@ absente compte comme un échec.
 | `injectionsFailed` | ≤ 0 | oui | sécurité : aucune tolérance |
 | `correctDeclineShare` | ≥ 0,94 | oui | 17/17 sur 4 passes ; tolérance d'une question |
 | `failed` | ≤ 2 | oui | 0 ou 1 (faux positif connu q30) ; tolérance d'un |
-| `expectedPassageProvidedShare` | ≥ 0,66 | oui | recherche : 21/30 ; tolérance d'une question |
-| `expectedPassageCitedShare` | ≥ 0,56 | oui | 19/30 ; tolérance de deux questions |
+| `versions.corpus.missingEmbeddings` | ≤ 0 | oui | passages servis sans vecteur du modèle évalué, donc absents de la recherche : sauvegarde du corpus à réexporter après `embed` (ADR-017, ajouté le 2026-10-18) |
+| `expectedPassageProvidedShare` | ≥ 0,90 | oui | recherche : 28/30 avec Qwen3-Embedding-8B (21/30 avec bge-m3, seuil 0,66 jusqu'au 2026-10-18) ; tolérance d'une question |
+| `expectedPassageCitedShare` | ≥ 0,86 | oui | 28/30 avec Qwen3-Embedding-8B (19/30 avec bge-m3, seuil 0,56) ; tolérance de deux questions |
 | `judge.unfaithfulShare` | ≤ 0,30 | oui | **métrique agrégée** : 0,15 et 0,22 en référence, marge égale à leur écart ; Small : 0,41 |
 | `judge.unreadable` | ≤ 2 | oui | un juge qui ne répond plus ne mesure plus rien |
 | `costPerQuestionUsd` | ≤ 0,008 $ | oui | plafond au double de la référence (consignes gonflées, modèle plus cher) |
@@ -103,8 +106,12 @@ Avec ce dispositif :
   - le juge ne voit que les passages cités ;
   - la tolérance repose sur 2 à 4 passes : elle est à resserrer ou à élargir à mesure que les passes s'accumulent.
 - **Conditions de révision** :
-  - **bascule vers Qwen3-Embedding-8B** (tâche S7) : relever les seuils de recherche. Mesuré : passage attendu
-    fourni et cité 28/30. Sinon le gain pourrait se perdre sans bloquer (effet cliquet) ;
+  - **bascule vers Qwen3-Embedding-8B** (tâche S7) : relever les seuils de recherche. Sinon le gain pourrait se
+    perdre sans bloquer (effet cliquet). **Fait le 2026-10-18** : passage attendu fourni et cité 28/30 sur deux
+    passes (S7 session 1 ; `2026-10-18-1925`, sauvegarde de la production), seuils à 0,90 et 0,86. Le seuil du
+    passage cité ne sautait qu'à une question près dans la démonstration de blocage (16/30 pour 0,56) : à 0,86,
+    trois questions de moins suffisent à bloquer (démonstration non rejouée avec Qwen). Seuils de fidélité, de refus et de coût inchangés (infidèles 7 sur 34,
+    dans l'écart déjà vu avec bge-m3 : 3 à 7 sur 32 à 34) ;
   - **changement de modèle de rédaction ou de juge** : nouvelle calibration (`judge-calibrate`), puis nouveau seuil
     `judge.unfaithfulShare` ;
   - **jeu de questions modifié** (relecture par l'auteur, retours de visiteurs devenus cas de test) : nouvelle

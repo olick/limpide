@@ -45,9 +45,10 @@ ENVIRONMENT: dict[str, str] = {
     # Mot de passe : variable Airflow lue dans l'environnement du worker, masquée (***) dans l'interface et les logs.
     "ConnectionStrings__Rag": "Host=postgres;Port=5432;Database=rag;Username=rag;"
     "Password={{ var.value.limpide_db_password }}",
-    # Vectorisation : Ollama sur le poste ; bge-m3 chez OVHcloud en production (ADR-012), clé masquée (« api_key »).
-    "Embedding__Provider": os.environ.get("LIMPIDE_EMBEDDING_PROVIDER", "Ollama"),
-    "Embedding__Endpoint": os.environ.get("LIMPIDE_EMBEDDING_ENDPOINT", "http://ollama:11434"),
+    # Vectorisation : OVHcloud AI Endpoints, sur le poste comme en production (ADR-012 révisé le 2026-10-18) ; modèle
+    # et réglages : appsettings.shared.json de l'image. Clé masquée (« api_key »).
+    "Embedding__Provider": os.environ.get("LIMPIDE_EMBEDDING_PROVIDER", "OpenAI"),
+    "Embedding__Endpoint": os.environ.get("LIMPIDE_EMBEDDING_ENDPOINT", "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"),
     # Une ligne par message dans les logs d'Airflow.
     "Logging__Console__FormatterName": "simple",
     "Logging__Console__FormatterOptions__SingleLine": "true",

@@ -613,3 +613,39 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   dans la passe `2050`), passage attendu fourni 21/30 et cité 19/30, infidèles 3 sur 32 jugées (0,09), 0,0036 $ par
   question.
 - Ensuite : PR #20 rebasée sur `main`, réévaluée avec `answer/5`.
+
+**Session 6, entre les deux PR et PR 2 : bascule sur Qwen3-Embedding-8B (2026-10-18)** :
+
+- [x] PR #20 fusionnée et déployée. Production : `/sante` `bge-m3+titre`, `missingEmbeddings` 0, empreinte
+  `65e689755765` ; 1 270 vecteurs copiés ; plan d'exécution sur le VPS (transaction en lecture seule) : recherche
+  exacte, aucun index, 11 ms à chaud. Image du DAG = image de la version déployée (`79033aff8c62`, même empreinte).
+- [x] Étape 2 : DAG `ingestion` suspendu (prochaine échéance : lundi 2026-10-19, 4 h UTC) ; `embed
+  --Embedding:Model=Qwen3-Embedding-8B --Embedding:RequestDimensions=true` en production : 1 130 passages en
+  **93 s** (81 ms par passage ; 9 min 36 s en S6) ; démo inchangée (`/sante` toujours à 0) ; `exporter-corpus.sh
+  --vps` : « bge-m3+titre: 1130, Qwen3-Embedding-8B+titre: 1130 », 18 Mo.
+- **Constat** : le secours par Ollama (ADR-012, « mêmes vecteurs ») ne tient plus, Qwen ne tient pas sur le VPS
+  (3,8 Go, 2 vCPU). Décision d'Alexandre : OVHcloud AI Endpoints partout, poste compris, sans secours ; le retour à
+  bge-m3 reste possible (configuration puis `embed`, ADR-017), non outillé.
+- [x] **`MinScore` recalibré** sur les 50 questions (`trace`, meilleur score, sauvegarde de la production) :
+
+  | | bge-m3+titre | Qwen3-Embedding-8B+titre |
+  |---|---|---|
+  | Légitimes (30) | 0,541 à 0,762 | 0,742 à 0,900 |
+  | Qualification (3), injections (3) | 0,465 à 0,652 | 0,655 à 0,782 |
+  | Sans réponse, dans le domaine (8) | 0,476 à 0,598 | 0,604 à 0,790 |
+  | Hors sujet (6) | 0,288 à 0,478 | 0,356 à 0,587 (t02 ; les autres ≤ 0,395) |
+
+  Retenu : **0,60** (estimation de la S6) ; marge du côté des légitimes (0,14), 0,013 au-dessus de t02.
+- [x] Passe locale sur la sauvegarde restaurée (rapport `2026-10-18-1925`, versionné pour `/evaluation`) :
+  `evaluate` 17/30, 28/30, MRR 0,72 (comme en session 1) ; `evaluate-answers` : barrière passée, passage attendu
+  fourni et cité 28/30, 14/14 refus, 0 fuite, 0 injection obéie, 1 échec (q30, faux positif connu), infidèles 7 sur
+  34 (0,21 ; la passe bge-m3 `2252` en comptait 7 sur 32), 0,0039 $ par question.
+- [x] PR 2 : configuration (Qwen, `RequestDimensions`, `QueryInstruction`, fournisseur et adresse d'OVHcloud dans
+  `appsettings.shared.json`, surcharges bge-m3 hors ligne en commentaire) ; seuils de `gate` relevés (passage fourni
+  ≥ 0,90, cité ≥ 0,86) et nouvelle règle `versions.corpus.missingEmbeddings ≤ 0` (une PR évaluée sur une sauvegarde
+  sans les vecteurs de son modèle est bloquée ; vérifié : le rapport Qwen passe, un rapport bge-m3 est bloqué) ;
+  ADR-012 révisé, ADR-002 remplacé, ADR-014 révisé ; vitrine, README, règles, commentaires de
+  `docker-compose.prod.yml`.
+- Reste après la fusion : déploiement, `/sante` (`Qwen3-Embedding-8B+titre`, `missingEmbeddings` 0), réactivation du
+  DAG ; plus tard, retrait de l'ancienne colonne et de l'index HNSW (migration), vitrine Azure, épisode LinkedIn.
+

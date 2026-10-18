@@ -1,13 +1,13 @@
 # Déploiement de la démo (ADR-006)
 
 Une seule machine (VPS OVHcloud, 2 vCores, 4 Go), Docker Compose. Seul Caddy est exposé (80/443) ;
-PostgreSQL et Ollama restent sur le réseau interne Docker.
+PostgreSQL reste sur le réseau interne Docker ; la vectorisation passe par l'API d'OVHcloud AI Endpoints (ADR-012).
 
 ```
 Internet ──▶ caddy (80/443, HTTPS automatique avec un nom de domaine)
                └──▶ web (Blazor, 8080, utilisateur non root)
                       ├──▶ postgres (pgvector)
-                      ├──▶ ollama (bge-m3 gardé en mémoire, préchauffé au démarrage de web)
+                      ├──▶ API OVHcloud AI Endpoints (Qwen3-Embedding-8B, France)
                       └──▶ API Mistral (UE)
 ingestion : à la demande (docker compose run --rm ingestion <commande>), jamais démarrée par « up »
 ```
@@ -38,7 +38,7 @@ Avant le premier déploiement par la chaîne, il n'existe pas : `touch .env.vers
 
 ```bash
 cp .env.prod.example .env.prod && chmod 600 .env.prod   # puis remplir les secrets
-limpide up -d --build --wait                              # télécharge bge-m3 au premier démarrage (≈ 1,2 Go)
+limpide up -d --build --wait
 limpide run --rm ingestion migrate                        # crée le schéma (base vide)
 ```
 

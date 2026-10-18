@@ -6,7 +6,7 @@
 - **la vitrine Azure**, décrite en code (Terraform), recréée à chaque séance puis détruite (ADR-011).
 
 Deux services extérieurs servent les deux : **Mistral** rédige les réponses (ADR-004), **OVHcloud AI Endpoints**
-vectorise les questions avec bge-m3 (ADR-012).
+vectorise les questions avec Qwen3-Embedding-8B (ADR-012, révisé le 2026-10-18).
 
 ## Démo publique : https://www.limpide-ia.fr
 
@@ -28,7 +28,7 @@ flowchart LR
         B["sauvegarde quotidienne<br/>(minuteur systemd)"] --> PG
     end
 
-    W -->|question| OVH["OVHcloud AI Endpoints<br/>bge-m3, France"]
+    W -->|question| OVH["OVHcloud AI Endpoints<br/>Qwen3-Embedding-8B, France"]
     W -->|5 passages + question| M["API Mistral<br/>Medium 3.5, UE"]
     AD -->|connexion OpenID Connect| E["Microsoft Entra ID"]
     I -->|collecte polie| S["EUR-Lex (CELLAR), cnil.fr"]

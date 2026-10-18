@@ -40,8 +40,8 @@ qu'il le maîtrise). Découvre Terraform et Airflow avec ce projet : expliquer l
   qu'orchestrer les commandes .NET (ADR-007).
 - Ne pas changer de base vectorielle, de stratégie de recherche ou de découpage sans mesure : pgvector (ADR-001),
   recherche vectorielle seule (ADR-005), découpage structurel (ADR-010).
-- **Changer de modèle d'embedding impose de recalibrer `Generation:MinScore`** (0,50, propre à bge-m3+titre) et de
-  relancer l'évaluation.
+- **Changer de modèle d'embedding impose de recalibrer `Generation:MinScore`** (0,60, propre à
+  Qwen3-Embedding-8B+titre) et de relancer l'évaluation ; procédure de bascule : ADR-017.
 - **Vitrine des technologies** (`src/Limpide.Web/Components/TechStack.razor`) : à jour à chaque adoption.
 - Jamais commités : `.env`, `.env.*`, `data/`, état Terraform.
 - **Toute modification passe par une PR** (`main` protégée, « Build et tests » requis) : Alexandre fusionne ;
@@ -63,8 +63,9 @@ Décisions : `docs/adr/README.md` ; un numéro d'ADR s'attribue **à l'écriture
   OpenID Connect) ; mêmes user-secrets que la console.
 - `src/appsettings.shared.json` : connexion, Embedding, Search, Generation, communs aux applications ; ne pas les
   dupliquer ailleurs.
-- Modèles : bge-m3 (1024 dimensions ; `Embedding:Provider` = `Ollama` sur le poste, `OpenAI` vers OVHcloud AI
-  Endpoints en production) ; Mistral **Medium 3.5** (`mistral-medium-2604`) par défaut, Small 4 pour des essais
+- Modèles : Qwen3-Embedding-8B réduit à 1 024 dimensions, par OVHcloud AI Endpoints partout, poste compris (clé
+  `Embedding:ApiKey`) ; bge-m3 par Ollama seulement hors ligne (surcharges dans `appsettings.shared.json`) ;
+  Mistral **Medium 3.5** (`mistral-medium-2604`) par défaut, Small 4 pour des essais
   (`--Generation:Model=mistral-small-2603`).
 
 Conventions propres à un dossier : `.claude/rules/` (ingestion, génération, évaluation, interfaces web, Airflow,
@@ -100,11 +101,11 @@ Plan : `docs/plan/plan-global.md`. Un fichier par semaine, `docs/plan/semaine-NN
 réalisation) : **toujours lire celui de la semaine en cours**.
 
 S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraform) ; S8–S10 à venir (observabilité
-et coûts, gouvernance, marge). **S7 en cours**, évaluation et CI/CD : sessions 1 à 4 faites (jeu `jeu/2`, juge
+et coûts, gouvernance, marge). **S7 faite**, évaluation et CI/CD : sessions 1 à 4 faites (jeu `jeu/2`, juge
 calibré, `gate`, ADR-014 ; chaîne GitHub Actions jusqu'au VPS, Grype, ADR-015 ; le 2026-10-17, évaluation sur le
 runner en contrôle requis « Évaluation », ≈ 2 min et 0,28 $, et workflow « Azure » manuel et validé, ADR-016).
-Session 5 faite le 2026-10-18 (blocage démontré, page `/evaluation`, espace Mistral `limpide-evaluation`). Reste la
-6 : bascule Qwen3-Embedding-8B **par la CI**, en deux PR (table de vecteurs par modèle, à valider en début de session).
+Sessions 5 et 6 faites le 2026-10-18 (blocage démontré, page `/evaluation` ; bascule sur Qwen3-Embedding-8B par la
+CI, ADR-017). Après son déploiement : `/sante` (`missingEmbeddings` 0), puis réactiver le DAG `ingestion` (suspendu).
 
 Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
 budget Mistral à construire ; anti-bot ; test du message à la 11e question.

@@ -6,7 +6,7 @@ namespace Limpide.Core.Search;
 /// </summary>
 public interface IPassageSearch
 {
-    /// <summary>Nom de la stratégie (ex. « vectorielle (bge-m3+titre) ») : affiché dans le panneau « sous le capot ».</summary>
+    /// <summary>Nom de la stratégie (ex. « vectorielle (Qwen3-Embedding-8B+titre) ») : affiché dans le panneau « sous le capot ».</summary>
     string Strategy { get; }
 
     /// <summary>Passages triés du plus proche au moins proche, avec la durée de chaque étape.</summary>

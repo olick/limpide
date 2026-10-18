@@ -53,7 +53,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => embedding.Provider switch
         {
             EmbeddingOptions.Ollama => new OllamaApiClient(embedding.Endpoint, embedding.Model),
-            // API compatible OpenAI : même modèle bge-m3 chez OVHcloud (vecteurs identiques, mesuré), ou un autre modèle.
+            // API compatible OpenAI : OVHcloud AI Endpoints (Qwen3-Embedding-8B, ADR-012), ou une autre API.
             EmbeddingOptions.OpenAI => new EmbeddingClient(embedding.Model,
                 new ApiKeyCredential(embedding.ApiKey is { Length: > 0 } key
                     ? key

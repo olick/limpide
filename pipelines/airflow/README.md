@@ -19,10 +19,11 @@ cd pipelines/airflow
 #   DOCKER_GID=...            getent group docker | cut -d: -f3 (le worker lance des conteneurs)
 #   LIMPIDE_DATA_DIR=...      chemin absolu de data/ à la racine du dépôt
 #   LIMPIDE_DB_PASSWORD=...   POSTGRES_PASSWORD du .env de la racine
+#   OVH_AI_ENDPOINTS_KEY=...  clé OVHcloud AI Endpoints (vectorisation, ADR-012) : Embedding:ApiKey des user-secrets
 docker compose up airflow-init        # première fois : base d'Airflow, compte administrateur
 docker compose up -d --wait
 
-# Pour le DAG ingestion, depuis la racine du dépôt : la pile (postgres, ollama) et l'image d'ingestion.
+# Pour le DAG ingestion, depuis la racine du dépôt : la pile (postgres) et l'image d'ingestion.
 docker compose up -d --wait
 docker build --target ingestion -t limpide-ingestion .   # à refaire après toute modification du code .NET
 ```

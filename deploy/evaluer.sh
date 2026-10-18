@@ -7,7 +7,7 @@
 #      un déploiement ;
 #   4. evaluate-answers (jeu complet, juge de fidélité), puis gate (seuils de l'ADR-014) : code 1 si bloqué.
 # Configuration : celle du dépôt seulement (ni user-secrets ni réglages de développement), vectorisation des questions
-# comme en production (bge-m3 chez OVHcloud AI Endpoints). Base supprimée à la sortie, même en cas d'échec.
+# comme en production (modèle de appsettings.shared.json, Qwen3-Embedding-8B chez OVHcloud AI Endpoints). Base supprimée à la sortie, même en cas d'échec.
 # Coût : ≈ 0,29 $ chez Mistral par exécution (réponses et juge).
 #
 # Usage : deploy/evaluer.sh [--resultats <dossier>]

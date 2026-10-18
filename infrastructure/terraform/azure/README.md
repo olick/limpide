@@ -13,7 +13,7 @@ socle `../etat`).
 | `donnees` | PostgreSQL 17 managé, pgvector autorisé, base `rag`, **connexion par Entra ID seulement** ; pare-feu : poste de l'administrateur et services Azure |
 | `stockage` | compte de stockage des documents bruts (conteneur `brut`), sans clés d'accès ; l'application y écrit |
 | `secrets` | droit de l'application de lire les secrets du **coffre permanent du socle** |
-| `app` | journaux (Log Analytics), environnement Container Apps, application web (publique) ; vectorisation par bge-m3 chez OVHcloud AI Endpoints (ADR-012) |
+| `app` | journaux (Log Analytics), environnement Container Apps, application web (publique) ; vectorisation par Qwen3-Embedding-8B chez OVHcloud AI Endpoints (ADR-012) |
 | `budget` | alerte de budget de l'environnement (50, 80, 100 % ; propriétaires de l'abonnement) |
 
 | Environnement (`environnements/`) | PostgreSQL | Application | Budget |

@@ -9,7 +9,7 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | N° | Décision | Date |
 |---|---|---|
 | [001](001-pgvector.md) | PostgreSQL + pgvector plutôt qu'une base vectorielle dédiée | 2026-09-28 |
-| [002](002-embeddings-locaux.md) | Embeddings calculés localement avec bge-m3 (Ollama) | 2026-09-28 |
+| [002](002-embeddings-locaux.md) | Embeddings calculés localement avec bge-m3 (Ollama) — remplacé par l'ADR-012 | 2026-09-28 |
 | [003](003-ingestion-phase1.md) | Ingestion par une console .NET en phase 1, Airflow en phase 2 | 2026-09-28 |
 | [004](004-choix-llm.md) | Génération des réponses par Mistral, hébergé en UE (Medium 3.5) | 2026-10-05 |
 | [005](005-recherche-hybride.md) | Recherche vectorielle seule (l'hybride, mesurée, ne l'améliore pas) et seuil de pertinence | 2026-10-05 |
@@ -19,7 +19,7 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [009](009-batch-incremental.md) | Mise à jour du corpus en batch incrémental hebdomadaire, pas en flux continu | 2026-10-11 |
 | [010](010-decoupage-structurel.md) | Découpage structurel (article, considérant, section) plutôt qu'à taille fixe, mesuré | 2026-10-11 |
 | [011](011-container-apps-plutot-qu-aks.md) | Azure Container Apps (plan Consommation) plutôt qu'AKS pour exécuter Limpide sur Azure | 2026-10-13 |
-| [012](012-hebergement-des-modeles.md) | Génération par API (pas de GPU) ; vectorisation par bge-m3 chez OVHcloud AI Endpoints, Ollama en secours | 2026-10-13 |
+| [012](012-hebergement-des-modeles.md) | Génération par API (pas de GPU) ; vectorisation chez OVHcloud AI Endpoints : bge-m3, puis Qwen3-Embedding-8B (révision du 2026-10-18), sans secours | 2026-10-13 |
 | [013](013-hebergement-d-airflow.md) | Airflow allégé (LocalExecutor) sur le serveur de la démo, interface par tunnel SSH (proposé) | 2026-10-13 |
 | [014](014-metriques-et-seuils-d-evaluation.md) | Métriques d'évaluation et seuils de blocage (barrière `gate`, juge en métrique agrégée) | 2026-10-15 |
 | [015](015-chaine-ci-cd.md) | Chaîne CI/CD par GitHub Actions, qui n'orchestre que des scripts lançables en local | 2026-10-17 |

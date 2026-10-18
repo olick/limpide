@@ -49,7 +49,7 @@ variable "embedding_api_key_id" {
 }
 
 variable "embedding_endpoint" {
-  description = "API d'embeddings compatible OpenAI : bge-m3 chez OVHcloud AI Endpoints (ADR-012)."
+  description = "API d'embeddings compatible OpenAI : OVHcloud AI Endpoints (ADR-012 ; modèle dans appsettings.shared.json)."
   type        = string
   default     = "https://oai.endpoints.kepler.ai.cloud.ovh.net/v1"
 }
@@ -94,7 +94,7 @@ resource "azurerm_container_app_environment" "env" {
 # L'application web (image de la S3), sans aucun secret dans sa configuration :
 # - PostgreSQL : jeton Entra ID de son identité (Database:Authentication = EntraId) ;
 # - clés Mistral et OVHcloud : lues dans le coffre du socle par la plateforme, au démarrage, grâce à la même identité ;
-# - vectorisation des questions : bge-m3 par l'API d'OVHcloud (ADR-012 ; plus de conteneur Ollama, ≈ 80 % du coût).
+# - vectorisation des questions : Qwen3-Embedding-8B par l'API d'OVHcloud (ADR-012 ; plus de conteneur Ollama, ≈ 80 % du coût).
 resource "azurerm_container_app" "web" {
   name                         = "ca-web"
   container_app_environment_id = azurerm_container_app_environment.env.id

@@ -1,6 +1,7 @@
 # ADR-002 : Embeddings calculés localement avec bge-m3 (Ollama)
 
-- **Statut** : accepté (confirmé par les mesures de fin de semaine 1, 2026-09-29)
+- **Statut** : remplacé par l'ADR-012 : bge-m3 par l'API d'OVHcloud (2026-10-13), puis Qwen3-Embedding-8B
+  (révision du 2026-10-18). Ollama ne sert plus qu'à travailler hors ligne avec bge-m3.
 - **Date** : 2026-09-28
 
 ## Contexte
@@ -24,7 +25,8 @@ donc le changement de fournisseur se limite à la configuration.
 
 - Coût nul en développement ; mesurer en semaine 1 le temps d'ingestion du corpus complet sur CPU.
 - Le modèle d'embedding est enregistré sur chaque passage (`chunks.embedding_model`) :
-  changer de modèle impose une réindexation complète, traçable.
+  changer de modèle impose une réindexation complète, traçable. Depuis l'ADR-017, un vecteur par passage et par
+  modèle (`chunk_embeddings`) : les modèles coexistent, la bascule se fait sans interruption.
 - **Condition de révision** : si l'ingestion complète dépasse 30 minutes sur l'hébergement cible,
   ou si l'évaluation de la semaine 5 montre une qualité de recherche insuffisante.
 
