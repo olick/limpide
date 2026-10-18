@@ -437,7 +437,8 @@ Questions à trancher avant la PR 1 :
 2. **Entre les deux (≈ 30 min)** : `embed` avec Qwen3-Embedding-8B en production (la démo sert toujours bge-m3), puis
    `deploy/exporter-corpus.sh` : la sauvegarde contient les deux modèles.
 3. **PR 2 (≈ 1 h 30)** : `Embedding:Model=Qwen3-Embedding-8B`, `Embedding:RequestDimensions=true`,
-   `Embedding:QueryInstruction` ; `Generation:MinScore` recalibré (≈ 0,60 mesuré) ; seuils de `gate` relevés ;
+   `Embedding:QueryInstruction` ; `Generation:MinScore` recalibré (≈ 0,60 mesuré) ; seuils de `gate` relevés, dont
+   celui du passage cité (franchi à une question près par la démonstration de la session 5) ;
    révision de l'ADR-012 (et de l'ADR-002) ; vitrine des technologies (bge-m3 → Qwen3-Embedding). L'évaluation de la
    PR tourne sur les vecteurs Qwen. Fusion, déploiement, `/sante` vérifié.
 4. **Après** : retrait des vecteurs bge-m3 et de l'ancienne colonne par une migration, une fois le retour arrière
@@ -493,3 +494,21 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   (≈ 4 h, deux PR, table de vecteurs par modèle proposée) ; budget de la semaine porté à ≈ 16 h 30.
 - Plafond Mistral (ADR-016) : le plafond se règle par espace de travail, pas par clé. Espace séparé pour l'évaluation,
   à créer par Alexandre **avant la session 6** (procédure dans la session 6).
+
+**Session 5 (2026-10-18)** :
+
+- [x] **Blocage démontré** (PR #16, fermée sans fusion) : consignes `answer/4` = `answer/3` sans la règle de citation.
+  « Build et tests » vert, « Évaluation » rouge, fusion bloquée (`BLOCKED`) ; 2 min 49 s, ≈ 0,28 $. Trois seuils
+  franchis : échecs du contrôle 6 (≤ 2 ; 5 `sans-citation` et le faux positif connu q30), passage attendu cité 16/30
+  (≥ 0,56), réponses jugées infidèles 0,36 (≤ 0,30). Refus, injections, fuites, recherche et coût inchangés.
+- **Constat** : sans la consigne, le modèle cite encore la plupart du temps (16/30 contre 19/30 : les passages
+  arrivent étiquetés `[P1]`, et la règle 4 garde un exemple `[P2]`). Le seuil du passage cité ne saute qu'à une
+  question près ; le détecteur solide est le garde-fou `sans-citation`, compté dans les échecs. **Session 6** : en
+  relevant les seuils avec Qwen, resserrer celui du passage cité.
+- [x] **Page publique** `/evaluation` : méthode, résultats de la version en ligne (la plus récente évaluation de la
+  même configuration : consignes, modèle, vectorisation ; sinon, un avertissement), historique, limites connues.
+  Source : les rapports JSON versionnés de `eval/results/`, copiés avec l'application (`Limpide.Web.csproj`,
+  `.dockerignore`, `Dockerfile`), lus au démarrage ; les rapports de la chaîne, artefacts d'exécution, n'y figurent
+  pas. Ajouter un rapport au dépôt à chaque changement de configuration. Vérifiée en local et dans l'image.
+- README : lien vers la page ; « Limites connues » remises à jour (elles dataient de la phase 1).
+- Enregistrement de la démonstration : à la fin du plan (rouvrir la PR #16, pousser un commit vide).

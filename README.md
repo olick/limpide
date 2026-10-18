@@ -1,6 +1,7 @@
 # Limpide
 
-**Démo : [https://www.limpide-ia.fr](https://www.limpide-ia.fr)**
+**Démo : [https://www.limpide-ia.fr](https://www.limpide-ia.fr)** · résultats d'évaluation :
+[www.limpide-ia.fr/evaluation](https://www.limpide-ia.fr/evaluation)
 
 Assistant qui aide à naviguer dans les textes publics encadrant l'IA : le règlement européen sur l'IA (AI Act)
 et les fiches pratiques IA de la CNIL. Il « joue cartes sur table » : chaque réponse cite ses sources, reproduites
@@ -85,9 +86,10 @@ un autre tranchant la situation de l'utilisateur) : voir [`docs/notes/observatio
 Ce que la version actuelle ne fait pas encore, et qui forme le programme de la phase 2 :
 [`docs/plan/bilan-phase-1.md`](docs/plan/bilan-phase-1.md).
 
-- Corpus volontairement réduit : l'AI Act et deux fiches CNIL.
-- Ingestion et déploiement lancés à la main ; pas d'évaluation automatique avant mise en ligne ; pas de supervision.
-- 10 à 15 questions de test, écrites par l'auteur : mesures indicatives, pas une évaluation statistique.
+- Corpus volontairement réduit : l'AI Act et les 17 fiches pratiques IA de la CNIL.
+- Pas encore de supervision : ni traces par requête, ni alertes de coût (S8).
+- Jeu d'évaluation de 50 questions rédigé par un modèle, pas encore relu par l'auteur ; relectures faites par un
+  modèle, pas par un juriste : un échantillon, pas une évaluation statistique (page d'évaluation de la démo).
 - Les considérants passent parfois devant l'article qui fait foi dans les résultats.
 - Un seul serveur, sans haute disponibilité ; quota de questions en mémoire.
 
