@@ -646,6 +646,20 @@ Repris tel quel de `CLAUDE.md` le 2026-10-15 (rangement : `CLAUDE.md` ne garde q
   sans les vecteurs de son modèle est bloquée ; vérifié : le rapport Qwen passe, un rapport bge-m3 est bloqué) ;
   ADR-012 révisé, ADR-002 remplacé, ADR-014 révisé ; vitrine, README, règles, commentaires de
   `docker-compose.prod.yml`.
-- Reste après la fusion : déploiement, `/sante` (`Qwen3-Embedding-8B+titre`, `missingEmbeddings` 0), réactivation du
-  DAG ; plus tard, retrait de l'ancienne colonne et de l'index HNSW (migration), vitrine Azure, épisode LinkedIn.
+- [x] Évaluation de la PR #22 dans la chaîne (2 min 33 s de job, ≈ 0,31 $ : rédaction 0,195 $, juge 0,113 $) :
+  barrière passée, `missingEmbeddings` 0, passage attendu fourni et cité 28/30, 0 échec, 14/14 refus, 0 fuite,
+  infidèles 8 sur 33 (0,24 ; q03, q06, q12, q16, q19, q21, q28, q29). **À surveiller** : deux passes Qwen à 0,21 (locale,
+  `1925`) et 0,24 (chaîne), contre 0,09 à 0,22 avec bge-m3 (0,09 à 0,15 sur les dernières passes). Sous le seuil (0,30), non expliqué, réponses
+  signalées non relues ; hypothèse non vérifiée : plus de passages cités, donc plus de matière jugée. À relire en S8.
+- [x] **Déploiement (2026-10-18)** : premier essai en échec à la publication des images (« unknown blob » de ghcr.io
+  sur `limpide-admin`, après une couche montée depuis `limpide-web` ; rien n'a touché le serveur), job relancé à
+  l'identique, au vert. `/sante` : `Qwen3-Embedding-8B+titre`, `missingEmbeddings` 0, empreinte `65e689755765` ;
+  image du DAG = version déployée (`26df4f01703c`) ; préchauffage 0,9 s ; recherche sur le serveur (« prévenir les
+  utilisateurs qu'ils parlent à un chatbot ») : article 50 en tête, 0,778. Coupure au redémarrage de `web` non
+  mesurée (quelques secondes de 502 à chaque déploiement, `.claude/rules/production.md`).
+- [x] DAG `ingestion` réactivé (aucune exécution lancée ; prochaine le lundi 2026-10-19, 4 h UTC). Poste :
+  `OVH_AI_ENDPOINTS_KEY` dans `pipelines/airflow/.env`, base `rag` migrée et vectorisée avec Qwen (1 130 passages,
+  99 s).
+- Reste : retrait de l'ancienne colonne et de l'index HNSW (migration), une fois le retour arrière jugé inutile ;
+  vitrine Azure ; épisode LinkedIn (épisode 19 de la série courte, brouillon proposé le 2026-10-18, pas encore dans le fichier).
 
