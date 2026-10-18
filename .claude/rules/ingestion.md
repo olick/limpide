@@ -26,7 +26,7 @@ paths:
   `FixedSizeChunker` gardé pour comparer (`--Ingestion:ChunkingStrategy=FixedSize`).
   Modifier `Packer` impose d'incrémenter la version des deux découpeurs. `chunk` remplace tous les passages d'une
   version dans une transaction.
-- **Vectorisation** : « titre + texte » (libellé `bge-m3+titre`) ; un vecteur par passage **et par modèle**
+- **Vectorisation** : « titre + texte » (libellé `Qwen3-Embedding-8B+titre`, `bge-m3+titre` gardé pour le retour arrière) ; un vecteur par passage **et par modèle**
   (`chunk_embeddings`, ADR-017) : `embed` calcule ceux du modèle configuré qui manquent, sans toucher les autres, lot
   par lot (reprise possible) ; la recherche et le passage d'une candidate en `embedded` (seul statut que `publish` accepte) ne regardent que le
   modèle configuré. Un modèle pas encore

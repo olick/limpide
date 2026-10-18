@@ -23,7 +23,7 @@ resource "azurerm_role_assignment" "app_secrets" {
 }
 
 output "embedding_api_key_id" {
-  description = "Référence de la clé OVHcloud AI Endpoints (bge-m3, ADR-012)."
+  description = "Référence de la clé OVHcloud AI Endpoints (vectorisation, ADR-012)."
   value       = "${data.azurerm_key_vault.socle.vault_uri}secrets/ovh-ai-endpoints-key"
   depends_on  = [azurerm_role_assignment.app_secrets]
 }

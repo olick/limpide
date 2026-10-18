@@ -7,8 +7,9 @@ public sealed class EmbeddingOptions
     public const string OpenAI = "OpenAI";
 
     /// <summary>
-    /// <c>Ollama</c> (défaut : bge-m3 sur la machine, ADR-002) ou <c>OpenAI</c> : toute API d'embeddings compatible
-    /// OpenAI (OVHcloud AI Endpoints, Mistral…), à l'adresse <see cref="Endpoint"/>, avec la clé <see cref="ApiKey"/>.
+    /// <c>Ollama</c> (défaut du code : bge-m3 sur la machine, hors ligne) ou <c>OpenAI</c> : toute API d'embeddings
+    /// compatible OpenAI, à l'adresse <see cref="Endpoint"/>, avec la clé <see cref="ApiKey"/>. La configuration
+    /// partagée choisit OVHcloud AI Endpoints et Qwen3-Embedding-8B (ADR-012).
     /// Mesures de la S6 : docs/notes/comparatif-couts-hebergement.md.
     /// </summary>
     public string Provider { get; set; } = Ollama;

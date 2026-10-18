@@ -22,7 +22,8 @@ paths:
   acceptées (`[P1a]`, `[P5.1.a]`). Refus reconnus par `Refusals`. Texte du modèle nettoyé par `ModelText.Clean`.
 - Avertissement juridique fixe (`AnswerPrompt.Disclaimer`) et réponse hors périmètre fixe (`AnswerPrompt.OutOfScope`),
   jamais générés.
-- Seuil `Generation:MinScore = 0,50` (pas d'appel au LLM en dessous), propre à bge-m3+titre. Deux lignes de défense :
+- Seuil `Generation:MinScore = 0,60` (pas d'appel au LLM en dessous), propre à Qwen3-Embedding-8B+titre (bge-m3+titre :
+  0,50). Deux lignes de défense :
   le seuil pour le hors sujet, le « je ne sais pas » du modèle pour les questions proches sans réponse.
 - Recherche vectorielle seule ; l'hybride reste en option (`Search:Strategy=Hybrid`), mesurée moins bonne.
 - Toute modification de la recherche : `evaluate` avant et après (voir `.claude/rules/evaluation.md`).

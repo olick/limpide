@@ -14,8 +14,8 @@ paths:
   (clé à commande imposée), validation manuelle ; rien n'est construit sur le serveur. Version en place dans
   `.env.version` (alias `limpide` : `--env-file .env.prod --env-file .env.version`). Règle de version unique :
   `deploy/version-images.sh`.
-- Vectorisation par OVHcloud AI Endpoints (`OVH_AI_ENDPOINTS_KEY`) ; Ollama en secours (profil `ollama`,
-  `deploy/ollama`).
+- Vectorisation par OVHcloud AI Endpoints (`OVH_AI_ENDPOINTS_KEY`), Qwen3-Embedding-8B, sans secours (ADR-012
+  révisé) : le profil `ollama` ne sert que bge-m3, et y revenir est un changement de configuration (ADR-017).
 - Sauvegarde quotidienne de la base (`deploy/backup-db.sh`, 3 h 15 UTC, `~/backups`, 7 jours).
 - Chaque déploiement de `web` coupe le site quelques secondes (502). Après un `pg_restore --clean` : redémarrer `web`.
 - Mémoire : lire `free -m` (available), pas le graphique d'OVH. Swap de 2 Go.

@@ -2,8 +2,9 @@
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod up -d --build
 #   docker compose -f docker-compose.prod.yml --env-file .env.prod run --rm ingestion <commande>
 # Seul Caddy est exposé ; PostgreSQL reste sur le réseau interne.
-# Vectorisation (ADR-012) : bge-m3 servi par OVHcloud AI Endpoints (mêmes vecteurs qu'Ollama, mesuré) ; Ollama reste
-# disponible en secours (profil « ollama », voir plus bas).
+# Vectorisation (ADR-012, révisé le 2026-10-18) : Qwen3-Embedding-8B servi par OVHcloud AI Endpoints, sans secours.
+# Le profil « ollama » (bge-m3) ne sert plus de secours : revenir à bge-m3 est un changement de configuration suivi
+# d'un embed (ADR-017), pas une bascule d'hébergeur.
 # Projet distinct de l'environnement de développement (docker-compose.yml) : volumes séparés.
 # Images (S7) : sur le VPS, celles que la chaîne CI/CD a publiées sur ghcr.io, version dans .env.version (écrit par
 # deploy/deployer.sh) ; rien n'y est construit. Sans IMAGE_TAG (test local de cette configuration), « --build »
@@ -12,11 +13,10 @@ name: limpide-prod
 
 x-app-env: &app-env
   ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=${POSTGRES_USER:-rag};Password=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD manquant dans .env.prod}"
-  # bge-m3 par l'API d'OVHcloud (France). Secours : EMBEDDING_PROVIDER=Ollama, EMBEDDING_ENDPOINT=http://ollama:11434
-  # et « --profile ollama up -d » (mêmes vecteurs : rien à recalculer).
+  # Modèle et réglages de vectorisation : src/appsettings.shared.json (Qwen3-Embedding-8B par l'API d'OVHcloud, France).
   Embedding__Provider: "${EMBEDDING_PROVIDER:-OpenAI}"
   Embedding__Endpoint: "${EMBEDDING_ENDPOINT:-https://oai.endpoints.kepler.ai.cloud.ovh.net/v1}"
-  Embedding__ApiKey: "${OVH_AI_ENDPOINTS_KEY:-}"
+  Embedding__ApiKey: "${OVH_AI_ENDPOINTS_KEY:?OVH_AI_ENDPOINTS_KEY manquant dans .env.prod}"
   Mistral__ApiKey: "${MISTRAL_API_KEY:?MISTRAL_API_KEY manquant dans .env.prod}"
 
 services:
@@ -97,7 +97,8 @@ services:
       retries: 10
     mem_limit: 512m
 
-  # Secours (ADR-012) : jamais démarré par « up » ; « --profile ollama up -d » avec EMBEDDING_PROVIDER=Ollama.
+  # bge-m3 sur le serveur (ADR-012) : jamais démarré par « up » ; ne sert plus de secours depuis la bascule sur Qwen
+  # (2026-10-18) : un retour à bge-m3 demande aussi modèle, consigne de question et seuil (ADR-017).
   ollama:
     image: ollama/ollama:latest
     profiles: ["ollama"]

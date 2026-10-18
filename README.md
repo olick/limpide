@@ -27,12 +27,12 @@ reproduits à l'identique avec leur source et leur licence, et le panneau « sou
 ```mermaid
 flowchart LR
     subgraph Ingestion["Ingestion (console .NET, commandes idempotentes)"]
-        F[fetch<br/>EUR-Lex, CNIL] --> E[extract<br/>texte structuré] --> C[chunk<br/>article, section] --> M[embed<br/>bge-m3]
+        F[fetch<br/>EUR-Lex, CNIL] --> E[extract<br/>texte structuré] --> C[chunk<br/>article, section] --> M[embed<br/>Qwen3-Embedding-8B]
     end
     M --> DB[(PostgreSQL<br/>+ pgvector)]
     U((Visiteur)) -->|HTTPS| P[Caddy]
     P --> W[Application web<br/>Blazor Server]
-    W -->|question vectorisée| O[bge-m3<br/>OVHcloud AI Endpoints, France]
+    W -->|question vectorisée| O[Qwen3-Embedding-8B<br/>OVHcloud AI Endpoints, France]
     W -->|5 passages les plus proches| DB
     W -->|passages + question| L[Mistral Medium<br/>API, inférence UE]
     W --> G{{Contrôles :<br/>citations, seuil,<br/>qualification juridique}}
@@ -40,14 +40,14 @@ flowchart LR
 
 Architecture physique (serveur de la démo, vitrine Azure, flux et secrets) : [`docs/architecture-physique.md`](docs/architecture-physique.md).
 
-Une question : vectorisation (bge-m3, sur le serveur) → recherche des 5 passages les plus proches (pgvector) →
+Une question : vectorisation (Qwen3-Embedding-8B, par l'API d'OVHcloud) → recherche des 5 passages les plus proches (pgvector) →
 si aucun n'est assez proche, « je ne sais pas » sans appeler le modèle → sinon réponse rédigée par Mistral à partir
 de ces seuls passages → contrôles déterministes (citations vérifiées, qualification juridique détectée).
 
 | Composant | Choix | Pourquoi (décision détaillée) |
 |---|---|---|
 | Base | PostgreSQL + pgvector | une seule base pour les données et les vecteurs ([ADR-001](docs/adr/001-pgvector.md)) |
-| Embeddings | bge-m3 : Ollama sur le poste, **OVHcloud AI Endpoints en production** (même modèle, vecteurs identiques) | multilingue, mesuré ([ADR-002](docs/adr/002-embeddings-locaux.md)) ; en production, un conteneur de moins et la mémoire du serveur doublée pour 0,01 € le million de tokens, en France ([ADR-012](docs/adr/012-hebergement-des-modeles.md)) |
+| Embeddings | Qwen3-Embedding-8B par **OVHcloud AI Endpoints** (France), partout ; bge-m3 jusqu'au 2026-10-18 | multilingue, poids ouverts ; bon passage dans le top 5 pour 28/30 questions contre 21/30 avec bge-m3, pour 0,10 € le million de tokens ([ADR-012](docs/adr/012-hebergement-des-modeles.md)) ; bascule sans interruption, deux modèles en base ([ADR-017](docs/adr/017-vecteurs-par-modele.md)) |
 | Ingestion | console .NET, une commande par étape | idempotente, reprise telle quelle par Airflow en phase 2 ([ADR-003](docs/adr/003-ingestion-phase1.md)) |
 | Génération | Mistral Medium 3.5, inférence UE | retenu après mesure et relecture face à Small ([ADR-004](docs/adr/004-choix-llm.md)) |
 | Recherche | vectorielle seule, seuil de pertinence | l'hybride (plein texte) mesurée moins bonne ([ADR-005](docs/adr/005-recherche-hybride.md)) |
@@ -109,21 +109,22 @@ Deux façons de faire tourner Limpide sur un poste :
 | | Docker fait tourner | L'application | Adresse |
 |---|---|---|---|
 | **Développement** (`docker-compose.yml`) | PostgreSQL, Ollama et le back office | lancée par `dotnet` (profil VS Code « Web » ou `dotnet run`) | http://localhost:5181 |
-| **Production en local** (`docker-compose.prod.yml`) | tout : Caddy, application, back office, PostgreSQL (vectorisation par OVHcloud ; Ollama en secours) | dans un conteneur (voir `deploy/README.md`) | http://localhost:8088 |
+| **Production en local** (`docker-compose.prod.yml`) | tout : Caddy, application, back office, PostgreSQL (vectorisation par OVHcloud) | dans un conteneur (voir `deploy/README.md`) | http://localhost:8088 |
 
 En développement :
 
 ```bash
 cp .env.example .env
 docker compose up -d
-docker compose exec ollama ollama pull bge-m3
+docker compose exec ollama ollama pull bge-m3   # facultatif : bge-m3 hors ligne (appsettings.shared.json)
 docker compose exec postgres psql -U rag -d rag -c "\dx"   # doit lister l'extension vector
 
-# Secrets locaux (hors du dépôt) : chaîne de connexion et clé d'API Mistral
+# Secrets locaux (hors du dépôt) : chaîne de connexion, clés d'API Mistral et OVHcloud AI Endpoints (vectorisation)
 dotnet user-secrets set "ConnectionStrings:Rag" \
   "Host=localhost;Port=5432;Database=rag;Username=rag;Password=<mot de passe du .env>" \
   --project src/Limpide.Ingestion
 dotnet user-secrets set "Mistral:ApiKey" "<clé>" --project src/Limpide.Ingestion
+dotnet user-secrets set "Embedding:ApiKey" "<clé OVHcloud AI Endpoints>" --project src/Limpide.Ingestion
 ```
 
 ## Ingestion
@@ -137,7 +138,7 @@ Dans VS Code : profils `Debug` et `Release` (F5), qui ouvrent le mode interactif
 dotnet run --project src/Limpide.Ingestion -- fetch     # télécharge corpus.json dans data/raw, versionne en base
 dotnet run --project src/Limpide.Ingestion -- extract   # texte structuré des versions courantes dans data/extracted
 dotnet run --project src/Limpide.Ingestion -- chunk     # passages dans la table chunks
-dotnet run --project src/Limpide.Ingestion -- embed     # embeddings bge-m3 des passages qui n'en ont pas
+dotnet run --project src/Limpide.Ingestion -- embed     # vecteurs du modèle configuré qui manquent (Qwen3-Embedding-8B)
 dotnet run --project src/Limpide.Ingestion -- ask Quelles pratiques d\'IA sont interdites \?
 dotnet run --project src/Limpide.Ingestion -- search Quelles pratiques d\'IA sont interdites \?
 dotnet run --project src/Limpide.Ingestion -- evaluate  # score de la recherche sur eval/questions.json
@@ -171,7 +172,7 @@ Mêmes secrets que la console (user-secrets partagés) et mêmes réglages (`src
 
 ## Mise en ligne
 
-Image Docker multi-étapes (`Dockerfile`), pile `docker-compose.prod.yml` (Caddy, application, PostgreSQL ; Ollama jusqu'à l'ADR-012),
+Image Docker multi-étapes (`Dockerfile`), pile `docker-compose.prod.yml` (Caddy, application, PostgreSQL ; vectorisation par OVHcloud, ADR-012),
 secrets dans `.env.prod` (jamais commité). Procédure complète : [`deploy/README.md`](deploy/README.md).
 
 ## Score de recherche
@@ -201,13 +202,13 @@ Détail et limites de la mesure : [`docs/notes/observations-decoupage.md`](docs/
 ├── scripts/            Scripts utilitaires (création de la solution .NET)
 ├── src/
 │   ├── Limpide.Core            Domaine : extraction, découpage, évaluation, interfaces (sans infrastructure)
-│   ├── Limpide.Infrastructure  PostgreSQL + pgvector, Ollama, Mistral
+│   ├── Limpide.Infrastructure  PostgreSQL + pgvector, embeddings (OVHcloud ou Ollama), Mistral
 │   ├── Limpide.Ingestion       Console : ingestion, recherche, évaluation, questions
 │   ├── Limpide.Web             Application web (Blazor, rendu serveur)
 │   └── appsettings.shared.json Réglages communs à la console et au web
 ├── eval/               Questions de test ; rapports d'évaluation des réponses (results/)
 ├── tests/              Tests unitaires de Limpide.Core
 ├── data/               Documents bruts téléchargés (ignoré par git)
-├── docker-compose.yml       Développement : PostgreSQL + pgvector, Ollama
-└── docker-compose.prod.yml  Démo en ligne : Caddy, application, PostgreSQL, Ollama
+├── docker-compose.yml       Développement : PostgreSQL + pgvector, Ollama (bge-m3 hors ligne), back office
+└── docker-compose.prod.yml  Démo en ligne : Caddy, application, back office, PostgreSQL
 ```
