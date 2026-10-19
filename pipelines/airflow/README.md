@@ -100,6 +100,11 @@ la tâche `bilan` rassemble les résumés, envoie **une** alerte Discord si une 
 (sinon Airflow marquerait l'exécution réussie, puisque `embed` réussit). Après réparation d'une tâche (« Clear »),
 cocher **Downstream** pour relancer aussi `bilan`.
 
+Une exécution **réussie** envoie aussi un message (depuis le 2026-10-19), court : documents vérifiés, nouvelles
+versions collectées, écartées (texte identique), publiées, durée. Sans lui, une exécution réussie et une exécution
+qui n'a pas eu lieu étaient toutes deux muettes. Ne pas recevoir le message du lundi est donc un signal ; l'alerte
+automatique sur une exécution manquante viendra de la supervision (S8).
+
 La **cause** figure dans le log et dans l'alerte. Airflow recopie la sortie du conteneur en INFO, ligne par ligne,
 sans en connaître la gravité ; `IngestionCommand` (un `DockerOperator` à peine étendu) fait donc des lignes d'erreur
 de la console (`fail:`, `Erreur (...)`) le message de l'échec : la ligne ERROR du log dit pourquoi, au lieu de
