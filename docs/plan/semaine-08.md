@@ -87,6 +87,10 @@ qui y mène.
      traces (Tempo n'a ni purge ciblée ni contrôle d'accès fin) ;
    - comment : durée, accès (Grafana par tunnel SSH, back office authentifié), droit d'opposition ou case à cocher,
      filtre des données personnelles évidentes (adresse électronique, téléphone) avant écriture ;
+   - **déjà à traiter, quelle que soit la décision** : les journaux bruts des conteneurs de la démo (`docker logs`,
+     sans rotation) peuvent contenir le texte de questions : avant la PR #24 (2026-10-19), `Home.razor` l'écrivait
+     dans le message d'erreur. Les purger, puis plafonner leur taille et leur durée (`logging:` dans
+     `docker-compose.prod.yml`, comme `supervision/`) ; nettoyer au passage les ≈ 13,5 Go récupérables par Docker ;
    - puis l'appliquer : message « Question reçue » enrichi (`Visit.cs`), règle « jamais le texte » de
      `.claude/rules/supervision.md` et ADR-018 révisés, mention d'information, registre des traitements (S9).
 
@@ -199,7 +203,9 @@ qui y mène.
   - **une modification du DAG n'est pas déployée par la chaîne** : le workflow « Déploiement » ne se déclenche que
     sur `src/`, `deploy/`, `docker-compose.prod.yml`… ; le DAG du serveur ne change qu'au `git merge` de
     `deployer.sh`, donc au prochain déploiement de l'application. Contourné à la main (`git pull --ff-only` sur le
-    serveur). À décider : ajouter `pipelines/airflow/dags/**` aux chemins du workflow, ou documenter le `git pull` ;
+    serveur). Décidé avec Alexandre : `pipelines/airflow/dags/**` ajouté aux chemins du workflow « Déploiement »
+    (même version d'images : ni reconstruction, ni redémarrage ; relu par `relecteur-infra`). Idée pour plus tard :
+    contrôler l'import du DAG en CI avant fusion (un DAG cassé n'apparaît que dans l'interface d'Airflow) ;
   - Docker garde ≈ 13,5 Go récupérables sur le serveur (images 10 Go, cache de construction 3,5 Go, restes des
     constructions sur le serveur d'avant la S7) : à nettoyer en session 5, avec la rotation des journaux ;
   - l'ajout de la ligne à `.env.prod` avait été donné sans commande : `web` a d'abord été « recréé » sans la

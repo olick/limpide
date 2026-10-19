@@ -21,6 +21,10 @@ on:
       # Rapports d'évaluation versionnés, copiés dans l'image web (page /evaluation).
       - "eval/results/*.json"
       - "docker-compose.prod.yml"
+      # DAG d'Airflow : lu sur le serveur dans ~/limpide, mis à jour par le git merge de deployer.sh. Version des images
+      # inchangée : rien n'est reconstruit ni redémarré, sauf si la configuration du serveur (.env.prod) a changé
+      # depuis (constaté le 2026-10-19 : la PR #25 n'était pas arrivée).
+      - "pipelines/airflow/dags/**"
       - "deploy/**"
       # Scripts de l'évaluation, sans effet sur le VPS : leur modification ne redéploie pas (ADR-016).
       - "!deploy/evaluer.sh"
