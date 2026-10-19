@@ -9,7 +9,8 @@ en une transaction. Une candidate au texte identique à la version publiée est 
 échoue aux contrôles qualité (`validate`) part en quarantaine.
 
 Échecs : une étape en échec n'arrête pas les suivantes (un document indisponible ne bloque pas les autres) ; la tâche
-`bilan` envoie alors une seule alerte Discord et marque l'exécution en échec.
+`bilan` envoie alors une seule alerte Discord et marque l'exécution en échec. Une exécution réussie envoie aussi un
+message, plus court : sans lui, une exécution réussie et une exécution qui n'a pas eu lieu se ressemblent.
 
 Prérequis (développement) : la pile du dépôt démarrée (`docker compose up -d` à la racine : postgres, ollama) et
 l'image construite (`docker build --target ingestion -t limpide-ingestion .`). Voir pipelines/airflow/README.md.
@@ -104,6 +105,24 @@ def keep_failure_cause(context: Context) -> None:
     context["ti"].xcom_push(key="cause", value=str(context["exception"])[:1000].splitlines())
 
 
+def success_message(summaries: dict[str, dict[str, Any]], run_id: str, started: datetime.datetime | None) -> str:
+    """Une ligne de bilan : documents vérifiés, nouvelles versions, versions écartées et publiées, durée."""
+    fetch = summaries.get("fetch", {})
+    # Toutes les issues de fetch sont des compteurs (inchangé, nouvelle version...), sauf le code de sortie.
+    checked = sum(v for k, v in fetch.items() if isinstance(v, int) and k != "exitCode")
+    collected = fetch.get("created", 0) + fetch.get("restored", 0)
+    discarded = summaries.get("extract", {}).get("discarded", 0)
+    published = summaries.get("publish", {}).get("published", 0)
+    duration = ""
+    if started is not None:
+        seconds = int((datetime.datetime.now(datetime.UTC) - started).total_seconds())
+        duration = f" en {seconds // 60} min {seconds % 60:02d} s"
+    corpus = f"**{published} version(s) publiée(s)**" if published else "corpus de la démo inchangé"
+    return (f"✅ **Limpide : ingestion réussie** ({run_id}){duration}\n"
+            f"{checked} document(s) vérifié(s), {collected} nouvelle(s) version(s) collectée(s), "
+            f"{discarded} écartée(s) (texte identique) ; {corpus}.")
+
+
 def send_discord_alert(message: str) -> None:
     """Webhook Discord : un simple POST JSON. L'adresse contient un jeton, d'où « secret » dans le nom (masquée)."""
     url = Variable.get("discord_webhook_secret", default=None)
@@ -153,7 +172,8 @@ with DAG(
     @task(trigger_rule="all_done", retries=0)
     def bilan() -> dict[str, Any]:
         """
-        Rassemble les résumés et envoie au plus une alerte :
+        Rassemble les résumés et envoie un seul message :
+        - tout s'est bien passé → message court (documents vérifiés, versions collectées et publiées, durée) ;
         - une tâche a échoué (pas de résumé : il n'est gardé qu'en cas de succès) → alerte, exécution en échec ;
         - une version est (ou reste) en quarantaine → alerte avec la raison et la marche à suivre, exécution réussie :
           le pipeline a fonctionné, c'est la donnée qui est refusée, et la version publiée reste en service.
@@ -181,7 +201,7 @@ with DAG(
             lines.append("Vérifier le texte, puis `release <empreinte> <motif>` ou `reject <empreinte> <motif>` "
                          "(console d'ingestion, `versions` pour l'état).")
         if not lines:
-            return summaries
+            lines.append(success_message(summaries, run_id, context["dag_run"].start_date))
 
         if failed:
             lines += [f"✅ `{command}` : {pulled[command]}" for command in summaries]
