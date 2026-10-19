@@ -4,6 +4,7 @@
 @using Limpide.Infrastructure.Storage
 @inject FeedbackStore Store
 @inject ILogger<FeedbackForm> Logger
+@inject Visit CurrentVisit
 
 <section class="feedback" aria-labelledby="feedback-title">
     <h2 id="feedback-title">Votre avis <span class="label">facultatif, chaque question l'est aussi</span></h2>
@@ -93,6 +94,8 @@
         {
             await Store.SaveAsync(feedback, CancellationToken.None);
             sent = true;
+            using (CurrentVisit.Scope(Logger))
+                Logger.FeedbackSent(feedback.Context is not null);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {

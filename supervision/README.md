@@ -34,6 +34,11 @@ Grafana : affiche et relie le tout (d'une trace à ses messages, d'un message à
 - **Le journal `answer_log`** (base, pas la pile) : une ligne par question, avec son `trace_id`. Il est durable,
   sauvegardé avec la base, interrogeable en SQL ; la trace, elle, disparaît au bout de 14 jours.
 
+- **Les journaux** racontent les opérations d'une visite (`Visit.cs`) : ouverture, pages, question reçue
+  (longueur), recherche, rédaction, garde-fous, réponse, retour envoyé, fin. Chaque message porte un identifiant de
+  **visite** tiré au hasard à l'ouverture de la page (ni IP, ni cookie, il meurt avec elle) et, pour une question,
+  le `trace_id`. Dans Grafana : `{service_name="limpide-web"} | visite="7f3a1c2e"` pour suivre une visite.
+
 **Jamais le texte des questions ni des réponses** : ni dans les traces (contenu des appels aux modèles désactivé dans
 le code), ni dans les messages, ni dans la base. Seulement des mesures et des codes.
 

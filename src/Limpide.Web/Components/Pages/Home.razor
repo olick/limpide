@@ -6,6 +6,7 @@
 @inject ILogger<Home> Logger
 @inject GenerationSettings Generation
 @inject Limpide.Infrastructure.Storage.AnswerLogStore AnswerLog
+@inject Visit CurrentVisit
 
 <PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
 
@@ -321,6 +322,9 @@
             return;
 
         error = null;
+        using var visitScope = CurrentVisit.Scope(Logger);
+        CurrentVisit.QuestionAsked();
+        Logger.QuestionReceived(question.Trim().Length);
         var quota = Quota.TryConsume(ClientAddress ?? "inconnue");
         if (!quota.Allowed)
         {
@@ -347,6 +351,7 @@
             answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
             engineOpen = result.Guardrails.Count > 0;
+            Logger.AnswerSteps(result, Generation.MinScore);
             await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()));
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)

@@ -75,6 +75,10 @@ Répartition des rôles :
 | Prometheus (métriques) | Comment évoluent latence, volume, erreurs, mémoire du serveur ? | 30 jours |
 | `answer_log` (base) | Pour chaque question : issue, coût, garde-fous, modèle, consignes | 12 mois (comme les retours) |
 
+Les journaux racontent les opérations d'une visite (ouverture, pages, question reçue, recherche, rédaction,
+garde-fous, réponse, retour, fin), avec un identifiant de visite aléatoire, sans lien avec l'IP ni cookie, qui meurt
+avec la page : on suit le parcours d'une visite sans savoir qui elle est.
+
 Les interfaces (Grafana) ne sont pas exposées : accès par tunnel SSH, comme Airflow (ADR-013). Les alertes partent
 vers Discord, comme celles du DAG.
 

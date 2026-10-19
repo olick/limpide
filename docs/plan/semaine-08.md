@@ -76,7 +76,19 @@ qui y mène.
 3. **Rotation des secrets** : procédure documentée pour la clé d'API du LLM.
 4. **Questions des utilisateurs** : elles peuvent contenir des données personnelles.
    Décider et documenter : pas de conservation du texte, ou conservation courte et pseudonymisée pour l'amélioration.
-   Mettre à jour la mention d'information de la démo en conséquence.
+   Mettre à jour la mention d'information de la démo en conséquence, **y compris pour ce qui existe déjà depuis la
+   session 1** : journal `answer_log` (12 mois, sans texte) et journaux des visites (Loki, 14 jours : identifiant de
+   visite aléatoire, pages, longueur des questions, mesures ; donnée pseudonyme).
+   **Si le texte est conservé** (demandé le 2026-10-19 : les journaux de la session 1 ne montrent que des mesures),
+   décider aussi :
+   - quoi : la question seule, ou la question et la réponse ;
+   - où : dans les journaux (Loki, 14 jours, avec la visite et le `trace_id`, à côté des messages actuels), ou dans
+     une table à part liée à `answer_log` (durée choisie, purge, consultable dans le back office) ; pas dans les
+     traces (Tempo n'a ni purge ciblée ni contrôle d'accès fin) ;
+   - comment : durée, accès (Grafana par tunnel SSH, back office authentifié), droit d'opposition ou case à cocher,
+     filtre des données personnelles évidentes (adresse électronique, téléphone) avant écriture ;
+   - puis l'appliquer : message « Question reçue » enrichi (`Visit.cs`), règle « jamais le texte » de
+     `.claude/rules/supervision.md` et ADR-018 révisés, mention d'information, registre des traitements (S9).
 
 **Terminé quand** : la décision sur les questions des utilisateurs est appliquée dans le code et documentée.
 
@@ -152,6 +164,16 @@ qui y mène.
   `exception.message`, `exception.stacktrace` vidés). Vérifié par un envoi forgé (5 faux textes de question, adresse
   IP) : rien n'arrive dans Tempo ni Loki, `error.type` et `exception.type` restent. Source PostgreSQL de Grafana et
   compte en lecture seule : session 2.
+- [x] **Journaux des opérations** (demande d'Alexandre : Loki ne montrait que le démarrage, l'application n'écrivait
+  presque rien). `Visit.cs` : identifiant de visite aléatoire par circuit Blazor (ni IP ni cookie), messages
+  structurés (`LoggerMessage`) : visite ouverte, page, question reçue (longueur), recherche (passages, meilleur score,
+  seuil, durées), rédaction (modèle, consignes, tokens, coût, durée), garde-fou déclenché (avertissement), réponse
+  (issue, passages cités, durée totale), hors périmètre, retour envoyé, visite terminée (pages, questions, durée
+  active). Texte des questions toujours exclu (option écartée : décision de la session 5). Vérifié (parcours
+  d'Alexandre, visite `bc9593bb`) : 4 questions racontées étape par étape avec leur `trace_id`, fin de visite écrite
+  ≈ 3 min après la fermeture de l'onglet (aucun signal de déconnexion reçu : Blazor garde le circuit 3 min).
+  Point 4 de la session 5 complété : où et comment conserver le texte s'il l'est, et mention d'information à
+  étendre aux journaux déjà en place.
 - Reste : déploiement sur le VPS (réseau `limpide-prod_default`, `OTEL_EXPORTER_OTLP_ENDPOINT` du conteneur `web`,
   mesure sur place, tunnel SSH vers Grafana), vitrine des technologies au déploiement (OpenTelemetry, Grafana :
   pas avant qu'ils tournent), message Discord de succès du DAG (PR à part).

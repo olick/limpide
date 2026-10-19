@@ -18,6 +18,9 @@ builder.Services.AddHostedService<Limpide.Web.EmbeddingWarmup>();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddSingleton(builder.Configuration.GetSection("Protection").Get<QuotaOptions>() ?? new QuotaOptions());
 builder.Services.AddSingleton<QuestionQuota>();
+// Une visite par circuit Blazor : identifiant aléatoire qui relie ses messages (ADR-018), ni IP ni cookie.
+builder.Services.AddScoped<Limpide.Web.Visit>();
+builder.Services.AddScoped<Microsoft.AspNetCore.Components.Server.Circuits.CircuitHandler, Limpide.Web.VisitCircuitHandler>();
 // Page publique d'évaluation : rapports versionnés copiés avec l'application (dossier evaluation).
 builder.Services.AddSingleton<Limpide.Web.EvaluationReports>();
 // Anti-spam du formulaire de retours : 5 envois par heure et par visiteur, 200 par jour au total.
