@@ -16,7 +16,10 @@ Alexandre ne connaissait pas Airflow avant la S4 : concepts d'abord. Détail et 
 - Local : compose officiel + `docker-compose.override.yaml` (socket Docker pour le worker seul : choix de
   développement ; `AIRFLOW_VAR_*`, webhook Discord dans `pipelines/airflow/.env`). Réseau `limpide_default`.
 - Production (ADR-013) : `docker-compose.leger.yaml` + `docker-compose.production.yaml` (LocalExecutor, DAG
-  paramétré par `LIMPIDE_*`), interface par tunnel SSH vers 8080.
+  paramétré par `LIMPIDE_*`), interface par tunnel SSH vers 8080. Le DAG arrive sur le serveur par la chaîne
+  (`git merge` de `deployer.sh`, workflow déclenché par `pipelines/airflow/dags/**`, sans redémarrage de la démo) ;
+  le reste de `pipelines/airflow/` (fichiers Compose) se met à jour à la main. L'analyse Grype de ce déploiement
+  peut le bloquer (nouvelle faille dans les images) ; ne pas le valider le lundi vers 4 h UTC (ingestion en cours).
 - Démonstration de quarantaine : `pipelines/airflow/demo/quarantaine.sh`.
 - Pylance strict : `pipelines/airflow/.venv` + `pyrightconfig.json` (`pipelines/airflow/.venv/bin/pyright` depuis la
   racine).
