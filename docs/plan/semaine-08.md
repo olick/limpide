@@ -12,6 +12,17 @@ de budget Mistral (session 3) ; anti-bot et test du message à la 11e question (
 basse avec Qwen (0,21 et 0,24 contre 0,09 à 0,15), réponses signalées à relire ; retrait de l'ancienne colonne de
 vecteurs et de l'index HNSW.
 
+**Points ouverts des sessions 1 et 2** (relevés le 2026-10-19, détail dans le journal de réalisation) :
+
+| Point | Pourquoi | Quand |
+|---|---|---|
+| Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte que la personne autorisée au back office (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
+| Identifiants par défaut de la base d'Airflow sur le serveur (`airflow` / `airflow`) | elle contient les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est désormais sur son réseau | session 5 |
+| 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
+| Journaux bruts des conteneurs de la démo sans rotation ni plafond (`docker-compose.prod.yml` n'a pas de bloc `logging`) | ils peuvent contenir le texte de questions : avant la PR #24, l'application l'y écrivait en cas d'erreur | session 5 : purge, puis plafond de taille et de durée (`logging:`) ; nettoyer au passage ≈ 13,5 Go récupérables par Docker |
+| Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | amélioration, sans urgence : une inscription d'application propre à Grafana |
+| Recréer Grafana sur le serveur après la fusion de la PR #30 | messages d'alerte protégés ; la chaîne ne déploie pas la supervision | dès que possible, puis rayer la ligne : `docker compose -f supervision/docker-compose.yml up -d --force-recreate grafana` |
+
 ---
 
 ## Session 1 : traces avec OpenTelemetry (≈ 2 h, révisée le 2026-10-19)
