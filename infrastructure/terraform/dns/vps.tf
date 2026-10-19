@@ -26,6 +26,6 @@ locals {
 }
 
 output "vps_ipv4" {
-  description = "Adresse IPv4 du VPS, lue chez OVHcloud, cible des entrées @, www et admin."
+  description = "Adresse IPv4 du VPS, lue chez OVHcloud, cible des entrées @, www, admin et grafana."
   value       = local.vps_ipv4
 }

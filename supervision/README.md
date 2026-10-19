@@ -60,6 +60,15 @@ Grafana : http://localhost:3000 (`admin`). Explore → Tempo (Search) pour les t
 
 Seul Grafana publie un port (127.0.0.1:3000) ; Tempo, Loki et Prometheus s'interrogent par Grafana.
 
+## Accès (production)
+
+https://grafana.limpide-ia.fr/ (sous-domaine à part : une faille de Grafana ne peut pas agir dans le back office),
+lien « Supervision » du back office. Grafana gère lui-même la connexion Microsoft (`connexion-microsoft.sh` recopie
+la configuration du back office) : seule la personne autorisée au back office entre, avec le rôle Editor ; toute
+autre est refusée. Le mot de passe `admin` reste valable pour l'API et l'administration, **par tunnel SSH
+seulement** : Caddy refuse l'authentification par mot de passe venue d'Internet. Procédure : `deploy/README.md`,
+« Supervision ».
+
 ## Tableaux de bord et alertes (session 2)
 
 Versionnés dans le dépôt, chargés au démarrage de Grafana (dossier « Limpide ») : une modification faite dans
@@ -126,3 +135,5 @@ graphique d'OVH, `deploy/README.md`). Aucun arrêt par manque de mémoire pendan
 - Au redémarrage, Tempo écrit « failed to replay block. removing. » pour un bloc récent inachevé : sans perte
   constatée (10 traces sur 10 retrouvées, 2026-10-19).
 - Le mot de passe de Grafana n'est lu qu'au premier démarrage (puis il vit dans le volume `grafana`).
+- Connexion Microsoft : « Error retrieving access token payload … not in JWT format » est attendu (comptes
+  personnels : jeton d'accès opaque) ; Grafana lit le jeton d'identité.

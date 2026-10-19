@@ -45,6 +45,8 @@ services:
       DataProtection__KeysPath: /keys
       # Lien « Voir la démo » : la démo locale (dotnet run, profil http).
       Site__DemoUrl: "http://localhost:5181"
+      # Grafana de la pile locale (supervision/), si elle tourne.
+      Site__SupervisionUrl: "http://localhost:3000/"
     ports:
       - "127.0.0.1:${ADMIN_PORT:-5182}:8080"
     volumes:

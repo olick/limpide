@@ -80,7 +80,23 @@ Les journaux racontent les opérations d'une visite (ouverture, pages, question 
 garde-fous, réponse, retour, fin), avec un identifiant de visite aléatoire, sans lien avec l'IP ni cookie, qui meurt
 avec la page : on suit le parcours d'une visite sans savoir qui elle est.
 
-Les interfaces (Grafana) ne sont pas exposées : accès par tunnel SSH, comme Airflow (ADR-013). Les alertes partent
+Accès à Grafana : d'abord par tunnel SSH seulement, comme Airflow (ADR-013). **Révision du 2026-10-19** (demande
+d'Alexandre : montrer les tableaux de bord en rendez-vous) : Grafana est servi par Caddy sur son propre
+sous-domaine, https://grafana.limpide-ia.fr/, lien « Supervision » du back office. **Sous-domaine et non chemin du
+back office** (`/grafana/`, essayé puis écarté à la relecture) : le navigateur isole les sites par domaine, pas par
+chemin ; sous la même adresse, une faille de Grafana exécutant du JavaScript agirait dans le back office avec la
+session de l'administrateur. Grafana gère lui-même la connexion Microsoft (même inscription d'application, même
+personne autorisée que le back office, rôle Editor, toute autre refusée ; formulaire « admin » désactivé ; le mot de
+passe reste pour l'API, par tunnel seulement : Caddy refuse l'authentification par mot de passe venue d'Internet ;
+métriques internes coupées, cookie « Secure », HSTS). Écartés : le back office comme porte d'entrée (Grafana ferait
+confiance à un en-tête transmis par Caddy : du code maison dans le chemin de sécurité) et le tunnel seul (rien à
+montrer en rendez-vous). Prix : Grafana devient joignable depuis Internet ; Grype y trouve 19 failles élevées ou
+critiques corrigeables (13.2.4), surtout dans des greffons inutilisés ou en HTTP/2 (Caddy lui parle en HTTP/1.1) ;
+dans Grafana même, surtout des plantages. Rayon d'action si Grafana était compromis : plus large qu'un déni de
+service, il connaît les mots de passe de lecture (`answer_log`, quelques colonnes d'Airflow), le webhook Discord et le
+secret client Microsoft du back office, et rejoint les réseaux de la démo et d'Airflow. Suivi : analyse hebdomadaire
+des images de la supervision (S8, session 5), montée de version à chaque correctif ; secours : vider
+`GRAFANA_ADDRESS` ferme Grafana au public. Les alertes partent
 vers Discord, comme celles du DAG.
 
 ## Mesures (poste, 2026-10-19)
