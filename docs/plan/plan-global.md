@@ -213,9 +213,12 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
 
 ### S8 · Observabilité, coûts, sécurité
 
-- **OpenTelemetry** : une trace par requête (recherche, génération, garde-fous), tableau de bord de latence
-- **FinOps / GreenOps** : coût par requête et par ingestion, alertes de budget Azure,
-  estimation de la consommation énergétique, effet de la mise à l'échelle jusqu'à zéro
+- **OpenTelemetry** : une trace par requête (recherche, génération, garde-fous), tableau de bord de latence ;
+  collecteur, Tempo, Loki, Prometheus et Grafana sur le VPS, journal des réponses en base (ADR-018 : la démo n'est
+  pas sur Azure, ADR-006)
+- **FinOps / GreenOps** : coût par requête et par ingestion, alerte de budget Mistral, factures OVHcloud (VPS,
+  AI Endpoints) et Mistral ; Azure (vitrine) à part, avec l'effet de la mise à l'échelle jusqu'à zéro ;
+  estimation de la consommation énergétique
 - **Garde-fous v2** : détection d'injection de prompt, filtrage des sorties, journalisation des refus
 - **Sécurité** : revue des accès, rotation des secrets, analyse des images de conteneurs
 - **Surveillance de la dérive** : suivi dans le temps du taux de « je ne sais pas » et des scores de recherche
@@ -232,7 +235,8 @@ permanent. Apprentissage de Terraform d'abord sans frais : fournisseurs `docker`
   (« vérification des citations… »). L'explication du panneau pour un non-spécialiste est avancée à l'étape
   intermédiaire d'avant la S6 ; ici, l'affichage en direct reprend ces mêmes explications
 - **Back office, v3** : tableaux de bord — coût par jour et par modèle, quota consommé, garde-fous déclenchés,
-  taux de « je ne sais pas » (dérive), latences ; authentification Entra ID une fois sur Azure
+  taux de « je ne sais pas » (dérive), latences : dans Grafana (ADR-018) ; authentification Entra ID reportée à la
+  migration cloud
 
 **Terminé quand** : pour n'importe quelle requête de la démo, on retrouve sa trace, son coût et ses garde-fous.
 **Blocs RNCP** : BC04, BC02 (sécurité, FinOps)
@@ -417,6 +421,7 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | Métriques et seuils d'évaluation (ADR-014, écrit le 2026-10-15) | S7 |
 | Chaîne CI/CD (ADR-015, écrit le 2026-10-17) | S7 |
 | Évaluation dans un environnement jetable sur le runner, recréation d'Azure à part (ADR-016, écrit le 2026-10-17) | S7 |
+| Supervision : pile auto-hébergée sur le VPS et journal des réponses en base (ADR-018, écrit le 2026-10-19) | S8 |
 
 ## Risques du planning
 

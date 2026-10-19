@@ -5,6 +5,8 @@
 @inject QuestionQuota Quota
 @inject ILogger<Home> Logger
 @inject GenerationSettings Generation
+@inject Limpide.Infrastructure.Storage.AnswerLogStore AnswerLog
+@inject Visit CurrentVisit
 
 <PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
 
@@ -320,11 +322,17 @@
             return;
 
         error = null;
+        using var visitScope = CurrentVisit.Scope(Logger);
+        CurrentVisit.QuestionAsked();
+        Logger.QuestionReceived(question.Trim().Length);
         var quota = Quota.TryConsume(ClientAddress ?? "inconnue");
         if (!quota.Allowed)
         {
             // L'adresse IP n'est pas journalisée (donnée personnelle) : seulement le type de limite atteinte.
             Logger.LogInformation("Question refusée par le quota : {Verdict}", quota.Verdict);
+            await SaveToLogAsync(AnswerLogEntry.Refused(
+                quota.Verdict == QuotaVerdict.ClientLimitReached ? AnswerOutcome.QuotaVisitor : AnswerOutcome.QuotaDaily,
+                question.Trim().Length, TraceId()));
             error = quota.Verdict == QuotaVerdict.ClientLimitReached
                 ? $"Limite atteinte : {QuotaSettings.PerClientPerHour} questions par heure et par visiteur, pour maîtriser le coût "
                   + $"de cette démo publique. Nouvelle question possible dans {Duration(quota.RetryAfter)}."
@@ -334,6 +342,7 @@
         }
 
         busy = true;
+        var started = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -342,10 +351,14 @@
             answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
             engineOpen = result.Guardrails.Count > 0;
+            Logger.AnswerSteps(result, Generation.MinScore);
+            await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()));
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
-            Logger.LogError(ex, "Échec de la réponse à la question « {Question} »", question);
+            // Jamais le texte de la question dans les messages : ils sont conservés et consultables (ADR-018).
+            Logger.LogError(ex, "Échec de la réponse à une question de {Length} caractères", question.Trim().Length);
+            await SaveToLogAsync(AnswerLogEntry.Failed(ex, question.Trim().Length, started.Elapsed, TraceId()));
             result = null;
             error = ex is OperationCanceledException
                 ? "La réponse a pris trop de temps (plus de 60 secondes). Réessayez dans un instant."
@@ -356,6 +369,22 @@
             busy = false;
         }
     }
+
+    /// <summary>Journal des réponses (ADR-018) : son échec ne doit jamais priver le visiteur de sa réponse.</summary>
+    private async Task SaveToLogAsync(AnswerLogEntry entry)
+    {
+        try
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            await AnswerLog.SaveAsync(entry, timeout.Token);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            Logger.LogWarning(ex, "Journal des réponses : ligne « {Outcome} » non enregistrée", entry.Outcome);
+        }
+    }
+
+    private static string? TraceId() => System.Diagnostics.Activity.Current?.TraceId.ToHexString();
 
     private static IEnumerable<(string Label, TimeSpan Duration)> Steps(AnswerTimings t) =>
     [

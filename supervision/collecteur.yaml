@@ -1,0 +1,68 @@
+# Collecteur OpenTelemetry (ADR-018) : reçoit tout de l'application, retire les données personnelles, répartit.
+# Changer de destination (Grafana Cloud, Azure Monitor lors d'une migration) ne touche que ce fichier.
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  # Refuse les envois quand la mémoire approche du plafond du conteneur (128 Mo), au lieu d'être tué par le système.
+  memory_limiter:
+    check_interval: 1s
+    limit_mib: 100
+    spike_limit_mib: 20
+
+  # Filet de sécurité : l'application ne doit pas envoyer ces attributs, mais s'ils arrivent, ils ne sont pas stockés.
+  # Ni adresse du visiteur, ni empreinte de son navigateur (la question elle-même n'est jamais émise : ADR-018).
+  attributes/donnees-personnelles:
+    actions:
+      - key: client.address
+        action: delete
+      - key: http.client_ip
+        action: delete
+      - key: user_agent.original
+        action: delete
+
+  # Messages d'erreur : une exception peut citer la question (réponse d'une API, paramètre). Le type de l'erreur
+  # (error.type, exception.type) reste ; le message et la pile d'appels (qui le reprend en .NET) sont vidés. Ils restent
+  # lisibles dans la sortie du conteneur (docker compose logs web), non conservée par la supervision.
+  transform/messages-d-erreur:
+    error_mode: ignore
+    trace_statements:
+      - set(span.status.message, "") where span.status.code == STATUS_CODE_ERROR
+      - delete_key(spanevent.attributes, "exception.message")
+      - delete_key(spanevent.attributes, "exception.stacktrace")
+    log_statements:
+      - delete_key(log.attributes, "exception.message")
+      - delete_key(log.attributes, "exception.stacktrace")
+
+  batch: {}
+
+exporters:
+  otlp_grpc/tempo:
+    endpoint: tempo:4317
+    tls:
+      insecure: true # réseau interne au projet Compose
+  otlp_http/loki:
+    endpoint: http://loki:3100/otlp
+  otlp_http/prometheus:
+    endpoint: http://prometheus:9090/api/v1/otlp
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/donnees-personnelles, transform/messages-d-erreur, batch]
+      exporters: [otlp_grpc/tempo]
+    logs:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/donnees-personnelles, transform/messages-d-erreur, batch]
+      exporters: [otlp_http/loki]
+    metrics:
+      receivers: [otlp]
+      processors: [memory_limiter, attributes/donnees-personnelles, batch]
+      exporters: [otlp_http/prometheus]

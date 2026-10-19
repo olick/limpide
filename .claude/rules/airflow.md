@@ -9,8 +9,9 @@ Alexandre ne connaissait pas Airflow avant la S4 : concepts d'abord. Détail et 
 `pipelines/airflow/README.md`, `docs/plan/semaine-04.md` (journal de réalisation).
 
 - Airflow 3.3.1. DAG `ingestion` : une tâche `DockerOperator` par commande .NET (`fetch`, `extract`, `chunk`,
-  `validate`, `embed`, `publish`), **aucun code métier en Python** ; étapes en `all_done`, tâche `bilan` (une alerte
-  Discord par exécution, quarantaine comprise, sans faire échouer l'exécution).
+  `validate`, `embed`, `publish`), **aucun code métier en Python** ; étapes en `all_done`, tâche `bilan` : une alerte
+  Discord **seulement** en cas d'échec ou de quarantaine (une quarantaine ne fait pas échouer l'exécution). Une
+  exécution réussie ne prévient pas : `airflow dags list-runs ingestion` dans l'ordonnanceur pour vérifier.
 - Chaque commande écrit un résumé JSON en dernière ligne (`CommandSummary`), repris en XCom.
 - Local : compose officiel + `docker-compose.override.yaml` (socket Docker pour le worker seul : choix de
   développement ; `AIRFLOW_VAR_*`, webhook Discord dans `pipelines/airflow/.env`). Réseau `limpide_default`.

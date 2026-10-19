@@ -1,0 +1,21 @@
+# Prometheus : métriques de l'application reçues en OTLP (par le collecteur), et métriques de la machine collectées
+# toutes les 30 s auprès de node-exporter. Conservation : 30 jours (option de la ligne de commande).
+
+global:
+  scrape_interval: 30s
+
+# Attributs de ressource OpenTelemetry gardés comme étiquettes : distinguer limpide-web d'un autre service.
+otlp:
+  promote_resource_attributes:
+    - service.name
+    - service.instance.id
+
+storage:
+  tsdb:
+    # Les envois OTLP regroupés par le collecteur peuvent arriver légèrement dans le désordre.
+    out_of_order_time_window: 30m
+
+scrape_configs:
+  - job_name: serveur
+    static_configs:
+      - targets: ["node-exporter:9100"]
