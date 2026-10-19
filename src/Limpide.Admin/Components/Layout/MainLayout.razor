@@ -10,6 +10,11 @@
                 <NavLink href="/retours">Retours</NavLink>
                 <NavLink href="/journal">Journal</NavLink>
                 <NavLink href="/reglages">Réglages</NavLink>
+                @* Grafana (ADR-018) : sa propre connexion Microsoft, même personne autorisée qu'ici. *@
+                @if (SupervisionUrl is { } supervision)
+                {
+                    <a href="@supervision" target="_blank" rel="noopener">Supervision</a>
+                }
             </Authorized>
         </AuthorizeView>
         @if (Configuration["Site:DemoUrl"] is { Length: > 0 } demo)
@@ -33,3 +38,13 @@
     <a href="." class="reload">Recharger</a>
     <span class="dismiss">🗙</span>
 </div>
+
+@code {
+    // Adresse de Grafana (Site:SupervisionUrl) ; en production, GRAFANA_ADDRESS sans schéma (« grafana.limpide-ia.fr »).
+    private string? SupervisionUrl => Configuration["Site:SupervisionUrl"] switch
+    {
+        null or "" => null,
+        var url when url.StartsWith("http", StringComparison.Ordinal) => url,
+        var host => $"https://{host}/",
+    };
+}

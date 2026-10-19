@@ -76,6 +76,10 @@ qui y mène.
    (`airflow` / `airflow`, `pipelines/airflow/docker-compose.yaml`) ; elle est joignable depuis son réseau, où Grafana
    est désormais attaché. Les changer (elle contient les variables d'Airflow, dont la clé OVHcloud et le webhook).
 2. **Analyse des images** de conteneurs dans la chaîne CI (déjà amorcée en S7) : traiter les vulnérabilités critiques.
+   **Ajouté le 2026-10-19** : Grafana est exposé sur Internet (sous-domaine `grafana.limpide-ia.fr`) ; Grype y trouve 19 failles élevées
+   ou critiques corrigeables (13.2.4), surtout dans des greffons inutilisés. Analyser chaque semaine les images de la
+   supervision (signaler sans bloquer le déploiement de la démo), monter de version à chaque correctif ; envisager de
+   retirer les greffons inutilisés de l'image.
 3. **Rotation des secrets** : procédure documentée pour la clé d'API du LLM.
 4. **Questions des utilisateurs** : elles peuvent contenir des données personnelles.
    Décider et documenter : pas de conservation du texte, ou conservation courte et pseudonymisée pour l'amélioration.
@@ -88,7 +92,7 @@ qui y mène.
    - où : dans les journaux (Loki, 14 jours, avec la visite et le `trace_id`, à côté des messages actuels), ou dans
      une table à part liée à `answer_log` (durée choisie, purge, consultable dans le back office) ; pas dans les
      traces (Tempo n'a ni purge ciblée ni contrôle d'accès fin) ;
-   - comment : durée, accès (Grafana par tunnel SSH, back office authentifié), droit d'opposition ou case à cocher,
+   - comment : durée, accès (Grafana derrière la connexion Microsoft, rôle Editor ; back office authentifié), droit d'opposition ou case à cocher,
      filtre des données personnelles évidentes (adresse électronique, téléphone) avant écriture ;
    - **déjà à traiter, quelle que soit la décision** : les journaux bruts des conteneurs de la démo (`docker logs`,
      sans rotation) peuvent contenir le texte de questions : avant la PR #24 (2026-10-19), `Home.razor` l'écrivait
@@ -258,3 +262,33 @@ qui y mène.
 - Reste : installation sur le serveur (`deploy/README.md`, « Supervision » : webhook, `LIMPIDE_ENVIRONNEMENT=serveur`,
   `compte-lecture.sh limpide-prod-postgres-1`, Grafana recréé). Ensuite (demandé par Alexandre) : Grafana accessible
   depuis le back office, connexion Microsoft gérée par Grafana (option A, PR à part).
+
+**Grafana depuis le back office (2026-10-19, demande d'Alexandre, option A)** :
+
+- Choix (ADR-018 révisé) : Grafana servi par Caddy, lien « Supervision » du back office, **connexion Microsoft gérée
+  par Grafana** (même inscription d'application et même personne autorisée que le back office : `iss` et `sub`
+  d'`ADMIN_ALLOWED_USER`, rôle strict, toute autre refusée). Écartés : le back office comme porte d'entrée (confiance
+  dans un en-tête transmis par Caddy), le tunnel seul.
+- [x] `supervision/connexion-microsoft.sh` (recopie `ADMIN_OIDC_*` et la règle d'accès dans `supervision/.env`, sans
+  affichage) ; Grafana : `generic_oauth` avec PKCE, connexion automatique, formulaire désactivé ; lien du back office
+  (`Site:SupervisionUrl`, administrateurs seulement).
+- [x] Vérifié sur le poste : connexion Microsoft d'Alexandre, compte créé (« Generic OAuth ») ; API : 200 avec le mot
+  de passe, 401 sans. Le refus d'un autre compte n'a pas été essayé (pas de second compte).
+- **Constat** (Grype, avant d'exposer) : Grafana 13.2.3 a 21 failles élevées ou critiques corrigeables (201
+  occurrences), 13.2.4 en a 19 : passage en 13.2.4. Surtout dans des greffons inclus et inutilisés (MSSQL, MySQL,
+  OpenTSDB, Cloud Monitoring) ou en HTTP/2 (non atteint : Caddy parle HTTP/1.1 à Grafana) ; dans Grafana même,
+  `kin-openapi` (surtout des plantages). Suivi en session 5.
+- **Revu après `relecteur-infra`** : d'abord servi sous https://admin.limpide-ia.fr/grafana/, **écarté** : même
+  origine que le back office, une faille de Grafana exécutant du JavaScript agirait dans le back office avec la
+  session de l'administrateur. Décision avec Alexandre : **sous-domaine `grafana.limpide-ia.fr`** (entrée DNS par
+  Terraform, bloc Caddy `{$GRAFANA_ADDRESS}`, vide = Grafana fermé au public, ce qui sert de secours). Durcissements :
+  Caddy refuse l'authentification par mot de passe venue d'Internet (403 ; mot de passe `admin` par tunnel seulement)
+  et masque `/metrics` ; métriques internes de Grafana coupées ; cookie « Secure » en HTTPS ; HSTS ; rôle **Editor**
+  (pas d'ajout de source de données depuis Internet) ; Caddy recréé et non redémarré (fichier monté) ; rayon
+  d'action d'un Grafana compromis écrit dans l'ADR (mots de passe de lecture, webhook, secret client, réseaux).
+- Seconde relecture : rien de bloquant ; corrigé : filtre de Caddy insensible à la casse (`(?i)^basic\s`), secours
+  (désactiver aussi la connexion Microsoft pour retrouver le formulaire par le tunnel), DNS vérifié avant d'exposer
+  (certificat), `GRAFANA_ADDRESS` écrit sans doublon. Amélioration notée : une inscription d'application propre à
+  Grafana, pour ne plus partager le secret client avec le back office.
+- Reste : adresse de retour `https://grafana.limpide-ia.fr/login/generic_oauth` dans le portail (à la place de celle en
+  `/grafana/`), puis installation sur le serveur (`deploy/README.md`, « Supervision », dans l'ordre indiqué).

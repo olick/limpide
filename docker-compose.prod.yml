@@ -32,6 +32,8 @@ services:
       REDIRECT_FROM: "${REDIRECT_FROM:-http://redirection-inactive.invalid}"
       # Back office (ex. « admin.limpide-ia.fr ») ; vide ou absent : bloc inactif.
       ADMIN_ADDRESS: "${ADMIN_ADDRESS:-http://admin-inactif.invalid}"
+      # Supervision (ex. « grafana.limpide-ia.fr », ADR-018) ; vide ou absent : bloc inactif, Grafana fermé au public.
+      GRAFANA_ADDRESS: "${GRAFANA_ADDRESS:-http://grafana-inactif.invalid}"
     volumes:
       - ./deploy/Caddyfile:/etc/caddy/Caddyfile:ro
       - caddy_data:/data
@@ -76,6 +78,8 @@ services:
       Admin__ClientSecret: "${ADMIN_OIDC_CLIENT_SECRET:-}"
       Admin__AllowedUsers__0: "${ADMIN_ALLOWED_USER:-}"
       DataProtection__KeysPath: /keys
+      # Lien « Supervision » vers Grafana (sous-domaine servi par Caddy, ADR-018) ; vide : pas de lien.
+      Site__SupervisionUrl: "${GRAFANA_ADDRESS:-}"
     volumes:
       - admin_keys:/keys
     depends_on:

@@ -310,10 +310,39 @@ Vérifier les droits sans afficher le mot de passe :
 `docker exec -e PGPASSWORD=$(grep ^GRAFANA_PG_PASSWORD= supervision/.env | cut -d= -f2) limpide-prod-postgres-1
 psql -h localhost -U grafana_lecture -d rag -c "select count(*) from feedback"` doit répondre « permission denied ».
 
-Grafana, depuis le poste (port 3001 : le 3000 du poste sert à la pile locale) :
+Grafana depuis le back office (lien « Supervision »), sur https://grafana.limpide-ia.fr/ : sous-domaine à part, pas
+un chemin du back office (une faille de Grafana ne doit pas pouvoir agir dans le back office). Entrée DNS `grafana`
+(Terraform, `infrastructure/terraform/dns/zone.tf`, appliquée après fusion). Connexion Microsoft : même inscription
+d'application que le back office, adresse de retour `https://grafana.limpide-ia.fr/login/generic_oauth` (portail
+Azure → Entra ID → Inscriptions d'applications → « Limpide Admin » → Authentification ;
+`http://localhost:3000/login/generic_oauth` pour le poste). Une fois, **dans cet ordre** (Grafana protégé avant d'être
+exposé, et DNS en place avant que Caddy demande le certificat) :
 
 ```bash
-ssh -N -L 3001:localhost:3000 debian@57.129.175.88         # puis http://localhost:3001 (admin, supervision/.env)
+cd ~/limpide
+dig +short grafana.limpide-ia.fr                 # l'adresse du VPS (entrée appliquée par Terraform après fusion)
+supervision/connexion-microsoft.sh ../.env.prod https://grafana.limpide-ia.fr/   # rien n'est affiché
+docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
+grep -q '^GRAFANA_ADDRESS=' .env.prod && sed -i 's/^GRAFANA_ADDRESS=.*/GRAFANA_ADDRESS=grafana.limpide-ia.fr/' .env.prod \
+  || echo GRAFANA_ADDRESS=grafana.limpide-ia.fr >> .env.prod
+limpide up -d --force-recreate caddy admin  # Caddyfile relu (fichier monté : restart ne suffit pas) ; lien du back office
+curl -sI https://grafana.limpide-ia.fr/ | head -1                                 # 302 (vers la connexion)
+curl -s -o /dev/null -w '%{http_code}\n' -u admin:x https://grafana.limpide-ia.fr/api/search  # 403 (refusé par Caddy)
+```
+
+Seule la personne autorisée au back office (`ADMIN_ALLOWED_USER`) entre, avec le rôle Editor ; toute autre est
+refusée. Après un changement du secret client du back office : relancer `connexion-microsoft.sh`, puis recréer
+Grafana.
+
+Secours (connexion Microsoft en panne, ou faille de Grafana) : vider `GRAFANA_ADDRESS` dans `.env.prod`, puis
+`limpide up -d --force-recreate caddy admin` : Grafana est fermé au public. Pour y entrer par le tunnel, il faut aussi
+`GRAFANA_OIDC_ACTIF=false` dans `supervision/.env` et Grafana recréé : connexion Microsoft active, Grafana renvoie
+vers Microsoft puis vers https://grafana.limpide-ia.fr/, même par le tunnel (le formulaire « admin » revient sans
+elle ; ne jamais rouvrir `GRAFANA_ADDRESS` dans cet état). Puis, depuis le poste (port 3001 : le 3000 du poste sert à
+la pile locale ; mot de passe `admin` de `supervision/.env`) :
+
+```bash
+ssh -N -L 3001:localhost:3000 debian@57.129.175.88         # puis http://localhost:3001/
 ```
 
 Vérifier : une question sur la démo, puis sa trace dans Grafana (Explore → Tempo) et sa ligne dans `answer_log`

@@ -44,5 +44,13 @@ resource "ovh_domain_zone_record" "admin" {
   target    = local.vps_ipv4
 }
 
+# Grafana (S8, ADR-018) : sous-domaine à part du back office (isolation par le navigateur), servi par Caddy sur le VPS.
+resource "ovh_domain_zone_record" "grafana" {
+  zone      = var.zone
+  subdomain = "grafana"
+  fieldtype = "A"
+  target    = local.vps_ipv4
+}
+
 # Supprimée par Terraform le 2026-10-12 : limpide-ia.fr.limpide-ia.fr (A), erreur de saisie de la S5 (sous-domaine
 # « limpide-ia.fr » au lieu de vide). Importée, puis son bloc retiré : le `plan` suivant a annoncé sa destruction.

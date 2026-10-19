@@ -103,12 +103,13 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 S1–S7 faites (POC, démo, Airflow, versions, back office, Terraform ; S7 le 2026-10-18 : évaluation en CI, `gate`,
 chaîne jusqu'au VPS, bascule Qwen3-Embedding-8B, ADR-014 à 017) ; S9–S10 à venir (gouvernance, marge).
 
-**S8 en cours** (observabilité, coûts, sécurité). Session 1 faite le 2026-10-19 : supervision auto-hébergée sur le
-VPS (collecteur OpenTelemetry, Tempo, Loki, Prometheus, Grafana : `supervision/`, Grafana par tunnel SSH port 3001),
-journal `answer_log` en base, journaux des visites (ADR-018, accepté ; ≈ 400 à 500 Mo sur le serveur, 1,35 Go
-restent disponibles) ; message Discord aussi quand le DAG réussit. Prochaine : session 2 (tableaux de bord,
-alertes). Reportés de la S7 (liste en tête de `semaine-08.md`) : garde-fou « Oui » en tête, alerte de budget
-Mistral, anti-bot, fidélité jugée plus basse avec Qwen, test du message à la 11e question.
+**S8 en cours** (observabilité, coûts, sécurité), ADR-018. Session 1 faite le 2026-10-19 : supervision auto-hébergée
+sur le VPS (collecteur OpenTelemetry, Tempo, Loki, Prometheus, Grafana : `supervision/`), journal `answer_log`,
+journaux des visites, message Discord quand le DAG réussit. Session 2 (PR #28, puis Grafana sur
+https://grafana.limpide-ia.fr/ depuis le back office, connexion Microsoft) : tableaux de bord, 8 alertes Discord,
+lecture seule d'`answer_log` et de la base d'Airflow ; installation sur le serveur à faire. Prochaine : session 3.
+Reportés de la S7 (liste en tête de `semaine-08.md`) : garde-fou « Oui » en tête, alerte de budget Mistral, anti-bot,
+fidélité jugée plus basse avec Qwen, test du message à la 11e question.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,

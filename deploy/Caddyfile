@@ -25,6 +25,28 @@
 	}
 }
 
+# Supervision (GRAFANA_ADDRESS, ex. « grafana.limpide-ia.fr », ADR-018) : Grafana, joint sur le réseau de la démo.
+# Sous-domaine à part, pas un chemin du back office : le navigateur isole les sites par domaine, une faille de Grafana
+# ne peut pas agir dans le back office avec la session de l'administrateur. Grafana gère sa propre connexion Microsoft
+# (même personne autorisée que le back office). Vide ou absent : bloc inactif (secours : Grafana fermé au public).
+{$GRAFANA_ADDRESS} {
+	encode gzip
+	# Mot de passe « admin » (API) : jamais depuis Internet (essais en continu, ou blocage du compte) ; par tunnel SSH
+	# seulement, directement sur le port de Grafana.
+	@motdepasse header_regexp Authorization (?i)^basic\s
+	respond @motdepasse "Authentification par mot de passe réservée au tunnel SSH." 403
+	# Métriques internes de Grafana : servies sans authentification ; personne ne les lit.
+	respond /metrics 404
+	reverse_proxy grafana:3000
+	header {
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		X-Frame-Options DENY
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}
+
 # Adresse(s) redirigée(s) vers SITE_ADDRESS (ex. domaine nu « limpide-ia.fr » → « www.limpide-ia.fr ») : une seule
 # adresse canonique. Caddy obtient aussi le certificat de cette adresse, pour rediriger en HTTPS.
 # REDIRECT_FROM vide ou absent : docker-compose.prod.yml passe une adresse inexistante, en HTTP (aucun certificat

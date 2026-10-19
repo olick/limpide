@@ -26,5 +26,6 @@ paths:
 - `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` : l'application voit l'IP réelle et le HTTPS derrière Caddy.
 - Airflow : `.claude/rules/airflow.md` (tunnel SSH vers 8080).
 - Supervision (S8, ADR-018) : projet Compose `limpide-supervision` (`supervision/`), hors de la chaîne ; export de
-  `web` activé par `OTEL_EXPORTER_OTLP_ENDPOINT` dans `.env.prod` ; Grafana par tunnel SSH (port 3001 du poste).
+  `web` activé par `OTEL_EXPORTER_OTLP_ENDPOINT` dans `.env.prod` ; Grafana sur https://grafana.limpide-ia.fr/
+  (`GRAFANA_ADDRESS`, connexion Microsoft), tunnel SSH en secours (port 3001 du poste).
   Mémoire : `supervision/memoire.sh`. Procédure : `deploy/README.md`, « Supervision ».

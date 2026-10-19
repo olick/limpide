@@ -98,13 +98,37 @@ services:
 
   grafana:
     <<: *commun
-    image: grafana/grafana:13.2.3
+    image: grafana/grafana:13.2.4 # 13.2.3 : 21 failles élevées ou critiques corrigeables, 19 ici (Grype, 2026-10-19)
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?mot de passe de Grafana absent (supervision/.env)}
       GF_USERS_ALLOW_SIGN_UP: "false"
       GF_ANALYTICS_REPORTING_ENABLED: "false"
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_NEWS_NEWS_FEED_ENABLED: "false"
+      # Adresse publique : http://localhost:3000/ sur le poste, https://grafana.limpide-ia.fr/ sur le serveur (Caddy).
+      GF_SERVER_ROOT_URL: ${GRAFANA_ADRESSE:-http://localhost:3000/}
+      GF_SECURITY_COOKIE_SECURE: ${GRAFANA_COOKIE_SECURE:-false}
+      # Métriques internes de Grafana (/metrics, sans authentification) : inutiles ici.
+      GF_METRICS_ENABLED: "false"
+      # Connexion Microsoft (supervision/connexion-microsoft.sh) : même inscription d'application et même personne
+      # autorisée que le back office, avec le rôle Editor (consulter, explorer ; pas d'ajout de source de données
+      # depuis Internet) ; toute autre personne est refusée (rôle strict). Active, elle remplace le formulaire
+      # « admin » ; le mot de passe reste pour l'API, par tunnel SSH seulement (Caddy le refuse).
+      GF_AUTH_GENERIC_OAUTH_ENABLED: ${GRAFANA_OIDC_ACTIF:-false}
+      GF_AUTH_GENERIC_OAUTH_NAME: Microsoft
+      GF_AUTH_GENERIC_OAUTH_CLIENT_ID: ${GRAFANA_OIDC_CLIENT_ID:-}
+      GF_AUTH_GENERIC_OAUTH_CLIENT_SECRET: ${GRAFANA_OIDC_CLIENT_SECRET:-}
+      GF_AUTH_GENERIC_OAUTH_SCOPES: openid email profile
+      GF_AUTH_GENERIC_OAUTH_AUTH_URL: ${GRAFANA_OIDC_AUTH_URL:-}
+      GF_AUTH_GENERIC_OAUTH_TOKEN_URL: ${GRAFANA_OIDC_TOKEN_URL:-}
+      GF_AUTH_GENERIC_OAUTH_USE_PKCE: "true"
+      GF_AUTH_GENERIC_OAUTH_ALLOW_SIGN_UP: "true"
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_PATH: ${GRAFANA_OIDC_ROLE:-}
+      GF_AUTH_GENERIC_OAUTH_ROLE_ATTRIBUTE_STRICT: "true"
+      GF_AUTH_GENERIC_OAUTH_EMAIL_ATTRIBUTE_PATH: email || preferred_username
+      GF_AUTH_OAUTH_AUTO_LOGIN: ${GRAFANA_OIDC_ACTIF:-false}
+      GF_AUTH_DISABLE_LOGIN_FORM: ${GRAFANA_OIDC_ACTIF:-false}
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
       GOMEMLIMIT: 400MiB
       # Compte de lecture d'answer_log (supervision/compte-lecture.sh) ; vide : la source « Journal » échoue seule.
       GRAFANA_PG_PASSWORD: ${GRAFANA_PG_PASSWORD:-}
