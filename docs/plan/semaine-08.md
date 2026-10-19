@@ -18,7 +18,7 @@ vecteurs et de l'index HNSW.
 
 **Révision** : le plan exportait vers la supervision d'Azure, mais la démo est sur le VPS (ADR-006) et Azure n'est
 qu'une vitrine détruite la plupart du temps. Décision avec Alexandre : pile auto-hébergée sur le VPS (collecteur
-OpenTelemetry, Tempo, Loki, Prometheus, Grafana) et journal des réponses en base (**ADR-018**, proposé).
+OpenTelemetry, Tempo, Loki, Prometheus, Grafana) et journal des réponses en base (**ADR-018**, accepté le 2026-10-19 après mesure sur le serveur).
 
 1. **Journal `answer_log`** (migration 0006) : une ligne par question (issue, `trace_id`, modèle, consignes, scores,
    latences par étape, tokens, coût, garde-fous), ni texte ni IP.
@@ -185,6 +185,27 @@ qui y mène.
 - **Constat hors sujet** (`relecteur-infra`) : les conteneurs de la démo (`docker-compose.prod.yml`) n'ont pas de
   rotation de leurs journaux : ils grossissent sans limite sur le disque du serveur. À traiter en session 5
   (sécurité), avec la mesure du disque.
-- Reste : déploiement sur le VPS (réseau `limpide-prod_default`, `OTEL_EXPORTER_OTLP_ENDPOINT` du conteneur `web`,
-  mesure sur place, tunnel SSH vers Grafana), vitrine des technologies au déploiement (OpenTelemetry, Grafana :
-  pas avant qu'ils tournent), message Discord de succès du DAG (PR à part).
+- [x] **Message Discord de succès du DAG** (PR #25) : `bilan` envoie aussi un message quand l'exécution réussit
+  (documents vérifiés, versions collectées, écartées, publiées, durée). Déclenché à la main sur le serveur : message
+  reçu.
+- [x] **Déploiement sur le VPS (2026-10-19)**, PR #24 et #25 fusionnées. Avant : 1 977 Mo disponibles, disque à 63 %
+  (15 Go libres). Pile démarrée (`supervision/.env` créé sur le serveur, mot de passe jamais affiché),
+  `OTEL_EXPORTER_OTLP_ENDPOINT=http://collecteur:4317` ajouté à `.env.prod` (copie `.env.prod.avant-supervision`),
+  `web` recréé. Vérifié : 3 questions dans `answer_log` avec leur `trace_id`, traces dans Tempo, démo inchangée
+  (`/sante`). Mémoire (`supervision/memoire.sh`) : pile 394 Mo réels, 1 541 Mo disponibles ; au repos après une
+  ingestion, pile 505 Mo, **1 354 Mo disponibles**, swap 140 Mo, aucun arrêt. **ADR-018 accepté.** Vitrine des
+  technologies : groupe « Supervision » (OpenTelemetry, Grafana, Prometheus).
+- **Constats** :
+  - **une modification du DAG n'est pas déployée par la chaîne** : le workflow « Déploiement » ne se déclenche que
+    sur `src/`, `deploy/`, `docker-compose.prod.yml`… ; le DAG du serveur ne change qu'au `git merge` de
+    `deployer.sh`, donc au prochain déploiement de l'application. Contourné à la main (`git pull --ff-only` sur le
+    serveur). À décider : ajouter `pipelines/airflow/dags/**` aux chemins du workflow, ou documenter le `git pull` ;
+  - Docker garde ≈ 13,5 Go récupérables sur le serveur (images 10 Go, cache de construction 3,5 Go, restes des
+    constructions sur le serveur d'avant la S7) : à nettoyer en session 5, avec la rotation des journaux ;
+  - l'ajout de la ligne à `.env.prod` avait été donné sans commande : `web` a d'abord été « recréé » sans la
+    variable (Compose ne voit rien changer, « Healthy » sans « Recreated »). Une seule commande (sauvegarde, ajout,
+    recréation, vérification dans le conteneur) a suffi ensuite ;
+  - creux de mémoire pendant l'ingestion : à lire dans Prometheus (`node_memory_MemAvailable_bytes`), la mesure
+    manuelle est arrivée après la fin de l'exécution.
+- Reste pour la session 1 : rien. Session 2 : tableaux de bord, alertes (dont « DAG qui n'a pas tourné »), source
+  PostgreSQL de Grafana.

@@ -64,6 +64,11 @@
             new("OpenID Connect", "connexion au back office (Microsoft Entra ID)", "openid"),
             new("Discord", "alertes du pipeline", "discord"),
         ]),
+        ("Supervision", [
+            new("OpenTelemetry", "mesure chaque question, étape par étape, sans jamais garder son texte", "opentelemetry"),
+            new("Grafana", "traces (Tempo), journaux (Loki), tableaux de bord et alertes, sur le serveur", "grafana"),
+            new("Prometheus", "métriques dans le temps : latence, erreurs, mémoire du serveur", "prometheus"),
+        ]),
         ("Code", [
             new("GitHub", "dépôt public, sous licence Apache 2.0 ; registre des images Docker", "github"),
             new("GitHub Actions", "vérifie chaque modification (compilation, tests), puis la met en ligne après validation", "githubactions"),

@@ -1,6 +1,7 @@
 # Icônes des technologies
 
-Fichiers SVG de [Simple Icons](https://simpleicons.org) 16.35.0 (licence CC0 1.0), copiés tels quels le 2026-10-12.
+Fichiers SVG de [Simple Icons](https://simpleicons.org) 16.35.0 (licence CC0 1.0), copiés tels quels le 2026-10-12
+(OpenTelemetry, Grafana, Prometheus : le 2026-10-19, même version).
 Servis par l'application elle-même : aucune requête vers un site tiers depuis la page de la démo.
 
 Les marques et logos appartiennent à leurs propriétaires ; leur présence indique seulement qu'une technologie est

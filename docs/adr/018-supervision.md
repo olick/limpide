@@ -1,6 +1,6 @@
 # ADR-018 : Supervision — OpenTelemetry, pile Grafana auto-hébergée sur le VPS, et journal des réponses en base
 
-- **Statut** : proposé (mémoire de la pile à mesurer en local, puis sur le serveur)
+- **Statut** : accepté, en production depuis le 2026-10-19
 - **Date** : 2026-10-19
 
 ## Contexte
@@ -68,7 +68,7 @@ Contraintes :
 
 Répartition des rôles :
 
-| Outil | Répond à | Conservation (proposée) |
+| Outil | Répond à | Conservation |
 |---|---|---|
 | Tempo (traces) | Comment s'est déroulée cette requête, étape par étape ? | 14 jours |
 | Loki (journaux) | Que s'est-il passé : messages, erreurs, piles d'appels ? | 14 jours |
@@ -87,13 +87,26 @@ vers Discord, comme celles du DAG.
 Pile complète, 6 questions, Grafana consulté : **≈ 650 Mo réels** (Grafana 353, Tempo 120, Loki 72, collecteur 50,
 Prometheus 39, node-exporter 12), 350 Mo au repos ; plafonds ≈ 1,55 Go. Grafana 13 et Tempo 3 pèsent deux à trois
 fois l'estimation ; Tempo n'est contenu que par `GOMEMLIMIT` (250 Mo sans, 120 Mo avec). Sur le serveur (≈ 1,9 Go
-disponibles), il resterait ≈ 1,2 Go : au-dessus du seuil de révision, à confirmer sur place. Détail :
+disponibles), il en restait ≈ 1,2 Go selon cette mesure ; mesure sur place ci-dessous. Détail :
 `supervision/README.md`.
+
+## Mesures (serveur, 2026-10-19)
+
+| | Avant la pile | Pile + 3 questions (10 h 28) | Au repos, après une ingestion (15 h 49) |
+|---|---|---|---|
+| Mémoire disponible | 1 977 Mo | 1 541 Mo | 1 354 Mo |
+| Swap utilisé | 15 Mo | 30 Mo | 140 Mo |
+| Pile (mémoire réelle) | — | 394 Mo | 505 Mo |
+
+Sur le serveur, la pile pèse moins que sur le poste (Grafana 223 à 285 Mo, Tempo 52 à 65, Loki 50 à 62, collecteur
+38 à 43, Prometheus 24 à 37, node-exporter 7 à 13). Aucun arrêt par manque de mémoire ; 1,35 Go disponibles, soit
+près de trois fois le seuil de révision (500 Mo). Pour comparaison, Airflow au repos : ≈ 800 Mo. Les trois questions
+ont chacune leur `trace_id` dans `answer_log` et leur trace dans Tempo.
 
 ## Conséquences
 
-- **À mesurer avant le déploiement** : la pile tourne d'abord en local avec ses plafonds de mémoire, sous quelques
-  dizaines de questions (`docker stats`). Les plafonds de production en découlent.
+- Mémoire mesurée en local, puis sur le serveur (voir « Mesures ») : les plafonds de production en découlent ;
+  `supervision/memoire.sh` refait la mesure.
 - Un projet Compose séparé pour la supervision : elle se met à jour et s'arrête sans toucher la démo.
 - Le code : une `ActivitySource` dans `Limpide.Core` (bibliothèque standard, aucun paquet ajouté ; les métriques
   viennent des instrumentations, les indicateurs métier du journal),
