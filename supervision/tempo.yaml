@@ -1,5 +1,5 @@
 # Tempo 3 en un seul processus (-target=all par défaut) : sans Kafka, réservé aux déploiements microservices.
-# Conservation : 14 jours, valeur par défaut (block_retention: 336h). Le journal des réponses (base) garde 12 mois.
+# Le journal des réponses (base) garde 12 mois ; Tempo, 14 jours (plus bas).
 
 stream_over_http_enabled: true
 
@@ -20,6 +20,12 @@ storage:
       path: /var/tempo/wal
     local:
       path: /var/tempo/blocks
+
+# Conservation : 14 jours, écrite explicitement (c'est aussi la valeur par défaut). En Tempo 3, le nettoyage est fait
+# par le « backend worker », qui tourne dans le même processus.
+backend_worker:
+  compaction:
+    block_retention: 336h
 
 usage_report:
   reporting_enabled: false

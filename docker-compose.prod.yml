@@ -51,6 +51,9 @@ services:
       DataProtection__KeysPath: /keys
       # Lien « Back office » en bas de la page (vide : pas de lien).
       Site__AdminUrl: "${ADMIN_ADDRESS:-}"
+      # Supervision (ADR-018) : collecteur du projet limpide-supervision, joint par son nom sur le réseau de la démo
+      # (http://collecteur:4317). Vide ou absent : rien n'est mesuré ni exporté (deploy/README.md, « Supervision »).
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${OTEL_EXPORTER_OTLP_ENDPOINT:-}"
     volumes:
       - web_keys:/keys
     depends_on:

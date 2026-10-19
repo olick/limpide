@@ -11,9 +11,21 @@
 
 name: limpide-supervision
 
+# Réglages communs : en cas de manque de mémoire sur toute la machine, le noyau tue d'abord la supervision
+# (oom_score_adj), jamais la démo ; journaux des conteneurs plafonnés à 30 Mo chacun.
+x-commun: &commun
+  restart: unless-stopped
+  oom_score_adj: 500
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: "3"
+
 services:
   # Point d'entrée unique de l'application (OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 sur le poste).
   collecteur:
+    <<: *commun
     image: otel/opentelemetry-collector-contrib:0.162.0
     command: ["--config=/etc/otelcol/collecteur.yaml"]
     volumes:
@@ -24,11 +36,12 @@ services:
     networks: [supervision, limpide]
     depends_on: [tempo, loki, prometheus]
     environment:
-      GOMEMLIMIT: 100MiB
-    restart: unless-stopped
+      GOMEMLIMIT: 80MiB # sous le seuil de refus du collecteur (100 Mo), qui garde ainsi une marge
     mem_limit: 128m
+    memswap_limit: 128m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
   tempo:
+    <<: *commun
     image: grafana/tempo:3.1.0
     command: ["-config.file=/etc/tempo.yaml"]
     volumes:
@@ -37,10 +50,11 @@ services:
     networks: [supervision]
     environment:
       GOMEMLIMIT: 300MiB
-    restart: unless-stopped
     mem_limit: 384m # 250 Mo mesurés après une question (poste, 2026-10-19) : 256 Mo au bord de l'arrêt
+    memswap_limit: 384m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
   loki:
+    <<: *commun
     image: grafana/loki:3.7.8
     command: ["-config.file=/etc/loki/loki.yaml"]
     volumes:
@@ -49,10 +63,11 @@ services:
     networks: [supervision]
     environment:
       GOMEMLIMIT: 200MiB
-    restart: unless-stopped
     mem_limit: 256m
+    memswap_limit: 256m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
   prometheus:
+    <<: *commun
     image: prom/prometheus:v3.15.0
     command:
       - --config.file=/etc/prometheus/prometheus.yml
@@ -66,21 +81,23 @@ services:
     networks: [supervision]
     environment:
       GOMEMLIMIT: 200MiB
-    restart: unless-stopped
     mem_limit: 256m
+    memswap_limit: 256m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
   # Mémoire disponible, swap, disque et processeur de la machine (lus dans /proc et /sys de l'hôte, en lecture seule).
   node-exporter:
+    <<: *commun
     image: prom/node-exporter:v1.12.1
     command: ["--path.rootfs=/host"]
     pid: host
     volumes:
       - /:/host:ro,rslave
     networks: [supervision]
-    restart: unless-stopped
     mem_limit: 32m
+    memswap_limit: 32m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
   grafana:
+    <<: *commun
     image: grafana/grafana:13.2.3
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?mot de passe de Grafana absent (supervision/.env)}
@@ -96,8 +113,8 @@ services:
       - "127.0.0.1:3000:3000"
     networks: [supervision]
     depends_on: [tempo, loki, prometheus]
-    restart: unless-stopped
     mem_limit: 512m # 217 Mo au repos, 325 Mo après quelques vues (poste, 2026-10-19)
+    memswap_limit: 512m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
 
 networks:
   supervision:

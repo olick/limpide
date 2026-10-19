@@ -80,3 +80,8 @@ graphique d'OVH, `deploy/README.md`). Aucun arrêt par manque de mémoire pendan
 - Tempo 3 n'a plus d'ingesters ni de compacteur ; en un seul processus, il tourne sans Kafka. Ne pas copier les
   blocs `ingest`, `block_builder` des exemples « microservices ».
 - Les métriques de l'application partent toutes les 60 s : rien dans Prometheus pendant la première minute.
+- Fichier de configuration modifié : `up -d --force-recreate <service>` (fichiers montés un par un ; `up -d` seul
+  garde l'ancien contenu).
+- Au redémarrage, Tempo écrit « failed to replay block. removing. » pour un bloc récent inachevé : sans perte
+  constatée (10 traces sur 10 retrouvées, 2026-10-19).
+- Le mot de passe de Grafana n'est lu qu'au premier démarrage (puis il vit dans le volume `grafana`).

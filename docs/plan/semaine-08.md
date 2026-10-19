@@ -174,6 +174,17 @@ qui y mène.
   ≈ 3 min après la fermeture de l'onglet (aucun signal de déconnexion reçu : Blazor garde le circuit 3 min).
   Point 4 de la session 5 complété : où et comment conserver le texte s'il l'est, et mention d'information à
   étendre aux journaux déjà en place.
+- [x] **Préparation du déploiement** : `OTEL_EXPORTER_OTLP_ENDPOINT` transmis à `web` (vide par défaut : la fusion
+  n'active rien), procédure dans `deploy/README.md` (« Supervision » : prérequis, mise en place, tunnel SSH sur le
+  port 3001, vérification, retour arrière, mises à jour), `supervision/memoire.sh` (mémoire réelle de chaque
+  conteneur, lue dans le cgroup, et `MemAvailable`). Relectures `relecteur-infra` et `relecteur-regles` : rien de
+  bloquant ; corrigé : la supervision est tuée en premier en cas de manque de mémoire (`oom_score_adj: 500`), sans
+  droit au swap (`memswap_limit`), journaux des conteneurs plafonnés (3 × 10 Mo), conservation de Tempo écrite
+  (`backend_worker.compaction.block_retention`), `GOMEMLIMIT` du collecteur sous son seuil de refus, fichier de
+  configuration modifié = `--force-recreate`.
+- **Constat hors sujet** (`relecteur-infra`) : les conteneurs de la démo (`docker-compose.prod.yml`) n'ont pas de
+  rotation de leurs journaux : ils grossissent sans limite sur le disque du serveur. À traiter en session 5
+  (sécurité), avec la mesure du disque.
 - Reste : déploiement sur le VPS (réseau `limpide-prod_default`, `OTEL_EXPORTER_OTLP_ENDPOINT` du conteneur `web`,
   mesure sur place, tunnel SSH vers Grafana), vitrine des technologies au déploiement (OpenTelemetry, Grafana :
   pas avant qu'ils tournent), message Discord de succès du DAG (PR à part).

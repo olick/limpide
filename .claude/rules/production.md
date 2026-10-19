@@ -25,3 +25,6 @@ paths:
   configuré, donc absents de la recherche (0 attendu, ADR-017).
 - `ASPNETCORE_FORWARDEDHEADERS_ENABLED=true` : l'application voit l'IP réelle et le HTTPS derrière Caddy.
 - Airflow : `.claude/rules/airflow.md` (tunnel SSH vers 8080).
+- Supervision (S8, ADR-018) : projet Compose `limpide-supervision` (`supervision/`), hors de la chaîne ; export de
+  `web` activé par `OTEL_EXPORTER_OTLP_ENDPOINT` dans `.env.prod` ; Grafana par tunnel SSH (port 3001 du poste).
+  Mémoire : `supervision/memoire.sh`. Procédure : `deploy/README.md`, « Supervision ».

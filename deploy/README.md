@@ -265,6 +265,54 @@ serveur.
 Avant la chaîne (jusqu'au 2026-10-17), le serveur construisait les images : `git pull`, puis
 `limpide --profile outils build ingestion`, `limpide run --rm ingestion migrate`, `limpide up -d --build --wait web`.
 
+## Supervision (S8, ADR-018)
+
+Projet Compose à part (`supervision/`, détail et concepts dans `supervision/README.md`) : la chaîne ne le déploie
+pas, il se met à jour et s'arrête sans toucher la démo. ≈ 650 Mo mesurés sous charge sur le poste, ≈ 1,55 Go de
+plafonds : **mesurer avant et après** (`free -m`, `supervision/memoire.sh`). Seuil de révision : moins de 500 Mo
+disponibles.
+
+Prérequis : la version qui contient `supervision/` est déployée (`deployer.sh`), et la démo tourne (la pile rejoint
+son réseau `limpide-prod_default`, qui doit exister).
+
+Mise en place (une fois) :
+
+```bash
+cd ~/limpide
+free -m; df -h /; docker system df                         # mémoire et disque avant
+(umask 077; printf 'GRAFANA_ADMIN_PASSWORD=%s\nLIMPIDE_RESEAU=limpide-prod_default\n' "$(openssl rand -hex 16)" > supervision/.env)
+docker compose -f supervision/docker-compose.yml up -d --wait
+# Activer l'export de l'application : OTEL_EXPORTER_OTLP_ENDPOINT=http://collecteur:4317 dans .env.prod, puis
+limpide up -d web                                          # recrée web : coupure de quelques secondes
+supervision/memoire.sh                                     # puis de nouveau après quelques questions
+```
+
+Grafana, depuis le poste (port 3001 : le 3000 du poste sert à la pile locale) :
+
+```bash
+ssh -N -L 3001:localhost:3000 debian@57.129.175.88         # puis http://localhost:3001 (admin, supervision/.env)
+```
+
+Vérifier : une question sur la démo, puis sa trace dans Grafana (Explore → Tempo) et sa ligne dans `answer_log`
+(`limpide exec postgres psql -U rag -d rag -c "select at, outcome, trace_id from answer_log order by at desc limit 3"`).
+
+Retour arrière : vider `OTEL_EXPORTER_OTLP_ENDPOINT` dans `.env.prod`, `limpide up -d web`, puis
+`docker compose -f supervision/docker-compose.yml down` (les volumes, donc l'historique, restent ; `down -v` efface
+traces, journaux, métriques et tableaux de bord, **définitivement**). La démo ne dépend pas de la supervision :
+collecteur arrêté, l'application abandonne ses envois sans erreur visible. Si `.env.prod` est recréé, y remettre
+`OTEL_EXPORTER_OTLP_ENDPOINT` (la chaîne ne le réécrit pas).
+
+Mise à jour, après le déploiement de la PR qui la contient :
+
+- version d'une image (`supervision/docker-compose.yml`) : `docker compose -f supervision/docker-compose.yml up -d --wait` ;
+- **fichier de configuration** (`collecteur.yaml`, `tempo.yaml`...) : ces fichiers sont montés un par un, et `git`
+  les remplace par de nouveaux fichiers : le conteneur garde l'ancien contenu, et `up -d` ne voit rien. Il faut
+  `docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate <service>`.
+
+En cas de manque de mémoire sur toute la machine, le noyau tue d'abord la supervision (`oom_score_adj: 500`), qui
+n'a pas droit au swap (`memswap_limit`). Le mot de passe de Grafana n'est lu qu'au premier démarrage : le changer
+ensuite se fait par `docker compose -f supervision/docker-compose.yml exec grafana grafana cli admin reset-admin-password <nouveau>`.
+
 ## Test en local de la configuration de production
 
 Même procédure, avec dans `.env.prod` : `HTTP_PORT=8088`, `HTTPS_PORT=8443`, `SITE_ADDRESS=:80`.
