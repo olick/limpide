@@ -93,6 +93,9 @@ ls -lh ~/backups
 # Restaurer une sauvegarde, puis redémarrer l'application (voir « Données » ci-dessus)
 limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner < ~/backups/limpide-AAAAMMJJ-HHMM.dump
 limpide restart web
+# Supervision : droits de lecture d'answer_log (une sauvegarde antérieure à la migration 0007 ne les a pas)
+limpide --profile outils run --rm ingestion migrate && supervision/compte-lecture.sh limpide-prod-postgres-1
+docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
 ```
 
 ## Mémoire : swap de secours
@@ -287,6 +290,26 @@ limpide up -d web                                          # recrée web : coupu
 supervision/memoire.sh                                     # puis de nouveau après quelques questions
 ```
 
+Tableaux de bord et alertes (S8, session 2) : après le déploiement de la migration 0007, démo **et Airflow**
+démarrés (Grafana rejoint leurs deux réseaux, `limpide-prod_default` et `airflow_default`, qui doivent exister).
+Ordre de démarrage : démo, Airflow, supervision ; d'arrêt, l'inverse (tant que Grafana y est attaché, le réseau
+d'Airflow ne peut pas être supprimé). Rejouable :
+
+```bash
+cd ~/limpide
+limpide exec postgres psql -U rag -d rag -tAc "select 1 from pg_roles where rolname = 'lecture_supervision'"  # 1
+(umask 077; grep -vE '^(DISCORD_WEBHOOK_URL|LIMPIDE_ENVIRONNEMENT)=' supervision/.env > supervision/.env.tmp
+ grep '^DISCORD_WEBHOOK_URL=' pipelines/airflow/.env >> supervision/.env.tmp      # même salon que le DAG
+ echo LIMPIDE_ENVIRONNEMENT=serveur >> supervision/.env.tmp; mv supervision/.env.tmp supervision/.env)
+grep -c '^DISCORD_WEBHOOK_URL=https' supervision/.env                              # 1
+supervision/compte-lecture.sh limpide-prod-postgres-1                              # comptes de lecture
+docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
+```
+
+Vérifier les droits sans afficher le mot de passe :
+`docker exec -e PGPASSWORD=$(grep ^GRAFANA_PG_PASSWORD= supervision/.env | cut -d= -f2) limpide-prod-postgres-1
+psql -h localhost -U grafana_lecture -d rag -c "select count(*) from feedback"` doit répondre « permission denied ».
+
 Grafana, depuis le poste (port 3001 : le 3000 du poste sert à la pile locale) :
 
 ```bash
@@ -300,7 +323,8 @@ Retour arrière : vider `OTEL_EXPORTER_OTLP_ENDPOINT` dans `.env.prod`, `limpide
 `docker compose -f supervision/docker-compose.yml down` (les volumes, donc l'historique, restent ; `down -v` efface
 traces, journaux, métriques et tableaux de bord, **définitivement**). La démo ne dépend pas de la supervision :
 collecteur arrêté, l'application abandonne ses envois sans erreur visible. Si `.env.prod` est recréé, y remettre
-`OTEL_EXPORTER_OTLP_ENDPOINT` (la chaîne ne le réécrit pas).
+`OTEL_EXPORTER_OTLP_ENDPOINT` (la chaîne ne le réécrit pas). `supervision/.env` doit garder `DISCORD_WEBHOOK_URL` :
+sans lui, Docker Compose refuse toute commande sur la pile, `down` compris.
 
 Mise à jour, après le déploiement de la PR qui la contient :
 

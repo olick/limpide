@@ -45,16 +45,57 @@ le code), ni dans les messages, ni dans la base. Seulement des mesures et des co
 ## Démarrer en local
 
 ```bash
-cp supervision/.env.example supervision/.env      # puis choisir GRAFANA_ADMIN_PASSWORD (sans $)
+cp supervision/.env.example supervision/.env      # GRAFANA_ADMIN_PASSWORD (sans $), DISCORD_WEBHOOK_URL
+supervision/compte-lecture.sh                     # comptes de lecture (base de la démo, base d'Airflow) : une fois
 docker compose -f supervision/docker-compose.yml up -d --wait
 OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 dotnet run --project src/Limpide.Web --launch-profile http
 ```
+
+Prérequis : la démo (`docker compose up -d`) et Airflow (`pipelines/airflow`) ont démarré au moins une fois, Grafana
+rejoint leurs réseaux ; migration 0007 appliquée (`migrate`).
 
 Grafana : http://localhost:3000 (`admin`). Explore → Tempo (Search) pour les traces, Loki
 (`{service_name="limpide-web"}`) pour les messages, Prometheus pour les métriques. Sans
 `OTEL_EXPORTER_OTLP_ENDPOINT`, l'application ne mesure ni n'exporte rien (et `answer_log.trace_id` reste vide).
 
 Seul Grafana publie un port (127.0.0.1:3000) ; Tempo, Loki et Prometheus s'interrogent par Grafana.
+
+## Tableaux de bord et alertes (session 2)
+
+Versionnés dans le dépôt, chargés au démarrage de Grafana (dossier « Limpide ») : une modification faite dans
+l'interface n'est pas gardée (l'exporter en JSON et remplacer le fichier, `grafana/dashboards/`).
+
+- **Limpide — technique** : questions par issue, latence par étape (médiane, 95e centile), erreurs, coût par jour,
+  réponses HTTP 5xx, mémoire disponible et swap, disque, et les **dernières questions** (sans texte) : un clic sur
+  `trace` ouvre la trace.
+- **Limpide — qualité et dérive** : part de « je ne sais pas » et de hors périmètre, meilleur score de la recherche
+  face au seuil (0,60), garde-fous par jour et par code, passages cités par réponse.
+
+Sources de Grafana : Prometheus, Tempo, Loki, et deux bases PostgreSQL **en lecture seule** (compte
+`grafana_lecture`, `compte-lecture.sh`) : `answer_log` dans la base de la démo (rôle `lecture_supervision`, migration
+0007), `dag_run` et `import_error` dans celle d'Airflow.
+
+Alertes (`grafana/provisioning/alerting/alertes.yaml`), sur Discord, avec l'environnement (poste ou serveur) et
+« que faire » dans le message :
+
+| Alerte | Seuil | Source |
+|---|---|---|
+| Mémoire disponible basse | < 300 Mo pendant 5 min | Prometheus (node-exporter) |
+| Swap très utilisé | > 1 Go pendant 15 min | Prometheus |
+| Disque presque plein | > 85 % pendant 15 min | Prometheus |
+| La démo n'envoie plus de mesures | aucune métrique de `limpide-web` depuis 10 min | Prometheus |
+| Questions en erreur | ≥ 3 erreurs ou délais dépassés en 15 min | `answer_log` |
+| Réponses anormalement lentes | médiane > 15 s sur 30 min (au moins 3 questions) | `answer_log` |
+| Le DAG n'a pas tourné | aucune exécution réussie depuis 8 jours | base d'Airflow |
+| Un DAG ne s'importe plus | au moins une erreur d'import pendant 5 min | base d'Airflow |
+
+L'échec et la quarantaine d'une ingestion restent signalés par le DAG lui-même (tâche `bilan`).
+
+**Pourquoi la base d'Airflow et pas ses métriques** (essayé le 2026-10-19) : Airflow sait envoyer ses métriques en
+OpenTelemetry, mais un compteur n'existe qu'à partir de sa première mesure et repart de zéro au redémarrage de
+l'ordonnanceur. Après un redémarrage sans exécution, l'alerte se déclencherait à tort ; DAG en pause sans
+redémarrage, la dernière valeur continuerait d'être envoyée et l'alerte ne partirait jamais. La table `dag_run`
+donne directement la date de la dernière réussite.
 
 ## Mémoire (poste, 2026-10-19)
 

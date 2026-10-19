@@ -72,6 +72,9 @@ qui y mène.
 ## Session 5 : sécurité et données personnelles (≈ 2 h)
 
 1. **Revue des accès** : qui peut faire quoi sur Azure, GitHub et la base. Principe du moindre privilège.
+   **Relevé en session 2** (`relecteur-infra`) : la base d'Airflow du serveur garde les identifiants par défaut
+   (`airflow` / `airflow`, `pipelines/airflow/docker-compose.yaml`) ; elle est joignable depuis son réseau, où Grafana
+   est désormais attaché. Les changer (elle contient les variables d'Airflow, dont la clé OVHcloud et le webhook).
 2. **Analyse des images** de conteneurs dans la chaîne CI (déjà amorcée en S7) : traiter les vulnérabilités critiques.
 3. **Rotation des secrets** : procédure documentée pour la clé d'API du LLM.
 4. **Questions des utilisateurs** : elles peuvent contenir des données personnelles.
@@ -215,3 +218,43 @@ qui y mène.
     manuelle est arrivée après la fin de l'exécution.
 - Reste pour la session 1 : rien. Session 2 : tableaux de bord, alertes (dont « DAG qui n'a pas tourné »), source
   PostgreSQL de Grafana.
+- [x] Chaîne : `pipelines/airflow/dags/**` déclenche le déploiement (PR #27). Vérifié à sa fusion : images « déjà
+  publiée », `web` et `admin` « Running » (non recréés, démarrés à 17:43:43 avant comme après), site en ligne.
+
+**Session 2 : tableaux de bord et alertes (2026-10-19)** :
+
+- [x] **Grafana lit deux bases en lecture seule** (compte `grafana_lecture`, `supervision/compte-lecture.sh`, mot de
+  passe dans `supervision/.env`) : `answer_log` dans la base de la démo (rôle `lecture_supervision`, migration
+  `0007_lecture_supervision.sql` ; vérifié : `answer_log` lisible, `feedback` refusée), `dag_run` et `import_error`
+  dans celle d'Airflow. Hôtes désignés par le nom du conteneur : Grafana est sur deux réseaux qui ont chacun un
+  service `postgres`.
+- [x] **Deux tableaux de bord versionnés** (`supervision/grafana/dashboards/`, chargés au démarrage, dossier
+  « Limpide ») : « technique » (questions par issue, latence par étape, erreurs, coût par jour, 5xx, mémoire et swap,
+  disque, dernières questions sans texte avec lien vers la trace) et « qualité et dérive » (« je ne sais pas » et hors
+  périmètre, meilleur score face au seuil, garde-fous, passages cités). Les 14 requêtes passent.
+- [x] **8 alertes sur Discord** (`grafana/provisioning/alerting/alertes.yaml`), chacune avec « que faire » et
+  l'étiquette `environnement` (poste, serveur) : mémoire disponible < 300 Mo, swap > 1 Go, disque > 85 %, démo
+  muette 10 min, ≥ 3 erreurs en 15 min, médiane > 15 s, **aucune ingestion réussie depuis 8 jours**, DAG cassé.
+  L'échec et la quarantaine restent dans le message du DAG.
+- **Écart au plan** : métriques d'Airflow essayées (OpenTelemetry, `otel_on`, déjà dans l'image 3.3.1) puis
+  **abandonnées** pour l'alerte « le DAG n'a pas tourné » : un compteur n'existe qu'à partir de sa première mesure et
+  repart de zéro au redémarrage de l'ordonnanceur (alerte à tort après un redémarrage), et reste figé quand le DAG est
+  en pause sans redémarrage (alerte jamais déclenchée). Chaque tâche apparaissait en plus comme une instance
+  distincte. Grafana lit `dag_run` à la place.
+- **Défaut antérieur corrigé** : en mode allégé sur le poste, l'ordonnanceur ne recevait pas la clé OVHcloud
+  (`AIRFLOW_VAR_LIMPIDE_EMBEDDING_API_KEY`, donnée au serveur seulement) : toute exécution locale échouait au rendu du
+  modèle de la tâche (« Variable limpide_embedding_api_key not found »). Constaté sur l'échéance manquée du jour,
+  lancée au démarrage d'Airflow (piège connu) ; après correction, exécution réussie.
+- [x] **Alerte déclenchée en test** : « La démo n'envoie plus de mesures » (démo locale arrêtée), déclenchée à
+  18:11:04 UTC, envoyée à Discord sans erreur ; démo relancée, alerte **résolue** à 18:14:02 UTC (message de
+  résolution envoyé sans erreur).
+- [x] Relectures (`relecteur-regles`, `relecteur-infra`) : rien de bloquant. Corrigé : droits **par colonne** dans
+  la base d'Airflow (`dag_run` : `dag_id`, `state`, `end_date` ; `import_error` : `id`, `filename`, `timestamp` ;
+  vérifié : `dag_run.conf` et `variable` refusées, les 8 alertes saines) ; `compte-lecture.sh` vérifie d'abord que les
+  deux bases tournent ; procédure du serveur rejouable, Airflow dans les prérequis, ordre démarrage/arrêt, webhook
+  obligatoire pour toute commande de la pile, restauration d'une sauvegarde. Vérifié sans objet : `$values` des
+  messages d'alerte conservé par le provisionnement. Reporté en session 5 : identifiants par défaut de la base
+  d'Airflow sur le serveur.
+- Reste : installation sur le serveur (`deploy/README.md`, « Supervision » : webhook, `LIMPIDE_ENVIRONNEMENT=serveur`,
+  `compte-lecture.sh limpide-prod-postgres-1`, Grafana recréé). Ensuite (demandé par Alexandre) : Grafana accessible
+  depuis le back office, connexion Microsoft gérée par Grafana (option A, PR à part).
