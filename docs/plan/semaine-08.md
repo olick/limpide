@@ -290,5 +290,16 @@ qui y mène.
   (désactiver aussi la connexion Microsoft pour retrouver le formulaire par le tunnel), DNS vérifié avant d'exposer
   (certificat), `GRAFANA_ADDRESS` écrit sans doublon. Amélioration notée : une inscription d'application propre à
   Grafana, pour ne plus partager le secret client avec le back office.
-- Reste : adresse de retour `https://grafana.limpide-ia.fr/login/generic_oauth` dans le portail (à la place de celle en
-  `/grafana/`), puis installation sur le serveur (`deploy/README.md`, « Supervision », dans l'ordre indiqué).
+- [x] Adresse de retour du portail remplacée par `https://grafana.limpide-ia.fr/login/generic_oauth` (Alexandre).
+- [x] **Installation sur le serveur (2026-10-19)**, PR #28 et #29 fusionnées : deux déploiements et `terraform apply`
+  (une entrée DNS ajoutée, `grafana.limpide-ia.fr` → 57.129.175.88). Session 2 : migration 0007 présente, webhook
+  copié, comptes de lecture créés, Grafana recréé ; vérifié sur le serveur : 2 tableaux de bord, les deux bases
+  « Database Connection OK », 8 alertes saines. Exposition : connexion Microsoft configurée, Grafana recréé,
+  `GRAFANA_ADDRESS` posé, Caddy et `admin` recréés. Vérifié depuis le poste : certificat Let's Encrypt, accueil →
+  connexion (302), mot de passe refusé (403), `/metrics` 404, HSTS, redirection vers Microsoft avec l'adresse de
+  retour `https://grafana.limpide-ia.fr/login/generic_oauth` et PKCE ; démo et back office à 200. **Connexion
+  d'Alexandre par le lien « Supervision » du back office : réussie.**
+- Constat : une erreur « Error in expanding template » (alerte « Réponses anormalement lentes ») vue une fois sur le
+  serveur, juste après un démarrage de Grafana, non reproduite (ni sur le serveur ensuite, ni sur le poste) :
+  messages protégés par précaution (`{{ with $values.A }}…{{ else }}n/d{{ end }}`, PR à part). Vérifié sur le poste
+  (8 alertes saines, aucune erreur de gabarit) ; sur le serveur, à recréer Grafana après la fusion.

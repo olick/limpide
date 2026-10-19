@@ -3,6 +3,9 @@
 # pas ici : la tâche bilan du DAG les signale déjà ; ici, ce qu'elle ne peut pas dire (le DAG n'a pas tourné, il est
 # cassé), plus la santé de la démo et du serveur.
 # Chaque alerte porte l'environnement (poste ou serveur, LIMPIDE_ENVIRONNEMENT) : même salon Discord pour les deux.
+# Valeurs dans les messages : toujours « {{ with $values.A }}…{{ else }}n/d{{ end }} » : une requête sans ligne (moins de 3
+# questions, par exemple) n'a pas de valeur A. Vu une fois sur le serveur juste après un démarrage (« Error in
+# expanding template », 2026-10-19), non reproduit : protection par précaution.
 # Modifier une règle : dans ce fichier (PR), puis recréer Grafana (--force-recreate grafana).
 apiVersion: 1
 
@@ -53,7 +56,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "Moins de 300 Mo de mémoire disponible depuis 5 min ({{ humanize $values.A.Value }} Mo)."
+          summary: "Moins de 300 Mo de mémoire disponible depuis 5 min ({{ with $values.A }}{{ humanize .Value }}{{ else }}n/d{{ end }} Mo)."
           description: >-
             Que faire : supervision/memoire.sh sur le serveur (quel conteneur grossit ?). En cas de manque, le noyau tue
             d'abord la supervision (oom_score_adj) ; au-delà, la démo. Seuil de révision de l'ADR-018 : 500 Mo.
@@ -81,7 +84,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "Plus de 1 Go de swap utilisé depuis 15 min ({{ humanize $values.A.Value }} Mo) : la machine ralentit."
+          summary: "Plus de 1 Go de swap utilisé depuis 15 min ({{ with $values.A }}{{ humanize .Value }}{{ else }}n/d{{ end }} Mo) : la machine ralentit."
           description: "Que faire : supervision/memoire.sh ; la démo et Airflow ne tiennent plus en mémoire vive."
 
       - uid: disque-plein
@@ -107,7 +110,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "Disque du serveur rempli à {{ humanize $values.A.Value }} % (seuil : 85 %)."
+          summary: "Disque du serveur rempli à {{ with $values.A }}{{ humanize .Value }}{{ else }}n/d{{ end }} % (seuil : 85 %)."
           description: >-
             Que faire : df -h / ; docker system df (images et cache de construction récupérables) ; ~/backups (7 jours).
 
@@ -165,7 +168,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "{{ $values.A.Value }} questions sans réponse à cause d'une panne ou d'un délai en 15 min."
+          summary: "{{ with $values.A }}{{ .Value }}{{ else }}n/d{{ end }} questions sans réponse à cause d'une panne ou d'un délai en 15 min."
           description: >-
             Que faire : Grafana, tableau « Limpide — technique », « Dernières questions » puis la trace (quelle étape
             échoue : vectorisation OVHcloud, base, Mistral ?) ; Loki, {service_name="limpide-web"} |= "Échec".
@@ -198,7 +201,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "Médiane des réponses à {{ humanize $values.A.Value }} s sur 30 min (habituel : 2 à 4 s)."
+          summary: "Médiane des réponses à {{ with $values.A }}{{ humanize .Value }}{{ else }}n/d{{ end }} s sur 30 min (habituel : 2 à 4 s)."
           description: >-
             Que faire : tableau « Limpide — technique », « Latence par étape » : rédaction (Mistral) ou vectorisation
             (OVHcloud) ? Une vectorisation à 5,5 s a déjà été vue le 2026-10-19.
@@ -231,7 +234,7 @@ groups:
         execErrState: Error
         labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
         annotations:
-          summary: "Aucune ingestion réussie depuis {{ humanize $values.A.Value }} jours (attendu : une par semaine)."
+          summary: "Aucune ingestion réussie depuis {{ with $values.A }}{{ humanize .Value }}{{ else }}n/d{{ end }} jours (attendu : une par semaine)."
           description: >-
             Que faire : interface d'Airflow (tunnel SSH, port 8080) : DAG en pause, ordonnanceur arrêté, exécutions en
             échec ? airflow dags list-runs ingestion dans l'ordonnanceur.
