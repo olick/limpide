@@ -50,7 +50,7 @@ public static class ServiceCollectionExtensions
         var generation = configuration.GetSection("Generation").Get<GenerationOptions>() ?? new GenerationOptions();
 
         // Fournisseur d'embeddings choisi par configuration (Embedding:Provider), derrière la même interface.
-        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => embedding.Provider switch
+        services.AddSingleton<IEmbeddingGenerator<string, Embedding<float>>>(_ => WithTelemetry(embedding.Provider switch
         {
             EmbeddingOptions.Ollama => new OllamaApiClient(embedding.Endpoint, embedding.Model),
             // API compatible OpenAI : OVHcloud AI Endpoints (Qwen3-Embedding-8B, ADR-012), ou une autre API.
@@ -62,13 +62,14 @@ public static class ServiceCollectionExtensions
                 .AsIEmbeddingGenerator(embedding.RequestDimensions ? embedding.Dimensions : null),
             _ => throw new InvalidOperationException(
                 $"Embedding:Provider « {embedding.Provider} » inconnu (attendu : {EmbeddingOptions.Ollama} ou {EmbeddingOptions.OpenAI})."),
-        });
+        }));
 
         services.AddSingleton(provider => new DatabaseMigrator(connectionString, provider.GetRequiredService<ILogger<DatabaseMigrator>>()));
         services.AddSingleton<DocumentVersionStore>();
         services.AddSingleton<ChunkStore>();
         services.AddSingleton<EmbeddingStore>();
         services.AddSingleton<FeedbackStore>();
+        services.AddSingleton<AnswerLogStore>();
         services.AddSingleton<AuditStore>();
         services.AddSingleton(configuration.GetSection("Search").Get<SearchOptions>() ?? new SearchOptions());
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();
@@ -77,7 +78,10 @@ public static class ServiceCollectionExtensions
         // Clé exigée seulement quand on génère une réponse : les commandes d'ingestion s'en passent.
         services.AddSingleton<IChatClient>(_ =>
             new ChatClient(generation.Model, new ApiKeyCredential(GenerationApiKey(configuration)), new OpenAIClientOptions { Endpoint = generation.Endpoint })
-                .AsIChatClient());
+                .AsIChatClient()
+                .AsBuilder()
+                .UseOpenTelemetry(sourceName: GenAiTelemetrySource, configure: c => c.EnableSensitiveData = false)
+                .Build());
         // Lues à la première question, pas au démarrage : le back office enregistre ces services sans s'en servir.
         services.AddSingleton(_ => AnswerInstructions.FromTemplate(Required(generation.Prompt, "Generation:Prompt"),
             PromptFiles.Read(generation.Prompt!)));
@@ -92,6 +96,21 @@ public static class ServiceCollectionExtensions
             new JudgeInstructions(Required(judge.Prompt, "Judge:Prompt"), PromptFiles.Read(judge.Prompt!).TrimEnd())));
         return services;
     }
+
+    /// <summary>
+    /// Traces et métriques des appels aux modèles (conventions gen_ai.* d'OpenTelemetry : durée, tokens), à
+    /// déclarer par l'application qui les exporte (ADR-018).
+    /// </summary>
+    public const string GenAiTelemetrySource = "Limpide.GenAI";
+
+    /// <summary>
+    /// Contenu des messages jamais enregistré : la question y figure. Fixé dans le code, car la variable
+    /// OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT=true l'activerait sinon.
+    /// </summary>
+    private static IEmbeddingGenerator<string, Embedding<float>> WithTelemetry(IEmbeddingGenerator<string, Embedding<float>> generator) =>
+        generator.AsBuilder()
+            .UseOpenTelemetry(sourceName: GenAiTelemetrySource, configure: g => g.EnableSensitiveData = false)
+            .Build();
 
     private static string Required(string? value, string key) =>
         value is { Length: > 0 } ? value : throw new InvalidOperationException($"Réglage « {key} » absent (version des consignes, ex. answer/3).");

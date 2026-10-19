@@ -100,15 +100,14 @@ Production : https://www.limpide-ia.fr et https://admin.limpide-ia.fr, sur un VP
 Plan : `docs/plan/plan-global.md`. Un fichier par semaine, `docs/plan/semaine-NN.md` (plan, puis journal de
 réalisation) : **toujours lire celui de la semaine en cours**.
 
-S1–S6 faites le 2026-10-13 (POC, démo, Airflow, versions, back office, Terraform) ; S8–S10 à venir (observabilité
-et coûts, gouvernance, marge). **S7 faite**, évaluation et CI/CD : sessions 1 à 4 faites (jeu `jeu/2`, juge
-calibré, `gate`, ADR-014 ; chaîne GitHub Actions jusqu'au VPS, Grype, ADR-015 ; le 2026-10-17, évaluation sur le
-runner en contrôle requis « Évaluation », ≈ 2 min et 0,28 $, et workflow « Azure » manuel et validé, ADR-016).
-Sessions 5 et 6 faites le 2026-10-18 (blocage démontré, page `/evaluation` ; bascule sur Qwen3-Embedding-8B par la
-CI, ADR-017, déployée ; fidélité jugée à surveiller, journal de la S7).
+S1–S7 faites (POC, démo, Airflow, versions, back office, Terraform ; S7 le 2026-10-18 : évaluation en CI, `gate`,
+chaîne jusqu'au VPS, bascule Qwen3-Embedding-8B, ADR-014 à 017) ; S9–S10 à venir (gouvernance, marge).
 
-Points ouverts pour la S8 : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté ; alerte de
-budget Mistral à construire ; anti-bot ; test du message à la 11e question.
+**S8 en cours** (observabilité, coûts, sécurité). Session 1 commencée le 2026-10-19 : supervision auto-hébergée sur
+le VPS (collecteur OpenTelemetry, Tempo, Loki, Prometheus, Grafana : `supervision/`) et journal `answer_log` en base
+(ADR-018, proposé) ; validée en local (≈ 650 Mo sous charge), **reste le déploiement sur le VPS**. Reportés de la S7
+(liste en tête de `semaine-08.md`) : garde-fou « Oui » en tête, alerte de budget Mistral, anti-bot, fidélité jugée
+plus basse avec Qwen, test du message à la 11e question.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,

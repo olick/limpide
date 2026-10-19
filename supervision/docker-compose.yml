@@ -1,0 +1,114 @@
+# Supervision de Limpide (S8, ADR-018) : un projet Compose à part, qu'on démarre, met à jour ou arrête sans toucher
+# la démo. L'application envoie traces, métriques et journaux en OTLP au collecteur, qui les répartit :
+#   traces → Tempo, journaux → Loki, métriques → Prometheus ; Grafana affiche le tout.
+#
+#   docker compose -f supervision/docker-compose.yml up -d --wait
+#   Grafana : http://localhost:3000 (admin, mot de passe GRAFANA_ADMIN_PASSWORD de supervision/.env)
+#
+# Ports liés à 127.0.0.1 seulement (Docker contourne le pare-feu). En production, accès par tunnel SSH, comme Airflow.
+# Mémoire : tous ces outils sont écrits en Go, dont le ramasse-miettes ignore le plafond du conteneur. GOMEMLIMIT
+# (≈ 80 % du plafond) le fait nettoyer plus tôt au lieu d'être tué par le système. Mesures : supervision/README.md.
+
+name: limpide-supervision
+
+services:
+  # Point d'entrée unique de l'application (OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 sur le poste).
+  collecteur:
+    image: otel/opentelemetry-collector-contrib:0.162.0
+    command: ["--config=/etc/otelcol/collecteur.yaml"]
+    volumes:
+      - ./collecteur.yaml:/etc/otelcol/collecteur.yaml:ro
+    ports:
+      - "127.0.0.1:4317:4317" # OTLP gRPC
+      - "127.0.0.1:4318:4318" # OTLP HTTP
+    networks: [supervision, limpide]
+    depends_on: [tempo, loki, prometheus]
+    environment:
+      GOMEMLIMIT: 100MiB
+    restart: unless-stopped
+    mem_limit: 128m
+
+  tempo:
+    image: grafana/tempo:3.1.0
+    command: ["-config.file=/etc/tempo.yaml"]
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml:ro
+      - tempo:/var/tempo
+    networks: [supervision]
+    environment:
+      GOMEMLIMIT: 300MiB
+    restart: unless-stopped
+    mem_limit: 384m # 250 Mo mesurés après une question (poste, 2026-10-19) : 256 Mo au bord de l'arrêt
+
+  loki:
+    image: grafana/loki:3.7.8
+    command: ["-config.file=/etc/loki/loki.yaml"]
+    volumes:
+      - ./loki.yaml:/etc/loki/loki.yaml:ro
+      - loki:/loki
+    networks: [supervision]
+    environment:
+      GOMEMLIMIT: 200MiB
+    restart: unless-stopped
+    mem_limit: 256m
+
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=30d
+      # Reçoit les métriques de l'application en OTLP (par le collecteur), en plus de ce qu'il collecte lui-même.
+      - --web.enable-otlp-receiver
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus:/prometheus
+    networks: [supervision]
+    environment:
+      GOMEMLIMIT: 200MiB
+    restart: unless-stopped
+    mem_limit: 256m
+
+  # Mémoire disponible, swap, disque et processeur de la machine (lus dans /proc et /sys de l'hôte, en lecture seule).
+  node-exporter:
+    image: prom/node-exporter:v1.12.1
+    command: ["--path.rootfs=/host"]
+    pid: host
+    volumes:
+      - /:/host:ro,rslave
+    networks: [supervision]
+    restart: unless-stopped
+    mem_limit: 32m
+
+  grafana:
+    image: grafana/grafana:13.2.3
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?mot de passe de Grafana absent (supervision/.env)}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_ANALYTICS_REPORTING_ENABLED: "false"
+      GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
+      GF_NEWS_NEWS_FEED_ENABLED: "false"
+      GOMEMLIMIT: 400MiB
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana:/var/lib/grafana
+    ports:
+      - "127.0.0.1:3000:3000"
+    networks: [supervision]
+    depends_on: [tempo, loki, prometheus]
+    restart: unless-stopped
+    mem_limit: 512m # 217 Mo au repos, 325 Mo après quelques vues (poste, 2026-10-19)
+
+networks:
+  supervision:
+  # Réseau de la démo : l'application y joint le collecteur par son nom (« collecteur »). Poste : limpide_default ;
+  # serveur : limpide-prod_default.
+  limpide:
+    name: ${LIMPIDE_RESEAU:-limpide_default}
+    external: true
+
+volumes:
+  tempo:
+  loki:
+  prometheus:
+  grafana:

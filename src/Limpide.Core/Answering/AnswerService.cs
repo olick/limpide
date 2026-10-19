@@ -24,10 +24,35 @@ public sealed record GenerationSettings(
 /// <summary>Question → recherche → génération → contrôles. Ne dépend que d'interfaces.</summary>
 public sealed class AnswerService(IPassageSearch search, IChatClient chat, GenerationSettings settings, AnswerInstructions instructions)
 {
+    /// <summary>Garde-fou du seuil de pertinence : la question n'a pas été soumise au modèle.</summary>
+    public const string OutOfScopeCode = "hors-perimetre";
+
     public async Task<AnswerResult> AskAsync(string question, CancellationToken ct)
     {
+        using var activity = AnswerTelemetry.Source.StartActivity("Réponse à une question");
+        activity?.SetTag("limpide.question.length", question.Length);
+        try
+        {
+            var result = await AnswerAsync(question, ct);
+            AnswerTelemetry.Describe(activity, result);
+            return result;
+        }
+        catch (Exception ex) when (activity is not null)
+        {
+            // Le type seulement : le message d'une exception peut reprendre la question (pas d'AddException).
+            activity.SetTag("error.type", ex.GetType().FullName);
+            activity.SetStatus(ActivityStatusCode.Error, ex.GetType().Name);
+            throw;
+        }
+    }
+
+    private async Task<AnswerResult> AnswerAsync(string question, CancellationToken ct)
+    {
         var total = Stopwatch.StartNew();
-        var found = await search.SearchAsync(question, settings.PassageCount, ct);
+        SearchOutcome found;
+        // Étape « recherche » : la vectorisation de la question et la requête SQL s'y rattachent.
+        using (AnswerTelemetry.Source.StartActivity("Recherche des passages"))
+            found = await search.SearchAsync(question, settings.PassageCount, ct);
 
         var best = found.Passages.Count == 0 ? 0 : found.Passages.Max(p => p.Score);
         if (best < settings.MinScore)
@@ -85,7 +110,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         instructions.Version,
         new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, TimeSpan.Zero, elapsed),
         new TokenUsage(0, 0, 0m),
-        [new Guardrail("hors-perimetre",
+        [new Guardrail(OutOfScopeCode,
             $"Meilleur passage à {best:F3}, sous le seuil de pertinence ({settings.MinScore:F2}) : le modèle n'est pas appelé.")]);
 
     private TokenUsage Usage(UsageDetails? usage)

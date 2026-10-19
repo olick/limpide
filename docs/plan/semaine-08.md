@@ -7,18 +7,34 @@ son coût et les garde-fous déclenchés, et on suit la santé du système dans 
 
 **Prérequis** : chaîne CI/CD avec évaluation (semaine 7).
 
+**Reportés de la S7** : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté (session 4) ; alerte
+de budget Mistral (session 3) ; anti-bot et test du message à la 11e question (session 5) ; fidélité jugée plus
+basse avec Qwen (0,21 et 0,24 contre 0,09 à 0,15), réponses signalées à relire ; retrait de l'ancienne colonne de
+vecteurs et de l'index HNSW.
+
 ---
 
-## Session 1 : traces avec OpenTelemetry (≈ 2 h)
+## Session 1 : traces avec OpenTelemetry (≈ 2 h, révisée le 2026-10-19)
 
-1. Instrumenter `Limpide.Web` avec OpenTelemetry : requêtes HTTP, accès base, appels HTTP sortants.
-2. **Traces du pipeline RAG** : une activité par étape (embedding de la question, recherche, garde-fous, génération),
+**Révision** : le plan exportait vers la supervision d'Azure, mais la démo est sur le VPS (ADR-006) et Azure n'est
+qu'une vitrine détruite la plupart du temps. Décision avec Alexandre : pile auto-hébergée sur le VPS (collecteur
+OpenTelemetry, Tempo, Loki, Prometheus, Grafana) et journal des réponses en base (**ADR-018**, proposé).
+
+1. **Journal `answer_log`** (migration 0006) : une ligne par question (issue, `trace_id`, modèle, consignes, scores,
+   latences par étape, tokens, coût, garde-fous), ni texte ni IP.
+2. Instrumenter `Limpide.Web` avec OpenTelemetry : requêtes HTTP, accès base, appels HTTP sortants, journaux.
+   **Blazor Server** : une question passe par le circuit SignalR, pas par une requête HTTP ; la trace part de
+   l'activité de l'événement Blazor (.NET 10), les étapes du RAG s'y rattachent par le code.
+3. **Traces du pipeline RAG** : une activité par étape (embedding de la question, recherche, garde-fous, génération),
    avec en attributs le nombre de passages, les scores, les tokens, le coût, les garde-fous déclenchés.
-3. Instrumenter l'appel au LLM : Microsoft.Extensions.AI propose une instrumentation OpenTelemetry qui suit
-   les conventions sémantiques de l'IA générative. **Ne pas enregistrer le texte des questions** par défaut (voir session 5).
-4. Exporter vers le service de supervision Azure (ou un tableau de bord local en développement).
+4. Instrumenter l'appel au LLM : Microsoft.Extensions.AI propose une instrumentation OpenTelemetry qui suit
+   les conventions sémantiques de l'IA générative. **Ne pas enregistrer le texte des questions** par défaut (voir
+   session 5), ni dans les traces, ni dans les messages (`Home.razor` l'écrit aujourd'hui dans le message d'erreur).
+5. Tout exporter vers le collecteur ; pile de supervision en local (`docker compose`), **mémoire mesurée** sous
+   charge avant de fixer les plafonds et de déployer sur le VPS.
 
-**Terminé quand** : une question dans la démo produit une trace complète, étape par étape.
+**Terminé quand** : une question dans la démo produit une trace complète, étape par étape, et une ligne du journal
+qui y mène.
 
 ## Session 2 : tableaux de bord et alertes (≈ 2 h)
 
@@ -26,15 +42,19 @@ son coût et les garde-fous déclenchés, et on suit la santé du système dans 
 2. **Tableau de bord qualité** : taux de « je ne sais pas », de refus, de citations invalides, score moyen des passages.
 3. **Suivi de la dérive** : l'évolution de ces taux dans le temps. Une hausse du « je ne sais pas » peut signaler
    des questions d'un nouveau type, ou une dégradation du corpus.
-4. **Alertes** : taux d'erreur, latence anormale, échec du DAG, quarantaine.
+4. **Alertes** (vers Discord) : taux d'erreur, latence anormale, échec du DAG, quarantaine ; **DAG qui n'a pas
+   tourné** (aujourd'hui, une exécution réussie et une exécution absente sont muettes toutes les deux, constaté le
+   2026-10-19) ; serveur : mémoire **disponible**, swap, disque.
 
 **Terminé quand** : les deux tableaux de bord existent et une alerte a été déclenchée en test.
 
 ## Session 3 : FinOps et GreenOps (≈ 2 h)
 
 1. **Coût par requête** (tokens) et **coût par ingestion** (embeddings, calcul), agrégés par jour.
-2. **Coût d'infrastructure** par environnement, à partir des données de facturation Azure.
-3. Mesurer l'effet de la **mise à l'échelle jusqu'à zéro** et du seuil de pertinence (questions sans appel au LLM).
+2. **Coût d'infrastructure** par environnement : factures OVHcloud (VPS, AI Endpoints) et Mistral pour la démo,
+   facturation Azure pour la vitrine et l'évaluation. **Alerte de budget Mistral** (reportée de la S7).
+3. Mesurer l'effet du seuil de pertinence (questions sans appel au LLM) ; la **mise à l'échelle jusqu'à zéro** ne
+   concerne que la vitrine Azure.
 4. **Estimation énergétique** : ordre de grandeur par requête, en précisant la méthode et ses limites.
 5. Page `docs/finops.md` : coût mensuel réel, projection selon le trafic, leviers d'optimisation, avec chiffres.
 
@@ -84,3 +104,54 @@ son coût et les garde-fous déclenchés, et on suit la santé du système dans 
 | Politique sur les questions | S9 : dossier RGPD |
 | FinOps chiffré | Soutenance BC02 et BC04 |
 | Journal des garde-fous | S9 : registre des risques |
+
+---
+
+## Journal de réalisation
+
+**Session 1 : supervision (commencée le 2026-10-19)** :
+
+- Première exécution automatique du DAG depuis la bascule Qwen (lundi 2026-10-19, 4 h UTC) : **réussie**, 1 min 50 s,
+  aucune publication (empreinte `65e689755765` inchangée). Aucune alerte Discord : `bilan` ne prévient qu'en cas
+  d'échec ou de quarantaine, vérifié par `airflow dags list-runs ingestion` (la règle Airflow disait l'inverse,
+  corrigée).
+- Décision (avec Alexandre) : pile auto-hébergée sur le VPS, **avec** collecteur OpenTelemetry (une seule adresse pour
+  l'application, filtrage des attributs sensibles, destination changeable sans toucher le code) et **avec** Loki ;
+  Aspire Dashboard écarté comme repli ; journal `answer_log` en base pour l'enregistrement métier (ADR-018, proposé).
+  Estimation non mesurée : 600 à 850 Mo, ≈ 1,3 Go de plafonds, pour ≈ 1,9 Go disponibles.
+- [x] Plan révisé (session 1 : VPS au lieu d'Azure ; session 2 : alerte « DAG qui n'a pas tourné » et alertes du
+  serveur ; session 3 : factures OVHcloud et Mistral, alerte de budget Mistral), ADR-018 écrit.
+- [x] **Journal des réponses** : migration `0006_journal_des_reponses.sql` (`answer_log`, ni texte ni IP, longueur de
+  la question seulement, purge à 12 mois à chaque écriture), `AnswerLogEntry` (Core), `AnswerLogStore`. Issues :
+  réponse, je-ne-sais-pas, hors-perimetre, quota-visiteur, quota-journalier, delai-depasse, erreur (type de
+  l'exception, jamais son message). Un échec d'écriture ne prive pas le visiteur de sa réponse. `Home.razor`
+  n'écrit plus la question dans le message d'erreur (elle partirait dans Loki).
+- [x] **Instrumentation** : `AnswerTelemetry` (Core, bibliothèque standard), deux activités (« Réponse à une
+  question », « Recherche des passages ») avec issue, scores, tokens, coût, un événement par garde-fou ;
+  `UseOpenTelemetry()` de Microsoft.Extensions.AI sur la rédaction et la vectorisation, `EnableSensitiveData = false`
+  fixé dans le code (la variable `OTEL_INSTRUMENTATION_GENAI_CAPTURE_MESSAGE_CONTENT` l'activerait sinon) ; web :
+  ASP.NET Core, HttpClient, Npgsql, Blazor (.NET 10 : une activité par événement, racine de la trace d'une question),
+  journaux en OTLP. Export seulement si `OTEL_EXPORTER_OTLP_ENDPOINT` est défini. Paquets : OpenTelemetry 1.20.0,
+  Microsoft.Extensions.AI 10.10.0 (10.10.1 n'existe pas).
+- [x] **Pile locale** (`supervision/`, projet Compose `limpide-supervision`) : collecteur 0.162.0, Tempo 3.1.0
+  (un seul processus, sans Kafka), Loki 3.7.8, Prometheus 3.15.0 (récepteur OTLP), Grafana 13.2.3 (sources créées au
+  démarrage, liens trace ↔ messages), node-exporter 1.12.1. Seul Grafana publie un port (127.0.0.1:3000).
+- [x] Vérifié de bout en bout (6 questions d'Alexandre) : chaque ligne d'`answer_log` porte le `trace_id` de sa
+  trace ; trace complète (événement Blazor → réponse → recherche → vectorisation OVHcloud, SQL → Mistral → écriture
+  du journal) ; **aucun texte libre** dans les attributs ni dans les messages ; question hors sujet : 0,343, modèle
+  non appelé, coût nul, 222 ms. Répartition typique : Mistral 1,8 à 3,1 s, vectorisation 115 à 865 ms, SQL 18 à
+  51 ms (219 ms à froid).
+- **Constat** : une vectorisation à **5,5 s** chez OVHcloud (question de 09:25:05, total 7,6 s), contre 115 à 865 ms
+  pour les autres. Première matière pour l'alerte de latence (session 2).
+- **Mémoire** (détail : `supervision/README.md`) : ≈ 650 Mo réels sous charge, 350 Mo au repos, plafonds ≈ 1,55 Go.
+  Grafana 13 (353 Mo) et Tempo 3 (250 Mo avant `GOMEMLIMIT`, 120 Mo après) dépassent l'estimation ; `GOMEMLIMIT`
+  ajouté à tous les conteneurs Go.
+- [x] Relecture (`relecteur-regles`) : le **message d'une exception** partait dans Tempo (`AddException`, événement
+  `gen_ai.client.operation.exception` de Microsoft.Extensions.AI) et dans Loki, alors qu'il peut citer la question.
+  Corrigé : le code ne trace que le type ; transformation `transform/messages-d-erreur` du collecteur (statut,
+  `exception.message`, `exception.stacktrace` vidés). Vérifié par un envoi forgé (5 faux textes de question, adresse
+  IP) : rien n'arrive dans Tempo ni Loki, `error.type` et `exception.type` restent. Source PostgreSQL de Grafana et
+  compte en lecture seule : session 2.
+- Reste : déploiement sur le VPS (réseau `limpide-prod_default`, `OTEL_EXPORTER_OTLP_ENDPOINT` du conteneur `web`,
+  mesure sur place, tunnel SSH vers Grafana), vitrine des technologies au déploiement (OpenTelemetry, Grafana :
+  pas avant qu'ils tournent), message Discord de succès du DAG (PR à part).
