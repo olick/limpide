@@ -106,12 +106,21 @@ services:
       GF_ANALYTICS_CHECK_FOR_UPDATES: "false"
       GF_NEWS_NEWS_FEED_ENABLED: "false"
       GOMEMLIMIT: 400MiB
+      # Compte de lecture d'answer_log (supervision/compte-lecture.sh) ; vide : la source « Journal » échoue seule.
+      GRAFANA_PG_PASSWORD: ${GRAFANA_PG_PASSWORD:-}
+      GRAFANA_AIRFLOW_PASSWORD: ${GRAFANA_AIRFLOW_PASSWORD:-}
+      LIMPIDE_PG_HOTE: ${LIMPIDE_PG_HOTE:-limpide-postgres-1}
+      # Alertes (provisioning/alerting) : même webhook que le DAG ; obligatoire, Grafana refuserait le point de contact.
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:?webhook Discord absent (supervision/.env)}
+      LIMPIDE_ENVIRONNEMENT: ${LIMPIDE_ENVIRONNEMENT:-poste}
     volumes:
       - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards/limpide:ro
       - grafana:/var/lib/grafana
     ports:
       - "127.0.0.1:3000:3000"
-    networks: [supervision]
+    # limpide : lecture d'answer_log dans la base de la démo ; airflow : dernière exécution du DAG.
+    networks: [supervision, limpide, airflow]
     depends_on: [tempo, loki, prometheus]
     mem_limit: 512m # 217 Mo au repos, 325 Mo après quelques vues (poste, 2026-10-19)
     memswap_limit: 512m # pas de swap : une pile qui gonfle ne fait pas swapper la démo
@@ -122,6 +131,10 @@ networks:
   # serveur : limpide-prod_default.
   limpide:
     name: ${LIMPIDE_RESEAU:-limpide_default}
+    external: true
+  # Réseau d'Airflow (projet « airflow », poste et serveur) : doit exister, donc Airflow démarré au moins une fois.
+  airflow:
+    name: airflow_default
     external: true
 
 volumes:

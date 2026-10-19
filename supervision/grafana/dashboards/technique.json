@@ -1,0 +1,366 @@
+{
+  "uid": "limpide-technique",
+  "title": "Limpide — technique",
+  "description": "Santé de la démo : volume, latence par étape, erreurs, coût, mémoire et disque du serveur (ADR-018). Source : journal answer_log (une ligne par question) et Prometheus.",
+  "tags": [
+    "limpide"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "editable": true,
+  "refresh": "1m",
+  "time": {
+    "from": "now-7d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Questions par heure, selon l'issue",
+      "description": "Réponse, « je ne sais pas », hors périmètre (modèle non appelé), quota atteint, délai dépassé, erreur.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1h'), outcome AS metric, count(*) AS questions\nFROM answer_log WHERE $__timeFilter(at) GROUP BY 1, 2 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Latence par étape (médiane et 95e centile, par heure)",
+      "description": "Vectorisation de la question (OVHcloud), recherche en base, rédaction (Mistral), total. Questions abouties seulement.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1h'),\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY total_ms) AS \"total, médiane\",\n  percentile_cont(0.95) WITHIN GROUP (ORDER BY total_ms) AS \"total, 95e centile\",\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY generation_ms) AS \"rédaction, médiane\",\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY embedding_ms) AS \"vectorisation, médiane\",\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY search_ms) AS \"base, médiane\"\nFROM answer_log WHERE $__timeFilter(at) AND outcome IN ('reponse', 'je-ne-sais-pas', 'hors-perimetre') GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Erreurs et délais dépassés (par heure)",
+      "description": "Questions sans réponse à cause d'une panne (recherche, vectorisation ou rédaction indisponible) ou de plus de 60 s.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1h'), outcome AS metric, count(*) AS questions\nFROM answer_log WHERE $__timeFilter(at) AND outcome IN ('erreur', 'delai-depasse') GROUP BY 1, 2 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 4,
+      "type": "timeseries",
+      "title": "Coût des réponses par jour",
+      "description": "Coût estimé d'après les tokens et le tarif configuré (Mistral). À confronter à la facture (session 3).",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 8,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'), sum(cost_usd) AS \"coût ($)\"\nFROM answer_log WHERE $__timeFilter(at) GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Réponses HTTP en erreur (5xx) par minute",
+      "description": "Erreurs du serveur web (pages, /sante), mesurées par l'application.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 8,
+        "w": 8,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "sum(rate(http_server_request_duration_seconds_count{http_response_status_code=~\"5..\"}[5m])) * 60 or vector(0)",
+          "legendFormat": "5xx par minute",
+          "range": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 6,
+      "type": "timeseries",
+      "title": "Mémoire disponible et swap du serveur",
+      "description": "Mémoire disponible (MemAvailable), pas « utilisée » : le cache disque est récupérable. Seuil d'alerte : 300 Mo.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_memory_MemAvailable_bytes",
+          "legendFormat": "mémoire disponible",
+          "range": true,
+          "editorMode": "code"
+        },
+        {
+          "refId": "B",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes",
+          "legendFormat": "swap utilisé",
+          "range": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 7,
+      "type": "timeseries",
+      "title": "Disque du serveur (part utilisée)",
+      "description": "Partition racine. Seuil d'alerte : 85 %.",
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 15,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "1 - node_filesystem_avail_bytes{mountpoint=\"/\"} / node_filesystem_size_bytes{mountpoint=\"/\"}",
+          "legendFormat": "disque utilisé",
+          "range": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 8,
+      "type": "table",
+      "title": "Dernières questions (sans leur texte)",
+      "description": "Une ligne par question : issue, scores, durées, coût, garde-fous. « trace » ouvre le détail étape par étape (14 jours).",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 22,
+        "w": 24,
+        "h": 9
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT at AS heure, outcome AS issue, question_length AS longueur, best_score AS \"meilleur score\",\n  total_ms AS \"durée (ms)\", cost_usd AS \"coût ($)\", array_to_string(guardrails, ', ') AS \"garde-fous\", trace_id AS trace\nFROM answer_log WHERE $__timeFilter(at) ORDER BY at DESC LIMIT 100",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "trace"
+            },
+            "properties": [
+              {
+                "id": "links",
+                "value": [
+                  {
+                    "title": "Ouvrir la trace",
+                    "url": "",
+                    "internal": {
+                      "datasourceUid": "tempo",
+                      "datasourceName": "Tempo",
+                      "query": {
+                        "query": "${__value.raw}",
+                        "queryType": "traceql"
+                      }
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          {
+            "displayName": "heure",
+            "desc": true
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Tableaux de bord versionnés (supervision/grafana/dashboards/*.json), chargés au démarrage de Grafana. Une
+# modification faite dans l'interface n'est pas enregistrée dans le dépôt : l'exporter (Partager → Exporter) et
+# remplacer le fichier JSON.
+apiVersion: 1
+
+providers:
+  - name: limpide
+    folder: Limpide
+    type: file
+    allowUiUpdates: false
+    options:
+      path: /var/lib/grafana/dashboards/limpide

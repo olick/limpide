@@ -1,0 +1,266 @@
+# Alertes de la supervision (S8, session 2, ADR-018), envoyées sur Discord, comme celles du DAG. Peu de règles,
+# chacune reliée à une action (« que faire » dans sa description). L'échec et la quarantaine d'une ingestion ne sont
+# pas ici : la tâche bilan du DAG les signale déjà ; ici, ce qu'elle ne peut pas dire (le DAG n'a pas tourné, il est
+# cassé), plus la santé de la démo et du serveur.
+# Chaque alerte porte l'environnement (poste ou serveur, LIMPIDE_ENVIRONNEMENT) : même salon Discord pour les deux.
+# Modifier une règle : dans ce fichier (PR), puis recréer Grafana (--force-recreate grafana).
+apiVersion: 1
+
+contactPoints:
+  - orgId: 1
+    name: Discord
+    receivers:
+      - uid: discord
+        type: discord
+        settings:
+          # Même salon que les messages du DAG ; adresse (avec son jeton) dans supervision/.env.
+          url: $DISCORD_WEBHOOK_URL
+          use_discord_username: false
+
+policies:
+  - orgId: 1
+    receiver: Discord
+    group_by: [alertname, environnement]
+    group_wait: 30s
+    group_interval: 5m
+    # Une alerte toujours active est rappelée deux fois par jour, pas toutes les 5 minutes.
+    repeat_interval: 12h
+
+groups:
+  - orgId: 1
+    name: Limpide
+    folder: Limpide
+    interval: 1m
+    rules:
+      # --- Serveur ---------------------------------------------------------------------------------------------------
+      - uid: memoire-disponible-basse
+        title: Mémoire disponible basse sur le serveur
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 300, to: 0 }
+            datasourceUid: prometheus
+            model: { refId: A, instant: true, expr: node_memory_MemAvailable_bytes / 1048576 }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: lt, params: [300] } }]
+        for: 5m
+        noDataState: NoData # node-exporter muet : à savoir aussi
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Moins de 300 Mo de mémoire disponible depuis 5 min ({{ humanize $values.A.Value }} Mo)."
+          description: >-
+            Que faire : supervision/memoire.sh sur le serveur (quel conteneur grossit ?). En cas de manque, le noyau tue
+            d'abord la supervision (oom_score_adj) ; au-delà, la démo. Seuil de révision de l'ADR-018 : 500 Mo.
+
+      - uid: swap-utilise
+        title: Swap très utilisé sur le serveur
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: (node_memory_SwapTotal_bytes - node_memory_SwapFree_bytes) / 1048576
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [1024] } }]
+        for: 15m
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Plus de 1 Go de swap utilisé depuis 15 min ({{ humanize $values.A.Value }} Mo) : la machine ralentit."
+          description: "Que faire : supervision/memoire.sh ; la démo et Airflow ne tiennent plus en mémoire vive."
+
+      - uid: disque-plein
+        title: Disque du serveur presque plein
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: prometheus
+            model:
+              refId: A
+              instant: true
+              expr: 100 * (1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"})
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [85] } }]
+        for: 15m
+        noDataState: NoData
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Disque du serveur rempli à {{ humanize $values.A.Value }} % (seuil : 85 %)."
+          description: >-
+            Que faire : df -h / ; docker system df (images et cache de construction récupérables) ; ~/backups (7 jours).
+
+      # --- Démo ------------------------------------------------------------------------------------------------------
+      - uid: demo-muette
+        title: La démo n'envoie plus de mesures
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: prometheus
+            # L'application envoie ses métriques toutes les 60 s tant qu'elle tourne : rien depuis 10 min, c'est
+            # qu'elle est arrêtée, ou que son export est coupé (OTEL_EXPORTER_OTLP_ENDPOINT, collecteur).
+            model: { refId: A, instant: true, expr: 'count(target_info{job="limpide-web"}) or vector(0)' }
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: lt, params: [1] } }]
+        for: 10m
+        noDataState: Alerting
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Aucune mesure de la démo depuis 10 min : arrêtée, ou export vers la supervision coupé."
+          description: >-
+            Que faire : https://www.limpide-ia.fr/sante ; sur le serveur, docker ps (web), puis
+            OTEL_EXPORTER_OTLP_ENDPOINT dans .env.prod et l'état du collecteur.
+
+      - uid: reponses-en-erreur
+        title: Questions en erreur
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 900, to: 0 }
+            datasourceUid: journal
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              rawSql: >-
+                SELECT count(*) AS erreurs FROM answer_log
+                WHERE at > now() - interval '15 minutes' AND outcome IN ('erreur', 'delai-depasse')
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [2] } }]
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "{{ $values.A.Value }} questions sans réponse à cause d'une panne ou d'un délai en 15 min."
+          description: >-
+            Que faire : Grafana, tableau « Limpide — technique », « Dernières questions » puis la trace (quelle étape
+            échoue : vectorisation OVHcloud, base, Mistral ?) ; Loki, {service_name="limpide-web"} |= "Échec".
+
+      - uid: latence-anormale
+        title: Réponses anormalement lentes
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 1800, to: 0 }
+            datasourceUid: journal
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              # Au moins 3 questions : une seule réponse lente n'est pas une tendance (sinon, aucune ligne : OK).
+              rawSql: >-
+                SELECT percentile_cont(0.5) WITHIN GROUP (ORDER BY total_ms) / 1000.0 AS mediane_s FROM answer_log
+                WHERE at > now() - interval '30 minutes' AND outcome IN ('reponse', 'je-ne-sais-pas')
+                HAVING count(*) >= 3
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [15] } }]
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Médiane des réponses à {{ humanize $values.A.Value }} s sur 30 min (habituel : 2 à 4 s)."
+          description: >-
+            Que faire : tableau « Limpide — technique », « Latence par étape » : rédaction (Mistral) ou vectorisation
+            (OVHcloud) ? Une vectorisation à 5,5 s a déjà été vue le 2026-10-19.
+
+      # --- Ingestion (Airflow) ---------------------------------------------------------------------------------------
+      - uid: dag-pas-tourne
+        title: Le DAG d'ingestion n'a pas tourné
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: airflow
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              # Exécution hebdomadaire (lundi, 4 h UTC) : plus de 8 jours sans réussite, il en manque une.
+              rawSql: >-
+                SELECT coalesce(extract(epoch FROM now() - max(end_date)) / 86400, 999) AS jours FROM dag_run
+                WHERE dag_id = 'ingestion' AND state = 'success'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [8] } }]
+        for: 0s
+        noDataState: Alerting
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Aucune ingestion réussie depuis {{ humanize $values.A.Value }} jours (attendu : une par semaine)."
+          description: >-
+            Que faire : interface d'Airflow (tunnel SSH, port 8080) : DAG en pause, ordonnanceur arrêté, exécutions en
+            échec ? airflow dags list-runs ingestion dans l'ordonnanceur.
+
+      - uid: dag-casse
+        title: Un DAG ne s'importe plus
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 600, to: 0 }
+            datasourceUid: airflow
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              rawSql: SELECT count(*) AS erreurs_import FROM import_error
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0] } }]
+        for: 5m
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Airflow n'arrive plus à lire un fichier de DAG : il ne lancera rien."
+          description: >-
+            Que faire : interface d'Airflow, bandeau « DAG Import Errors » ; corriger le DAG (PR), qui arrive sur le
+            serveur par la chaîne de déploiement.

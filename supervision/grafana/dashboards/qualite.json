@@ -1,0 +1,217 @@
+{
+  "uid": "limpide-qualite",
+  "title": "Limpide — qualité et dérive",
+  "description": "Ce que les visiteurs obtiennent, jour après jour : une hausse du « je ne sais pas » ou une baisse des scores peut signaler des questions d'un nouveau type ou une dégradation du corpus (ADR-018).",
+  "tags": [
+    "limpide"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "editable": true,
+  "refresh": "1m",
+  "time": {
+    "from": "now-30d",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "id": 1,
+      "type": "timeseries",
+      "title": "Part des questions sans réponse sur le fond (par jour)",
+      "description": "« Je ne sais pas » du modèle, et hors périmètre (meilleur passage sous le seuil, modèle non appelé).",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'),\n  avg((outcome = 'je-ne-sais-pas')::int) AS \"je ne sais pas\",\n  avg((outcome = 'hors-perimetre')::int) AS \"hors périmètre\"\nFROM answer_log WHERE $__timeFilter(at) AND outcome IN ('reponse', 'je-ne-sais-pas', 'hors-perimetre') GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit"
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 2,
+      "type": "timeseries",
+      "title": "Meilleur score de la recherche (par jour)",
+      "description": "Similarité du meilleur passage trouvé. Ligne rouge : seuil de pertinence (0,60, Qwen3-Embedding-8B+titre) ; en dessous, le modèle n'est pas appelé.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'),\n  percentile_cont(0.5) WITHIN GROUP (ORDER BY best_score) AS \"médiane\",\n  min(best_score) AS \"minimum\"\nFROM answer_log WHERE $__timeFilter(at) AND outcome IN ('reponse', 'je-ne-sais-pas', 'hors-perimetre') GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "thresholdsStyle": {
+              "mode": "line+area"
+            }
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 0.6
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 3,
+      "type": "timeseries",
+      "title": "Garde-fous déclenchés (par jour)",
+      "description": "Citation inventée, réponse sans citation, qualification juridique, consigne divulguée, réponse tronquée…",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'), g AS metric, count(*) AS \"déclenchements\"\nFROM answer_log, unnest(guardrails) AS g WHERE $__timeFilter(at) AND g <> 'hors-perimetre' GROUP BY 1, 2 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 70,
+            "stacking": {
+              "mode": "normal"
+            }
+          }
+        },
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 4,
+      "type": "barchart",
+      "title": "Garde-fous sur la période",
+      "description": "Total par garde-fou sur la période affichée.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT g AS \"garde-fou\", count(*) AS \"déclenchements\"\nFROM answer_log, unnest(guardrails) AS g WHERE $__timeFilter(at) AND g <> 'hors-perimetre' GROUP BY 1 ORDER BY 2 DESC",
+          "format": "table",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    },
+    {
+      "id": 5,
+      "type": "timeseries",
+      "title": "Passages cités par réponse (moyenne, par jour)",
+      "description": "Une réponse sur le fond cite ses sources ; une baisse durable mérite une lecture des réponses.",
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "journal"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 16,
+        "w": 24,
+        "h": 7
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "grafana-postgresql-datasource",
+            "uid": "journal"
+          },
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'), avg(cited) AS \"passages cités\"\nFROM answer_log WHERE $__timeFilter(at) AND outcome = 'reponse' GROUP BY 1 ORDER BY 1",
+          "format": "time_series",
+          "rawQuery": true,
+          "editorMode": "code"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "options": {}
+    }
+  ]
+}

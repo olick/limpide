@@ -23,3 +23,11 @@ Détail et mesures : `supervision/README.md`.
 - Ports liés à 127.0.0.1 ; Grafana par tunnel SSH en production, comme Airflow.
 - Collecteur : exporteurs `otlp_grpc` / `otlp_http`. Tempo 3 en un seul processus : pas de Kafka, pas de blocs
   `ingest` / `block_builder`.
+- Tableaux de bord (`grafana/dashboards/*.json`) et alertes (`grafana/provisioning/alerting/alertes.yaml`) versionnés,
+  chargés au démarrage : ne pas les modifier dans l'interface. Peu d'indicateurs, chacun relié à une décision ; chaque
+  alerte dit « que faire » et porte `environnement` (poste, serveur ; même salon Discord).
+- Grafana lit deux bases en lecture seule (`grafana_lecture`, `compte-lecture.sh`) : `answer_log` (rôle
+  `lecture_supervision`, migration 0007) et la base d'Airflow (`dag_run`, `import_error`). Hôtes désignés par le
+  nom du conteneur : Grafana est sur deux réseaux qui ont chacun un service `postgres`.
+- « Le DAG n'a pas tourné » se lit dans `dag_run`, pas dans les métriques d'Airflow (compteurs remis à zéro au
+  redémarrage, figés quand le DAG est en pause).

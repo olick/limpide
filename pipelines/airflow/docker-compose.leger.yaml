@@ -37,6 +37,10 @@ services:
       AIRFLOW_VAR_LIMPIDE_DB_PASSWORD: "${LIMPIDE_DB_PASSWORD:?LIMPIDE_DB_PASSWORD manquant dans .env}"
       AIRFLOW_VAR_LIMPIDE_DATA_DIR: "${LIMPIDE_DATA_DIR:?LIMPIDE_DATA_DIR manquant dans .env}"
       AIRFLOW_VAR_DISCORD_WEBHOOK_SECRET: "${DISCORD_WEBHOOK_URL:-}"
+      # Vectorisation par OVHcloud (ADR-012) : manquait ici, toute exécution locale en mode allégé échouait au rendu
+      # du modèle de la tâche (« Variable limpide_embedding_api_key not found », constaté le 2026-10-19). Le serveur
+      # la reçoit par docker-compose.production.yaml.
+      AIRFLOW_VAR_LIMPIDE_EMBEDDING_API_KEY: "${OVH_AI_ENDPOINTS_KEY:?OVH_AI_ENDPOINTS_KEY manquant dans .env}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
     group_add:

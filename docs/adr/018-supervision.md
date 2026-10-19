@@ -62,9 +62,10 @@ Contraintes :
 - **Journal `answer_log`** (migration 0006) : une ligne par question, avec horodatage, `trace_id`, issue (réponse,
   « je ne sais pas », refus, erreur), modèle, version des consignes, scores, latences par étape, tokens, coût et
   garde-fous. Ni texte ni IP. C'est l'enregistrement métier : durable, interrogeable en SQL, couvert par la
-  sauvegarde quotidienne. Il sert au coût par jour, à la dérive, à l'audit et au back office. Grafana le lira
-  directement (source PostgreSQL, compte en lecture seule : session 2) ; le `trace_id` mène à la trace tant que
-  Tempo la garde.
+  sauvegarde quotidienne. Il sert au coût par jour, à la dérive, à l'audit et au back office. Grafana le lit
+  directement (source PostgreSQL, compte en lecture seule, migration 0007) ; le `trace_id` mène à la trace tant que
+  Tempo la garde. Pour l'ingestion, Grafana lit de même la base d'Airflow (`dag_run`, `import_error`) : plus fiable
+  que les métriques d'Airflow pour savoir si le DAG a tourné (session 2, `supervision/README.md`).
 
 Répartition des rôles :
 

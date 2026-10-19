@@ -20,6 +20,36 @@ datasources:
         spanStartTimeShift: -5m
         spanEndTimeShift: 5m
 
+  # Journal des réponses (answer_log, ADR-018) : coût, issues, dérive. Compte grafana_lecture, qui ne peut lire que
+  # cette table (migration 0007, supervision/compte-lecture.sh) ; mot de passe lu dans l'environnement de Grafana.
+  - name: Journal des réponses
+    type: grafana-postgresql-datasource
+    uid: journal
+    # Nom du conteneur, pas « postgres » : Grafana est aussi sur le réseau d'Airflow, qui a son propre « postgres ».
+    url: $LIMPIDE_PG_HOTE:5432
+    user: grafana_lecture
+    jsonData:
+      database: rag
+      sslmode: disable
+      postgresVersion: 1700
+    secureJsonData:
+      password: $GRAFANA_PG_PASSWORD
+
+  # Base d'Airflow : dernière exécution réussie du DAG, DAG cassés (alerte « le DAG n'a pas tourné »). Plus fiable
+  # que ses métriques : un compteur OpenTelemetry disparaît au redémarrage de l'ordonnanceur et reste figé quand le
+  # DAG est en pause. Compte grafana_lecture, qui ne lit que dag_run et import_error (supervision/compte-lecture.sh).
+  - name: Airflow
+    type: grafana-postgresql-datasource
+    uid: airflow
+    url: airflow-postgres-1:5432
+    user: grafana_lecture
+    jsonData:
+      database: airflow
+      sslmode: disable
+      postgresVersion: 1600
+    secureJsonData:
+      password: $GRAFANA_AIRFLOW_PASSWORD
+
   - name: Loki
     type: loki
     uid: loki
