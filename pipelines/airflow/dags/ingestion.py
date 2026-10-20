@@ -106,7 +106,8 @@ def keep_failure_cause(context: Context) -> None:
 
 
 def success_message(summaries: dict[str, dict[str, Any]], run_id: str, started: datetime.datetime | None) -> str:
-    """Une ligne de bilan : documents vérifiés, nouvelles versions, versions écartées et publiées, durée."""
+    """Une ligne de bilan : documents vérifiés, nouvelles versions, versions écartées et publiées, durée ;
+    coût de la vectorisation quand embed a calculé des vecteurs (S8, session 3)."""
     fetch = summaries.get("fetch", {})
     # Toutes les issues de fetch sont des compteurs (inchangé, nouvelle version...), sauf le code de sortie.
     checked = sum(v for k, v in fetch.items() if isinstance(v, int) and k != "exitCode")
@@ -118,9 +119,17 @@ def success_message(summaries: dict[str, dict[str, Any]], run_id: str, started: 
         seconds = int((datetime.datetime.now(datetime.UTC) - started).total_seconds())
         duration = f" en {seconds // 60} min {seconds % 60:02d} s"
     corpus = f"**{published} version(s) publiée(s)**" if published else "corpus de la démo inchangé"
-    return (f"✅ **Limpide : ingestion réussie** ({run_id}){duration}\n"
-            f"{checked} document(s) vérifié(s), {collected} nouvelle(s) version(s) collectée(s), "
-            f"{discarded} écartée(s) (texte identique) ; {corpus}.")
+    message = (f"✅ **Limpide : ingestion réussie** ({run_id}){duration}\n"
+               f"{checked} document(s) vérifié(s), {collected} nouvelle(s) version(s) collectée(s), "
+               f"{discarded} écartée(s) (texte identique) ; {corpus}.")
+    embed = summaries.get("embed", {})
+    if embed.get("embedded", 0):
+        # costEur : null quand l'API ne rend pas les tokens ou que le tarif du modèle manque (jamais deviné).
+        cost = embed.get("costEur")
+        cost_text = "coût inconnu" if cost is None else f"≈ {cost:.4f} €".replace(".", ",")
+        tokens = f"{embed['tokens']:,} tokens".replace(",", " ") if "tokens" in embed else "tokens non rendus"
+        message += f"\nVectorisation : {embed['embedded']} passage(s), {tokens}, {cost_text}."
+    return message
 
 
 def send_discord_alert(message: str) -> None:

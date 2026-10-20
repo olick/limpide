@@ -18,7 +18,7 @@ le sont aussi depuis le 2026-10-20 (ADR-004, révision).
 
 | Poste | Fournisseur | Montant | Ramené au mois |
 |---|---|---|---|
-| Serveur de la démo (VPS-1) | OVHcloud | 55 € pour 12 mois | 4,58 € |
+| Serveur de la démo (VPS-1) | OVHcloud | 55 € TTC pour 12 mois (3,81 € HT par mois, ADR-006) | 4,58 € |
 | Nom de domaine `limpide-ia.fr` | OVHcloud | 6 € par an | 0,50 € |
 | Vectorisation (AI Endpoints) | OVHcloud | 0,09 € (Qwen3-Embedding-8B, 942 907 tokens) | ≈ 0,10 € |
 | Essais de modèles de rédaction (AI Endpoints) | OVHcloud | 0,29 € (gpt-oss-120b, Llama 3.3 70B, Qwen 3.5 397B) | ponctuel |
@@ -46,7 +46,8 @@ exécutions l'ont sautée (`deploy/evaluation-requise.sh`).
 | Vectorisation d'une question | ≈ 0,0003 centime | ≈ 30 tokens à ≈ 0,10 € par million |
 | Évaluation complète en CI | ≈ 0,26 € | 50 questions : 44 rédactions (6 arrêtées par le seuil) et 34 jugements |
 | Ingestion hebdomadaire sans changement | 0 € | même empreinte du contenu brut : rien n'est revectorisé |
-| Revectorisation complète du corpus | ≈ 0,03 € | 1 130 passages, ≈ 1,18 million de caractères avec les titres, ≈ 320 000 tokens |
+| Ingestion avec nouvelles versions | mesuré à chaque exécution | `embed` additionne les tokens rendus par l'API (≈ 0,0001 € pour 3 passages, 1 235 tokens) ; montant dans le message Discord du DAG |
+| Revectorisation complète du corpus | ≈ 0,036 € | 1 130 passages, ≈ 1,18 million de caractères avec les titres ; 3,26 caractères par token mesurés (3 passages : 4 023 caractères, titres compris, pour 1 235 tokens), soit ≈ 363 000 tokens |
 
 Le coût estimé par l'application se vérifie contre la facture : en production, les 5 réponses du 19 et du 20 octobre
 (9 051 tokens lus, 1 272 écrits) donnent exactement le montant enregistré dans `answer_log` ; la page Usage de
@@ -106,13 +107,13 @@ question, et Limpide répond « je ne sais pas » sans appeler le modèle. L'éc
 
 | Mix électrique supposé | Énergie | Gaz à effet de serre | dont fabrication du matériel | Eau |
 |---|---|---|---|---|
-| France | 0,14 Wh | 0,007 g CO₂e | 0,002 g | 0,5 mL |
-| Allemagne | 0,14 Wh | 0,05 g CO₂e | 0,002 g | 0,3 mL |
-| Moyenne mondiale | 0,14 Wh | 0,07 g CO₂e | 0,002 g | 0,6 mL |
+| France | 0,14 Wh | 0,0074 g CO₂e | 0,0016 g | 0,52 mL |
+| Allemagne | 0,14 Wh | 0,0475 g CO₂e | 0,0016 g | 0,28 mL |
+| Moyenne mondiale | 0,14 Wh | 0,0654 g CO₂e | 0,0016 g | 0,55 mL |
 
 **À comparer avec l'analyse de cycle de vie publiée par Mistral** (juillet 2025, avec Carbone 4 et l'ADEME, relue
 par Resilio et Hubblo) : 1,14 g CO₂e et 45 mL d'eau pour une réponse de 400 tokens de Mistral Large 2 dans Le Chat.
-L'écart (×17 à ×150) tient au modèle (Large 2, 123 milliards de paramètres, contre une architecture non publiée pour
+L'écart (×17 à ×154 : 1,14 g contre 0,0654 et 0,0074 g) tient au modèle (Large 2, 123 milliards de paramètres, contre une architecture non publiée pour
 Medium 3.5), au périmètre (analyse complète de Mistral contre modèle d'EcoLogits limité à l'inférence et au
 matériel) et au mix électrique. **L'enseignement est là** : l'ordre de grandeur dépend surtout des hypothèses, et ni
 la taille de Medium 3.5 ni la localisation de ses serveurs ne sont publiées.

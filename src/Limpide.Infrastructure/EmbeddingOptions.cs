@@ -41,6 +41,18 @@ public sealed class EmbeddingOptions
     public string QueryText(string question) =>
         QueryInstruction is { Length: > 0 } instruction ? $"{instruction}{question}" : question;
 
+    /// <summary>
+    /// Tarif par modèle, en euros par million de tokens (coût d'une ingestion, S8). Modèle absent : coût « inconnu »,
+    /// jamais deviné ; 0 pour un modèle local.
+    /// </summary>
+    public Dictionary<string, decimal> PricesPerMillion { get; set; } = [];
+
+    /// <summary>Coût en euros de <paramref name="tokens"/> tokens ; null si le tarif ou le nombre de tokens manque.</summary>
+    public decimal? Cost(long? tokens) =>
+        PricesPerMillion.TryGetValue(Model, out var price)
+            ? price == 0 ? 0m : tokens * price / 1_000_000m
+            : null;
+
     /// <summary>Passages envoyés par appel ; chaque lot est enregistré dès qu'il est calculé.</summary>
     public int BatchSize { get; set; } = 16;
 
