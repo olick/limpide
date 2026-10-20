@@ -21,7 +21,6 @@ vecteurs et de l'index HNSW.
 | 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
 | Journaux bruts des conteneurs de la démo sans rotation ni plafond (`docker-compose.prod.yml` n'a pas de bloc `logging`) | ils peuvent contenir le texte de questions : avant la PR #24, l'application l'y écrivait en cas d'erreur | session 5 : purge, puis plafond de taille et de durée (`logging:`) ; nettoyer au passage ≈ 13,5 Go récupérables par Docker |
 | Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | amélioration, sans urgence : une inscription d'application propre à Grafana |
-| Recréer Grafana sur le serveur après la fusion de la PR #30 | messages d'alerte protégés ; la chaîne ne déploie pas la supervision | dès que possible, puis rayer la ligne : `docker compose -f supervision/docker-compose.yml up -d --force-recreate grafana` |
 
 ---
 
@@ -314,3 +313,7 @@ qui y mène.
   serveur, juste après un démarrage de Grafana, non reproduite (ni sur le serveur ensuite, ni sur le poste) :
   messages protégés par précaution (`{{ with $values.A }}…{{ else }}n/d{{ end }}`, PR à part). Vérifié sur le poste
   (8 alertes saines, aucune erreur de gabarit) ; sur le serveur, à recréer Grafana après la fusion.
+- [x] Grafana recréé sur le serveur après la fusion de la PR #30 (Alexandre, confirmé le 2026-10-20).
+- [x] « Sous le capot » (PR #32, 2026-10-20) : la première étape ne prétend plus que la question reste sur le serveur
+  (elle est vectorisée par OVHcloud AI Endpoints). Capture `docs/images/sous-le-capot.png` à refaire : celle prise le
+  2026-10-20 montre encore l'ancien texte (démo qui n'exécutait pas le code de la PR #32).
