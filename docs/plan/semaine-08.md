@@ -368,5 +368,7 @@ qui y mène.
 - **Correction** (relecture de `docs/finops.md`) : une évaluation complète coûte ≈ 0,26 € pour 78 requêtes (rapport
   `2026-10-18-1925` : 44 rédactions, 34 jugements ; ADR-016), et non ≈ 0,20 € pour 65 : les 388 requêtes de la CI
   depuis le 19 en font ≈ 5, pas 6 (une exécution longue n'était pas une évaluation complète).
-- Reste pour la session 3 : coût Azure réel (Cost Management) et empreinte du serveur (calculateur carbone de
-  l'espace client OVHcloud), à relever par Alexandre.
+- [x] Coût Azure d'octobre (Alexandre, 2026-10-20) : < 0,01 € pour un budget de 10 € (vitrine détruite hors
+  démonstration).
+- Reste pour la session 3 : empreinte du serveur (bilan carbone mensuel de l'espace client OVHcloud, si le VPS y
+  figure), à relever par Alexandre.
