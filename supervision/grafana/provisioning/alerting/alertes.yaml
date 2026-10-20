@@ -206,6 +206,76 @@ groups:
             Que faire : tableau « Limpide — technique », « Latence par étape » : rédaction (Mistral) ou vectorisation
             (OVHcloud) ? Une vectorisation à 5,5 s a déjà été vue le 2026-10-19.
 
+      # --- Budget Mistral (S8, session 3) : coût estimé de la démo, d'après answer_log (tarifs en euros). Ne voit que
+      # la démo : l'évaluation (espace limpide-evaluation) et le poste ne sont bornés que par leur plafond chez Mistral.
+      - uid: budget-jour
+        title: Dépense de la démo anormale sur 24 h
+        condition: C
+        data:
+          - refId: A
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: journal
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              # Le quota (60 questions par jour à ≈ 0,44 centime) borne la démo à ≈ 0,26 € par jour : au-delà de 0,50 €,
+              # le quota ne la protège plus. Ne doit jamais se déclencher.
+              rawSql: >-
+                SELECT coalesce(sum(cost_eur), 0) AS euros FROM answer_log WHERE at > now() - interval '24 hours'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0.5] } }]
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "La démo a dépensé {{ with $values.A }}{{ printf \"%.2f\" .Value }}{{ else }}n/d{{ end }} € chez Mistral en 24 h (maximum permis par le quota : ≈ 0,26 €)."
+          description: >-
+            Que faire : le quota ne tient plus (contournement, robot, réglage Protection:GlobalPerDay modifié ?). Tableau
+            « Limpide — technique », questions par issue ; Loki, {service_name="limpide-web"} |= "Question reçue" (visites).
+            Pour couper tout de suite : désactiver la clé de l'espace par défaut dans la console Mistral (la démo répond
+            alors « erreur ») ; le plafond de 10 € de cet espace coupe de lui-même.
+
+      - uid: budget-mois
+        title: Budget Mistral de la démo à moitié consommé
+        condition: C
+        data:
+          - refId: A
+            # Sans effet ici (obligatoire) : la requête porte sa propre fenêtre, le mois en cours.
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: journal
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              # Mois civil en UTC, comme la facturation de Mistral (à confirmer sur la facture).
+              rawSql: >-
+                SELECT coalesce(sum(cost_eur), 0) AS euros FROM answer_log
+                WHERE at >= date_trunc('month', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [5] } }]
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "La démo a dépensé {{ with $values.A }}{{ printf \"%.2f\" .Value }}{{ else }}n/d{{ end }} € chez Mistral ce mois-ci : la moitié du plafond de 10 € de son espace."
+          description: >-
+            Que faire : comparer à la page Usage de Mistral (espace par défaut, qui compte aussi les essais du poste).
+            Trafic réel et voulu : relever le plafond de l'espace (et de l'organisation) ; sinon, baisser le quota
+            (Protection:GlobalPerDay). Au plafond, Mistral refuse les appels et la démo répond « erreur ».
+
       # --- Ingestion (Airflow) ---------------------------------------------------------------------------------------
       - uid: dag-pas-tourne
         title: Le DAG d'ingestion n'a pas tourné

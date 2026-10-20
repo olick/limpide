@@ -339,3 +339,15 @@ qui y mène.
   d'évaluation (`costPerQuestionEur`, seuil du `gate` 0,0068 € = 0,008 $ converti ; anciens rapports gardés en
   dollars, affichés comme tels). ADR-004 révisé, ADR-014 mis à jour. Vérifié : `ask` sur le poste, 1 970 + 386
   tokens → 0,005470 €.
+- **Dépense Mistral par espace de travail depuis le 19** (page Usage, relevé d'Alexandre l'après-midi du 20, après
+  celui du matin : 326 requêtes, 1,03 €) : `limpide-evaluation`
+  388 requêtes, 1,20 € (**93 %**) ; espace par défaut (démo et poste) 21 requêtes, 0,09 €. Six évaluations complètes
+  dans la chaîne depuis le 19 (exécutions de plus de 3 min ; les autres PR l'ont sautée par `evaluation-requise.sh`) :
+  ≈ 0,20 € et ≈ 65 requêtes par évaluation. Du 1er au 18 : ≈ 4,4 € (relevés du matin : 5,46 € − 1,03 € ; S7 :
+  construction de l'évaluation, calibration du juge, comparaisons, alors dans l'espace par défaut). **Le poste de dépense est l'évaluation, pas la démo** (≈ 0,44
+  centime par question ; au plus ≈ 0,26 € par jour sous le quota, ≈ 8 € par mois).
+- [x] **Alertes de budget** (seuils validés par Alexandre), sur `answer_log` : démo > 0,50 € sur 24 h (le quota ne
+  tient plus, ne doit jamais se déclencher) ; > 5 € depuis le début du mois (moitié du plafond de 10 €). Vérifié sur le
+  poste : 10 règles saines ; ligne fictive à 6 € → les deux alertes déclenchées (6,00 € et 6,04 €), transmises à
+  Discord sans erreur ; ligne supprimée → résolues. Limite : l'évaluation et le poste ne sont visibles que dans la
+  console Mistral (aucune API publique de la dépense trouvée), bornés par leur plafond.

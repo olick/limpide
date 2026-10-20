@@ -97,8 +97,12 @@ Alertes (`grafana/provisioning/alerting/alertes.yaml`), sur Discord, avec l'envi
 | Réponses anormalement lentes | médiane > 15 s sur 30 min (au moins 3 questions) | `answer_log` |
 | Le DAG n'a pas tourné | aucune exécution réussie depuis 8 jours | base d'Airflow |
 | Un DAG ne s'importe plus | au moins une erreur d'import pendant 5 min | base d'Airflow |
+| Dépense de la démo anormale sur 24 h (session 3) | > 0,50 € sur 24 h glissantes : le quota (60 questions par jour, ≈ 0,26 €) ne tient plus | `answer_log` |
+| Budget Mistral de la démo à moitié consommé (session 3) | > 5 € depuis le début du mois civil (UTC, à confirmer sur la facture de Mistral), moitié du plafond de 10 € de l'espace | `answer_log` |
 
-L'échec et la quarantaine d'une ingestion restent signalés par le DAG lui-même (tâche `bilan`).
+L'échec et la quarantaine d'une ingestion restent signalés par le DAG lui-même (tâche `bilan`). Les alertes de budget
+ne voient que la démo : l'évaluation (espace `limpide-evaluation`) et le poste ne sont bornés que par leur plafond chez
+Mistral (aucune API publique de lecture de la dépense trouvée le 2026-10-20).
 
 **Pourquoi la base d'Airflow et pas ses métriques** (essayé le 2026-10-19) : Airflow sait envoyer ses métriques en
 OpenTelemetry, mais un compteur n'existe qu'à partir de sa première mesure et repart de zéro au redémarrage de
