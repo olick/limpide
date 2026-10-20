@@ -106,10 +106,10 @@ chaîne jusqu'au VPS, bascule Qwen3-Embedding-8B, ADR-014 à 017) ; S9–S10 à 
 **S8 en cours** (observabilité, coûts, sécurité), ADR-018. Session 1 faite le 2026-10-19 : supervision auto-hébergée
 sur le VPS (`supervision/` : OpenTelemetry, Tempo, Loki, Prometheus, Grafana), journal `answer_log`, journaux des
 visites. Session 2 installée le 2026-10-19 : tableaux de bord, 8 alertes Discord, Grafana sur
-https://grafana.limpide-ia.fr/ depuis le back office (connexion Microsoft). Prochaine : session 3 (FinOps).
-Points ouverts des sessions 1 et 2 : tableau en tête de `semaine-08.md`.
-Reportés de la S7 (liste en tête de `semaine-08.md`) : garde-fou « Oui » en tête, alerte de budget Mistral, anti-bot,
-fidélité jugée plus basse avec Qwen, test du message à la 11e question.
+https://grafana.limpide-ia.fr/ depuis le back office (connexion Microsoft). Session 3 faite le 2026-10-20 : coûts
+en euros (migration 0008), 2 alertes de budget, `docs/finops.md`. Prochaine : session 4 (garde-fous v2, sacrifiable).
+Points ouverts des sessions 1 à 3 : tableau en tête de `semaine-08.md`. Reportés de la S7 : garde-fou « Oui » en tête,
+anti-bot, fidélité jugée plus basse avec Qwen, test du message à la 11e question.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,

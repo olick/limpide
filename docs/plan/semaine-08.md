@@ -12,7 +12,7 @@ de budget Mistral (session 3) ; anti-bot et test du message à la 11e question (
 basse avec Qwen (0,21 et 0,24 contre 0,09 à 0,15), réponses signalées à relire ; retrait de l'ancienne colonne de
 vecteurs et de l'index HNSW.
 
-**Points ouverts des sessions 1 et 2** (relevés le 2026-10-19, détail dans le journal de réalisation) :
+**Points ouverts des sessions 1 à 3** (relevés les 2026-10-19 et 20, détail dans le journal de réalisation) :
 
 | Point | Pourquoi | Quand |
 |---|---|---|
@@ -20,7 +20,8 @@ vecteurs et de l'index HNSW.
 | Identifiants par défaut de la base d'Airflow sur le serveur (`airflow` / `airflow`) | elle contient les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est désormais sur son réseau | session 5 |
 | 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
 | Journaux bruts des conteneurs de la démo sans rotation ni plafond (`docker-compose.prod.yml` n'a pas de bloc `logging`) | ils peuvent contenir le texte de questions : avant la PR #24, l'application l'y écrivait en cas d'erreur | session 5 : purge, puis plafond de taille et de durée (`logging:`) ; nettoyer au passage ≈ 13,5 Go récupérables par Docker |
-| Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | amélioration, sans urgence : une inscription d'application propre à Grafana |
+| Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | session 5 (revue des accès) : une inscription d'application propre à Grafana |
+| Empreinte carbone du serveur | `docs/finops.md` suppose 5 à 10 W pour le VPS ; le bilan carbone mensuel d'OVHcloud (« Mon compte ») ne cite pas les VPS | Alexandre : regarder si le VPS y figure, sinon l'hypothèse reste |
 
 ---
 
@@ -85,6 +86,13 @@ qui y mène.
    **Relevé en session 2** (`relecteur-infra`) : la base d'Airflow du serveur garde les identifiants par défaut
    (`airflow` / `airflow`, `pipelines/airflow/docker-compose.yaml`) ; elle est joignable depuis son réseau, où Grafana
    est désormais attaché. Les changer (elle contient les variables d'Airflow, dont la clé OVHcloud et le webhook).
+   **Ajouté le 2026-10-20** : une inscription d'application Microsoft propre à Grafana (≈ 30 min), pour ne plus
+   partager le secret client du back office. Piège : avec un compte Microsoft personnel, le `sub` du jeton est propre
+   à chaque application ; la règle d'accès de Grafana (`ADMIN_ALLOWED_USER`, celui du back office) refuserait
+   Alexandre. Étapes : inscription « Limpide Grafana » (adresses de retour du poste et du serveur, secret propre) ;
+   sur le poste, une connexion avec une règle provisoirement ouverte pour relever le nouveau `sub` (le même en
+   production : il dépend de l'application) ; `connexion-microsoft.sh` lit des valeurs propres à Grafana ;
+   application sur le serveur, connexion vérifiée, refus d'un autre compte essayé si possible.
 2. **Analyse des images** de conteneurs dans la chaîne CI (déjà amorcée en S7) : traiter les vulnérabilités critiques.
    **Ajouté le 2026-10-19** : Grafana est exposé sur Internet (sous-domaine `grafana.limpide-ia.fr`) ; Grype y trouve 19 failles élevées
    ou critiques corrigeables (13.2.4), surtout dans des greffons inutilisés. Analyser chaque semaine les images de la
@@ -370,5 +378,4 @@ qui y mène.
   depuis le 19 en font ≈ 5, pas 6 (une exécution longue n'était pas une évaluation complète).
 - [x] Coût Azure d'octobre (Alexandre, 2026-10-20) : < 0,01 € pour un budget de 10 € (vitrine détruite hors
   démonstration).
-- Reste pour la session 3 : empreinte du serveur (bilan carbone mensuel de l'espace client OVHcloud, si le VPS y
-  figure), à relever par Alexandre.
+- **Session 3 close le 2026-10-20**, sauf l'empreinte du serveur : voir les points ouverts.
