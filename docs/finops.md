@@ -18,7 +18,7 @@ le sont aussi depuis le 2026-10-20 (ADR-004, révision).
 
 | Poste | Fournisseur | Montant | Ramené au mois |
 |---|---|---|---|
-| Serveur de la démo (VPS-1) | OVHcloud | 55 € pour 12 mois | 4,58 € |
+| Serveur de la démo (VPS-1) | OVHcloud | 55 € TTC pour 12 mois (3,81 € HT par mois, ADR-006) | 4,58 € |
 | Nom de domaine `limpide-ia.fr` | OVHcloud | 6 € par an | 0,50 € |
 | Vectorisation (AI Endpoints) | OVHcloud | 0,09 € (Qwen3-Embedding-8B, 942 907 tokens) | ≈ 0,10 € |
 | Essais de modèles de rédaction (AI Endpoints) | OVHcloud | 0,29 € (gpt-oss-120b, Llama 3.3 70B, Qwen 3.5 397B) | ponctuel |
