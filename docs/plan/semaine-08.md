@@ -315,8 +315,11 @@ qui y mène.
   (8 alertes saines, aucune erreur de gabarit) ; sur le serveur, à recréer Grafana après la fusion.
 - [x] Grafana recréé sur le serveur après la fusion de la PR #30 (Alexandre, confirmé le 2026-10-20).
 - [x] « Sous le capot » (PR #32, 2026-10-20) : la première étape ne prétend plus que la question reste sur le serveur
-  (elle est vectorisée par OVHcloud AI Endpoints). Capture `docs/images/sous-le-capot.png` à refaire : celle prise le
-  2026-10-20 montre encore l'ancien texte (démo qui n'exécutait pas le code de la PR #32).
+  (elle est vectorisée par OVHcloud AI Endpoints). Capture `docs/images/sous-le-capot.png` refaite après le
+  déploiement des PR #32 et #34, avec la question du README (`reponse.png`) : 1 719 tokens lus, comme la précédente ;
+  vectorisation à 9,4 s (pic d'OVHcloud, comme les 5,5 s de la session 1). Espace manquante après « Coût de cette
+  réponse : » (« :0,44 ») corrigée ensuite dans le code (vérifiée dans le code généré par Razor) : la capture ne la
+  montre pas encore.
 
 **Session 3 : FinOps et GreenOps (commencée le 2026-10-20)** :
 
