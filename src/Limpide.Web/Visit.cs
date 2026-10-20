@@ -94,9 +94,9 @@ public static partial class VisitorLog
     private static partial void Searched(this ILogger logger, int passages, double? bestScore, double minScore, int embeddingMs, int searchMs);
 
     [LoggerMessage(Level = LogLevel.Information,
-        Message = "Rédaction par {Model} ({PromptVersion}) : {InputTokens} + {OutputTokens} tokens, {CostUsd} $, {GenerationMs} ms")]
+        Message = "Rédaction par {Model} ({PromptVersion}) : {InputTokens} + {OutputTokens} tokens, {CostEur} €, {GenerationMs} ms")]
     private static partial void Generated(this ILogger logger, string? model, string promptVersion, long? inputTokens,
-        long? outputTokens, decimal? costUsd, int generationMs);
+        long? outputTokens, decimal? costEur, int generationMs);
 
     [LoggerMessage(Level = LogLevel.Warning, Message = "Garde-fou déclenché : {Guardrail}")]
     private static partial void GuardrailTriggered(this ILogger logger, string guardrail);
@@ -118,7 +118,7 @@ public static partial class VisitorLog
         else
         {
             logger.Searched(entry.Passages, entry.BestScore, minScore, Ms(t.Embedding), Ms(t.Search));
-            logger.Generated(entry.Model, result.PromptVersion, entry.InputTokens, entry.OutputTokens, entry.CostUsd, Ms(t.Generation));
+            logger.Generated(entry.Model, result.PromptVersion, entry.InputTokens, entry.OutputTokens, entry.CostEur, Ms(t.Generation));
         }
 
         foreach (var code in entry.Guardrails.Where(c => c != AnswerService.OutOfScopeCode))

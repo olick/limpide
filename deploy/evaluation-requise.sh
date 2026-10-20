@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# L'évaluation (deploy/evaluer.sh : ≈ 0,29 $ et quelques minutes) est-elle nécessaire ? Répond « oui » si un fichier
+# L'évaluation (deploy/evaluer.sh : ≈ 0,25 € et quelques minutes) est-elle nécessaire ? Répond « oui » si un fichier
 # modifié depuis <base> peut changer les réponses ou leur mesure (liste des fichiers en cause sur la sortie d'erreur),
 # « non » sinon. Sans argument (lancement à la main) : toujours « oui ».
 # Liste large exprès : un oubli laisserait passer en production une modification non évaluée ; un excès ne coûte que

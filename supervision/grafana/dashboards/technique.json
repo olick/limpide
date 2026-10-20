@@ -156,7 +156,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "journal"
           },
-          "rawSql": "SELECT $__timeGroupAlias(at, '1d'), sum(cost_usd) AS \"coût ($)\"\nFROM answer_log WHERE $__timeFilter(at) GROUP BY 1 ORDER BY 1",
+          "rawSql": "SELECT $__timeGroupAlias(at, '1d'), sum(cost_eur) AS \"coût (€)\"\nFROM answer_log WHERE $__timeFilter(at) GROUP BY 1 ORDER BY 1",
           "format": "time_series",
           "rawQuery": true,
           "editorMode": "code"
@@ -164,7 +164,7 @@
       ],
       "fieldConfig": {
         "defaults": {
-          "unit": "currencyUSD",
+          "unit": "currencyEUR",
           "custom": {
             "drawStyle": "bars",
             "fillOpacity": 70,
@@ -316,7 +316,7 @@
             "type": "grafana-postgresql-datasource",
             "uid": "journal"
           },
-          "rawSql": "SELECT at AS heure, outcome AS issue, question_length AS longueur, best_score AS \"meilleur score\",\n  total_ms AS \"durée (ms)\", cost_usd AS \"coût ($)\", array_to_string(guardrails, ', ') AS \"garde-fous\", trace_id AS trace\nFROM answer_log WHERE $__timeFilter(at) ORDER BY at DESC LIMIT 100",
+          "rawSql": "SELECT at AS heure, outcome AS issue, question_length AS longueur, best_score AS \"meilleur score\",\n  total_ms AS \"durée (ms)\", cost_eur AS \"coût (€)\", array_to_string(guardrails, ', ') AS \"garde-fous\", trace_id AS trace\nFROM answer_log WHERE $__timeFilter(at) ORDER BY at DESC LIMIT 100",
           "format": "table",
           "rawQuery": true,
           "editorMode": "code"

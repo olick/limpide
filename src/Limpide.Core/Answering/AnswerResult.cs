@@ -32,7 +32,7 @@ public sealed record SourcePassage(string Id, RetrievedPassage Passage, bool Cit
 
 public sealed record AnswerTimings(TimeSpan Embedding, TimeSpan Search, TimeSpan Generation, TimeSpan Total);
 
-/// <param name="EstimatedCost">En dollars, d'après le tarif configuré ; null si le tarif du modèle n'est pas connu.</param>
+/// <param name="EstimatedCost">En euros, d'après le tarif configuré ; null si le tarif du modèle n'est pas connu.</param>
 public sealed record TokenUsage(long? InputTokens, long? OutputTokens, decimal? EstimatedCost);
 
 /// <summary>Un contrôle qui s'est déclenché sur cette réponse.</summary>

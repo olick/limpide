@@ -317,3 +317,25 @@ qui y mène.
 - [x] « Sous le capot » (PR #32, 2026-10-20) : la première étape ne prétend plus que la question reste sur le serveur
   (elle est vectorisée par OVHcloud AI Endpoints). Capture `docs/images/sous-le-capot.png` à refaire : celle prise le
   2026-10-20 montre encore l'ancien texte (démo qui n'exécutait pas le code de la PR #32).
+
+**Session 3 : FinOps et GreenOps (commencée le 2026-10-20)** :
+
+- Relevés d'Alexandre (2026-10-20) :
+  - OVHcloud : VPS 55 € pour 12 mois (≈ 4,58 €/mois), nom de domaine 6 €/an ;
+  - AI Endpoints : 0,39 € en octobre, dont 0,29 € d'essais de modèles de rédaction (gpt-oss-120b, Llama 3.3 70B,
+    Qwen 3.5 397B) et 0,09 € de vectorisation Qwen3-Embedding-8B (942 907 tokens, revectorisation du 18 comprise) ;
+  - Mistral, à l'usage, sans abonnement : 5,46 € du 1er au 20 octobre (≈ 100 requêtes par jour), dont 326 requêtes et
+    1,03 € depuis le 19.
+- **La démo ne pèse presque rien chez Mistral** : `answer_log` en production depuis le 19 = 6 questions, 5 appels
+  (9 051 tokens lus, 1 272 écrits), 0,0254 $, soit ≈ 1,5 % des appels et ≈ 2 % de la dépense. Le reste vient de
+  l'évaluation (espace `limpide-evaluation`, ADR-016) et du poste : à répartir par la page Usage de Mistral filtrée
+  par espace de travail.
+- Plafond Mistral : organisation 20 €, espace de la démo 10 €, `limpide-evaluation` 10 € (ADR-016 ; règle de
+  production précisée).
+- [x] **Coûts en euros** (décision d'Alexandre : les factures sont en euros) : tarifs relevés sur la page de
+  Mistral (inférence régionale, majoration UE comprise, 0,85 fois le tarif en dollars) ; `cost_eur` dans
+  `answer_log` (migration 0008, lignes existantes recalculées à partir des tokens : 0,042266 $ → 0,035925 € sur le
+  poste), traces (`limpide.cost.eur`), messages, Grafana, « Sous le capot » (« centime d'euro »), console, rapports
+  d'évaluation (`costPerQuestionEur`, seuil du `gate` 0,0068 € = 0,008 $ converti ; anciens rapports gardés en
+  dollars, affichés comme tels). ADR-004 révisé, ADR-014 mis à jour. Vérifié : `ask` sur le poste, 1 970 + 386
+  tokens → 0,005470 €.

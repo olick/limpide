@@ -25,10 +25,10 @@ public sealed class AnswerLogStore(NpgsqlDataSource dataSource, EmbeddingOptions
         await using (var insert = new NpgsqlCommand("""
             INSERT INTO answer_log (outcome, trace_id, question_length, search_strategy, embedding_model, model,
                 prompt_version, passages, cited, best_score, embedding_ms, search_ms, generation_ms, total_ms,
-                input_tokens, output_tokens, cost_usd, guardrails, error)
+                input_tokens, output_tokens, cost_eur, guardrails, error)
             VALUES (@outcome, @trace_id, @question_length, @search_strategy, @embedding_model, @model,
                 @prompt_version, @passages, @cited, @best_score, @embedding_ms, @search_ms, @generation_ms, @total_ms,
-                @input_tokens, @output_tokens, @cost_usd, @guardrails, @error)
+                @input_tokens, @output_tokens, @cost_eur, @guardrails, @error)
             """, connection, tx))
         {
             var p = insert.Parameters;
@@ -49,7 +49,7 @@ public sealed class AnswerLogStore(NpgsqlDataSource dataSource, EmbeddingOptions
             p.Add(Nullable("total_ms", NpgsqlDbType.Integer, Ms(entry.Total)));
             p.Add(Nullable("input_tokens", NpgsqlDbType.Bigint, entry.InputTokens));
             p.Add(Nullable("output_tokens", NpgsqlDbType.Bigint, entry.OutputTokens));
-            p.Add(Nullable("cost_usd", NpgsqlDbType.Numeric, entry.CostUsd));
+            p.Add(Nullable("cost_eur", NpgsqlDbType.Numeric, entry.CostEur));
             p.Add(new NpgsqlParameter("guardrails", NpgsqlDbType.Array | NpgsqlDbType.Text) { Value = entry.Guardrails.ToArray() });
             p.Add(Nullable("error", NpgsqlDbType.Text, entry.Error));
             await insert.ExecuteNonQueryAsync(ct);

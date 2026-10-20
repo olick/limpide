@@ -27,7 +27,7 @@ public sealed class GenerationOptions
     /// <summary>Seuil de pertinence (similarité cosinus du meilleur passage) ; 0 = désactivé. Calibré dans l'ADR-005.</summary>
     public double MinScore { get; set; }
 
-    /// <summary>Tarif par modèle, en dollars par million de tokens, majoration UE comprise. Relevés dans l'ADR-004.</summary>
+    /// <summary>Tarif par modèle, en euros par million de tokens, majoration UE comprise (ADR-004, révisé en S8).</summary>
     public Dictionary<string, ModelPrice> Prices { get; set; } = [];
 
     public GenerationSettings ToSettings() =>

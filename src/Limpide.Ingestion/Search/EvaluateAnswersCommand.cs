@@ -130,8 +130,8 @@ public sealed class EvaluateAnswersCommand(
                 PromptLeaks = checks.Count(c => c.Result.Guardrails.Any(g => g.Code == "consigne-divulguee")),
                 Guardrails = results.SelectMany(r => r.Guardrails).GroupBy(g => g.Code).ToDictionary(g => g.Key, g => g.Count()),
                 LatencySeconds = new { Median = Percentile(totals, 0.5).TotalSeconds, P95 = Percentile(totals, 0.95).TotalSeconds },
-                CostUsd = costs.Any(c => c is null) ? (decimal?)null : costs.Sum(),
-                CostPerQuestionUsd = costs.Any(c => c is null) ? (decimal?)null : Math.Round(costs.Sum()!.Value / checks.Count, 6),
+                CostEur = costs.Any(c => c is null) ? (decimal?)null : costs.Sum(),
+                CostPerQuestionEur = costs.Any(c => c is null) ? (decimal?)null : Math.Round(costs.Sum()!.Value / checks.Count, 6),
                 ModelCalls = results.Count(r => r.Timings.Generation > TimeSpan.Zero),
                 Judge = new
                 {
@@ -139,7 +139,7 @@ public sealed class EvaluateAnswersCommand(
                     Unfaithful = judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful),
                     UnfaithfulShare = Share(judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful), judgments.Count),
                     Unreadable = judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unreadable),
-                    CostUsd = judgments.Values.Any(j => j.Usage.EstimatedCost is null) ? null : (decimal?)judgments.Values.Sum(j => j.Usage.EstimatedCost),
+                    CostEur = judgments.Values.Any(j => j.Usage.EstimatedCost is null) ? null : (decimal?)judgments.Values.Sum(j => j.Usage.EstimatedCost),
                 },
             },
             Questions = checks.Select(c => new
@@ -154,7 +154,7 @@ public sealed class EvaluateAnswersCommand(
                 Seconds = c.Result.Timings.Total.TotalSeconds,
                 c.Result.Usage.InputTokens,
                 c.Result.Usage.OutputTokens,
-                CostUsd = c.Result.Usage.EstimatedCost,
+                CostEur = c.Result.Usage.EstimatedCost,
                 Judge = judgments.GetValueOrDefault(c.Question.Id) is { } j
                     ? new { Verdict = JudgeLabel(j.Verdict), j.Issues }
                     : null,
@@ -288,7 +288,7 @@ public sealed class EvaluateAnswersCommand(
 
     private static string Seconds(TimeSpan duration) => $"{duration.TotalSeconds.ToString("0.0", French)} s";
 
-    private static string Cost(decimal? cost) => cost is { } c ? $"{c.ToString("0.000000", French)} $" : "inconnu";
+    private static string Cost(decimal? cost) => cost is { } c ? $"{c.ToString("0.000000", French)} €" : "inconnu";
 
     /// <summary>Centile par la méthode du rang le plus proche (0,5 : médiane ; 0,95 : 95e centile).</summary>
     private static TimeSpan Percentile(IReadOnlyCollection<TimeSpan> values, double p)

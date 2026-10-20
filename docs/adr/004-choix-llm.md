@@ -139,3 +139,12 @@ de Small ne se reproduisent pas sur cette passe, mais rien ne garantit qu'elles 
 **Décision : Mistral Medium 3.5 (`mistral-medium-2604`) pour la démo, et par défaut** (`src/appsettings.shared.json`).
 Small reste utilisable pour des essais (`--Generation:Model=mistral-small-2603`). À remesurer en S7 sur le jeu de
 50 questions, avec une relecture outillée.
+
+## Révision du 2026-10-20 : coûts en euros (S8, session 3)
+
+Les factures (Mistral, OVHcloud) sont en euros ; le coût estimé était en dollars, donc impossible à confronter à la
+facture sans taux de change. Les tarifs de `Generation:Prices` et du juge passent **en euros**, relevés sur la page
+des tarifs de Mistral (inférence régionale, majoration UE comprise : Medium 3.5 1,4025 € / 7,0125 €, Small 4
+0,14025 € / 0,561 €, Large 3 0,4675 € / 1,4025 € par million de tokens, soit 0,85 fois le tarif en dollars).
+Journal des réponses : colonne `cost_eur`, lignes existantes recalculées à partir des tokens (migration 0008).
+Rapports d'évaluation : `costEur`, `costPerQuestionEur` ; les rapports antérieurs restent en dollars (archives).

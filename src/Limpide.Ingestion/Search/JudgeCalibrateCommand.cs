@@ -92,7 +92,7 @@ public sealed class JudgeCalibrateCommand(FaithfulnessJudge judge, IngestionOpti
 
         var costs = rows.Select(r => r.Judgment.Usage.EstimatedCost).ToList();
         var durations = rows.Select(r => r.Judgment.Duration).Order().ToList();
-        text.Append($"Coût : {(costs.Any(c => c is null) ? "inconnu" : $"{costs.Sum()!.Value.ToString("0.0000", French)} $")}"
+        text.Append($"Coût : {(costs.Any(c => c is null) ? "inconnu" : $"{costs.Sum()!.Value.ToString("0.0000", French)} €")}"
             + $" · durée médiane {durations[durations.Count / 2].TotalSeconds.ToString("0.0", French)} s, max {durations[^1].TotalSeconds.ToString("0.0", French)} s");
         return text.ToString();
     }

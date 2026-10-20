@@ -30,7 +30,7 @@ public static class AnswerTelemetry
         activity.SetTag("gen_ai.request.model", entry.Model);
         activity.SetTag("gen_ai.usage.input_tokens", entry.InputTokens);
         activity.SetTag("gen_ai.usage.output_tokens", entry.OutputTokens);
-        activity.SetTag("limpide.cost.usd", entry.CostUsd is { } cost ? (double)cost : null);
+        activity.SetTag("limpide.cost.eur", entry.CostEur is { } cost ? (double)cost : null);
         activity.SetTag("limpide.guardrails", entry.Guardrails.ToArray());
 
         // Un événement par garde-fou : visible sur la ligne de temps de la trace. La description est omise, elle
