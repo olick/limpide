@@ -354,3 +354,19 @@ qui y mène.
   poste : 10 règles saines ; ligne fictive à 6 € → les deux alertes déclenchées (6,00 € et 6,04 €), transmises à
   Discord sans erreur ; ligne supprimée → résolues. Limite : l'évaluation et le poste ne sont visibles que dans la
   console Mistral (aucune API publique de la dépense trouvée), bornés par leur plafond.
+- [x] **Effet du seuil de pertinence** (rapport `2026-10-18-1925`) : 6 questions sur 50 arrêtées (12 %), toutes hors
+  sujet, 44 appels au modèle ; ≈ 0,38 centime, ≈ 3 s et ≈ 0,14 Wh économisés par question arrêtée. Production : 1 sur
+  6, trop peu pour conclure. (Le plan annonçait ≈ 17 : confusion avec les questions de refus, dont 8 dépassent le
+  seuil et sont refusées par le modèle.)
+- [x] **Ordre de grandeur énergétique** : EcoLogits 0.11.3 (calcul ponctuel dans un environnement jetable, rien dans
+  le dépôt), `mistral-medium-2604`, 250 tokens écrits : 0,14 Wh, 0,007 g CO₂e (mix français) à 0,07 g (mondial) ;
+  analyse de cycle de vie de Mistral (Large 2, 400 tokens) : 1,14 g. Écart ×17 à ×150 expliqué (modèle, périmètre,
+  mix). Serveur toujours allumé (5 à 10 W supposés) : l'équivalent de 26 000 à 52 000 réponses par mois.
+- [x] **`docs/finops.md`** : coût mensuel réel, répartition Mistral, coûts unitaires (corpus : 1 130 passages,
+  ≈ 320 000 tokens, revectorisation complète ≈ 0,03 €), garde-fous de la dépense, projection (≈ 6,7 € à ≈ 23 € par
+  mois, ≈ 25 € au plus sous les plafonds), seuil, énergie, leviers, limites. Lien depuis le README.
+- **Correction** (relecture de `docs/finops.md`) : une évaluation complète coûte ≈ 0,26 € pour 78 requêtes (rapport
+  `2026-10-18-1925` : 44 rédactions, 34 jugements ; ADR-016), et non ≈ 0,20 € pour 65 : les 388 requêtes de la CI
+  depuis le 19 en font ≈ 5, pas 6 (une exécution longue n'était pas une évaluation complète).
+- Reste pour la session 3 : coût Azure réel (Cost Management) et empreinte du serveur (calculateur carbone de
+  l'espace client OVHcloud), à relever par Alexandre.
