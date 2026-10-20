@@ -365,6 +365,14 @@ qui y mène.
 - [x] **`docs/finops.md`** : coût mensuel réel, répartition Mistral, coûts unitaires (corpus : 1 130 passages,
   ≈ 320 000 tokens, revectorisation complète ≈ 0,03 €), garde-fous de la dépense, projection (≈ 6,7 € à ≈ 23 € par
   mois, ≈ 25 € au plus sous les plafonds), seuil, énergie, leviers, limites. Lien depuis le README.
+- [x] **Coût par ingestion** (point 1 du plan, jusque-là seulement estimé) : `embed` additionne les tokens rendus
+  par l'API pour chaque lot et écrit `tokens` et `costEur` dans son résumé (tarifs `Embedding:PricesPerMillion`,
+  0,10 € par million pour Qwen3-Embedding-8B, 0 pour bge-m3 ; tokens non rendus ou tarif absent : coût inconnu) ; le
+  message Discord du DAG ajoute « Vectorisation : N passage(s), N tokens, ≈ X € ». Vérifié sur le poste : 3 vecteurs
+  supprimés puis recalculés par OVHcloud, 1 235 tokens pour 4 023 caractères titres compris, 0,000124 € (3,26
+  caractères par token : revectorisation complète ≈ 363 000 tokens, ≈ 0,036 €). Bilan carbone d'OVHcloud : les VPS ne figurent pas dans la liste des services couverts.
+- [x] Capture « Sous le capot » refaite sur le site déployé (Alexandre) : espace après « Coût de cette réponse : »,
+  vectorisation à 486 ms.
 - **Correction** (relecture de `docs/finops.md`) : une évaluation complète coûte ≈ 0,26 € pour 78 requêtes (rapport
   `2026-10-18-1925` : 44 rédactions, 34 jugements ; ADR-016), et non ≈ 0,20 € pour 65 : les 388 requêtes de la CI
   depuis le 19 en font ≈ 5, pas 6 (une exécution longue n'était pas une évaluation complète).

@@ -28,6 +28,8 @@ public sealed class EmbedCommand(
         summary.Add("embedded", 0);
         if (total == 0)
         {
+            summary.Add("tokens", 0);
+            summary.Measure("costEur", 0m);
             logger.LogInformation("Aucun passage à vectoriser ({Model})", options.Label);
             await MarkReadyAsync(ct);
             return 0;
@@ -39,6 +41,8 @@ public sealed class EmbedCommand(
         var overall = Stopwatch.StartNew();
         TimeSpan? firstBatch = null;
         int done = 0, characters = 0;
+        // Tokens facturés, d'après l'usage rendu par l'API ; null dès qu'un lot ne le donne pas (coût inconnu).
+        long? tokens = 0;
 
         while (await store.NextBatchAsync(options.Label, options.BatchSize, ct) is { Count: > 0 } batch)
         {
@@ -57,16 +61,23 @@ public sealed class EmbedCommand(
             done += batch.Count;
             summary.Add("embedded", batch.Count);
             characters += batch.Sum(c => c.Content.Length);
+            tokens += embeddings.Usage?.InputTokenCount;
             logger.LogInformation("{Done}/{Total} — lot de {Count} en {Seconds:F1} s", done, total, batch.Count, watch.Elapsed.TotalSeconds);
         }
+
+        var cost = options.Cost(tokens);
+        if (tokens is { } counted)
+            summary.Add("tokens", (int)counted);
+        summary.Measure("costEur", cost);
 
         // Le premier lot inclut le chargement du modèle en mémoire : on le sort de la moyenne.
         var elapsed = overall.Elapsed;
         var steady = done > options.BatchSize ? (elapsed - firstBatch!.Value) / (done - options.BatchSize) : elapsed / done;
         logger.LogInformation(
-            "Vectorisation terminée : {Done} passages, {Characters:N0} caractères, {Total:F1} s au total "
+            "Vectorisation terminée : {Done} passages, {Characters:N0} caractères, {Tokens} tokens, {Cost} €, {Total:F1} s au total "
             + "(premier lot, avec chargement du modèle : {First:F1} s), {PerChunk:F0} ms par passage en régime établi",
-            done, characters, elapsed.TotalSeconds, firstBatch!.Value.TotalSeconds, steady.TotalMilliseconds);
+            done, characters, tokens?.ToString() ?? "? (non rendus par l'API)", cost?.ToString("0.000000") ?? "inconnu",
+            elapsed.TotalSeconds, firstBatch!.Value.TotalSeconds, steady.TotalMilliseconds);
 
         await MarkReadyAsync(ct);
         return 0;
