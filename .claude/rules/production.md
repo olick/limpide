@@ -19,7 +19,8 @@ paths:
 - Sauvegarde quotidienne de la base (`deploy/backup-db.sh`, 3 h 15 UTC, `~/backups`, 7 jours).
 - Chaque déploiement de `web` coupe le site quelques secondes (502). Après un `pg_restore --clean` : redémarrer `web`.
 - Mémoire : lire `free -m` (available), pas le graphique d'OVH. Swap de 2 Go.
-- Quota : 10 questions/h par IP, 60/jour (`QuestionQuota`) ; plafond Mistral 10 €/mois.
+- Quota : 10 questions/h par IP, 60/jour (`QuestionQuota`) ; plafond Mistral 10 €/mois pour l'espace de
+  la démo (organisation 20 €, dont 10 € pour l'espace `limpide-evaluation`, ADR-016).
 - `GET /sante` : empreinte du corpus servi (lue en base, gardée 30 s), test de fumée d'Azure (`azure/verifier.sh`) et
   du VPS ; 500 si l'application ne lit pas la base. `missingEmbeddings` : passages servis sans vecteur du modèle
   configuré, donc absents de la recherche (0 attendu, ADR-017).
