@@ -23,7 +23,7 @@ le sont aussi depuis le 2026-10-20 (ADR-004, révision).
 | Vectorisation (AI Endpoints) | OVHcloud | 0,09 € (Qwen3-Embedding-8B, 942 907 tokens) | ≈ 0,10 € |
 | Essais de modèles de rédaction (AI Endpoints) | OVHcloud | 0,29 € (gpt-oss-120b, Llama 3.3 70B, Qwen 3.5 397B) | ponctuel |
 | Rédaction et juge (API, à l'usage) | Mistral | 5,46 € | ≈ 8 € |
-| Vitrine et socle Azure | Microsoft | à relever (Cost Management) | — |
+| Vitrine et socle Azure | Microsoft | < 0,01 € (budget « Limpide » : 10 € par mois) | < 0,01 € sans recréation de la vitrine |
 
 Mistral, du 1er au 18 octobre (≈ 4,4 € : relevés du matin du 20, 5,46 € au total moins 1,03 € depuis le 19) : construction de l'évaluation (S7), calibration du juge, comparaisons de
 modèles, alors toutes dans l'espace de travail par défaut. Depuis le 19, chaque usage a son espace :
@@ -80,7 +80,9 @@ Hypothèses : coûts unitaires ci-dessus, vectorisation négligeable, une revect
 | Quota atteint chaque jour | 60 | 40 et plus | 7,9 € + 10 € (plafond) | ≈ 23 € |
 | Au-delà | — | — | plafonds atteints : la démo ou l'évaluation s'arrête | ≈ 25 € au plus |
 
-Le dernier scénario est le pire cas garanti par les plafonds (5,10 € de fixe + 20 € chez Mistral), hors Azure.
+Le dernier scénario est le pire cas garanti par les plafonds (5,10 € de fixe + 20 € chez Mistral). Azure n'y
+figure pas : < 0,01 € en octobre, la vitrine étant détruite quand elle ne sert pas ; recréée à la demande, ≈ 0,10 €
+par recréation (ADR-016).
 Au-delà de quelques centaines de questions par jour, il faudrait revoir le quota, le plafond et le modèle : c'est
 l'objet de la mise à l'échelle, après le plan.
 
