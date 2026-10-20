@@ -1,10 +1,12 @@
 ﻿@page "/"
 @using System.Globalization
 @using Limpide.Core.Protection
+@using Limpide.Infrastructure
 @inject AnswerService Answers
 @inject QuestionQuota Quota
 @inject ILogger<Home> Logger
 @inject GenerationSettings Generation
+@inject EmbeddingOptions Embedding
 @inject Limpide.Infrastructure.Storage.AnswerLogStore AnswerLog
 @inject Visit CurrentVisit
 
@@ -118,8 +120,18 @@
             <li>
                 <span class="step-title">Votre question est traduite en « sens »</span>
                 <span class="ms">@Ms(r.Timings.Embedding)</span>
-                <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres qui
-                    représente son sens. À cette étape, rien ne quitte le serveur.</p>
+                @* Phrase tirée du réglage Embedding : elle doit rester vraie quel que soit le fournisseur. *@
+                @if (Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback)
+                {
+                    <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres
+                        qui représente son sens. À cette étape, rien ne quitte le serveur.</p>
+                }
+                else
+                {
+                    <p>Un modèle de langue spécialisé (@Embedding.Model), @EmbeddingHost, transforme votre question en
+                        une suite de nombres qui représente son sens. Votre question lui est envoyée pour ce calcul :
+                        avec la rédaction, c'est la seule étape où elle quitte notre serveur.</p>
+                }
             </li>
             <li>
                 <span class="step-title">Recherche des passages les plus proches</span>
@@ -315,6 +327,10 @@
     private QuotaOptions QuotaSettings { get; set; } = default!;
 
     private int QuotaPerHour => QuotaSettings.PerClientPerHour;
+
+    private string EmbeddingHost => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase)
+        ? "hébergé par OVHcloud en France"
+        : $"appelé chez {Embedding.Endpoint.Host}";
 
     private async Task AskAsync()
     {
