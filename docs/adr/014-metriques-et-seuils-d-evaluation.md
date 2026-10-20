@@ -71,7 +71,7 @@ absente compte comme un échec.
 | `expectedPassageCitedShare` | ≥ 0,86 | oui | 28/30 avec Qwen3-Embedding-8B (19/30 avec bge-m3, seuil 0,56) ; tolérance de deux questions |
 | `judge.unfaithfulShare` | ≤ 0,30 | oui | **métrique agrégée** : 0,15 et 0,22 en référence, marge égale à leur écart ; Small : 0,41 |
 | `judge.unreadable` | ≤ 2 | oui | un juge qui ne répond plus ne mesure plus rien |
-| `costPerQuestionUsd` | ≤ 0,008 $ | oui | plafond au double de la référence (consignes gonflées, modèle plus cher) |
+| `costPerQuestionEur` | ≤ 0,0068 € | oui | plafond au double de la référence (consignes gonflées, modèle plus cher) ; `costPerQuestionUsd` ≤ 0,008 $ jusqu'au passage en euros (2026-10-20, ADR-004) |
 | `latencySeconds.p95` | ≤ 8 s | non | dépend d'une API externe ; signalé, suivi en S8 |
 
 Vérification sur les rapports du 2026-10-15 :

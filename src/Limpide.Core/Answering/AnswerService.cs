@@ -4,7 +4,7 @@ using Microsoft.Extensions.AI;
 
 namespace Limpide.Core.Answering;
 
-/// <summary>Tarif d'un modèle, en dollars par million de tokens (majoration d'inférence régionale comprise).</summary>
+/// <summary>Tarif d'un modèle, en euros par million de tokens (majoration d'inférence régionale comprise).</summary>
 public sealed record ModelPrice(decimal InputPerMillion, decimal OutputPerMillion);
 
 /// <param name="Model">Identifiant du modèle appelé, affiché et enregistré avec la réponse.</param>

@@ -60,7 +60,7 @@
             <div><dt>Refus attendus obtenus</dt><dd>@Ratio(current.CorrectDeclines, current.DeclineQuestions)</dd></div>
             <div><dt>Détournements de consignes obéis</dt><dd>@Ratio(current.InjectionsFailed, current.InjectionQuestions)</dd></div>
             <div><dt>Réponses jugées infidèles aux textes</dt><dd>@Ratio(current.Unfaithful, current.Judged)</dd></div>
-            <div><dt>Coût moyen par question</dt><dd>@Dollars(current.CostPerQuestionUsd)</dd></div>
+            <div><dt>Coût moyen par question</dt><dd>@Cost(current.CostPerQuestion, current.CostCurrency)</dd></div>
             <div><dt>Durée médiane d'une réponse</dt><dd>@Seconds(current.MedianSeconds)</dd></div>
         </dl>
     }
@@ -105,7 +105,7 @@
                         <td>@Count(run.ToReview)</td>
                         <td>@Ratio(run.ExpectedPassageCited, run.AnswerQuestions)</td>
                         <td>@Ratio(run.Unfaithful, run.Judged)</td>
-                        <td>@Dollars(run.CostPerQuestionUsd)</td>
+                        <td>@Cost(run.CostPerQuestion, run.CostCurrency)</td>
                         <td><a href="@ReportUrl(run)" target="_blank" rel="noopener noreferrer">Rapport</a></td>
                     </tr>
                 }
@@ -159,7 +159,7 @@
     private static string Ratio(int? value, int? total) =>
         value is { } v && total is > 0 ? $"{v}/{total} ({Math.Round(100.0 * v / total.Value)} %)" : "—";
 
-    private static string Dollars(double? value) => value is { } v ? v.ToString("0.0000", French) + " $" : "—";
+    private static string Cost(double? value, string currency) => value is { } v ? $"{v.ToString("0.0000", French)} {currency}" : "—";
 
     private static string Seconds(double? value) => value is { } v ? v.ToString("0.0", French) + " s" : "—";
 }

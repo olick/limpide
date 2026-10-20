@@ -25,7 +25,7 @@ public sealed record AnswerLogEntry(
     TimeSpan? Total,
     long? InputTokens,
     long? OutputTokens,
-    decimal? CostUsd,
+    decimal? CostEur,
     IReadOnlyList<string> Guardrails,
     string? Error = null)
 {

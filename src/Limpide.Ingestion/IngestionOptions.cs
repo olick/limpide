@@ -13,7 +13,7 @@ public sealed class IngestionOptions
     /// <summary>Réponses déjà relues, avec leur verdict, pour mesurer le juge de fidélité (judge-calibrate).</summary>
     public string JudgeCalibrationPath { get; set; } = "eval/calibration/fidelite.json";
 
-    /// <summary>evaluate-answers fait relire chaque réponse par le juge de fidélité (≈ 0,13 $ de plus pour 50 questions).</summary>
+    /// <summary>evaluate-answers fait relire chaque réponse par le juge de fidélité (≈ 0,11 € de plus pour 50 questions).</summary>
     public bool JudgeAnswers { get; set; } = true;
 
     /// <summary>Racine des fichiers bruts. En base, <c>raw_path</c> est relatif à cette racine.</summary>

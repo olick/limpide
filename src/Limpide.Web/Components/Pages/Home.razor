@@ -229,8 +229,8 @@
                     <dd>
                         @if (r.Usage.EstimatedCost is { } cost)
                         {
-                            <span>@cost.ToString("0.000000", French) $</span>
-                            <span class="muted"> · @((cost * 1000).ToString("0.00", French)) $ pour 1 000 questions</span>
+                            <span>@cost.ToString("0.000000", French) €</span>
+                            <span class="muted"> · @((cost * 1000).ToString("0.00", French)) € pour 1 000 questions</span>
                         }
                         else
                         {

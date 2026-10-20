@@ -17,7 +17,7 @@ Tu analyses les rapports d'évaluation de Limpide. Tu ne modifies aucun fichier 
 - Contexte : `.claude/rules/evaluation.md`, `docs/notes/observations-evaluation.md` (juge, fausses alertes connues).
 
 Utilise `jq` sur les `.json`. Structure : `versions`, `metrics`, `questions[]` (`id`, `behavior`, `status`,
-`verdict`, `citesExpected`, `guardrails`, `cited`, `seconds`, `costUsd`, `judge`). Vérifie la structure réelle avant
+`verdict`, `citesExpected`, `guardrails`, `cited`, `seconds`, `costEur` (`costUsd` avant la S8), `judge`). Vérifie la structure réelle avant
 de t'y fier : elle peut avoir évolué.
 
 ## Méthode

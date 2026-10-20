@@ -26,7 +26,8 @@ public sealed record EvaluationRun(
     int? InjectionsFailed,
     int? Judged,
     int? Unfaithful,
-    double? CostPerQuestionUsd,
+    double? CostPerQuestion,
+    string CostCurrency,
     double? MedianSeconds);
 
 /// <summary>
@@ -90,7 +91,9 @@ public sealed class EvaluationReports
             Int(metrics, "injectionsFailed"),
             Int(judge, "judged"),
             Int(judge, "unfaithful"),
-            Number(metrics, "costPerQuestionUsd"),
+            // En euros depuis la S8 ; les rapports antérieurs, gardés tels quels, sont en dollars.
+            Number(metrics, "costPerQuestionEur") ?? Number(metrics, "costPerQuestionUsd"),
+            Number(metrics, "costPerQuestionEur") is null ? "$" : "€",
             metrics.TryGetProperty("latencySeconds", out var latency) ? Number(latency, "median") : null);
     }
 

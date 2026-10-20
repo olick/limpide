@@ -39,7 +39,7 @@ public sealed class AskCommand(AnswerService service)
         Console.WriteLine($"  Durées      : vectorisation {Ms(t.Embedding)}, recherche {Ms(t.Search)}, "
             + $"génération {Ms(t.Generation)}, total {Ms(t.Total)}");
         Console.WriteLine($"  Tokens      : {u.InputTokens?.ToString() ?? "?"} en entrée, {u.OutputTokens?.ToString() ?? "?"} en sortie");
-        Console.WriteLine($"  Coût estimé : {(u.EstimatedCost is { } cost ? $"{cost:0.000000} $" : "inconnu (tarif du modèle non configuré)")}");
+        Console.WriteLine($"  Coût estimé : {(u.EstimatedCost is { } cost ? $"{cost:0.000000} €" : "inconnu (tarif du modèle non configuré)")}");
         Console.WriteLine(result.Guardrails.Count == 0
             ? "  Garde-fous  : aucun déclenché"
             : "  Garde-fous  :\n" + string.Join("\n", result.Guardrails.Select(g => $"    - {g.Code} : {g.Description}")));

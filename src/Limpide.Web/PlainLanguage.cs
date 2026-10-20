@@ -38,7 +38,7 @@ public static class PlainLanguage
         _ => (code, ""),
     };
 
-    /// <summary>Coût en dollars → « 0,4 centime » ou « 1,2 centime » (ordre de grandeur lisible).</summary>
-    public static string Cost(decimal dollars, IFormatProvider culture) =>
-        dollars <= 0 ? "rien" : $"{(dollars * 100).ToString("0.##", culture)} centime de dollar";
+    /// <summary>Coût en euros → « 0,4 centime » ou « 1,2 centime » (ordre de grandeur lisible).</summary>
+    public static string Cost(decimal euros, IFormatProvider culture) =>
+        euros <= 0 ? "rien" : $"{(euros * 100).ToString("0.##", culture)} centime d'euro";
 }

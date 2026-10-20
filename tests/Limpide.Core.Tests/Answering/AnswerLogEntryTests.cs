@@ -23,7 +23,7 @@ public class AnswerLogEntryTests
 
         Assert.Equal(AnswerOutcome.Answered, entry.Outcome);
         Assert.Equal(("mistral-medium-2604", "answer/5", 2, 1, 0.78), (entry.Model, entry.PromptVersion, entry.Passages, entry.Cited, entry.BestScore));
-        Assert.Equal((2400L, 300L, 0.0012m), (entry.InputTokens!.Value, entry.OutputTokens!.Value, entry.CostUsd!.Value));
+        Assert.Equal((2400L, 300L, 0.0012m), (entry.InputTokens!.Value, entry.OutputTokens!.Value, entry.CostEur!.Value));
         Assert.Equal(["reponse-tronquee"], entry.Guardrails);
         Assert.Equal("Dois-je prévenir les utilisateurs ?".Length, entry.QuestionLength);
         Assert.DoesNotContain(typeof(AnswerLogEntry).GetProperties(), p => p.Name is "Question" or "Answer");
