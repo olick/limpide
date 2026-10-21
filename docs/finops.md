@@ -124,8 +124,10 @@ la taille de Medium 3.5 ni la localisation de ses serveurs ne sont publiées.
   EcoLogits ; négligeable devant la rédaction ;
 - évaluation : 78 requêtes, soit ≈ 11 Wh au plus par évaluation (les jugements écrivent moins que 250 tokens) ;
 - **serveur** : allumé en permanence, quel que soit le trafic. Sa part d'une machine partagée n'est pas publiée ;
-  avec 5 à 10 W, il consommerait 3,6 à 7,2 kWh par mois, l'équivalent de 26 000 à 52 000 réponses rédigées. À
-  relever dans le calculateur d'empreinte carbone de l'espace client OVHcloud.
+  avec 5 à 10 W, il consommerait 3,6 à 7,2 kWh par mois, l'équivalent de 26 000 à 52 000 réponses rédigées.
+  Hypothèse non vérifiable : le calculateur d'empreinte carbone de l'espace client OVHcloud ne couvre pas les VPS
+  (serveurs dédiés, Hosted Private Cloud, Public Cloud, hébergement web ; vérifié le 2026-10-21, aucun bilan pour le
+  VPS de Limpide).
 
 Conséquence : au trafic d'une démo, réduire l'empreinte passe par le serveur (dimensionnement, mutualisation) bien
 plus que par les appels au modèle ; le seuil et le choix du modèle comptent quand le trafic grandit.

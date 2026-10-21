@@ -24,7 +24,6 @@ vecteurs et de l'index HNSW.
 | Identifiants par défaut de la base d'Airflow sur le serveur (`airflow` / `airflow`) | elle contient les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est désormais sur son réseau | session 5 |
 | 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
 | Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | session 5 (revue des accès) : une inscription d'application propre à Grafana |
-| Empreinte carbone du serveur | `docs/finops.md` suppose 5 à 10 W pour le VPS ; le bilan carbone mensuel d'OVHcloud (« Mon compte ») ne cite pas les VPS | Alexandre : regarder si le VPS y figure, sinon l'hypothèse reste |
 
 ---
 
@@ -414,5 +413,8 @@ qui y mène.
   refusée par le quota jamais conservée ; page « Questions » du back office (suppression notée dans `admin_actions`
   sans le texte) ; **page « Vos données »** (`/confidentialite`) : la démo n'avait aucune mention d'information.
   Relectures : rien de bloquant ; sources de chaque affirmation de la page notées en commentaire.
+- [x] **Empreinte carbone du serveur** : rien pour le VPS dans l'espace client OVHcloud (Alexandre, 2026-10-21), comme
+  l'annonçait la documentation (calculateur limité aux serveurs dédiés, Hosted Private Cloud, Public Cloud et
+  hébergement web). L'hypothèse de 5 à 10 W reste, dite non vérifiable dans `docs/finops.md` ; point ouvert fermé.
 - [ ] Vérifier en production : une question masquée dans `/questions`, une question avec la case cochée absente ;
   redirection `contact@limpide-ia.fr` créée chez OVHcloud (Alexandre).
