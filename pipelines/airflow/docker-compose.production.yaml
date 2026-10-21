@@ -14,6 +14,10 @@ x-production-dag-env: &production-dag-env
 
 services:
   postgres:
+    environment:
+      # Jamais le mot de passe par défaut sur le serveur (S8, session 5) : la base garde la clé OVHcloud et le webhook
+      # Discord (variables d'Airflow) et Grafana est sur son réseau. Absent de .env : Compose refuse de démarrer.
+      POSTGRES_PASSWORD: "${AIRFLOW_DB_PASSWORD:?AIRFLOW_DB_PASSWORD manquant dans .env}"
     mem_limit: 256m
 
   airflow-init:

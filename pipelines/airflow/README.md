@@ -186,7 +186,51 @@ et réglages du serveur (`docker-compose.production.yaml` : réseau `limpide-pro
 `pipelines/airflow/.env` du serveur (droits 600, jamais commité) : `AIRFLOW_UID` (id de `debian`), `DOCKER_GID`,
 `FERNET_KEY`, `AIRFLOW__API_AUTH__JWT_SECRET`, `_AIRFLOW_WWW_USER_USERNAME`, `_AIRFLOW_WWW_USER_PASSWORD` (tirés au
 hasard à l'installation), `LIMPIDE_DB_PASSWORD` et `OVH_AI_ENDPOINTS_KEY` (copiés de `.env.prod`),
-`LIMPIDE_DATA_DIR=limpide-prod_ingestion_data` (nom du volume), `DISCORD_WEBHOOK_URL`.
+`LIMPIDE_DATA_DIR=limpide-prod_ingestion_data` (nom du volume), `DISCORD_WEBHOOK_URL`, `AIRFLOW_DB_PASSWORD`
+(mot de passe de la base d'Airflow, hexadécimal ; obligatoire sur le serveur depuis la S8).
+
+**Mot de passe de la base d'Airflow** (S8, session 5) : il valait `airflow`, celui du fichier officiel. La base garde
+les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est sur son réseau (`airflow_default`). Changement
+sur une base existante, hors du créneau de l'ingestion (lundi 4 h UTC) ; Grafana n'est pas touché (compte
+`grafana_lecture` à part) :
+
+```bash
+cd ~/limpide/pipelines/airflow
+A="docker compose -f docker-compose.yaml -f docker-compose.leger.yaml -f docker-compose.production.yaml"
+# 0. Contrôles, avec les fichiers encore en place
+grep -c '^AIRFLOW_DB_PASSWORD=' .env                                       # attendu : 0 (sinon, déjà fait : s'arrêter)
+$A exec airflow-scheduler airflow dags list-runs ingestion | grep -c running   # attendu : 0
+docker ps --filter ancestor=limpide-ingestion:latest -q | wc -l                # attendu : 0 (aucune tâche en cours)
+
+# 1. Fichiers Compose à jour (pas apportés par le déploiement ; ne lance rien). En cas d'échec : s'arrêter là.
+git -C ~/limpide pull --ff-only
+
+# 2. Mot de passe écrit dans .env d'abord (jamais affiché), puis donné à la base par l'entrée standard (absent de ps)
+cp -p .env .env.avant-mot-de-passe-base
+[ -n "$(tail -c1 .env)" ] && echo >> .env                                  # saut de ligne final, sinon la ligne se colle
+printf 'AIRFLOW_DB_PASSWORD=%s\n' "$(openssl rand -hex 24)" >> .env          # hexadécimal : ni « $ », ni caractère d'URL
+grep -c '^AIRFLOW_DB_PASSWORD=[0-9a-f]\{48\}$' .env                          # attendu : 1
+printf "ALTER USER airflow PASSWORD '%s';\n" "$(sed -n 's/^AIRFLOW_DB_PASSWORD=//p' .env)" \
+  | docker exec -i airflow-postgres-1 psql -q -U airflow -d airflow
+
+# 3. Recréation avec le nouveau mot de passe, sans attendre (Airflow ne peut plus ouvrir de connexion d'ici là)
+$A up -d --wait postgres airflow-apiserver airflow-scheduler airflow-dag-processor
+
+# 4. Vérifications : le nouveau passe, l'ancien est refusé (depuis le réseau, où PostgreSQL exige le mot de passe)
+$A exec airflow-scheduler airflow db check                                 # « Connection successful »
+docker run --rm --network airflow_default postgres:16 \
+  psql "postgresql://airflow:airflow@postgres/airflow" -c 'SELECT 1' 2>&1 | grep -c 'password authentication failed'
+                                                                           # attendu : 1
+rm .env.avant-mot-de-passe-base               # une fois tout vérifié : la copie garde tous les anciens secrets
+```
+
+Un test de l'ancien mot de passe depuis le conteneur `postgres` lui-même ne prouverait rien : l'image officielle y
+accepte les connexions locales sans mot de passe. Ensuite, dans Grafana, les alertes « Aucune ingestion réussie » et
+« DAG cassé » doivent rester saines (elles lisent la base d'Airflow avec leur propre compte ; une alerte passagère
+pendant le redémarrage de `postgres` est possible). Recréer l'ordonnanceur tue une tâche en cours : d'où les contrôles
+de l'étape 0. Retour arrière (fichiers déjà tirés) : `printf "ALTER USER airflow PASSWORD 'airflow';\n" | docker exec
+-i airflow-postgres-1 psql -q -U airflow -d airflow`, `sed -i 's/^AIRFLOW_DB_PASSWORD=.*/AIRFLOW_DB_PASSWORD=airflow/'
+.env`, puis le même `up`.
 
 ```bash
 cd ~/limpide/pipelines/airflow

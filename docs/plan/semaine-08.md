@@ -416,5 +416,9 @@ qui y mène.
 - [x] **Empreinte carbone du serveur** : rien pour le VPS dans l'espace client OVHcloud (Alexandre, 2026-10-21), comme
   l'annonçait la documentation (calculateur limité aux serveurs dédiés, Hosted Private Cloud, Public Cloud et
   hébergement web). L'hypothèse de 5 à 10 W reste, dite non vérifiable dans `docs/finops.md` ; point ouvert fermé.
-- [ ] Vérifier en production : une question masquée dans `/questions`, une question avec la case cochée absente ;
-  redirection `contact@limpide-ia.fr` créée chez OVHcloud (Alexandre).
+- [x] Vérifié en production (Alexandre, 2026-10-21) : une question masquée dans `/questions`, une question avec la
+  case cochée absente ; redirection `contact@limpide-ia.fr` créée chez OVHcloud.
+- [ ] **Mot de passe de la base d'Airflow** : `AIRFLOW_DB_PASSWORD` (« airflow » par défaut sur le poste, obligatoire
+  sur le serveur : `docker-compose.production.yaml` refuse de démarrer sans) ; procédure du serveur dans
+  `pipelines/airflow/README.md` (`ALTER USER` sur la base existante, mot de passe hexadécimal jamais affiché, ancien
+  mot de passe refusé depuis le réseau `airflow_default`). À appliquer sur le serveur après la fusion.
