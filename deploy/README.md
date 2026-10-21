@@ -119,6 +119,43 @@ free -m      # lire « available » (mémoire réellement disponible), pas « us
 Linux remplit la mémoire libre avec le cache des fichiers lus (sauvegarde de 3 h 15, mises à jour) et le rend dès
 qu'un programme en a besoin. L'indicateur à surveiller (et à alerter en S8) est la mémoire **disponible**.
 
+## Journaux des conteneurs et disque (S8, session 5)
+
+Les journaux de chaque conteneur de la démo sont plafonnés à 3 × 10 Mo (`x-logging` de `docker-compose.prod.yml`,
+comme la supervision). Avant, ils grossissaient sans limite et pouvaient garder le texte de questions (écrit en cas
+d'erreur avant la PR #24). Un plafond ne s'applique qu'à un conteneur **recréé**, et la recréation efface ses anciens
+journaux : c'est aussi la purge. Le déploiement qui apporte ce plafond recrée `web`, `admin` et `postgres` (dépendance
+de `web`, configuration changée) ; seul Caddy est à recréer à la main, une fois (coupure de quelques secondes). Les
+données de la base sont dans le volume `pgdata` : une recréation ne les touche pas.
+
+```bash
+# Après le déploiement : recréer Caddy, puis vérifier le plafond de chacun
+limpide up -d --no-build --no-deps caddy
+for c in $(docker ps --filter label=com.docker.compose.project=limpide-prod -q); do
+  docker inspect -f '{{.Name}} {{.HostConfig.LogConfig.Config}}' "$c"
+done                                                        # attendu : map[max-file:3 max-size:10m]
+# Repli, seulement si postgres apparaît sans plafond : sauvegarde récente d'abord (ls -l ~/backups, ou
+# sudo systemctl start limpide-backup.service), puis limpide up -d --no-build --force-recreate postgres
+curl -s https://www.limpide-ia.fr/sante | head -c 200; echo
+
+# Disque : pas juste avant l'ingestion du lundi (4 h UTC), l'image qu'elle lance est supprimée puis remise.
+# Ce que Docker peut récupérer (2026-10-19 : ≈ 13,5 Go, images 10 Go, cache de construction 3,5 Go)
+df -h /; docker system df
+docker ps -a --filter status=exited --filter status=created  # leur image part aussi si aucun conteneur actif ne la sert
+docker builder prune -a -f       # cache de construction : plus rien n'est construit sur le serveur depuis la S7
+docker image prune -a -f         # images inutilisées, dont l'ingestion (lancée à la demande) et Ollama : re-téléchargeables
+# Remettre tout de suite l'image de l'ingestion et l'étiquette locale que lance le DAG (posée par deployer.sh) :
+# sans elle, la prochaine ingestion échoue
+version=$(sed -n 's/^IMAGE_TAG=//p' .env.version)
+limpide --profile outils pull --quiet ingestion
+docker tag "ghcr.io/olick/limpide-ingestion:$version" limpide-ingestion:latest
+docker image ls limpide-ingestion                           # attendu : latest, même identifiant que la version
+df -h /; docker system df
+```
+
+Jamais `docker volume prune` ni `docker system prune --volumes` : les volumes portent la base, le modèle bge-m3, les
+clés de chiffrement des cookies, Airflow et la supervision.
+
 ## Nom de domaine et HTTPS
 
 Démo : **https://www.limpide-ia.fr** (zone DNS chez OVH : `www` → A `57.129.175.88`, aucune entrée AAAA).

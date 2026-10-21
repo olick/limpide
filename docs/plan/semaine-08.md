@@ -391,3 +391,14 @@ qui y mène.
 - [x] Coût Azure d'octobre (Alexandre, 2026-10-20) : < 0,01 € pour un budget de 10 € (vitrine détruite hors
   démonstration).
 - **Session 3 close le 2026-10-20**, sauf l'empreinte du serveur : voir les points ouverts.
+
+**Session 5 : sécurité et données personnelles (commencée le 2026-10-21, avant la session 4)** :
+
+- Décisions d'Alexandre (2026-10-21) : le texte des questions **est conservé**, question seule, dans une table à part
+  liée à `answer_log`, 30 jours, avec une case « Ne pas conserver ma question » (opposition, intérêt légitime) ;
+  mention d'information au nom d'Alexandre, contact par une adresse dédiée du domaine (à créer).
+- [ ] **Journaux des conteneurs de la démo** plafonnés à 3 × 10 Mo (`x-logging`, `docker-compose.prod.yml`),
+  procédure de purge et de nettoyage du disque dans `deploy/README.md` (« Journaux des conteneurs et disque »).
+  Relectures : rien de bloquant ; corrigé : seul Caddy est à recréer à la main (le déploiement recrée `web`, `admin`
+  et `postgres`), étiquette `limpide-ingestion:latest` du DAG à remettre après `docker image prune -a`. À appliquer
+  sur le serveur après la fusion.
