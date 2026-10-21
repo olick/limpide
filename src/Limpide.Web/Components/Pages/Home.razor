@@ -57,12 +57,14 @@
         </button>
     </div>
     @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case. *@
-    <p class="keep">
-        Votre question est conservée @KeptQuestion.Retention.Days jours pour améliorer Limpide, sans adresse IP ;
-        adresses électroniques et numéros de téléphone masqués. N'y écrivez ni nom ni autre donnée personnelle.
+    <div class="keep">
+        <p>
+            Votre question est conservée @KeptQuestion.Retention.Days jours pour améliorer Limpide, sans adresse IP ;
+            adresses électroniques et numéros de téléphone masqués. N'y écrivez ni nom ni autre donnée personnelle.
+            <a href="/confidentialite">Vos données</a>
+        </p>
         <label><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
-        · <a href="/confidentialite">Vos données</a>
-    </p>
+    </div>
     <div class="examples">
         <span>Exemples :</span>
         @foreach (var example in Examples)
