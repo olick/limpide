@@ -100,8 +100,11 @@ h1:focus { outline: none; }
 
 .ask-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; gap: 1rem; }
 .count { color: var(--muted); font-size: 0.85rem; }
-.keep { color: var(--muted); font-size: 0.85rem; margin: 0.6rem 0 0; }
-.ask .keep label { display: inline; font-weight: normal; margin: 0; white-space: nowrap; }
+.keep { margin-top: 0.6rem; }
+.keep p { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.4rem; }
+/* Opposition (ADR-019) : sur sa ligne, en couleur de texte, pour qu'on la voie sans chercher. */
+.ask .keep label { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; font-weight: 600; color: var(--text); cursor: pointer; }
+.keep input[type="checkbox"] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
 
 button { font: inherit; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.6; }
