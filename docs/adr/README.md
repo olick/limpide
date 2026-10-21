@@ -26,3 +26,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [016](016-evaluation-dans-un-environnement-jetable.md) | Évaluation avant la production dans un environnement jetable sur le runner ; recréation d'Azure à part | 2026-10-17 |
 | [017](017-vecteurs-par-modele.md) | Une table de vecteurs par modèle (`chunk_embeddings`) : changer de modèle d'embedding sans interruption, recherche exacte | 2026-10-18 |
 | [018](018-supervision.md) | Supervision : OpenTelemetry, collecteur, Tempo, Loki, Prometheus et Grafana sur le VPS, journal des réponses en base | 2026-10-19 |
+| [019](019-questions-des-visiteurs.md) | Questions des visiteurs : texte conservé 30 jours dans une table à part, masqué, sauf opposition ; mention d'information | 2026-10-21 |

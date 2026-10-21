@@ -100,6 +100,8 @@ h1:focus { outline: none; }
 
 .ask-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; gap: 1rem; }
 .count { color: var(--muted); font-size: 0.85rem; }
+.keep { color: var(--muted); font-size: 0.85rem; margin: 0.6rem 0 0; }
+.ask .keep label { display: inline; font-weight: normal; margin: 0; white-space: nowrap; }
 
 button { font: inherit; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.6; }

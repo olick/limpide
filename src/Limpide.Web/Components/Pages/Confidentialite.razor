@@ -1,0 +1,98 @@
+@page "/confidentialite"
+@using Limpide.Core.Feedback
+
+<PageTitle>Vos données — Limpide</PageTitle>
+
+@* Mention d'information (RGPD, articles 13 et 21 ; S8, session 5, ADR-019). Chaque durée est celle du code ou de la
+   configuration : la modifier ici ET là-bas (KeptQuestion, AnswerLogEntry, VisitorFeedback, supervision/).
+   Sauvegardes : 7 jours (deploy/backup-db.sh) + copie quotidienne d'OVHcloud gardée 1 jour (deploy/README.md) = 8.
+   Serveur en France : ADR-006 ; OVHcloud AI Endpoints à Gravelines, Mistral en UE : ADR-012, ADR-004. *@
+<header class="hero">
+    <p class="back"><a href="/">← Poser une question</a></p>
+    <h1>Vos données</h1>
+    <p class="tagline">Ce que Limpide fait de ce que vous lui écrivez, combien de temps il le garde, et comment vous y opposer.</p>
+</header>
+
+<section class="eval-section">
+    <h2>Qui est responsable</h2>
+    <p>
+        Limpide est une démonstration gratuite, publiée par Alexandre Leclerc, architecte logiciel indépendant,
+        responsable du traitement. Contact, y compris pour exercer vos droits :
+        <a href="mailto:@Contact">@Contact</a>.
+    </p>
+</section>
+
+<section class="eval-section">
+    <h2>Votre question</h2>
+    <p>
+        <strong>Pour vous répondre</strong>, son texte est envoyé à deux services : OVHcloud AI Endpoints (France), qui
+        le transforme en vecteur pour chercher les passages proches, puis, si des passages assez proches existent,
+        Mistral AI (API hébergée dans l'Union européenne), qui rédige la réponse. Chacun la traite selon ses propres
+        conditions d'utilisation.
+    </p>
+    <p>
+        <strong>Pour améliorer Limpide</strong>, son texte est conservé @KeptQuestion.Retention.Days jours, sauf si vous
+        cochez « Ne pas conserver ma question » sous le champ. Il sert à comprendre ce que demandent les visiteurs et à
+        écrire de nouvelles questions de test, relues par une personne. Avant l'écriture, les adresses électroniques,
+        IBAN, numéros de sécurité sociale et de téléphone sont masqués ; les noms et adresses postales ne le sont pas :
+        n'en écrivez pas. Ni la réponse ni votre adresse IP ne sont conservées avec la question. Seul l'administrateur
+        y a accès, par un back office protégé. Fondement : l'intérêt légitime à améliorer le service (RGPD, article
+        6.1.f). Les sauvegardes quotidiennes de la base la gardent jusqu'à 8 jours de plus.
+    </p>
+    <p>
+        Une question refusée parce que la limite de questions est atteinte n'est pas conservée.
+    </p>
+</section>
+
+<section class="eval-section">
+    <h2>Ce qui est mesuré, sans le texte</h2>
+    <ul>
+        <li>
+            <strong>Journal des réponses</strong>, 12 mois : date, issue (réponse, refus, hors sujet, erreur), scores des
+            passages, durées, coût, contrôles déclenchés, longueur de la question. Il sert au suivi du coût et de la
+            qualité, et ne contient ni le texte de la question ni celui de la réponse.
+        </li>
+        <li>
+            <strong>Journaux techniques et traces</strong>, 14 jours : les mêmes mesures, étape par étape, et un
+            identifiant de visite tiré au hasard à l'ouverture de la page, qui ne vous suit pas d'une visite à l'autre
+            (ni cookie, ni adresse IP).
+        </li>
+        <li>
+            <strong>Adresse IP</strong> : gardée seulement en mémoire, pour limiter le nombre de questions par heure et
+            par visiteur, et effacée au redémarrage de l'application. Elle n'est écrite dans aucun journal de
+            l'application.
+        </li>
+    </ul>
+</section>
+
+<section class="eval-section">
+    <h2>Le formulaire de retours</h2>
+    <p>
+        Vos réponses au formulaire en bas de la page d'accueil sont conservées @((int)VisitorFeedback.Retention.TotalDays / 30)
+        mois, sans adresse IP. Votre dernière question et la réponse obtenue n'y sont jointes que si vous cochez la case
+        prévue (fondement : votre consentement).
+    </p>
+</section>
+
+<section class="eval-section">
+    <h2>Cookies et hébergement</h2>
+    <p>
+        Aucun cookie de mesure d'audience ni de publicité : seulement ceux nécessaires au fonctionnement de la page
+        (protection des formulaires). Le site est hébergé par OVHcloud, sur un serveur en France.
+    </p>
+</section>
+
+<section class="eval-section">
+    <h2>Vos droits</h2>
+    <p>
+        Vous pouvez demander l'accès à vos données, leur effacement ou leur rectification, et vous opposer à la
+        conservation de vos questions (la case suffit pour les prochaines). Limpide ne vous identifie pas : pour
+        retrouver une question, écrivez à <a href="mailto:@Contact">@Contact</a> avec son texte et le jour où vous
+        l'avez posée. Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la
+        <a href="https://www.cnil.fr/fr/adresser-une-plainte" target="_blank" rel="noopener noreferrer">CNIL</a>.
+    </p>
+</section>
+
+@code {
+    private const string Contact = "contact@limpide-ia.fr";
+}

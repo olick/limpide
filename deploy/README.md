@@ -215,6 +215,10 @@ l'accord du visiteur (case décochée par défaut), aucune adresse IP, conservat
 limpide run --rm ingestion feedback        # Markdown, les plus récents d'abord
 ```
 
+**Questions posées** (ADR-019) : texte conservé 30 jours dans `question_log`, masqué, sauf si le visiteur s'y oppose
+(case sous le champ). Lecture et suppression : back office, page « Questions ». Mention d'information :
+https://www.limpide-ia.fr/confidentialite (contact `contact@limpide-ia.fr`, redirection de courriel chez OVHcloud).
+
 ## Protections de la démo publique (S3, session 4)
 
 - **Quota de questions** (`Protection` dans `src/Limpide.Web/appsettings.json`) : 10 par heure et par adresse IP,
