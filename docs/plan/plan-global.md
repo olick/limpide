@@ -422,6 +422,7 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | Chaîne CI/CD (ADR-015, écrit le 2026-10-17) | S7 |
 | Évaluation dans un environnement jetable sur le runner, recréation d'Azure à part (ADR-016, écrit le 2026-10-17) | S7 |
 | Supervision : pile auto-hébergée sur le VPS et journal des réponses en base (ADR-018, écrit le 2026-10-19) | S8 |
+| Questions des visiteurs : texte conservé 30 jours, table à part, masqué, sauf opposition (ADR-019, écrit le 2026-10-21) | S8 |
 
 ## Risques du planning
 

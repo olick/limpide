@@ -70,6 +70,7 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<EmbeddingStore>();
         services.AddSingleton<FeedbackStore>();
         services.AddSingleton<AnswerLogStore>();
+        services.AddSingleton<QuestionLogStore>();
         services.AddSingleton<AuditStore>();
         services.AddSingleton(configuration.GetSection("Search").Get<SearchOptions>() ?? new SearchOptions());
         services.AddSingleton<IPassageSearch, PgvectorPassageSearch>();

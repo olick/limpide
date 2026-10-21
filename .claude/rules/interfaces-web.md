@@ -13,6 +13,10 @@ paths:
   encart « Vous échangez avec une IA » obligatoire (AI Act, article 50). Garde-fous traduits par `PlainLanguage.cs`.
 - Question limitée à 500 caractères, 60 s maximum par réponse ; quota (`QuestionQuota`) appliqué dans `Home.razor`
   avant l'appel au modèle, IP relevée dans `App.razor`, jamais journalisée.
+- **Page « Vos données »** (`/confidentialite`, ADR-019) : mention d'information de tout ce que la démo traite. Un
+  nouveau traitement, une durée ou un destinataire qui change (fournisseur de modèle, supervision) = cette page à
+  mettre à jour dans la même PR. Texte de la question conservé 30 jours (`question_log`), case d'opposition sous le
+  champ.
 - **Vitrine des technologies** (`Components/TechStack.razor`, icônes Simple Icons dans `wwwroot/tech/`, aucune
   requête vers un tiers) : à tenir à jour à chaque technologie adoptée (par exemple GitHub Actions, OpenTelemetry).
 - **Back office** : seul `AdminAuthentication.cs` connaît OpenID Connect ; accès par identifiant complet

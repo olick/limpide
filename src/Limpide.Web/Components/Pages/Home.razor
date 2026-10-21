@@ -56,6 +56,13 @@
             @(busy ? "Recherche en cours…" : "Poser la question")
         </button>
     </div>
+    @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case. *@
+    <p class="keep">
+        Votre question est conservée @KeptQuestion.Retention.Days jours pour améliorer Limpide, sans adresse IP ;
+        adresses électroniques et numéros de téléphone masqués. N'y écrivez ni nom ni autre donnée personnelle.
+        <label><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
+        · <a href="/confidentialite">Vos données</a>
+    </p>
     <div class="examples">
         <span>Exemples :</span>
         @foreach (var example in Examples)
@@ -318,6 +325,7 @@
     private AnswerResult? result;
     private string answerHtml = "";
     private bool engineOpen;
+    private bool doNotKeep;
 
     /// <summary>Adresse IP du visiteur (App.razor) ; sans elle, tous les visiteurs partagent un même quota.</summary>
     [CascadingParameter(Name = "ClientAddress")]
@@ -348,7 +356,7 @@
             Logger.LogInformation("Question refusée par le quota : {Verdict}", quota.Verdict);
             await SaveToLogAsync(AnswerLogEntry.Refused(
                 quota.Verdict == QuotaVerdict.ClientLimitReached ? AnswerOutcome.QuotaVisitor : AnswerOutcome.QuotaDaily,
-                question.Trim().Length, TraceId()));
+                question.Trim().Length, TraceId()), question: null); // refusée : rien à améliorer, texte non gardé
             error = quota.Verdict == QuotaVerdict.ClientLimitReached
                 ? $"Limite atteinte : {QuotaSettings.PerClientPerHour} questions par heure et par visiteur, pour maîtriser le coût "
                   + $"de cette démo publique. Nouvelle question possible dans {Duration(quota.RetryAfter)}."
@@ -368,13 +376,13 @@
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
             engineOpen = result.Guardrails.Count > 0;
             Logger.AnswerSteps(result, Generation.MinScore);
-            await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()));
+            await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()), Kept());
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // Jamais le texte de la question dans les messages : ils sont conservés et consultables (ADR-018).
             Logger.LogError(ex, "Échec de la réponse à une question de {Length} caractères", question.Trim().Length);
-            await SaveToLogAsync(AnswerLogEntry.Failed(ex, question.Trim().Length, started.Elapsed, TraceId()));
+            await SaveToLogAsync(AnswerLogEntry.Failed(ex, question.Trim().Length, started.Elapsed, TraceId()), Kept());
             result = null;
             error = ex is OperationCanceledException
                 ? "La réponse a pris trop de temps (plus de 60 secondes). Réessayez dans un instant."
@@ -386,19 +394,25 @@
         }
     }
 
-    /// <summary>Journal des réponses (ADR-018) : son échec ne doit jamais priver le visiteur de sa réponse.</summary>
-    private async Task SaveToLogAsync(AnswerLogEntry entry)
+    /// <summary>
+    /// Journal des réponses (ADR-018), avec le texte de la question s'il est conservé (ADR-019) : son échec ne doit
+    /// jamais priver le visiteur de sa réponse.
+    /// </summary>
+    private async Task SaveToLogAsync(AnswerLogEntry entry, KeptQuestion? question)
     {
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await AnswerLog.SaveAsync(entry, timeout.Token);
+            await AnswerLog.SaveAsync(entry, question, timeout.Token);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             Logger.LogWarning(ex, "Journal des réponses : ligne « {Outcome} » non enregistrée", entry.Outcome);
         }
     }
+
+    /// <summary>Texte à conserver, masqué ; null si le visiteur s'y oppose.</summary>
+    private KeptQuestion? Kept() => doNotKeep ? null : KeptQuestion.From(question);
 
     private static string? TraceId() => System.Diagnostics.Activity.Current?.TraceId.ToHexString();
 

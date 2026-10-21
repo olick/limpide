@@ -1,0 +1,80 @@
+@page "/questions"
+@attribute [Authorize(Policy = AdminAuthentication.Policy)]
+@rendermode InteractiveServer
+@using Limpide.Core.Answering
+@inject QuestionLogStore Store
+
+<PageTitle>Questions · Limpide</PageTitle>
+
+<h1>Questions des visiteurs</h1>
+<p class="hint">Conservées @KeptQuestion.Retention.Days jours (ADR-019), sauf si le visiteur s'y est opposé, sans
+    adresse IP ni réponse ; adresses électroniques, IBAN, numéros de sécurité sociale et de téléphone masqués avant
+    l'écriture. Une question qui devient un cas de test passe par Git (<code>eval/questions.json</code>), relue.
+    Supprimer : demande d'effacement d'un visiteur, ou donnée personnelle que le masquage a laissée passer.</p>
+
+@if (items is null)
+{
+    <p>Chargement…</p>
+}
+else if (items.Count == 0)
+{
+    <p>Aucune question conservée.</p>
+}
+else
+{
+    <table>
+        <thead><tr><th>Date</th><th>Question</th><th>Issue</th><th>Meilleur score</th><th>Trace</th><th></th></tr></thead>
+        <tbody>
+            @foreach (var q in items)
+            {
+                <tr>
+                    <td>@q.At.ToUniversalTime().ToString("yyyy-MM-dd HH:mm") UTC</td>
+                    <td>
+                        @q.Question
+                        @if (q.Masked.Count > 0)
+                        {
+                            <br /><span class="hint">masqué : @string.Join(", ", q.Masked)</span>
+                        }
+                    </td>
+                    <td><code>@q.Outcome</code></td>
+                    <td>@(q.BestScore?.ToString("0.000") ?? "—")</td>
+                    <td><code title="@q.TraceId">@(q.TraceId is { } t ? t[..8] : "—")</code></td>
+                    <td>
+                        @if (confirming == q.Id)
+                        {
+                            <button disabled="@busy" @onclick="() => DeleteAsync(q)">Confirmer</button>
+                            <button class="secondary" disabled="@busy" @onclick="() => confirming = null">Annuler</button>
+                        }
+                        else
+                        {
+                            <button class="secondary" disabled="@busy" @onclick="() => confirming = q.Id">Supprimer</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState>? AuthenticationState { get; set; }
+
+    private IReadOnlyList<StoredQuestion>? items;
+    private long? confirming;
+    private bool busy;
+
+    protected override async Task OnInitializedAsync() => items = await Store.ListAsync(500, CancellationToken.None);
+
+    private async Task DeleteAsync(StoredQuestion question)
+    {
+        var actor = AuthenticationState is null ? null : Actor.From((await AuthenticationState).User);
+        if (actor is null)
+            return;
+        busy = true;
+        await Store.DeleteAsync(question.Id, actor, CancellationToken.None);
+        items = await Store.ListAsync(500, CancellationToken.None);
+        confirming = null;
+        busy = false;
+    }
+}

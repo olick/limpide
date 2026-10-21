@@ -22,7 +22,8 @@ Contraintes :
 - **Mémoire** : VPS-1 (2 vCores, 4 Go) partagé entre la démo (Caddy, web, admin, PostgreSQL : 1,4 Go de plafonds) et
   Airflow allégé (2 Go de plafonds, ADR-013) ; ≈ 1,9 Go disponibles au dernier relevé (S7).
 - **Données personnelles** : les questions peuvent en contenir ; ni leur texte ni l'adresse IP ne doivent atteindre
-  les traces, les journaux ou la base (décision complète en session 5).
+  les traces, les journaux ou `answer_log`. Décision complète en session 5 (ADR-019, 2026-10-21) : le texte est
+  conservé 30 jours, masqué, dans une table à part (`question_log`), jamais dans la supervision.
 - **Blazor Server** : une question ne passe pas par une requête HTTP, mais par le circuit SignalR ouvert au chargement
   de la page. L'instrumentation des requêtes HTTP ne donne donc pas une trace par question. .NET 10 ouvre une activité
   par événement Blazor (source `Microsoft.AspNetCore.Components`, « Event onsubmit -> Home.AskAsync ») : elle sert de

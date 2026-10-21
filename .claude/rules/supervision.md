@@ -13,8 +13,9 @@ Détail et mesures : `supervision/README.md`.
 - L'application envoie tout en OTLP au **collecteur**, seule adresse connue d'elle (`OTEL_EXPORTER_OTLP_ENDPOINT`,
   rien n'est exporté sans) ; le collecteur répartit vers Tempo, Loki, Prometheus.
 - **Jamais le texte des questions ni des réponses** dans les traces, les messages ou `answer_log` : seulement des
-  mesures et des codes. `EnableSensitiveData = false` reste fixé dans le code ; une description de garde-fou (qui
-  peut citer la réponse) ne va pas dans les traces. Le collecteur retire en plus `client.address`,
+  mesures et des codes. Le texte de la question n'existe qu'en base, dans `question_log` (ADR-019, 30 jours,
+  masqué, back office seulement, aucun droit pour Grafana). `EnableSensitiveData = false` reste fixé dans le code ;
+  une description de garde-fou (qui peut citer la réponse) ne va pas dans les traces. Le collecteur retire en plus `client.address`,
   `user_agent.original`.
 - `answer_log` : une ligne par question (issue, `trace_id`, coût, garde-fous), 12 mois ; c'est l'enregistrement
   métier, la pile n'est que l'exploitation (14 à 30 jours).
