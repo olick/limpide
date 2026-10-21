@@ -23,7 +23,6 @@ vecteurs et de l'index HNSW.
 | Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte que la personne autorisée au back office (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
 | Identifiants par défaut de la base d'Airflow sur le serveur (`airflow` / `airflow`) | elle contient les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est désormais sur son réseau | session 5 |
 | 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
-| Journaux bruts des conteneurs de la démo sans rotation ni plafond (`docker-compose.prod.yml` n'a pas de bloc `logging`) | ils peuvent contenir le texte de questions : avant la PR #24, l'application l'y écrivait en cas d'erreur | session 5 : purge, puis plafond de taille et de durée (`logging:`) ; nettoyer au passage ≈ 13,5 Go récupérables par Docker |
 | Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | session 5 (revue des accès) : une inscription d'application propre à Grafana |
 | Empreinte carbone du serveur | `docs/finops.md` suppose 5 à 10 W pour le VPS ; le bilan carbone mensuel d'OVHcloud (« Mon compte ») ne cite pas les VPS | Alexandre : regarder si le VPS y figure, sinon l'hypothèse reste |
 
@@ -397,8 +396,23 @@ qui y mène.
 - Décisions d'Alexandre (2026-10-21) : le texte des questions **est conservé**, question seule, dans une table à part
   liée à `answer_log`, 30 jours, avec une case « Ne pas conserver ma question » (opposition, intérêt légitime) ;
   mention d'information au nom d'Alexandre, contact par une adresse dédiée du domaine (à créer).
-- [ ] **Journaux des conteneurs de la démo** plafonnés à 3 × 10 Mo (`x-logging`, `docker-compose.prod.yml`),
+- [x] **Journaux des conteneurs de la démo** plafonnés à 3 × 10 Mo (`x-logging`, `docker-compose.prod.yml`),
   procédure de purge et de nettoyage du disque dans `deploy/README.md` (« Journaux des conteneurs et disque »).
   Relectures : rien de bloquant ; corrigé : seul Caddy est à recréer à la main (le déploiement recrée `web`, `admin`
-  et `postgres`), étiquette `limpide-ingestion:latest` du DAG à remettre après `docker image prune -a`. À appliquer
-  sur le serveur après la fusion.
+  et `postgres`), étiquette `limpide-ingestion:latest` du DAG à remettre après `docker image prune -a`. PR #42.
+- [x] **Appliqué sur le serveur (2026-10-21)** : Caddy recréé ; les 4 conteneurs à `max-file:3 max-size:10m`, anciens
+  journaux effacés par la recréation (purge du texte de questions éventuellement écrit avant la PR #24). Le plafond
+  n'existait pas tant que la PR n'était pas déployée (`map[]` au premier essai). Nettoyage : 12,9 Go d'images
+  (anciennes versions, Ollama, Grafana 13.2.3, restes des constructions sur le serveur) et 3,9 Go de cache de
+  construction ; **disque 79 % → 38 %** (30 → 14 Go), à 6 points de l'alerte de 85 % avant. Étiquette du DAG
+  remise (`4dc1bd90e200`, version `4cb8856dd3b5`), `/sante` inchangé (1 130 passages, 0 vecteur manquant).
+- [x] **Questions conservées** (PR #43, ADR-019) : migration 0009 `question_log` (30 jours, purge à chaque question,
+  cascade depuis `answer_log`, aucun droit pour Grafana, vérifié) ; `PersonalDataMask` (adresses électroniques, IBAN,
+  numéros de sécurité sociale, téléphones ; 23 tests, dont des questions ordinaires laissées intactes) ; case « Ne pas
+  conserver ma question » sur sa propre ligne sous le champ (retour d'Alexandre : trop discrète au début ; PR #44,
+  le commit poussé après la fusion de la #43 n'y était pas) ; question
+  refusée par le quota jamais conservée ; page « Questions » du back office (suppression notée dans `admin_actions`
+  sans le texte) ; **page « Vos données »** (`/confidentialite`) : la démo n'avait aucune mention d'information.
+  Relectures : rien de bloquant ; sources de chaque affirmation de la page notées en commentaire.
+- [ ] Vérifier en production : une question masquée dans `/questions`, une question avec la case cochée absente ;
+  redirection `contact@limpide-ia.fr` créée chez OVHcloud (Alexandre).
