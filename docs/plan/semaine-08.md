@@ -5,6 +5,10 @@ son coût et les garde-fous déclenchés, et on suit la santé du système dans 
 
 **Budget temps** : environ 10 heures, en 5 sessions.
 
+**Ordre** (décidé avec Alexandre le 2026-10-21) : session 5 avant la session 4. La session 5 traite des risques sur
+un service exposé (Grafana sur Internet et ses failles, identifiants par défaut de la base d'Airflow, journaux des
+conteneurs qui peuvent contenir des questions) ; la session 4 améliore la démo et reste la première sacrifiable.
+
 **Prérequis** : chaîne CI/CD avec évaluation (semaine 7).
 
 **Reportés de la S7** : garde-fou « Oui » en tête sur la situation de l'utilisateur non détecté (session 4) ; alerte
