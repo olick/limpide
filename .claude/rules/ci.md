@@ -21,6 +21,10 @@ paths:
 - Outils tiers, surtout de sécurité (Grype) : lancés par un script depuis leur image Docker **épinglée par empreinte**,
   dans une version publiée depuis au moins deux semaines, dans un job sans secret quand c'est possible ; pas d'action
   du catalogue (compromission de `trivy-action`, mars 2026).
+- **Images tierces du serveur** (S8) : `deploy/analyser-images.sh --tierces` le lundi, rapport sans échec (correctifs
+  chez l'éditeur) ; le signal d'action, ce sont les PR de Dependabot (`.github/dependabot.yml`, docker-compose,
+  délai de 14 jours, majeures ignorées). Étiquettes exactes dans les fichiers Compose, suffixe de distribution
+  explicite pour les bases (`-bookworm`) : jamais de changement de glibc par surprise.
 - **Évaluation (ADR-016)** : `evaluation.yml` → `deploy/evaluer.sh` sur le runner (PostgreSQL jetable, corpus du
   socle, jeu complet, `gate`) ; le job « Évaluation » est un contrôle requis de `main`. Ce qui déclenche :
   `deploy/evaluation-requise.sh`, liste large ; un nouveau fichier qui influe sur les réponses ou leur mesure doit y
