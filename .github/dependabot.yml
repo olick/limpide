@@ -1,0 +1,32 @@
+# Dependabot (S8, session 5) : une PR quand l'éditeur d'une image tierce du serveur publie une nouvelle version.
+# L'analyse du lundi (deploy/analyser-images.sh --tierces) montre les failles de ces images sans échouer : presque
+# toutes se corrigent chez l'éditeur (Go, Debian), et ces PR sont le moment d'agir. Chaque PR passe la CI ; Alexandre
+# la fusionne après avoir lu l'analyse de la nouvelle version.
+#
+# Suit les étiquettes exactes (caddy:2.11.7, pas caddy:2) ; un suffixe (-pg17-bookworm, -trixie) est gardé tel quel.
+# Majeures ignorées : PostgreSQL 16 → 17 change le format des données, Grafana 13 → 14 peut casser les tableaux de bord
+# et les alertes ; elles se décident à la main, avec une procédure.
+# Après fusion : la démo (docker-compose.prod.yml) part avec le déploiement, sauf Caddy (deploy/README.md, « Journaux
+# des conteneurs et disque ») ; la supervision et Airflow se mettent à jour à la main (leur README).
+version: 2
+updates:
+  - package-ecosystem: docker-compose
+    directories:
+      - "/"
+      - "/supervision"
+      - "/pipelines/airflow"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: Europe/Paris
+    # Version publiée depuis au moins deux semaines, comme les outils de la CI (.claude/rules/ci.md) : une publication
+    # compromise est en général repérée avant. Un correctif urgent se monte à la main, sans attendre.
+    cooldown:
+      default-days: 14
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "Images tierces :"

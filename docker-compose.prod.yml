@@ -31,7 +31,8 @@ x-app-env: &app-env
 
 services:
   caddy:
-    image: caddy:2
+    # Étiquettes exactes, suivies par Dependabot (S8, session 5) : version en place sur le serveur le 2026-10-22.
+    image: caddy:2.11.7
     logging: *logging
     restart: unless-stopped
     ports:
@@ -101,7 +102,8 @@ services:
     mem_limit: 256m
 
   postgres:
-    image: pgvector/pgvector:pg17
+    # Distribution explicite : passer de bookworm à trixie change la glibc, donc le tri du texte (index à reconstruire).
+    image: pgvector/pgvector:0.8.7-pg17-bookworm
     logging: *logging
     restart: unless-stopped
     environment:

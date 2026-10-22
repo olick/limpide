@@ -15,8 +15,8 @@ données restaurées, `evaluate-answers`, `gate`, `destroy`. En écrivant la ses
 1. **`evaluate-answers` n'utilise pas l'application déployée.** Il appelle `AnswerService` dans son propre
    processus. Sur Azure, l'évaluation tournerait donc sur le runner, branchée sur la base Azure. La Container App
    créée à chaque PR ne servirait qu'à un test de fumée.
-2. **La production, c'est le VPS** (ADR-006) : PostgreSQL et pgvector dans Docker (`pgvector/pgvector:pg17`),
-   connexion par mot de passe. Un conteneur de la même image sur le runner lui ressemble davantage qu'un PostgreSQL
+2. **La production, c'est le VPS** (ADR-006) : PostgreSQL et pgvector dans Docker (`pgvector/pgvector:pg17`,
+   épinglé en `0.8.7-pg17-bookworm` depuis le 2026-10-22), connexion par mot de passe. Un conteneur de la même image sur le runner lui ressemble davantage qu'un PostgreSQL
    managé d'Azure (Entra ID, extensions autorisées une à une).
 3. **Le coût par PR** :
    - durée : environ 25 à 30 min (`apply` ≈ 11 min, `destroy` ≈ 13 min, mesures de la S6) ;
@@ -45,7 +45,7 @@ réponses.** Le même script se lance depuis le poste.
 | Déclenchement | `evaluation.yml` à chaque PR. `deploy/evaluation-requise.sh` compare la PR à sa base : consignes, `appsettings.shared.json`, `Limpide.Core`, `Limpide.Infrastructure`, `Limpide.Ingestion` (dont les seuils de `gate`), jeu de questions, versions des paquets, l'évaluation elle-même |
 | Clés d'API | lues dans le coffre du socle par l'identité `id-limpide-ci-evaluation`, masquées dans les journaux |
 | Données | `corpus.dump`, conteneur `corpus` du socle : `pg_dump` du corpus sans donnée de visiteur, journal des migrations compris |
-| Base | conteneur `pgvector/pgvector:pg17` jetable ; sauvegarde restaurée, puis `migrate` du code de la PR, comme un déploiement |
+| Base | conteneur pgvector jetable, même étiquette que la production (`0.8.7-pg17-bookworm` le 2026-10-22) ; sauvegarde restaurée, puis `migrate` du code de la PR, comme un déploiement |
 | Évaluation | `evaluate-answers` (jeu complet, juge de fidélité), configuration du dépôt seulement (ni user-secrets ni réglages du poste), questions vectorisées par OVHcloud AI Endpoints comme en production |
 | Décision | `gate` : code 1 si un seuil bloquant est franchi ; tableau dans le résumé de l'exécution, rapports en artefact (90 jours) |
 

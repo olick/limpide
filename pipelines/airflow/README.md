@@ -218,7 +218,7 @@ $A up -d --wait postgres airflow-apiserver airflow-scheduler airflow-dag-process
 
 # 4. Vérifications : le nouveau passe, l'ancien est refusé (depuis le réseau, où PostgreSQL exige le mot de passe)
 $A exec airflow-scheduler airflow db check                                 # « Connection successful »
-docker run --rm --network airflow_default postgres:16 \
+docker run --rm --network airflow_default postgres:16.15-trixie \
   psql "postgresql://airflow:airflow@postgres/airflow" -c 'SELECT 1' 2>&1 | grep -c 'password authentication failed'
                                                                            # attendu : 1
 rm .env.avant-mot-de-passe-base               # une fois tout vérifié : la copie garde tous les anciens secrets

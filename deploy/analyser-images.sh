@@ -5,6 +5,16 @@
 # CVE-2026-33634 : étiquettes de trivy-action réécrites, binaire piégé, secrets de CI volés).
 #
 #   deploy/analyser-images.sh [<version>]     version par défaut : deploy/version-images.sh
+#   deploy/analyser-images.sh --tierces       images des autres éditeurs lancées sur le serveur (S8, session 5)
+#
+# --tierces : Caddy et Grafana sont exposés sur Internet, la supervision et Airflow tournent à côté de la démo. Liste
+# lue dans les fichiers Compose du serveur (démo, supervision, Airflow), donc à jour sans rien maintenir ; exceptions
+# dans deploy/grype-tierces.yaml. Une étiquette flottante (caddy:2, postgres:16) est analysée telle que publiée
+# aujourd'hui : le serveur peut tourner sur une copie plus ancienne (corriger : docker compose pull, puis up -d).
+# Rapport seulement, jamais d'échec (sauf image introuvable) : presque toutes ces failles viennent de l'éditeur (Go,
+# Debian) et la seule action possible est de monter de version quand il en publie une ; ce signal-là vient de
+# Dependabot (.github/dependabot.yml), qui ouvre une PR à chaque nouvelle version (décision du 2026-10-22). Lancée
+# chaque lundi (analyse-images.yml), jamais avant un déploiement de la démo.
 #
 # Politique (appliquée ici, pas par Grype, pour que le rapport montre tout) :
 #   - BLOQUANT : vulnérabilité de sévérité élevée ou critique (High, Critical) dont un correctif existe : on peut agir ;
@@ -26,10 +36,33 @@ GRYPE="anchore/grype:v0.120.0@sha256:5c88961f4130e830542d441c7ed6c78baa28e799163
 REGISTRE="ghcr.io/olick"
 IMAGES=(limpide-web limpide-admin limpide-ingestion)
 
-VERSION="${1:-$(deploy/version-images.sh)}"
-if [[ ! "$VERSION" =~ ^[0-9a-f]{12,40}$ ]]; then
-  echo "Usage : deploy/analyser-images.sh [<version>] (12 à 40 caractères hexadécimaux)" >&2
-  exit 2
+# Images tierces des fichiers Compose du serveur, valeur par défaut des variables résolue (${X:-image}). Exclues :
+# les nôtres (analysées sans --tierces), Ollama (profil jamais démarré sur le serveur, ADR-012), Redis (Airflow allégé,
+# LocalExecutor, n'en lance pas).
+images_tierces() {
+  sed -nE 's/^\s*image:\s*([^ #]+).*/\1/p' docker-compose.prod.yml supervision/docker-compose.yml \
+      pipelines/airflow/docker-compose.yaml \
+    | sed -E 's/^\$\{[A-Z_]+:-([^}]+)\}$/\1/' | grep -vE '^(ghcr\.io/olick/|ollama/|redis:)' | sort -u
+}
+
+if [[ "${1:-}" == "--tierces" ]]; then
+  mapfile -t REFS < <(images_tierces)
+  NOMS=("${REFS[@]}")
+  CONFIG=deploy/grype-tierces.yaml
+  TITRE="Analyse des images tierces du serveur"
+  BLOQUER=0
+else
+  VERSION="${1:-$(deploy/version-images.sh)}"
+  if [[ ! "$VERSION" =~ ^[0-9a-f]{12,40}$ ]]; then
+    echo "Usage : deploy/analyser-images.sh [<version>|--tierces] (12 à 40 caractères hexadécimaux)" >&2
+    exit 2
+  fi
+  REFS=()
+  for image in "${IMAGES[@]}"; do REFS+=("$REGISTRE/$image:$VERSION"); done
+  NOMS=("${IMAGES[@]}")
+  CONFIG=deploy/grype.yaml
+  TITRE="Analyse des images ($VERSION)"
+  BLOQUER=1
 fi
 RAPPORTS="${RAPPORTS:-$(mktemp -d)}"
 mkdir -p "$RAPPORTS"
@@ -45,24 +78,38 @@ BLOQUANTES='[.matches[] | select((.vulnerability.severity == "High" or .vulnerab
 resume="| Image | Critique | Élevée | Moyenne | Faible | Avec correctif | Exceptions | Résultat |
 |---|---|---|---|---|---|---|---|"
 bloquee=0
-for image in "${IMAGES[@]}"; do
-  rapport="$RAPPORTS/$image.json"
-  echo "== $REGISTRE/$image:$VERSION"
+absentes=0
+for i in "${!REFS[@]}"; do
+  ref="${REFS[$i]}"
+  image="${NOMS[$i]}"
+  rapport="$RAPPORTS/$(tr '/:' '__' <<< "$image").json"
+  echo "== $ref"
   # Version jamais publiée (publication en échec) : le dire, plutôt qu'une erreur de Grype noyée dans le journal.
-  if ! docker manifest inspect "$REGISTRE/$image:$VERSION" > /dev/null 2>&1; then
-    echo "ARRÊT : $REGISTRE/$image:$VERSION introuvable sur ghcr.io (version non publiée ?), rien à analyser." >&2
+  if ! docker manifest inspect "$ref" > /dev/null 2>&1; then
+    # Images tierces : continuer avec les autres (refus passager de Docker Hub, limite de débit), échouer à la fin.
+    if (( BLOQUER == 0 )); then
+      echo "$ref introuvable ou refusée par son registre : non analysée." >&2
+      resume+=$'\n'"| $image | | | | | | | ❓ non analysée |"
+      absentes=1
+      continue
+    fi
+    echo "ARRÊT : $ref introuvable sur son registre (version non publiée ?), rien à analyser." >&2
     exit 3
   fi
   docker run --rm --user "$(id -u):$(id -g)" \
     -v "$CACHE:/cache" -e GRYPE_DB_CACHE_DIR=/cache -e TMPDIR=/cache/tmp -e GRYPE_CHECK_FOR_APP_UPDATE=false \
-    -v "$PWD/deploy/grype.yaml:/grype.yaml:ro" \
-    "$GRYPE" -c /grype.yaml -o json "registry:$REGISTRE/$image:$VERSION" > "$rapport"
+    -v "$PWD/$CONFIG:/grype.yaml:ro" \
+    "$GRYPE" -c /grype.yaml -o json "registry:$ref" > "$rapport"
+  dernier="$rapport"
 
   compte() { jq --arg s "$1" '[.matches[] | select(.vulnerability.severity | IN($s | split(",")[]))] | length' "$rapport"; }
   corrigeables=$(jq '[.matches[] | select(.vulnerability.fix.state == "fixed")] | length' "$rapport")
   exceptions=$(jq '.ignoredMatches | length' "$rapport")
   nb_bloquantes=$(jq "$BLOQUANTES | length" "$rapport")
-  if (( nb_bloquantes > 0 )); then
+  if (( nb_bloquantes > 0 && BLOQUER == 0 )); then
+    resultat="⚠️ $nb_bloquantes à suivre"
+    jq -r "$BLOQUANTES | .[] | \"  \(.vulnerability.severity)  \(.vulnerability.id)  \(.artifact.name) \(.artifact.version) → \(.vulnerability.fix.versions // [] | join(\", \"))\"" "$rapport" | sort -u
+  elif (( nb_bloquantes > 0 )); then
     resultat="❌ $nb_bloquantes bloquante(s)"
     bloquee=1
     jq -r "$BLOQUANTES | .[] | \"  \(.vulnerability.severity)  \(.vulnerability.id)  \(.artifact.name) \(.artifact.version) → \(.vulnerability.fix.versions // [] | join(\", \"))\"" "$rapport"
@@ -74,16 +121,20 @@ for image in "${IMAGES[@]}"; do
   resume+=$'\n'"$ligne"
 done
 
-base=$(jq -r '"\(.descriptor.name) \(.descriptor.version), base du \(.descriptor.db.status.built)"' "$RAPPORTS/${IMAGES[0]}.json")
-texte="### Analyse des images ($VERSION)
+base="aucune image analysée"
+if [[ -n "${dernier:-}" ]]; then
+  base=$(jq -r '"\(.descriptor.name) \(.descriptor.version), base du \(.descriptor.db.status.built)"' "$dernier")
+fi
+texte="### $TITRE
 
 $resume
 
-Bloquant : sévérité élevée ou critique **avec correctif disponible** ; détail des bloquantes dans le journal. $base."
+$( (( BLOQUER )) && echo "Bloquant" || echo "À suivre (sans bloquer : correctif chez l'éditeur)") : sévérité élevée ou critique **avec correctif disponible** ; détail dans le journal. $base."
 echo
 echo "$texte"
 echo "Rapports JSON : $RAPPORTS"
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
   echo "$texte" >> "$GITHUB_STEP_SUMMARY"
 fi
+(( absentes )) && exit 3
 exit "$bloquee"
