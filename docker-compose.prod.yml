@@ -63,6 +63,9 @@ services:
     restart: unless-stopped
     environment:
       <<: *app-env
+      # Compte limité (migration 0010, deploy/compte-web.sh) : lecture du corpus, écriture des journaux. Remplace celui
+      # de x-app-env, superutilisateur, que gardent les migrations et l'ingestion.
+      ConnectionStrings__Rag: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-rag};Username=limpide_web;Password=${WEB_DB_PASSWORD:?WEB_DB_PASSWORD manquant dans .env.prod (deploy/compte-web.sh)}"
       DataProtection__KeysPath: /keys
       # Lien « Back office » en bas de la page (vide : pas de lien).
       Site__AdminUrl: "${ADMIN_ADDRESS:-}"

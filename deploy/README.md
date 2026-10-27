@@ -90,11 +90,15 @@ sudo systemctl start limpide-backup.service      # sauvegarde immédiate
 journalctl -u limpide-backup.service -n 5        # résultat des dernières sauvegardes
 ls -lh ~/backups
 
-# Restaurer une sauvegarde, puis redémarrer l'application (voir « Données » ci-dessus)
+# Restaurer une sauvegarde, puis redémarrer l'application (voir « Données » ci-dessus). Sur une machine neuve, créer
+# d'abord les comptes (deploy/compte-web.sh) : les droits d'une sauvegarde postérieure à la migration 0010 visent
+# application_web, et pg_restore les ignore (avec une erreur) si le rôle n'existe pas encore.
 limpide exec -T postgres pg_restore -U rag -d rag --clean --if-exists --no-owner < ~/backups/limpide-AAAAMMJJ-HHMM.dump
+# Migrations avant web : une sauvegarde antérieure à 0007 ou 0010 n'a pas les droits de Grafana ou de web (sinon,
+# « permission denied » jusqu'au prochain déploiement)
+limpide --profile outils run --rm ingestion migrate
 limpide restart web
-# Supervision : droits de lecture d'answer_log (une sauvegarde antérieure à la migration 0007 ne les a pas)
-limpide --profile outils run --rm ingestion migrate && supervision/compte-lecture.sh limpide-prod-postgres-1
+supervision/compte-lecture.sh limpide-prod-postgres-1
 docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
 ```
 
@@ -187,6 +191,38 @@ limpide exec -T postgres psql -U rag -d rag -c "SELECT scriptname, applied FROM 
 Les bases créées avant la S5 (scripts `db/init`, supprimés depuis) reçoivent 0001 et 0002 sans effet (`IF NOT
 EXISTS`) : DbUp les inscrit simplement dans son journal. Vérifié le 2026-10-10 sur une copie de la base locale et
 sur une base vide : même schéma à l'arrivée, aucune donnée perdue.
+
+## Comptes de la base (S8, session 5)
+
+| Compte | Qui s'en sert | Droits |
+|---|---|---|
+| `rag` (`POSTGRES_USER`, créé par l'image) | migrations, ingestion (à la main et par Airflow), back office, sauvegarde | superutilisateur |
+| `limpide_web`, membre de `application_web` (migration 0010) | application web publique | lecture du corpus ; écriture et purge des journaux (`answer_log`, `question_log`, `feedback`), sans les relire |
+| `grafana_lecture`, membre de `lecture_supervision` (migration 0007) | Grafana | lecture d'`answer_log` |
+
+Avant la migration 0010 (S8, session 5), `web` se connectait en `rag` : une faille de la partie exposée sur Internet aurait donné toute
+la base, et des commandes dans le conteneur `postgres` (`COPY … PROGRAM`). Une nouvelle table que la démo lit ou
+écrit reçoit ses droits (`GRANT … TO application_web`) dans sa propre migration ; sinon, `web` échoue sur « permission
+denied » (les journaux de `web` le montrent).
+
+**Mise en place**, une fois par machine, **avant** de valider le déploiement qui l'apporte : `docker-compose.prod.yml`
+exige `WEB_DB_PASSWORD`, la chaîne échouerait sans rien arrêter. Le script crée le compte (et le rôle, encore sans
+droits ; la migration 0010 les donne pendant le déploiement) et écrit son mot de passe dans `.env.prod` :
+
+```bash
+cd ~/limpide && git pull --ff-only            # apporte le script ; le déploiement ne fera ensuite rien de plus ici
+deploy/compte-web.sh
+grep -c '^WEB_DB_PASSWORD=[0-9a-f]\{48\}$' .env.prod                         # attendu : 1
+# Valider le déploiement (migration 0010, puis web recréé avec le compte limité), puis poser une question dans la démo :
+limpide exec -T postgres psql -U rag -d rag -Atc \
+  "SELECT usename, count(*) FROM pg_stat_activity WHERE datname = 'rag' GROUP BY 1"   # limpide_web présent
+limpide exec -T postgres psql -U rag -d rag -Atc "SELECT outcome, at FROM answer_log ORDER BY at DESC LIMIT 1"   # la question
+limpide logs web --since 10m | grep -ci 'permission denied'                  # attendu : 0
+```
+
+Changer le mot de passe : relancer `deploy/compte-web.sh`, puis `limpide up -d --no-build --wait web`. Retour arrière
+(sans toucher aux droits) : `web` reprend `rag` si l'on retire sa ligne `ConnectionStrings__Rag` de
+`docker-compose.prod.yml` (commit, comme toute modification).
 
 ## Back office (admin.limpide-ia.fr)
 
