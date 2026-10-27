@@ -20,7 +20,7 @@ COMPTE="stlimpidetf024b1e9f"
 CONTENEUR="corpus"
 BLOB="corpus.dump"
 VPS="debian@57.129.175.88"
-IMAGE_PG="pgvector/pgvector:pg17" # celle des deux bases : fournit pg_restore pour la vérification
+IMAGE_PG="pgvector/pgvector:0.8.7-pg17-bookworm" # celle des deux bases : fournit pg_restore pour la vérification
 
 SOURCE="locale"
 case "${1:-}" in

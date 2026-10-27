@@ -99,7 +99,8 @@ x-airflow-common:
 
 services:
   postgres:
-    image: postgres:16
+    # Limpide (S8, session 5) : étiquette exacte suivie par Dependabot, distribution explicite (glibc, tri du texte).
+    image: postgres:16.15-trixie
     environment:
       POSTGRES_USER: airflow
       # Lu à la création de la base seulement : pour une base existante, ALTER USER (README, « Production »).

@@ -21,8 +21,6 @@ vecteurs et de l'index HNSW.
 | Point | Pourquoi | Quand |
 |---|---|---|
 | Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte que la personne autorisée au back office (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
-| Identifiants par défaut de la base d'Airflow sur le serveur (`airflow` / `airflow`) | elle contient les variables d'Airflow (clé OVHcloud, webhook Discord) et Grafana est désormais sur son réseau | session 5 |
-| 19 failles élevées ou critiques corrigeables dans Grafana 13.2.4 (Grype) | Grafana est exposé sur Internet ; failles surtout dans des greffons inutilisés, quelques-unes dans Grafana même (`kin-openapi`, plantages) | session 5 : analyse hebdomadaire des images de la supervision (signaler sans bloquer la démo), montée de version à chaque correctif |
 | Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | session 5 (revue des accès) : une inscription d'application propre à Grafana |
 
 ---
@@ -418,7 +416,32 @@ qui y mène.
   hébergement web). L'hypothèse de 5 à 10 W reste, dite non vérifiable dans `docs/finops.md` ; point ouvert fermé.
 - [x] Vérifié en production (Alexandre, 2026-10-21) : une question masquée dans `/questions`, une question avec la
   case cochée absente ; redirection `contact@limpide-ia.fr` créée chez OVHcloud.
-- [ ] **Mot de passe de la base d'Airflow** : `AIRFLOW_DB_PASSWORD` (« airflow » par défaut sur le poste, obligatoire
+- [x] **Mot de passe de la base d'Airflow** : `AIRFLOW_DB_PASSWORD` (« airflow » par défaut sur le poste, obligatoire
   sur le serveur : `docker-compose.production.yaml` refuse de démarrer sans) ; procédure du serveur dans
-  `pipelines/airflow/README.md` (`ALTER USER` sur la base existante, mot de passe hexadécimal jamais affiché, ancien
-  mot de passe refusé depuis le réseau `airflow_default`). À appliquer sur le serveur après la fusion.
+  `pipelines/airflow/README.md`. PR #47 ; relecture `relecteur-infra` : ordre corrigé (`git pull` d'abord), saut de
+  ligne final de `.env`, preuve du refus par le message exact, mot de passe hors de `ps`.
+- [x] **Appliqué sur le serveur (2026-10-21)** : aucune exécution en cours, mot de passe de 48 caractères
+  hexadécimaux écrit dans `.env` puis donné à la base par l'entrée standard, Airflow recréé (sain en ≈ 2 min 15),
+  `airflow db check` « Connection successful », **ancien mot de passe refusé** depuis `airflow_default` (« password
+  authentication failed »), copie de `.env` supprimée, alertes de Grafana saines.
+- [ ] **Images tierces du serveur** (décision d'Alexandre, 2026-10-22) : `deploy/analyser-images.sh --tierces`
+  (liste lue dans les fichiers Compose du serveur, sans Ollama ni Redis, non lancés), second job du lundi
+  (`analyse-images.yml`), **rapport sans échec** ; signal d'action par **Dependabot** (`.github/dependabot.yml`,
+  docker-compose, délai de 14 jours comme les outils de la CI, majeures ignorées). Première analyse (2026-10-22) :
+  9 images sur 10 ont des failles élevées ou critiques corrigées chez l'éditeur (postgres:16 seule saine) ; en
+  failles distinctes : Caddy 11, Grafana 19, Loki 10, Tempo 11, collecteur 11, Prometheus 11, node-exporter 14,
+  pgvector 11, Airflow 92. Cause principale : la bibliothèque standard de Go (go1.26.8, corrigée en 1.26.9 et
+  1.26.10) et `golang.org/x/net`, embarquées par l'éditeur ; pgvector et Airflow : Perl de Debian 12. Rien à
+  corriger de notre côté sinon monter de version quand l'éditeur publie (Grafana : rien depuis la 13.2.4 du 13
+  octobre). Un échec chaque lundi sur ces failles serait vite ignoré : d'où le rapport seul.
+  Étiquettes flottantes remplacées par les versions **en place sur le serveur** (relevées par Alexandre) : `caddy:2.11.7`,
+  `pgvector/pgvector:0.8.7-pg17-bookworm`, `postgres:16.15-trixie` (Airflow). Distribution explicite pour les bases :
+  passer de bookworm à trixie change la glibc, donc le tri du texte (index à reconstruire). Même étiquette pour
+  pgvector partout (poste, évaluation de la CI, export du corpus, Azure ; pas le dossier d'apprentissage Terraform) : l'évaluation tourne sur la glibc de la
+  production. Relectures : rien de bloquant ; corrigé : étiquettes alignées, une image refusée par Docker Hub (limite
+  de débit) est notée « non analysée » sans arrêter les autres (code 3 à la fin, testé).
+- [ ] À vérifier après la fusion : le déploiement recrée `postgres` (nom d'image changé, même image : sauvegarde et
+  `docker pull` avant de valider) ; premier lancement à la main du workflow (limite de Docker Hub) ; première
+  exécution de Dependabot (Insights → Dependency graph → Dependabot) : lecture de
+  `${AIRFLOW_IMAGE_NAME:-apache/airflow:3.3.1}`, prise en charge de `cooldown` pour docker-compose, filtre des
+  majeures sur les étiquettes à suffixe.

@@ -21,7 +21,7 @@ COFFRE="kvlimpide024b1e9f"
 COMPTE="stlimpidetf024b1e9f"
 CONTENEUR="corpus"
 BLOB="corpus.dump"
-IMAGE_PG="pgvector/pgvector:pg17"                                     # docker-compose.prod.yml
+IMAGE_PG="pgvector/pgvector:0.8.7-pg17-bookworm"                      # celle de docker-compose.prod.yml
 EMBEDDING_ENDPOINT="https://oai.endpoints.kepler.ai.cloud.ovh.net/v1" # docker-compose.prod.yml
 
 RESULTATS="eval/results"

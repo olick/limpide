@@ -1,0 +1,4 @@
+# Configuration de Grype pour deploy/analyser-images.sh --tierces (images des autres éditeurs, S8, session 5).
+# Même format et même règle que deploy/grype.yaml : une raison et une date par exception, retirée dès que l'éditeur
+# publie le correctif. À part, pour qu'une exception sur Grafana ne masque rien dans nos propres images.
+ignore: []

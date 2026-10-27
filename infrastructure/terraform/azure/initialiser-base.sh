@@ -26,7 +26,7 @@ for arg in "$@"; do
   esac
 done
 TF="$ICI/environnements/$ENV"
-IMAGE_PSQL="pgvector/pgvector:pg17"   # déjà présente pour la pile locale : fournit psql et pg_restore
+IMAGE_PSQL="pgvector/pgvector:0.8.7-pg17-bookworm"   # déjà présente pour la pile locale : fournit psql et pg_restore
 COMPTE="stlimpidetf024b1e9f"
 
 HOTE="$(terraform -chdir="$TF" output -raw postgresql_hote)"
