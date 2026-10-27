@@ -51,8 +51,9 @@ sur le coffre, écriture des conteneurs `tfstate` et `corpus`.
 Écart connu, déjà documenté (ADR-016) : `id-limpide-ci-azure` peut s'attribuer la lecture du coffre (la condition
 borne les rôles, pas la portée). Protégée par le relecteur et la branche `main` de l'environnement `azure`.
 
-Une inscription d'application Entra : « Limpide Admin » (comptes Microsoft personnels), un secret client qui **expire
-le 2027-10-12** ; ce jour-là, le back office et Grafana refusent toute connexion.
+Deux inscriptions d'application Entra (comptes Microsoft personnels) : « Limpide Admin » (back office) et, depuis le
+2026-10-27, « Limpide Grafana » (un secret par machine ; serveur à basculer). Leurs secrets **expirent le 2027-10-12** ; ce jour-là, le back
+office et Grafana refusent toute connexion.
 
 ## OVHcloud
 
@@ -94,7 +95,7 @@ retours, modification du corpus, `admin_actions`, création de table, `COPY … 
 |---|---|---|
 | Démo (`www`) | tout le monde | quota de 10 questions par heure et par adresse, 60 par jour |
 | Back office (`admin`) | Alexandre seul (`ADMIN_ALLOWED_USER`) | connexion Microsoft (double authentification) |
-| Grafana | Alexandre seul, rôle Editor | connexion Microsoft ; compte administrateur local, mot de passe dans `supervision/.env` |
+| Grafana | Alexandre seul, rôle Editor | connexion Microsoft, inscription propre (« Limpide Grafana ») ; compte administrateur local, mot de passe dans `supervision/.env`, par tunnel SSH seulement |
 | Interface d'Airflow | Alexandre | tunnel SSH seulement |
 
 ## Écarts et décisions
@@ -103,9 +104,9 @@ retours, modification du corpus, `admin_actions`, création de table, `COPY … 
 |---|---|
 | `web` en superutilisateur | **corrigé** : `limpide_web` (migration 0010, `deploy/compte-web.sh`) |
 | Back office et ingestion en superutilisateur | reporté : le back office est derrière la connexion Microsoft ; l'ingestion n'est lancée que par Alexandre et Airflow. Même méthode que pour `web` le jour où un second accès apparaît |
-| Grafana partage le secret client du back office | session 5 : inscription d'application propre à Grafana |
+| Grafana partage le secret client du back office | inscription « Limpide Grafana » (2026-10-27), secret propre à chaque machine : en place sur le poste, serveur à basculer (journal de la S8) |
 | Pas de double authentification sur GitHub et OVHcloud | risque accepté par Alexandre |
-| Secret client « Limpide Admin » à échéance (2027-10-12) | à renouveler avant ; rappel à poser |
+| Secrets clients « Limpide Admin » et « Limpide Grafana » à échéance (2027-10-12) | à renouveler avant ; rappel à poser |
 | `id-limpide-ci-azure` peut s'attribuer la lecture du coffre | accepté (ADR-016) |
 | LLMNR à l'écoute (5355), fermé par le pare-feu | remarque : désactivable (`LLMNR=no`, `systemd-resolved`), sans urgence |
 | Toutes les actions GitHub autorisées | accepté : épinglage par empreinte ; à restreindre si un contributeur arrive |

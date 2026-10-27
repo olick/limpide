@@ -112,10 +112,10 @@ services:
       GF_SECURITY_COOKIE_SECURE: ${GRAFANA_COOKIE_SECURE:-false}
       # Métriques internes de Grafana (/metrics, sans authentification) : inutiles ici.
       GF_METRICS_ENABLED: "false"
-      # Connexion Microsoft (supervision/connexion-microsoft.sh) : même inscription d'application et même personne
-      # autorisée que le back office, avec le rôle Editor (consulter, explorer ; pas d'ajout de source de données
-      # depuis Internet) ; toute autre personne est refusée (rôle strict). Active, elle remplace le formulaire
-      # « admin » ; le mot de passe reste pour l'API, par tunnel SSH seulement (Caddy le refuse).
+      # Connexion Microsoft (supervision/connexion-microsoft.sh) : inscription d'application propre à Grafana
+      # (« Limpide Grafana », pas celle du back office), une seule personne autorisée, avec le rôle Editor
+      # (consulter, explorer ; pas d'ajout de source de données depuis Internet) ; toute autre personne est refusée
+      # (rôle strict). Active, elle remplace le formulaire « admin » ; le mot de passe reste pour l'API, par tunnel SSH seulement (Caddy le refuse).
       GF_AUTH_GENERIC_OAUTH_ENABLED: ${GRAFANA_OIDC_ACTIF:-false}
       GF_AUTH_GENERIC_OAUTH_NAME: Microsoft
       GF_AUTH_GENERIC_OAUTH_CLIENT_ID: ${GRAFANA_OIDC_CLIENT_ID:-}
