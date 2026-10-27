@@ -309,6 +309,89 @@ serveur.
 Avant la chaîne (jusqu'au 2026-10-17), le serveur construisait les images : `git pull`, puis
 `limpide --profile outils build ingestion`, `limpide run --rm ingestion migrate`, `limpide up -d --build --wait web`.
 
+## Rotation de la clé Mistral (S8, session 5)
+
+Quand : clé apparue où elle ne devait pas (journal, capture d'écran, commit, poste perdu), dépense inexpliquée
+(alertes de budget), départ d'une personne qui l'a eue. Principe : **nouvelle clé posée et vérifiée avant de
+supprimer l'ancienne** (la démo ne perd jamais l'accès à Mistral ; seule la recréation de `web` coupe le site
+quelques secondes), puis preuve que l'ancienne est refusée.
+
+Deux clés, une par espace de travail Mistral (le plafond de dépense est par espace, ADR-016) :
+
+| Clé (espace) | Où elle vit | Qui la lit |
+|---|---|---|
+| Démo (par défaut, 10 €/mois) | `.env.prod` du serveur (`MISTRAL_API_KEY`) ; user-secrets du poste (`Mistral:ApiKey`) | `web` et l'ingestion lancée à la main (pas celle d'Airflow) ; poste |
+| Évaluation (`limpide-evaluation`, 10 €/mois) | coffre `kvlimpide024b1e9f`, secret `mistral-api-key` | évaluation de la CI (`deploy/evaluer.sh`) ; vitrine Azure |
+
+Dans la console Mistral, nommer chaque clé par usage et par mois (`limpide-demo-2026-10`) : la page des clés montre
+alors laquelle supprimer. Le poste peut avoir sa propre clé dans l'espace par défaut : perdre le poste ne force plus
+à changer celle de la démo.
+
+**Clé de la démo**, sur le serveur (nouvelle clé créée d'abord dans la console, espace par défaut) :
+
+```bash
+cd ~/limpide
+# 1. Nouvelle clé saisie sans affichage, essayée avant d'être posée (/v1/models : gratuit). En-tête passé par
+#    l'entrée standard : la clé n'apparaît ni à l'écran, ni dans l'historique, ni dans ps.
+read -rsp "Nouvelle clé Mistral : " CLE && echo
+printf 'Authorization: Bearer %s\n' "$CLE" | curl -s -o /dev/null -w '%{http_code}\n' -H @- https://api.mistral.ai/v1/models
+                                                                           # attendu : 200
+# 2. Copie de l'ancien fichier (pour l'étape 5 et le retour arrière), puis remplacement de la seule ligne
+cp -p .env.prod .env.prod.avant-rotation
+CLE="$CLE" awk '/^MISTRAL_API_KEY=/ { print "MISTRAL_API_KEY=" ENVIRON["CLE"]; next } { print }' \
+  .env.prod.avant-rotation > .env.prod; unset CLE
+grep -c '^MISTRAL_API_KEY=' .env.prod; cmp -s .env.prod .env.prod.avant-rotation || echo modifié   # attendu : 1, modifié
+# 3. web recréé avec la nouvelle valeur (coupure de quelques secondes) ; ingestion la lit à son prochain lancement
+limpide up -d --no-build --wait web
+curl -s https://www.limpide-ia.fr/sante                                  # web n'a pas de healthcheck : --wait ne prouve rien
+```
+
+4. Poser une question dans la démo : une réponse rédigée (pas « erreur ») prouve la nouvelle clé. Puis **supprimer
+   l'ancienne clé** dans la console Mistral.
+5. Preuve du refus, puis effacement de la copie (elle garde tous les anciens secrets) :
+
+```bash
+printf 'Authorization: Bearer %s\n' "$(sed -n 's/^MISTRAL_API_KEY=//p' .env.prod.avant-rotation)" \
+  | curl -s -o /dev/null -w '%{http_code}\n' -H @- https://api.mistral.ai/v1/models   # attendu : 401
+rm .env.prod.avant-rotation
+ls .env.prod.avant-*                                                       # attendu : aucun fichier (.env.prod.example reste)
+```
+
+Retour arrière avant l'étape 4 : `cp -p .env.prod.avant-rotation .env.prod`, puis le même `up`. Sur le poste (sa
+propre clé, ou la même) : `dotnet user-secrets set "Mistral:ApiKey" "<clé>" --project src/Limpide.Ingestion`. Tant que
+la copie existe, ne coller ni `docker inspect` ni `limpide config` dans un échange : ils affichent aussi la clé.
+
+**Clé de l'évaluation**, sur le poste (`az login` ; nouvelle clé créée dans l'espace `limpide-evaluation`) :
+
+```bash
+read -rsp "Nouvelle clé (limpide-evaluation) : " CLE && echo
+printf 'Authorization: Bearer %s\n' "$CLE" | curl -s -o /dev/null -w '%{http_code}\n' -H @- https://api.mistral.ai/v1/models   # 200
+az keyvault secret set --vault-name kvlimpide024b1e9f --name mistral-api-key --value "$CLE" --output none; unset CLE
+az keyvault secret show --vault-name kvlimpide024b1e9f --name mistral-api-key --query attributes.created -o tsv
+                                                     # attendu : l'heure d'à l'instant (UTC) ; sinon, s'arrêter là
+# Anciennes versions désactivées : l'identité de l'évaluation peut lire toutes les versions du secret (ADR-016)
+courante=$(az keyvault secret show --vault-name kvlimpide024b1e9f --name mistral-api-key --query id -o tsv)
+for id in $(az keyvault secret list-versions --vault-name kvlimpide024b1e9f --name mistral-api-key \
+              --query "[?attributes.enabled].id" -o tsv); do
+  [[ "$id" == "$courante" ]] || az keyvault secret set-attributes --id "$id" --enabled false --output none
+done
+az keyvault secret list-versions --vault-name kvlimpide024b1e9f --name mistral-api-key \
+  --query "[?attributes.enabled] | length(@)" -o tsv                     # attendu : 1
+```
+
+L'évaluation lit la dernière version à chaque exécution (rien d'autre à faire) ; une vitrine Azure en service la prend
+d'elle-même en 30 minutes au plus et redémarre sa révision (référence au coffre sans version). Retour arrière tant
+que l'ancienne clé existe chez Mistral : `az keyvault secret set-attributes --id <ancienne version> --enabled true`,
+puis désactiver la nouvelle. Ensuite, supprimer l'ancienne clé dans la console Mistral ; la prochaine évaluation d'une PR (ou « Re-run » de la dernière) le confirme.
+`--value` passe la clé en argument, visible dans `ps` le temps de la commande : acceptable sur le poste, où personne
+d'autre n'ouvre de session.
+
+La clé OVHcloud AI Endpoints suit le même principe, mais elle vit à plus d'endroits : `.env.prod`
+(`OVH_AI_ENDPOINTS_KEY`, puis le même `up` de `web`),
+`pipelines/airflow/.env` du serveur (même nom, lu par Airflow : recréer ses services, `pipelines/airflow/README.md`),
+secret `ovh-ai-endpoints-key` du coffre (partagé par l'évaluation et la vitrine), user-secrets du poste
+(`Embedding:ApiKey`).
+
 ## Supervision (S8, ADR-018)
 
 Projet Compose à part (`supervision/`, détail et concepts dans `supervision/README.md`) : la chaîne ne le déploie

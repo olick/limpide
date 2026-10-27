@@ -452,6 +452,30 @@ qui y mène.
   `-amd64` ; piège noté dans `dependabot.yml`. Leçon : **lire le diff de chaque PR de Dependabot**, la CI ne suffit
   pas. Non prouvés encore : `cooldown` (les deux versions proposées avaient plus de 14 jours), filtre des majeures
   sur les étiquettes à suffixe.
-- [ ] Airflow 3.3.2 sur le serveur : premier essai avant la fusion de la #49 (le `git pull` n'apportait encore que
-  la 3.3.1), à refaire ; collecteur `-amd64` après la fusion de cette PR (`up -d --wait collecteur`) ; premier
-  lancement à la main du workflow « Analyse des images » (celui du 2026-10-26 précède la fusion).
+- [x] **Airflow 3.3.2 sur le serveur (2026-10-27)** : premier essai avant la fusion de la #49 (le `git pull`
+  n'apportait encore que la 3.3.1, `up` sans effet), refait après : image tirée (≈ 3 min 30), `airflow-init` terminé
+  (migration de la base d'Airflow), les trois services sains, `airflow version` : 3.3.2. Leçon : fusionner d'abord,
+  puis tirer sur le serveur.
+- [ ] Collecteur `-amd64` sur le serveur après la fusion de la #51 (`up -d --wait collecteur`) ; premier lancement à
+  la main du workflow « Analyse des images » (celui du 2026-10-26 précède la fusion).
+- [x] **Rotation de la clé Mistral** (point 3) : procédure dans `deploy/README.md` (« Rotation de la clé Mistral »),
+  pour les deux clés, une par espace de travail. Démo : nouvelle clé essayée avant d'être posée, ligne de `.env.prod`
+  remplacée sans que la clé passe à l'écran, dans l'historique ou dans `ps` (en-tête de `curl` et `awk` par
+  l'entrée standard et l'environnement), `web` recréé, question dans la démo, ancienne clé supprimée, **refus prouvé**
+  (401 sur `/v1/models`, appel gratuit). Évaluation : nouvelle version du secret du coffre, **anciennes versions
+  désactivées** (l'identité de la CI les lit toutes, ADR-016) ; vitrine Azure : référence sans version, reprise en
+  30 minutes au plus (documentation de Container Apps). Commandes essayées sur le poste avec une fausse clé (401,
+  droits 600 gardés, une seule ligne changée) ; requête des versions essayée sur le coffre (1 version active, celle
+  du 2026-10-18). Pas de rotation à date fixe : sur événement (fuite, dépense inexpliquée, départ). Clé OVHcloud :
+  mêmes principes, quatre endroits listés. Relectures : rien de bloquant ; corrigé : arrêt si le dépôt dans le coffre
+  échoue (sinon la boucle ne désactivait rien et le contrôle affichait quand même 1), retour arrière du coffre,
+  clé jamais exportée dans le shell, `/sante` après la recréation (`web` sans healthcheck : `--wait` ne prouve rien),
+  copie `.env.prod.avant-rotation` contrôlée absente à la fin.
+- [x] **Rotation faite (2026-10-27)** : un relecteur (`relecteur-regles`) avait lu le `.env.prod` local, ignoré par
+  git, pour vérifier l'absence de secret dans le diff ; la même clé était au poste (user-secrets, `.env.prod` local)
+  et au serveur (empreintes SHA-256 identiques, comparées sans afficher la clé). Deux nouvelles clés dans l'espace par
+  défaut : `limpide-demo-2026-10` (serveur) et `limpide-poste-2026-10` (poste) ; perdre le poste ne touche plus la
+  démo. Question dans la démo après la recréation de `web`, ancienne clé supprimée, **401** sur le serveur et sur le
+  poste. Trouvée au passage : `.env.prod.avant-supervision`, copie de la session 1 jamais effacée (mot de passe
+  PostgreSQL et clé OVHcloud encore valides) ; à effacer. Contrôle final de la procédure corrigé
+  (`ls .env.prod.avant-*` : `.env.prod.example` est attendu).
