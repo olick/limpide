@@ -456,8 +456,8 @@ qui y mène.
   n'apportait encore que la 3.3.1, `up` sans effet), refait après : image tirée (≈ 3 min 30), `airflow-init` terminé
   (migration de la base d'Airflow), les trois services sains, `airflow version` : 3.3.2. Leçon : fusionner d'abord,
   puis tirer sur le serveur.
-- [ ] Collecteur `-amd64` sur le serveur après la fusion de la #51 (`up -d --wait collecteur`), à confirmer
-  (`docker inspect`).
+- [x] **Collecteur `-amd64` sur le serveur** (2026-10-27, après la #51) : `docker inspect` donne
+  `otel/opentelemetry-collector-contrib:0.162.0-amd64`.
 - [x] **Workflow « Analyse des images » lancé à la main** (2026-10-27, 17 h 02 UTC, après la #51) : deux jobs réussis,
   collecteur analysé en `0.162.0-amd64` ; toutes les images tierces « à suivre » (correctifs chez l'éditeur), rapport
   sans échec comme prévu.
