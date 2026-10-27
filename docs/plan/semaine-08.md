@@ -456,8 +456,11 @@ qui y mène.
   n'apportait encore que la 3.3.1, `up` sans effet), refait après : image tirée (≈ 3 min 30), `airflow-init` terminé
   (migration de la base d'Airflow), les trois services sains, `airflow version` : 3.3.2. Leçon : fusionner d'abord,
   puis tirer sur le serveur.
-- [ ] Collecteur `-amd64` sur le serveur après la fusion de la #51 (`up -d --wait collecteur`) ; premier lancement à
-  la main du workflow « Analyse des images » (celui du 2026-10-26 précède la fusion).
+- [ ] Collecteur `-amd64` sur le serveur après la fusion de la #51 (`up -d --wait collecteur`), à confirmer
+  (`docker inspect`).
+- [x] **Workflow « Analyse des images » lancé à la main** (2026-10-27, 17 h 02 UTC, après la #51) : deux jobs réussis,
+  collecteur analysé en `0.162.0-amd64` ; toutes les images tierces « à suivre » (correctifs chez l'éditeur), rapport
+  sans échec comme prévu.
 - [x] **Rotation de la clé Mistral** (point 3) : procédure dans `deploy/README.md` (« Rotation de la clé Mistral »),
   pour les deux clés, une par espace de travail. Démo : nouvelle clé essayée avant d'être posée, ligne de `.env.prod`
   remplacée sans que la clé passe à l'écran, dans l'historique ou dans `ps` (en-tête de `curl` et `awk` par
@@ -477,7 +480,7 @@ qui y mène.
   défaut : `limpide-demo-2026-10` (serveur) et `limpide-poste-2026-10` (poste) ; perdre le poste ne touche plus la
   démo. Question dans la démo après la recréation de `web`, ancienne clé supprimée, **401** sur le serveur et sur le
   poste. Trouvée au passage : `.env.prod.avant-supervision`, copie de la session 1 jamais effacée (mot de passe
-  PostgreSQL et clé OVHcloud encore valides) ; à effacer. Contrôle final de la procédure corrigé
+  PostgreSQL et clé OVHcloud encore valides) : **effacée** (droits 600, aucune variable absente de `.env.prod`). Contrôle final de la procédure corrigé
   (`ls .env.prod.avant-*` : `.env.prod.example` est attendu).
 - [x] **Revue des accès** (point 1, 2026-10-27) : `docs/acces.md`. Relevé direct (Azure, API de GitHub, commandes en
   lecture seule sur le serveur, code), pas de mémoire. Azure conforme au tableau des identités ; `main` sans exception,
