@@ -26,7 +26,9 @@ services:
   # Point d'entrée unique de l'application (OTEL_EXPORTER_OTLP_ENDPOINT=http://localhost:4317 sur le poste).
   collecteur:
     <<: *commun
-    image: otel/opentelemetry-collector-contrib:0.162.0
+    # Étiquette « -amd64 » (même image que 0.162.0 sur le serveur) : Dependabot lit « -386 » (x86 32 bits) comme un
+    # numéro de version plus récent et le proposait (PR #50, fermée) ; un suffixe en lettres le cantonne à « -amd64 ».
+    image: otel/opentelemetry-collector-contrib:0.162.0-amd64
     command: ["--config=/etc/otelcol/collecteur.yaml"]
     volumes:
       - ./collecteur.yaml:/etc/otelcol/collecteur.yaml:ro

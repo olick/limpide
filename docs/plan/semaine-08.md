@@ -424,7 +424,7 @@ qui y mène.
   hexadécimaux écrit dans `.env` puis donné à la base par l'entrée standard, Airflow recréé (sain en ≈ 2 min 15),
   `airflow db check` « Connection successful », **ancien mot de passe refusé** depuis `airflow_default` (« password
   authentication failed »), copie de `.env` supprimée, alertes de Grafana saines.
-- [ ] **Images tierces du serveur** (décision d'Alexandre, 2026-10-22) : `deploy/analyser-images.sh --tierces`
+- [x] **Images tierces du serveur** (décision d'Alexandre, 2026-10-22 ; PR #48, déployée le 2026-10-27) : `deploy/analyser-images.sh --tierces`
   (liste lue dans les fichiers Compose du serveur, sans Ollama ni Redis, non lancés), second job du lundi
   (`analyse-images.yml`), **rapport sans échec** ; signal d'action par **Dependabot** (`.github/dependabot.yml`,
   docker-compose, délai de 14 jours comme les outils de la CI, majeures ignorées). Première analyse (2026-10-22) :
@@ -440,8 +440,18 @@ qui y mène.
   pgvector partout (poste, évaluation de la CI, export du corpus, Azure ; pas le dossier d'apprentissage Terraform) : l'évaluation tourne sur la glibc de la
   production. Relectures : rien de bloquant ; corrigé : étiquettes alignées, une image refusée par Docker Hub (limite
   de débit) est notée « non analysée » sans arrêter les autres (code 3 à la fin, testé).
-- [ ] À vérifier après la fusion : le déploiement recrée `postgres` (nom d'image changé, même image : sauvegarde et
-  `docker pull` avant de valider) ; premier lancement à la main du workflow (limite de Docker Hub) ; première
-  exécution de Dependabot (Insights → Dependency graph → Dependabot) : lecture de
-  `${AIRFLOW_IMAGE_NAME:-apache/airflow:3.3.1}`, prise en charge de `cooldown` pour docker-compose, filtre des
-  majeures sur les étiquettes à suffixe.
+- [x] **Déployé (2026-10-27)** : sauvegarde et `docker pull` de pgvector avant de valider, `postgres` recréé ;
+  `/sante` inchangé (1 130 passages, 0 vecteur manquant).
+- [x] **Première exécution de Dependabot (2026-10-27, à la fusion)** : deux PR. `${AIRFLOW_IMAGE_NAME:-…}` est bien
+  lu : **#49**, Airflow 3.3.1 → 3.3.2 (publiée le 17 septembre), Grype : 99 → 63 failles élevées ou critiques
+  corrigeables ; fusionnée. Le fichier Compose officiel de la 3.3.2 ne diffère du nôtre que par l'image : pas de
+  nouveau téléchargement. **#50, fausse**, fermée : collecteur `0.162.0` → `0.162.0-386`, l'image x86 **32 bits**
+  (Dependabot ne reconnaît un suffixe que s'il commence par une lettre : `-386` passe pour un numéro de version) ;
+  CI verte, rien ne contrôle l'architecture, et le noyau du serveur l'aurait exécutée sans erreur. Corrigé : étiquette
+  `0.162.0-amd64` (même empreinte que `0.162.0` pour amd64, vérifié), qui cantonne Dependabot aux étiquettes
+  `-amd64` ; piège noté dans `dependabot.yml`. Leçon : **lire le diff de chaque PR de Dependabot**, la CI ne suffit
+  pas. Non prouvés encore : `cooldown` (les deux versions proposées avaient plus de 14 jours), filtre des majeures
+  sur les étiquettes à suffixe.
+- [ ] Airflow 3.3.2 sur le serveur : premier essai avant la fusion de la #49 (le `git pull` n'apportait encore que
+  la 3.3.1), à refaire ; collecteur `-amd64` après la fusion de cette PR (`up -d --wait collecteur`) ; premier
+  lancement à la main du workflow « Analyse des images » (celui du 2026-10-26 précède la fusion).

@@ -23,8 +23,10 @@ paths:
   du catalogue (compromission de `trivy-action`, mars 2026).
 - **Images tierces du serveur** (S8) : `deploy/analyser-images.sh --tierces` le lundi, rapport sans échec (correctifs
   chez l'éditeur) ; le signal d'action, ce sont les PR de Dependabot (`.github/dependabot.yml`, docker-compose,
-  délai de 14 jours, majeures ignorées). Étiquettes exactes dans les fichiers Compose, suffixe de distribution
-  explicite pour les bases (`-bookworm`) : jamais de changement de glibc par surprise.
+  délai de 14 jours, majeures ignorées) ; **lire le diff de chaque PR** : la CI ne contrôle pas l'architecture
+  (PR #50 : `-386`, image 32 bits, proposée comme version plus récente). Étiquettes exactes dans les fichiers
+  Compose, suffixe de distribution explicite pour les bases (`-bookworm`) : jamais de changement de glibc par
+  surprise.
 - **Évaluation (ADR-016)** : `evaluation.yml` → `deploy/evaluer.sh` sur le runner (PostgreSQL jetable, corpus du
   socle, jeu complet, `gate`) ; le job « Évaluation » est un contrôle requis de `main`. Ce qui déclenche :
   `deploy/evaluation-requise.sh`, liste large ; un nouveau fichier qui influe sur les réponses ou leur mesure doit y

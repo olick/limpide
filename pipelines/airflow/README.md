@@ -1,6 +1,7 @@
 # Airflow (local) — orchestration de l'ingestion (S4)
 
-Docker Compose **officiel** d'Apache Airflow 3.3.1 (exécuteur Celery), deux modifications seulement :
+Docker Compose **officiel** d'Apache Airflow (fichier de la 3.3.1, identique à celui de la 3.3.2 hormis l'image ;
+image en 3.3.2), exécuteur Celery, deux modifications seulement :
 ports limités à `127.0.0.1`, DAG d'exemple désactivés. Les ajouts propres à Limpide sont dans
 `docker-compose.override.yaml` (fusionné automatiquement). Pour le développement : l'hébergement d'Airflow
 en production est décidé en S6 (ADR sur l'hébergement d'Airflow).
@@ -48,8 +49,8 @@ signale tout. Environnement de développement, mêmes versions que les conteneur
 ```bash
 cd pipelines/airflow
 python3 -m venv .venv
-.venv/bin/pip install "apache-airflow==3.3.1" "apache-airflow-providers-docker==4.5.9" pyright \
-  --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.3.1/constraints-3.12.txt"
+.venv/bin/pip install "apache-airflow==3.3.2" "apache-airflow-providers-docker==4.5.9" pyright \
+  --constraint "https://raw.githubusercontent.com/apache/airflow/constraints-3.3.2/constraints-3.12.txt"
 .venv/bin/pyright      # depuis la racine du dépôt : mêmes règles que Pylance (pyrightconfig.json, mode strict)
 ```
 
