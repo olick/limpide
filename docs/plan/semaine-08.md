@@ -502,3 +502,15 @@ qui y mène.
 - [x] **Compte limité sur le serveur (2026-10-27)** : `deploy/compte-web.sh` avant de valider le déploiement de la
   #53 ; question dans la démo enregistrée (`reponse`, 17 h 39 UTC) ; connexions : `limpide_web` (web),
   `grafana_lecture`, `rag` (la session de contrôle) ; aucun « permission denied » dans les journaux de `web`.
+- [x] **Inscription d'application propre à Grafana, sur le poste** (point 1, 2026-10-27) : « Limpide Grafana » créée par
+  `az ad app create` (comptes personnels, adresses de retour de Grafana seulement), un secret par machine, échéance
+  2027-10-12 comme le back office (`poste` créé ; `serveur` à la bascule). `connexion-microsoft.sh` ne lit plus la
+  configuration du back office : identifiant et personne autorisée en arguments, secret par l'entrée standard depuis `az` (jamais à
+  l'écran ; au serveur par SSH). Sur le poste, trois pièges : **sujet propre à l'inscription** (relevé dans le
+  journal de Grafana en mode débogage, connexion refusée par une règle provisoire, débogage retiré ensuite ; différent
+  de celui du back office, vérifié), **« User sync failed »** (l'ancien utilisateur Grafana, rattaché à l'ancien
+  sujet, bloque le nouveau : supprimé par l'API, recréé à la connexion suivante, rôle Editor), **secret orphelin**
+  quand le script a échoué (apostrophe dans un message `${2:?…}`, erreur de syntaxe ; secret supprimé). Constaté
+  aussi : changer d'inscription ne ferme pas les sessions déjà ouvertes (stockées dans la base de Grafana).
+- [ ] Serveur : secret `serveur`, Grafana recréé, ancien utilisateur supprimé, connexion vérifiée ; puis adresses de
+  retour de Grafana retirées de « Limpide Admin ». Refus d'un autre compte : toujours sans second compte Microsoft.

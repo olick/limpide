@@ -472,16 +472,14 @@ psql -h localhost -U grafana_lecture -d rag -c "select count(*) from feedback"` 
 
 Grafana depuis le back office (lien « Supervision »), sur https://grafana.limpide-ia.fr/ : sous-domaine à part, pas
 un chemin du back office (une faille de Grafana ne doit pas pouvoir agir dans le back office). Entrée DNS `grafana`
-(Terraform, `infrastructure/terraform/dns/zone.tf`, appliquée après fusion). Connexion Microsoft : même inscription
-d'application que le back office, adresse de retour `https://grafana.limpide-ia.fr/login/generic_oauth` (portail
-Azure → Entra ID → Inscriptions d'applications → « Limpide Admin » → Authentification ;
-`http://localhost:3000/login/generic_oauth` pour le poste). Une fois, **dans cet ordre** (Grafana protégé avant d'être
+(Terraform, `infrastructure/terraform/dns/zone.tf`, appliquée après fusion). Connexion Microsoft : inscription
+d'application **propre à Grafana** (voir plus bas). Une fois, **dans cet ordre** (Grafana protégé avant d'être
 exposé, et DNS en place avant que Caddy demande le certificat) :
 
 ```bash
 cd ~/limpide
 dig +short grafana.limpide-ia.fr                 # l'adresse du VPS (entrée appliquée par Terraform après fusion)
-supervision/connexion-microsoft.sh ../.env.prod https://grafana.limpide-ia.fr/   # rien n'est affiché
+# connexion Microsoft configurée d'abord (« Inscription propre à Grafana » ci-dessous)
 docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
 grep -q '^GRAFANA_ADDRESS=' .env.prod && sed -i 's/^GRAFANA_ADDRESS=.*/GRAFANA_ADDRESS=grafana.limpide-ia.fr/' .env.prod \
   || echo GRAFANA_ADDRESS=grafana.limpide-ia.fr >> .env.prod
@@ -490,9 +488,56 @@ curl -sI https://grafana.limpide-ia.fr/ | head -1                               
 curl -s -o /dev/null -w '%{http_code}\n' -u admin:x https://grafana.limpide-ia.fr/api/search  # 403 (refusé par Caddy)
 ```
 
-Seule la personne autorisée au back office (`ADMIN_ALLOWED_USER`) entre, avec le rôle Editor ; toute autre est
-refusée. Après un changement du secret client du back office : relancer `connexion-microsoft.sh`, puis recréer
-Grafana.
+Une seule personne entre, avec le rôle Editor ; toute autre est refusée.
+
+**Inscription propre à Grafana** (S8, session 5, 2026-10-27). Jusque-là, Grafana utilisait l'inscription du back
+office, dont il gardait le secret : Grafana compromis l'aurait exposé. Inscription « Limpide Grafana » (appId
+`bb94431f-4f59-4219-be21-7cf662ef1326`), comptes Microsoft personnels, adresses de retour
+`https://grafana.limpide-ia.fr/login/generic_oauth` et `http://localhost:3000/login/generic_oauth` ; un secret par
+machine (`poste`, `serveur`), échéance 2027-10-12 comme celui du back office. Créée par `az ad app create`
+(`--sign-in-audience PersonalMicrosoftAccount --requested-access-token-version 2`). Trois pièges, rencontrés sur le
+poste :
+
+- **Le sujet change** : avec un compte personnel, `sub` est propre à chaque inscription ; l'identifiant autorisé du
+  back office (`ADMIN_ALLOWED_USER`) est refusé. Pour le relever : règle provisoire `<émetteur>#a-relever` (tout le
+  monde est refusé), Grafana recréé avec `GF_LOG_FILTERS: "oauth.generic_oauth:debug"` (fichier Compose
+  d'appoint), une connexion, puis `"sub"` dans « Parsed user info from JSON » de son journal ; recréer Grafana sans
+  ce réglage (le journal contient le nom et l'adresse). Le sujet ne dépend pas de l'adresse de retour : celui du
+  poste vaut pour le serveur.
+- **« User sync failed »** : l'utilisateur Grafana existant, rattaché à l'ancien sujet, bloque la création du
+  nouveau (même adresse). Le supprimer (API d'administration, ci-dessous) : la connexion suivante le recrée.
+  Tableaux de bord et alertes sont provisionnés, rien n'est perdu sinon les favoris.
+- **Un secret orphelin** : si le script échoue, le secret créé par `az` est perdu. `az ad app credential list --id
+  <appId>` puis `az ad app credential delete --id <appId> --key-id <keyId>`.
+
+Serveur (le script arrive par `git pull` : la supervision ne part pas avec le déploiement) ; le secret va du poste au
+serveur par SSH, sans écran ni fichier intermédiaire :
+
+```bash
+# Serveur
+cd ~/limpide && git pull --ff-only
+# Poste (az login) : secret « serveur » créé et envoyé au script du serveur
+az ad app credential reset --id bb94431f-4f59-4219-be21-7cf662ef1326 --append --display-name serveur \
+  --end-date 2027-10-12 --query password -o tsv \
+  | ssh debian@57.129.175.88 "~/limpide/supervision/connexion-microsoft.sh https://grafana.limpide-ia.fr/ \
+      bb94431f-4f59-4219-be21-7cf662ef1326 '<émetteur>#<sujet>'"
+# Serveur : Grafana recréé, ancien utilisateur Microsoft supprimé (mot de passe admin par l'entrée standard)
+docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
+g() { printf 'user = "admin:%s"\n' "$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' supervision/.env)" | curl -sS -K - "$@"; }
+g "http://127.0.0.1:3000/api/users?perpage=10" | python3 -c 'import json,sys; [print(u["id"], u["authLabels"]) for u in json.load(sys.stdin)]'
+# Seulement la ligne dont authLabels contient « Generic OAuth » ; jamais l'identifiant 1 (admin). Sans confirmation.
+g -w '\n%{http_code}\n' -X DELETE http://127.0.0.1:3000/api/admin/users/<id>        # {"message":"User deleted"} 200
+```
+
+Puis se connecter sur https://grafana.limpide-ia.fr/ (rôle Editor), et seulement ensuite retirer les adresses de
+retour de Grafana de l'inscription du back office. Retour arrière tant qu'elles y sont : version précédente du script
+(`git show <commit>~1:supervision/connexion-microsoft.sh`) lancée avec `../.env.prod`, Grafana recréé, utilisateur
+Microsoft supprimé comme ci-dessus ; une fois retirées, plus de retour vers l'ancienne inscription.
+
+Changer le secret d'une machine : la même commande `az … | script` (sans le `git pull`), puis supprimer l'ancien
+secret (`az ad app credential delete`) et recréer Grafana. Changer seulement d'adresse ou de personne autorisée :
+4e argument `--garder-secret`, sans tube. Si `az` échoue, le script reçoit une entrée vide et s'arrête sans rien
+changer.
 
 Secours (connexion Microsoft en panne, ou faille de Grafana) : vider `GRAFANA_ADDRESS` dans `.env.prod`, puis
 `limpide up -d --force-recreate caddy admin` : Grafana est fermé au public. Pour y entrer par le tunnel, il faut aussi

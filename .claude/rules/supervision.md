@@ -22,8 +22,9 @@ Détail et mesures : `supervision/README.md`.
 - Mémoire : `GOMEMLIMIT` (≈ 80 % du plafond) sur chaque conteneur Go, sinon Tempo atteint son plafond ; mesurer
   `anon` dans `memory.stat`, pas `docker stats` seul (cache disque compris).
 - Ports liés à 127.0.0.1. Grafana en production : https://grafana.limpide-ia.fr/ (sous-domaine à part du back office :
-  isolation par le navigateur ; Caddy, connexion Microsoft gérée par Grafana, `connexion-microsoft.sh`, seule la
-  personne autorisée au back office entre, rôle Editor) ; mot de passe `admin` par tunnel SSH seulement (Caddy le
+  isolation par le navigateur ; Caddy, connexion Microsoft gérée par Grafana, inscription d'application propre
+  « Limpide Grafana » (`connexion-microsoft.sh`, secret par l'entrée standard ; sujet propre à l'inscription, pas
+  celui du back office), une seule personne, rôle Editor) ; mot de passe `admin` par tunnel SSH seulement (Caddy le
   refuse). Exposé sur Internet : suivre ses failles (Grype) et monter sa version.
 - Collecteur : exporteurs `otlp_grpc` / `otlp_http`. Tempo 3 en un seul processus : pas de Kafka, pas de blocs
   `ingest` / `block_builder`.
