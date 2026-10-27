@@ -499,6 +499,6 @@ qui y mène.
   l'image accepte tout sans mot de passe : un essai par 127.0.0.1 ne prouverait rien ; mauvais mot de passe refusé,
   essayé), la requête n'est jamais journalisée en cas d'erreur, et la restauration migre avant de redémarrer `web`
   (une sauvegarde antérieure à 0010 laisserait `web` sans droits).
-- [ ] Compte limité sur le serveur : `deploy/compte-web.sh` **avant** de valider le déploiement (`deploy/README.md`,
-  « Comptes de la base »), puis question dans la démo, `limpide_web` dans `pg_stat_activity`, aucun « permission
-  denied ».
+- [x] **Compte limité sur le serveur (2026-10-27)** : `deploy/compte-web.sh` avant de valider le déploiement de la
+  #53 ; question dans la démo enregistrée (`reponse`, 17 h 39 UTC) ; connexions : `limpide_web` (web),
+  `grafana_lecture`, `rag` (la session de contrôle) ; aucun « permission denied » dans les journaux de `web`.
