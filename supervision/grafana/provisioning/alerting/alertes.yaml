@@ -276,6 +276,41 @@ groups:
             Trafic réel et voulu : relever le plafond de l'espace (et de l'organisation) ; sinon, baisser le quota
             (Protection:GlobalPerDay). Au plafond, Mistral refuse les appels et la démo répond « erreur ».
 
+      # --- Robots (S8, session 5, ADR-020) : pas de défi anti-robot tant qu'aucun abus n'est mesuré ; ce signal-là le
+      # mesure. Le quota global borne le coût, mais un robot qui l'épuise prive les vrais visiteurs jusqu'à minuit UTC.
+      - uid: quota-journalier
+        title: Quota du jour de la démo atteint
+        condition: C
+        data:
+          - refId: A
+            # Sans effet ici (obligatoire) : la requête porte sa propre fenêtre, le jour UTC du quota.
+            relativeTimeRange: { from: 86400, to: 0 }
+            datasourceUid: journal
+            model:
+              refId: A
+              format: table
+              rawQuery: true
+              rawSql: >-
+                SELECT count(*) AS refus FROM answer_log
+                WHERE outcome = 'quota-journalier' AND at >= date_trunc('day', now() AT TIME ZONE 'UTC') AT TIME ZONE 'UTC'
+          - refId: C
+            datasourceUid: __expr__
+            model:
+              refId: C
+              type: threshold
+              expression: A
+              conditions: [{ evaluator: { type: gt, params: [0] } }]
+        for: 0s
+        noDataState: OK
+        execErrState: Error
+        labels: { environnement: $LIMPIDE_ENVIRONNEMENT }
+        annotations:
+          summary: "Quota du jour atteint : {{ with $values.A }}{{ printf \"%.0f\" .Value }}{{ else }}n/d{{ end }} question(s) refusée(s) depuis minuit UTC ; la démo ne répond plus avant demain."
+          description: >-
+            Que faire : robot ou vrai succès ? Loki, {service_name="limpide-web"} |= "Question reçue" (visites : beaucoup
+            de visites courtes, des questions de même longueur à intervalles réguliers = robot). Trafic réel : relever
+            Protection:GlobalPerDay (coût, alertes de budget). Robot : ADR-020, ajouter un défi (ALTCHA, sans tiers).
+
       # --- Ingestion (Airflow) ---------------------------------------------------------------------------------------
       - uid: dag-pas-tourne
         title: Le DAG d'ingestion n'a pas tourné

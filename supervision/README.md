@@ -96,6 +96,9 @@ Alertes (`grafana/provisioning/alerting/alertes.yaml`), sur Discord, avec l'envi
 | La démo n'envoie plus de mesures | aucune métrique de `limpide-web` depuis 10 min | Prometheus |
 | Questions en erreur | ≥ 3 erreurs ou délais dépassés en 15 min | `answer_log` |
 | Réponses anormalement lentes | médiane > 15 s sur 30 min (au moins 3 questions) | `answer_log` |
+| Dépense de la démo anormale sur 24 h | > 0,50 € (le quota en permet ≈ 0,26 €) | `answer_log` |
+| Budget Mistral de la démo à moitié consommé | > 5 € depuis le début du mois (UTC) | `answer_log` |
+| Quota du jour de la démo atteint | au moins une question refusée par le quota global depuis minuit UTC (ADR-020) | `answer_log` |
 | Le DAG n'a pas tourné | aucune exécution réussie depuis 8 jours | base d'Airflow |
 | Un DAG ne s'importe plus | au moins une erreur d'import pendant 5 min | base d'Airflow |
 | Dépense de la démo anormale sur 24 h (session 3) | > 0,50 € sur 24 h glissantes : le quota (60 questions par jour, ≈ 0,26 €) ne tient plus | `answer_log` |
