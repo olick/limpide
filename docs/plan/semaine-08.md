@@ -479,3 +479,23 @@ qui y mène.
   poste. Trouvée au passage : `.env.prod.avant-supervision`, copie de la session 1 jamais effacée (mot de passe
   PostgreSQL et clé OVHcloud encore valides) ; à effacer. Contrôle final de la procédure corrigé
   (`ls .env.prod.avant-*` : `.env.prod.example` est attendu).
+- [x] **Revue des accès** (point 1, 2026-10-27) : `docs/acces.md`. Relevé direct (Azure, API de GitHub, commandes en
+  lecture seule sur le serveur, code), pas de mémoire. Azure conforme au tableau des identités ; `main` sans exception,
+  administrateur compris ; tous les workflows en `contents: read` ; SSH par clés, root refusé, `ufw` 22/80/443.
+  Double authentification : Microsoft seul ; GitHub, OVHcloud, Mistral, Discord sans, **risque accepté par
+  Alexandre**. Secret client « Limpide Admin » : échéance 2027-10-12.
+- [x] **Écart corrigé : `web` en superutilisateur.** Toute l'application (démo publique comprise) se connectait en
+  `rag`, superutilisateur de l'image PostgreSQL : une faille de `web` donnait toute la base et des commandes dans le
+  conteneur (`COPY … PROGRAM`). Migration 0010 (rôle `application_web` : lecture du corpus, écriture et purge des
+  journaux, lecture limitée aux colonnes de `RETURNING` et des purges), `deploy/compte-web.sh` (compte `limpide_web`,
+  mot de passe dans `.env.prod`, jamais à l'écran ni dans `ps`), chaîne de connexion propre à `web`. Essayé sur le
+  poste : `ask` (recherche et rédaction), `/sante`, écritures des trois journaux et cascade vers `question_log`
+  passent ; questions, retours, corpus en écriture, `admin_actions`, `CREATE TABLE`, `COPY … PROGRAM` refusés.
+  Back office et ingestion restent en `rag` (reporté, `docs/acces.md`). Relectures : rien de bloquant ; corrigé :
+  le script essaie le nouveau mot de passe par l'adresse réseau du conteneur avant d'écrire `.env.prod` (en local,
+  l'image accepte tout sans mot de passe : un essai par 127.0.0.1 ne prouverait rien ; mauvais mot de passe refusé,
+  essayé), la requête n'est jamais journalisée en cas d'erreur, et la restauration migre avant de redémarrer `web`
+  (une sauvegarde antérieure à 0010 laisserait `web` sans droits).
+- [ ] Compte limité sur le serveur : `deploy/compte-web.sh` **avant** de valider le déploiement (`deploy/README.md`,
+  « Comptes de la base »), puis question dans la démo, `limpide_web` dans `pg_stat_activity`, aucun « permission
+  denied ».

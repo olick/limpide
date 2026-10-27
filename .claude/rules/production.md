@@ -16,6 +16,10 @@ paths:
   `deploy/version-images.sh`.
 - Vectorisation par OVHcloud AI Endpoints (`OVH_AI_ENDPOINTS_KEY`), Qwen3-Embedding-8B, sans secours (ADR-012
   révisé) : le profil `ollama` ne sert que bge-m3, et y revenir est un changement de configuration (ADR-017).
+- **Comptes de la base** (S8, session 5) : `web` en `limpide_web` (rôle `application_web`, migration 0010 : lecture du
+  corpus, écriture des journaux sans les relire) ; migrations, ingestion et back office en `rag` (superutilisateur).
+  Toute nouvelle table que la démo lit ou écrit : `GRANT … TO application_web` dans sa migration. Machine neuve :
+  `deploy/compte-web.sh` avant le premier déploiement et avant toute restauration.
 - Sauvegarde quotidienne de la base (`deploy/backup-db.sh`, 3 h 15 UTC, `~/backups`, 7 jours).
 - Chaque déploiement de `web` coupe le site quelques secondes (502). Après un `pg_restore --clean` : redémarrer `web`.
 - Mémoire : lire `free -m` (available), pas le graphique d'OVH. Swap de 2 Go.
