@@ -105,10 +105,12 @@ chaîne jusqu'au VPS, bascule Qwen3-Embedding-8B, ADR-014 à 017) ; S9–S10 à 
 
 **S8 en cours** (observabilité, coûts, sécurité), ADR-018. Session 1 faite le 2026-10-19 : supervision auto-hébergée
 sur le VPS (`supervision/` : OpenTelemetry, Tempo, Loki, Prometheus, Grafana), journal `answer_log`, journaux des
-visites. Session 2 installée le 2026-10-19 : tableaux de bord, 8 alertes Discord, Grafana sur
-https://grafana.limpide-ia.fr/ depuis le back office (connexion Microsoft). Session 3 faite le 2026-10-20 : coûts
-en euros (migration 0008), 2 alertes de budget, `docs/finops.md`. Prochaine : session 5 (sécurité), puis 4
-(garde-fous v2, sacrifiable). Points ouverts et reportés de la S7 : tableau et liste en tête de `semaine-08.md`.
+visites. Session 2 (2026-10-19) : tableaux de bord, 8 alertes Discord, Grafana sur https://grafana.limpide-ia.fr/.
+Session 3 (2026-10-20) : coûts en euros (migration 0008), alertes de budget, `docs/finops.md`. Session 5 (2026-10-21
+à 27) : questions conservées 30 jours (ADR-019), `web` en compte limité (migration 0010), revue des accès
+(`docs/acces.md`), Grafana sur sa propre inscription Microsoft, rotation de la clé Mistral, Dependabot ; restent
+l'anti-bot et le test de la 11e question. Puis session 4 (garde-fous v2, sacrifiable). Points ouverts : tableau en
+tête de `semaine-08.md`.
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
 par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,

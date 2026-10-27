@@ -20,8 +20,9 @@ vecteurs et de l'index HNSW.
 
 | Point | Pourquoi | Quand |
 |---|---|---|
-| Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte que la personne autorisée au back office (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
-| Secret client Microsoft partagé entre Grafana et le back office | Grafana compromis exposerait aussi le secret du back office | session 5 (revue des accès) : une inscription d'application propre à Grafana |
+| Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte qu'une personne (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
+| ~~Secret client Microsoft partagé entre Grafana et le back office~~ | fait le 2026-10-27 : inscription « Limpide Grafana » | session 5 |
+| Secrets clients « Limpide Admin » et « Limpide Grafana » à échéance | le 2027-10-12, connexion impossible au back office et à Grafana, sans alerte | rappel dans l'agenda d'Alexandre |
 
 ---
 
