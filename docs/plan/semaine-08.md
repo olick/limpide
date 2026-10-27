@@ -456,8 +456,11 @@ qui y mène.
   n'apportait encore que la 3.3.1, `up` sans effet), refait après : image tirée (≈ 3 min 30), `airflow-init` terminé
   (migration de la base d'Airflow), les trois services sains, `airflow version` : 3.3.2. Leçon : fusionner d'abord,
   puis tirer sur le serveur.
-- [ ] Collecteur `-amd64` sur le serveur après la fusion de la #51 (`up -d --wait collecteur`) ; premier lancement à
-  la main du workflow « Analyse des images » (celui du 2026-10-26 précède la fusion).
+- [x] **Collecteur `-amd64` sur le serveur** (2026-10-27, après la #51) : `docker inspect` donne
+  `otel/opentelemetry-collector-contrib:0.162.0-amd64`.
+- [x] **Workflow « Analyse des images » lancé à la main** (2026-10-27, 17 h 02 UTC, après la #51) : deux jobs réussis,
+  collecteur analysé en `0.162.0-amd64` ; toutes les images tierces « à suivre » (correctifs chez l'éditeur), rapport
+  sans échec comme prévu.
 - [x] **Rotation de la clé Mistral** (point 3) : procédure dans `deploy/README.md` (« Rotation de la clé Mistral »),
   pour les deux clés, une par espace de travail. Démo : nouvelle clé essayée avant d'être posée, ligne de `.env.prod`
   remplacée sans que la clé passe à l'écran, dans l'historique ou dans `ps` (en-tête de `curl` et `awk` par
@@ -477,7 +480,7 @@ qui y mène.
   défaut : `limpide-demo-2026-10` (serveur) et `limpide-poste-2026-10` (poste) ; perdre le poste ne touche plus la
   démo. Question dans la démo après la recréation de `web`, ancienne clé supprimée, **401** sur le serveur et sur le
   poste. Trouvée au passage : `.env.prod.avant-supervision`, copie de la session 1 jamais effacée (mot de passe
-  PostgreSQL et clé OVHcloud encore valides) ; à effacer. Contrôle final de la procédure corrigé
+  PostgreSQL et clé OVHcloud encore valides) : **effacée** (droits 600, aucune variable absente de `.env.prod`). Contrôle final de la procédure corrigé
   (`ls .env.prod.avant-*` : `.env.prod.example` est attendu).
 - [x] **Revue des accès** (point 1, 2026-10-27) : `docs/acces.md`. Relevé direct (Azure, API de GitHub, commandes en
   lecture seule sur le serveur, code), pas de mémoire. Azure conforme au tableau des identités ; `main` sans exception,
@@ -496,13 +499,13 @@ qui y mène.
   l'image accepte tout sans mot de passe : un essai par 127.0.0.1 ne prouverait rien ; mauvais mot de passe refusé,
   essayé), la requête n'est jamais journalisée en cas d'erreur, et la restauration migre avant de redémarrer `web`
   (une sauvegarde antérieure à 0010 laisserait `web` sans droits).
-- [ ] Compte limité sur le serveur : `deploy/compte-web.sh` **avant** de valider le déploiement (`deploy/README.md`,
-  « Comptes de la base »), puis question dans la démo, `limpide_web` dans `pg_stat_activity`, aucun « permission
-  denied ».
+- [x] **Compte limité sur le serveur (2026-10-27)** : `deploy/compte-web.sh` avant de valider le déploiement de la
+  #53 ; question dans la démo enregistrée (`reponse`, 17 h 39 UTC) ; connexions : `limpide_web` (web),
+  `grafana_lecture`, `rag` (la session de contrôle) ; aucun « permission denied » dans les journaux de `web`.
 - [x] **Inscription d'application propre à Grafana, sur le poste** (point 1, 2026-10-27) : « Limpide Grafana » créée par
   `az ad app create` (comptes personnels, adresses de retour de Grafana seulement), un secret par machine, échéance
-  2027-10-12 comme le back office (`poste` créé ; `serveur` à la bascule). `connexion-microsoft.sh` ne lit plus la configuration du
-  back office : identifiant et personne autorisée en arguments, secret par l'entrée standard depuis `az` (jamais à
+  2027-10-12 comme le back office (`poste` créé ; `serveur` à la bascule). `connexion-microsoft.sh` ne lit plus la
+  configuration du back office : identifiant et personne autorisée en arguments, secret par l'entrée standard depuis `az` (jamais à
   l'écran ; au serveur par SSH). Sur le poste, trois pièges : **sujet propre à l'inscription** (relevé dans le
   journal de Grafana en mode débogage, connexion refusée par une règle provisoire, débogage retiré ensuite ; différent
   de celui du back office, vérifié), **« User sync failed »** (l'ancien utilisateur Grafana, rattaché à l'ancien
