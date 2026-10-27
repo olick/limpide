@@ -8,7 +8,7 @@ paths:
 Alexandre ne connaissait pas Airflow avant la S4 : concepts d'abord. Détail et constats :
 `pipelines/airflow/README.md`, `docs/plan/semaine-04.md` (journal de réalisation).
 
-- Airflow 3.3.1. DAG `ingestion` : une tâche `DockerOperator` par commande .NET (`fetch`, `extract`, `chunk`,
+- Airflow 3.3.2. DAG `ingestion` : une tâche `DockerOperator` par commande .NET (`fetch`, `extract`, `chunk`,
   `validate`, `embed`, `publish`), **aucun code métier en Python** ; étapes en `all_done`, tâche `bilan` : **un message
   Discord par exécution** (succès : bilan court, avec le coût de la vectorisation s'il y en a eu ;
   quarantaine : sans faire échouer l'exécution ; échec : avec la cause). Pas de message le lundi = pas d'exécution :

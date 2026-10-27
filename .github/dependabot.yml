@@ -4,6 +4,10 @@
 # la fusionne après avoir lu l'analyse de la nouvelle version.
 #
 # Suit les étiquettes exactes (caddy:2.11.7, pas caddy:2) ; un suffixe (-pg17-bookworm, -trixie) est gardé tel quel.
+# Piège : un suffixe n'est reconnu que s'il commence par une lettre. « 0.162.0-386 » (image x86 32 bits du collecteur)
+# passait pour plus récent que « 0.162.0 » (PR #50, fermée) : d'où l'étiquette « -amd64 ». Lire le diff de chaque PR.
+# Versions 0.x (collecteur) : 0.162 → 0.163 compte comme mineure, donc proposée, mais peut changer la configuration ;
+# lire la note de version avant de fusionner.
 # Majeures ignorées : PostgreSQL 16 → 17 change le format des données, Grafana 13 → 14 peut casser les tableaux de bord
 # et les alertes ; elles se décident à la main, avec une procédure.
 # Après fusion : la démo (docker-compose.prod.yml) part avec le déploiement, sauf Caddy (deploy/README.md, « Journaux

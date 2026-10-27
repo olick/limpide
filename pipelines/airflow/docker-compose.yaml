@@ -1,5 +1,6 @@
 # Limpide — Docker Compose officiel d'Apache Airflow 3.3.1, téléchargé le 2026-10-07 depuis
 #   https://airflow.apache.org/docs/apache-airflow/3.3.1/docker-compose.yaml
+# Image passée en 3.3.2 par Dependabot (2026-10-27) : le fichier officiel de la 3.3.2 ne diffère que par l'image.
 # Modifications : ports publiés limités à 127.0.0.1 (règle du projet : jamais exposés au réseau) ;
 # DAG d'exemple désactivés. La clé FERNET_KEY (chiffrement des secrets stockés par Airflow) est dans .env.
 # Usage pour le développement local uniquement (voir pipelines/airflow/README.md).
@@ -30,7 +31,7 @@
 # The following variables are supported:
 #
 # AIRFLOW_IMAGE_NAME           - Docker image name used to run Airflow.
-#                                Default: apache/airflow:3.3.1
+#                                Default: apache/airflow:3.3.2
 # AIRFLOW_UID                  - User ID in Airflow containers
 #                                Default: 50000
 # AIRFLOW_PROJ_DIR             - Base path to which all the files will be volumed.
