@@ -354,7 +354,7 @@ curl -s https://www.limpide-ia.fr/sante                                  # web n
 printf 'Authorization: Bearer %s\n' "$(sed -n 's/^MISTRAL_API_KEY=//p' .env.prod.avant-rotation)" \
   | curl -s -o /dev/null -w '%{http_code}\n' -H @- https://api.mistral.ai/v1/models   # attendu : 401
 rm .env.prod.avant-rotation
-ls .env.prod.*                                                             # attendu : aucun fichier
+ls .env.prod.avant-*                                                       # attendu : aucun fichier (.env.prod.example reste)
 ```
 
 Retour arrière avant l'étape 4 : `cp -p .env.prod.avant-rotation .env.prod`, puis le même `up`. Sur le poste (sa

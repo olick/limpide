@@ -471,3 +471,11 @@ qui y mène.
   échoue (sinon la boucle ne désactivait rien et le contrôle affichait quand même 1), retour arrière du coffre,
   clé jamais exportée dans le shell, `/sante` après la recréation (`web` sans healthcheck : `--wait` ne prouve rien),
   copie `.env.prod.avant-rotation` contrôlée absente à la fin.
+- [x] **Rotation faite (2026-10-27)** : un relecteur (`relecteur-regles`) avait lu le `.env.prod` local, ignoré par
+  git, pour vérifier l'absence de secret dans le diff ; la même clé était au poste (user-secrets, `.env.prod` local)
+  et au serveur (empreintes SHA-256 identiques, comparées sans afficher la clé). Deux nouvelles clés dans l'espace par
+  défaut : `limpide-demo-2026-10` (serveur) et `limpide-poste-2026-10` (poste) ; perdre le poste ne touche plus la
+  démo. Question dans la démo après la recréation de `web`, ancienne clé supprimée, **401** sur le serveur et sur le
+  poste. Trouvée au passage : `.env.prod.avant-supervision`, copie de la session 1 jamais effacée (mot de passe
+  PostgreSQL et clé OVHcloud encore valides) ; à effacer. Contrôle final de la procédure corrigé
+  (`ls .env.prod.avant-*` : `.env.prod.example` est attendu).
