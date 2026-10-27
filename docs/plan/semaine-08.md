@@ -486,8 +486,8 @@ qui y mène.
 - [x] **Revue des accès** (point 1, 2026-10-27) : `docs/acces.md`. Relevé direct (Azure, API de GitHub, commandes en
   lecture seule sur le serveur, code), pas de mémoire. Azure conforme au tableau des identités ; `main` sans exception,
   administrateur compris ; tous les workflows en `contents: read` ; SSH par clés, root refusé, `ufw` 22/80/443.
-  Double authentification : Microsoft seul ; GitHub, OVHcloud, Mistral, Discord sans, **risque accepté par
-  Alexandre**. Secret client « Limpide Admin » : échéance 2027-10-12.
+  Protection des comptes en ligne (double authentification) : **risque accepté par Alexandre**, détail retiré du
+  dépôt public le 2026-10-27. Secret client « Limpide Admin » : échéance 2027-10-12.
 - [x] **Écart corrigé : `web` en superutilisateur.** Toute l'application (démo publique comprise) se connectait en
   `rag`, superutilisateur de l'image PostgreSQL : une faille de `web` donnait toute la base et des commandes dans le
   conteneur (`COPY … PROGRAM`). Migration 0010 (rôle `application_web` : lecture du corpus, écriture et purge des
@@ -521,3 +521,9 @@ qui y mène.
   procédure) ; « Connection reset » juste après la recréation : **Grafana n'a pas de healthcheck**, `--wait` n'attend
   que le démarrage du conteneur (attente sur `/api/health` ajoutée). Session 5, point 1 terminé. Reste ouvert :
   refus d'un autre compte jamais essayé (pas de second compte Microsoft).
+- [x] **Anti-bot et test des messages du quota** (reportés de la S3 puis de la S7, 2026-10-27) : décision d'Alexandre,
+  **mesurer d'abord** (ADR-020) : pas de défi, alerte « Quota du jour de la démo atteint » (12e alerte, sur
+  `answer_log`). Essayé sur le poste : quota global à 1, deuxième question refusée avec le bon message, ligne
+  `quota-journalier`, alerte en « Firing » ; quota par visiteur à 1, message de la limite par visiteur (« 1 questions » :
+  pluriel faux avec 1, sans effet avec 10). Défi à ajouter (ALTCHA, sans tiers) seulement si l'alerte montre un abus.
+- [x] **Session 5 terminée** (2026-10-27). Reste ouvert : refus d'un autre compte Microsoft dans Grafana.

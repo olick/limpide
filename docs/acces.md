@@ -7,25 +7,26 @@ accès (contributeur, service, identité) et au moins une fois par an.
 **Méthode.** Relevé direct, pas de mémoire : `az role assignment list` et `az identity federated-credential list`
 (Azure), API de GitHub (règles de `main`, environnements, noms des secrets), commandes en lecture seule sur le serveur
 (`authorized_keys`, `sudo -l`, `sshd -T`, `ufw`, ports, rôles PostgreSQL), lecture des fichiers Compose et du code
-(tables lues et écrites). Non relevé par programme : la double authentification des comptes et les politiques IAM
+(tables lues et écrites). Non relevé par programme : la protection des comptes en ligne et les politiques IAM
 d'OVHcloud (déclaration d'Alexandre), les réglages d'Actions que le jeton du poste ne lit pas (interface de GitHub).
 
 ## Personnes et comptes
 
 Une seule personne, Alexandre, a tous les accès. Aucun compte partagé.
 
-| Compte | Ce qu'il donne | Double authentification |
-|---|---|---|
-| GitHub (`olick`, seul collaborateur, administrateur) | le code, la chaîne, l'approbation des déploiements | non |
-| Microsoft (Entra ID, propriétaire de l'abonnement Azure) | Azure, le coffre à secrets, le back office et Grafana (connexion) | **oui** |
-| OVHcloud (espace client) | le VPS (réinstallation, console, mode secours), la zone DNS, AI Endpoints | non |
-| Mistral | les clés de génération, les plafonds de dépense | non |
-| Discord | le salon des alertes | non |
+| Compte | Ce qu'il donne |
+|---|---|
+| GitHub (`olick`, seul collaborateur, administrateur) | le code, la chaîne, l'approbation des déploiements |
+| Microsoft (Entra ID, propriétaire de l'abonnement Azure) | Azure, le coffre à secrets, le back office et Grafana (connexion) |
+| OVHcloud (espace client) | le VPS (réinstallation, console, mode secours), la zone DNS, AI Endpoints |
+| Mistral | les clés de génération, les plafonds de dépense |
+| Discord | le salon des alertes |
 
-**Risque accepté par Alexandre (2026-10-27)** : pas de double authentification hors Microsoft. Les deux comptes qui
-comptent sont GitHub et OVHcloud : le premier permet de publier du code que la chaîne déploie (l'approbation de
-l'environnement `production` est celle du même compte), le second donne la main sur le serveur sans passer par SSH.
-Mistral et Discord sont bornés (plafonds de 10 € par espace ; un salon d'alertes).
+Les comptes qui comptent le plus sont GitHub (publier du code que la chaîne déploie : l'approbation de
+l'environnement `production` est celle du même compte) et OVHcloud (la main sur le serveur sans passer par SSH) ;
+Mistral et Discord sont bornés (plafonds de 10 € par espace ; un salon d'alertes). **Protection de ces comptes**
+(double authentification) : relevée avec Alexandre le 2026-10-27, risque accepté ; le détail n'est pas écrit dans
+ce dépôt, public.
 
 ## GitHub
 
@@ -94,7 +95,7 @@ retours, modification du corpus, `admin_actions`, création de table, `COPY … 
 | Application | Qui entre | Comment |
 |---|---|---|
 | Démo (`www`) | tout le monde | quota de 10 questions par heure et par adresse, 60 par jour |
-| Back office (`admin`) | Alexandre seul (`ADMIN_ALLOWED_USER`) | connexion Microsoft (double authentification) |
+| Back office (`admin`) | Alexandre seul (`ADMIN_ALLOWED_USER`) | connexion Microsoft |
 | Grafana | Alexandre seul, rôle Editor | connexion Microsoft, inscription propre (« Limpide Grafana ») ; compte administrateur local, mot de passe dans `supervision/.env`, par tunnel SSH seulement |
 | Interface d'Airflow | Alexandre | tunnel SSH seulement |
 
@@ -105,7 +106,7 @@ retours, modification du corpus, `admin_actions`, création de table, `COPY … 
 | `web` en superutilisateur | **corrigé** : `limpide_web` (migration 0010, `deploy/compte-web.sh`) |
 | Back office et ingestion en superutilisateur | reporté : le back office est derrière la connexion Microsoft ; l'ingestion n'est lancée que par Alexandre et Airflow. Même méthode que pour `web` le jour où un second accès apparaît |
 | Grafana partage le secret client du back office | **corrigé** : inscription « Limpide Grafana » (2026-10-27), secret propre à chaque machine, adresses de Grafana retirées de « Limpide Admin » |
-| Pas de double authentification sur GitHub et OVHcloud | risque accepté par Alexandre |
+| Protection des comptes en ligne (double authentification) | risque accepté par Alexandre ; détail hors du dépôt, public |
 | Secrets clients « Limpide Admin » et « Limpide Grafana » à échéance (2027-10-12) | à renouveler avant ; rappel à poser |
 | `id-limpide-ci-azure` peut s'attribuer la lecture du coffre | accepté (ADR-016) |
 | LLMNR à l'écoute (5355), fermé par le pare-feu | remarque : désactivable (`LLMNR=no`, `systemd-resolved`), sans urgence |

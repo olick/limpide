@@ -297,6 +297,10 @@ https://www.limpide-ia.fr/confidentialite (contact `contact@limpide-ia.fr`, redi
 - **Quota de questions** (`Protection` dans `src/Limpide.Web/appsettings.json`) : 10 par heure et par adresse IP,
   60 par jour au total (≈ 9 €/mois au plus avec Mistral Medium, sous le plafond de 10 € fixé chez Mistral).
   En mémoire : remis à zéro au redémarrage de `web`.
+- **Pas de défi anti-robot** (ADR-020) tant qu'aucun abus n'est mesuré : l'alerte « Quota du jour de la démo
+  atteint » (Grafana, Discord) dit quand le quota global est épuisé. Abus constaté : ALTCHA (sans tiers) d'abord.
+  Essayer les messages du quota sur le poste : `dotnet run --project src/Limpide.Web --launch-profile http --
+  --Protection:GlobalPerDay=1` (ou `--Protection:PerClientPerHour=1`), puis deux questions.
 - **Adresse du visiteur** : Caddy remplace tout `X-Forwarded-For` reçu d'Internet par l'adresse réelle (un visiteur ne
   peut pas usurper une autre adresse), et Docker transmet l'adresse publique d'origine. Vérifié le 2026-10-07.
 - **Docker contourne `ufw`** pour les ports publiés : un conteneur de test publié sur 8099 était joignable depuis
