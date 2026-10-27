@@ -52,7 +52,7 @@ sur le coffre, écriture des conteneurs `tfstate` et `corpus`.
 borne les rôles, pas la portée). Protégée par le relecteur et la branche `main` de l'environnement `azure`.
 
 Deux inscriptions d'application Entra (comptes Microsoft personnels) : « Limpide Admin » (back office) et, depuis le
-2026-10-27, « Limpide Grafana » (un secret par machine ; serveur à basculer). Leurs secrets **expirent le 2027-10-12** ; ce jour-là, le back
+2026-10-27, « Limpide Grafana » (un secret par machine : `poste`, `serveur`). Leurs secrets **expirent le 2027-10-12** ; ce jour-là, le back
 office et Grafana refusent toute connexion.
 
 ## OVHcloud
@@ -104,7 +104,7 @@ retours, modification du corpus, `admin_actions`, création de table, `COPY … 
 |---|---|
 | `web` en superutilisateur | **corrigé** : `limpide_web` (migration 0010, `deploy/compte-web.sh`) |
 | Back office et ingestion en superutilisateur | reporté : le back office est derrière la connexion Microsoft ; l'ingestion n'est lancée que par Alexandre et Airflow. Même méthode que pour `web` le jour où un second accès apparaît |
-| Grafana partage le secret client du back office | inscription « Limpide Grafana » (2026-10-27), secret propre à chaque machine : en place sur le poste, serveur à basculer (journal de la S8) |
+| Grafana partage le secret client du back office | **corrigé** : inscription « Limpide Grafana » (2026-10-27), secret propre à chaque machine, adresses de Grafana retirées de « Limpide Admin » |
 | Pas de double authentification sur GitHub et OVHcloud | risque accepté par Alexandre |
 | Secrets clients « Limpide Admin » et « Limpide Grafana » à échéance (2027-10-12) | à renouveler avant ; rappel à poser |
 | `id-limpide-ci-azure` peut s'attribuer la lecture du coffre | accepté (ADR-016) |

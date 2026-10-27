@@ -512,5 +512,11 @@ qui y mène.
   sujet, bloque le nouveau : supprimé par l'API, recréé à la connexion suivante, rôle Editor), **secret orphelin**
   quand le script a échoué (apostrophe dans un message `${2:?…}`, erreur de syntaxe ; secret supprimé). Constaté
   aussi : changer d'inscription ne ferme pas les sessions déjà ouvertes (stockées dans la base de Grafana).
-- [ ] Serveur : secret `serveur`, Grafana recréé, ancien utilisateur supprimé, connexion vérifiée ; puis adresses de
-  retour de Grafana retirées de « Limpide Admin ». Refus d'un autre compte : toujours sans second compte Microsoft.
+- [x] **Bascule du serveur (2026-10-27)** : secret `serveur` envoyé par SSH, Grafana recréé, ancien utilisateur
+  Microsoft (n° 2) supprimé, connexion sur https://grafana.limpide-ia.fr/ ; adresses de retour de Grafana retirées de
+  « Limpide Admin » (il ne garde que les siennes ; back office joignable). Le secret du back office n'est plus sur le
+  serveur hors de `.env.prod`. Deux accrocs : secret créé 19 s après la fusion, **sans `git pull`** sur le serveur
+  (l'ancien script a échoué sans rien écrire ; secret orphelin supprimé ; vérification de la version ajoutée à la
+  procédure) ; « Connection reset » juste après la recréation : **Grafana n'a pas de healthcheck**, `--wait` n'attend
+  que le démarrage du conteneur (attente sur `/api/health` ajoutée). Session 5, point 1 terminé. Reste ouvert :
+  refus d'un autre compte jamais essayé (pas de second compte Microsoft).

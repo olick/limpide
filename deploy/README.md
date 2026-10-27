@@ -514,8 +514,9 @@ Serveur (le script arrive par `git pull` : la supervision ne part pas avec le d�
 serveur par SSH, sans écran ni fichier intermédiaire :
 
 ```bash
-# Serveur
+# Serveur : script à jour d'abord (sinon l'ancien script échoue et le secret créé par az est perdu)
 cd ~/limpide && git pull --ff-only
+grep -c -- '--garder-secret' supervision/connexion-microsoft.sh               # attendu : 2 ou plus
 # Poste (az login) : secret « serveur » créé et envoyé au script du serveur
 az ad app credential reset --id bb94431f-4f59-4219-be21-7cf662ef1326 --append --display-name serveur \
   --end-date 2027-10-12 --query password -o tsv \
@@ -523,6 +524,9 @@ az ad app credential reset --id bb94431f-4f59-4219-be21-7cf662ef1326 --append --
       bb94431f-4f59-4219-be21-7cf662ef1326 '<émetteur>#<sujet>'"
 # Serveur : Grafana recréé, ancien utilisateur Microsoft supprimé (mot de passe admin par l'entrée standard)
 docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
+# Grafana sans healthcheck : --wait ne prouve rien. Attente bornée ; sinon, son journal
+timeout 60 bash -c 'until curl -sf -o /dev/null http://127.0.0.1:3000/api/health; do sleep 2; done' \
+  || docker compose -f supervision/docker-compose.yml logs --tail 30 grafana
 g() { printf 'user = "admin:%s"\n' "$(sed -n 's/^GRAFANA_ADMIN_PASSWORD=//p' supervision/.env)" | curl -sS -K - "$@"; }
 g "http://127.0.0.1:3000/api/users?perpage=10" | python3 -c 'import json,sys; [print(u["id"], u["authLabels"]) for u in json.load(sys.stdin)]'
 # Seulement la ligne dont authLabels contient « Generic OAuth » ; jamais l'identifiant 1 (admin). Sans confirmation.
