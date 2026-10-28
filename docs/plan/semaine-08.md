@@ -16,13 +16,15 @@ de budget Mistral (session 3) ; anti-bot et test du message à la 11e question (
 basse avec Qwen (0,21 et 0,24 contre 0,09 à 0,15), réponses signalées à relire ; retrait de l'ancienne colonne de
 vecteurs et de l'index HNSW.
 
-**Points ouverts des sessions 1 à 3** (relevés les 2026-10-19 et 20, détail dans le journal de réalisation) :
+**Points ouverts de la semaine** (relevés du 2026-10-19 au 28, détail dans le journal de réalisation) :
 
 | Point | Pourquoi | Quand |
 |---|---|---|
 | Refus d'un autre compte Microsoft dans Grafana, jamais testé | la règle n'accepte qu'une personne (relecture sans point bloquant), mais seul un essai le prouve ; il faut un second compte Microsoft personnel, même jetable | avant de montrer Grafana en rendez-vous |
 | ~~Secret client Microsoft partagé entre Grafana et le back office~~ | fait le 2026-10-27 : inscription « Limpide Grafana » | session 5 |
 | Secrets clients « Limpide Admin » et « Limpide Grafana » à échéance | le 2027-10-12, connexion impossible au back office et à Grafana, sans alerte | rappel dans l'agenda d'Alexandre |
+| Lenteur de la vectorisation chez OVHcloud (15 s par question le 2026-10-28 au soir) | sans secours en production (ADR-012 révisé) ; ponctuelle ou durable ? | mesure du lendemain, `evaluate` sur le poste |
+| Injections écrites par quelqu'un qui ne connaît pas les règles | la mesure de l'ADR-021 est optimiste (même auteur) | avec les testeurs extérieurs (en suspens) |
 
 ---
 
@@ -562,3 +564,15 @@ qui y mène.
   « Par étape » de la synthèse). Premier essai (3 questions, 19 h 21) : **vectorisation 10,9 s et 24,1 s** chez
   OVHcloud AI Endpoints, rédaction 1,7 s, juge 0,5 s. La lenteur venait d'OVHcloud ; elle touche aussi la démo
   (vectorisation de chaque question, avant le seuil).
+- [x] **Déployé (2026-10-28)** : #59 et #60 fusionnées, démo essayée par Alexandre sur le poste (injection bloquée,
+  vraie question). Grafana sans données du jour : **aucune question en production** depuis le 27 à 17 h 39 UTC
+  (`answer_log`, relevé par Alexandre : 3 lignes en 3 jours, tous ses essais). Sans trafic, rien ne mesure la
+  vectorisation de la démo.
+- [x] **Lenteur d'OVHcloud AI Endpoints (2026-10-28, soir)** : question posée en production, **15 s** (normale :
+  1,5 à 3 s) ; `evaluate` (recherche seule, 30 vectorisations, sans Mistral) : 55 s, soit ≈ 1,7 s par
+  vectorisation, contre quelques dixièmes d'habitude ; une heure plus tôt, 10 à 24 s. Rien changé : le seul secours
+  (bge-m3 par Ollama, ADR-017) recalibre le seuil et dégrade la recherche (21/30 contre 28/30), pour une lenteur qui
+  ne fait échouer aucune question. À refaire le lendemain (`time dotnet run --project src/Limpide.Ingestion --
+  evaluate` : 10 à 15 s attendues) ; si elle persiste, page d'état ou ticket OVHcloud. Une sonde de vectorisation
+  sans visiteur, seulement si l'épisode se répète (S10).
+- [x] **Session 4 terminée (2026-10-28). S8 terminée** : les 5 sessions faites, aucune sacrifiée.
