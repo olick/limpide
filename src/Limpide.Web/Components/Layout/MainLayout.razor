@@ -24,7 +24,8 @@
 <div id="blazor-error-ui" data-nosnippet>
     Une erreur inattendue s'est produite.
     <a href="." class="reload">Recharger</a>
-    <span class="dismiss">🗙</span>
+    @* Un vrai bouton (nom accessible, clavier) : blazor.web.js branche son clic sur « #blazor-error-ui .dismiss ». *@
+    <button type="button" class="dismiss" aria-label="Fermer le message d'erreur"><span aria-hidden="true">🗙</span></button>
 </div>
 
 @code {

@@ -22,17 +22,17 @@
 
 <ul class="promises" aria-label="Ce que fait Limpide">
     <li>
-        <strong>✔ Ce qu'il fait</strong>
+        <strong><span aria-hidden="true">✔</span> Ce qu'il fait</strong>
         Il cherche dans le règlement européen sur l'IA (AI Act) et les 17 fiches pratiques IA de la CNIL les passages
         qui répondent à votre question, et rédige une réponse qui renvoie à chacun d'eux.
     </li>
     <li>
-        <strong>✘ Ce qu'il ne fait pas</strong>
+        <strong><span aria-hidden="true">✘</span> Ce qu'il ne fait pas</strong>
         Il ne dit pas si votre situation est conforme : c'est le rôle d'un professionnel du droit. C'est une IA, qui
         peut se tromper : les textes cités font foi, pas sa formulation.
     </li>
     <li>
-        <strong>🔍 Pourquoi il montre tout</strong>
+        <strong><span aria-hidden="true">🔍</span> Pourquoi il montre tout</strong>
         Sous chaque réponse, « Sous le capot » explique comment elle a été produite : quels textes ont été retenus,
         par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.
     </li>
@@ -50,13 +50,14 @@
     <textarea id="question" rows="3" maxlength="@MaxLength" disabled="@busy"
               placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
               @bind="question" @bind:event="oninput"></textarea>
-    <div class="ask-actions">
-        <span class="count">@question.Length / @MaxLength · @QuotaPerHour questions par heure et par visiteur</span>
-        <button type="submit" disabled="@(busy || string.IsNullOrWhiteSpace(question))">
-            @(busy ? "Recherche en cours…" : "Poser la question")
-        </button>
+    <div class="examples">
+        <span>Exemples :</span>
+        @foreach (var example in Examples)
+        {
+            <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
+        }
     </div>
-    @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case. *@
+    @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case, avant l'envoi. *@
     <div class="keep">
         <p>
             Votre question est conservée @KeptQuestion.Retention.Days jours pour améliorer Limpide, sans adresse IP ;
@@ -65,14 +66,17 @@
         </p>
         <label><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
     </div>
-    <div class="examples">
-        <span>Exemples :</span>
-        @foreach (var example in Examples)
-        {
-            <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
-        }
+    <div class="ask-actions">
+        <span class="count">@question.Length / @MaxLength · @QuotaPerHour questions par heure et par visiteur</span>
+        <button type="submit" disabled="@busy">
+            @(busy ? "Recherche en cours…" : "Poser la question")
+        </button>
     </div>
 </form>
+
+@* Région d'annonce présente dès le départ (une région créée avec son texte n'est souvent pas lue) : l'attente
+   dure plusieurs secondes, bouton désactivé. La réponse arrivée, le focus passe sur son titre. *@
+<p class="sr-only" role="status">@(busy ? "Recherche en cours, la réponse peut prendre plusieurs secondes." : "")</p>
 
 @if (error is not null)
 {
@@ -81,8 +85,8 @@
 
 @if (result is { } r)
 {
-    <section class="answer @(r.Declined ? "declined" : "")" aria-live="polite">
-        <h2>Réponse de l'assistant <span class="label">formulation générée, à vérifier dans les textes cités</span></h2>
+    <section class="answer @(r.Declined ? "declined" : "")">
+        <h2 tabindex="-1" @ref="answerHeading">Réponse de l'assistant <span class="label">formulation générée, à vérifier dans les textes cités</span></h2>
         <div class="answer-text">@((MarkupString)answerHtml)</div>
         @if (r.Guardrails.Any(g => g.Code == "qualification-juridique"))
         {
@@ -345,6 +349,8 @@
     private string answerHtml = "";
     private bool engineOpen;
     private bool doNotKeep;
+    private ElementReference answerHeading;
+    private bool focusAnswer;
 
     /// <summary>Adresse IP du visiteur (App.razor) ; sans elle, tous les visiteurs partagent un même quota.</summary>
     [CascadingParameter(Name = "ClientAddress")]
@@ -361,8 +367,15 @@
 
     private async Task AskAsync()
     {
-        if (busy || string.IsNullOrWhiteSpace(question))
+        if (busy)
             return;
+
+        // Bouton toujours actif, contrôle à l'envoi : un bouton grisé sans explication ne dit pas quoi faire.
+        if (string.IsNullOrWhiteSpace(question))
+        {
+            error = "Écrivez d'abord votre question, ou choisissez un des exemples.";
+            return;
+        }
 
         error = null;
         using var visitScope = CurrentVisit.Scope(Logger);
@@ -394,6 +407,7 @@
             answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
             engineOpen = result.Guardrails.Count > 0;
+            focusAnswer = true;
             Logger.AnswerSteps(result, Generation.MinScore);
             await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()), Kept());
         }
@@ -411,6 +425,19 @@
         {
             busy = false;
         }
+    }
+
+    /// <summary>
+    /// Focus sur le titre de la réponse une fois affichée : le bouton désactivé pendant l'attente a perdu le focus,
+    /// et un lecteur d'écran lit la réponse à partir de là.
+    /// </summary>
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusAnswer || result is null)
+            return;
+
+        focusAnswer = false;
+        await answerHeading.FocusAsync();
     }
 
     /// <summary>

@@ -7,10 +7,13 @@
     --text: #1d2125;
     --muted: #5f666d;
     --border: #dcdfe3;
+    --control-border: #858b92; /* contour des champs : au moins 3:1 contre --surface et --bg */
     --accent: #1f5fa8;
+    --on-accent: #ffffff; /* texte posé sur --accent */
     --accent-soft: #e8f0fa;
     --source-bg: #fbfaf5;
-    --source-rule: #b9a25a;
+    --source-rule: #b9a25a; /* filet décoratif */
+    --source-ink: #7a6628; /* texte doré (repères [P1]) : 5,35:1 sur --source-bg */
     --warn-bg: #fff6e0;
     --warn-border: #e2b74a;
     --danger: #a32020;
@@ -28,10 +31,13 @@
         --text: #e6e8ea;
         --muted: #a0a7ae;
         --border: #343a40;
+        --control-border: #737b83;
         --accent: #7fb0ec;
+        --on-accent: #10161d;
         --accent-soft: #1e2b3a;
         --source-bg: #201f1a;
         --source-rule: #a08a45;
+        --source-ink: #a08a45;
         --warn-bg: #2d2615;
         --warn-border: #8a6d22;
         --danger: #ef8a8a;
@@ -60,6 +66,26 @@ a { color: var(--accent); }
 .page { padding-block: 2rem 1rem; }
 
 h1:focus { outline: none; }
+
+h1, h2, h3 { line-height: 1.25; }
+
+/* Lu par les lecteurs d'écran seulement. */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Lignes de 60 à 75 caractères pour les textes à lire ; les mots sans espace (adresses web des textes officiels)
+   passent à la ligne au lieu de déborder sur mobile, sans que le texte change. */
+.tagline, .answer-text, .verbatim, .story p, .eval-section p { max-width: 70ch; }
+.answer-text, .verbatim { overflow-wrap: anywhere; }
 
 /* En-tête */
 .hero h1 { margin: 0; font-size: 2.2rem; letter-spacing: -0.02em; }
@@ -91,7 +117,7 @@ h1:focus { outline: none; }
     font: inherit;
     color: inherit;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 8px;
     padding: 0.6rem 0.75rem;
 }
@@ -111,15 +137,11 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
 
 .ask-actions button {
     background: var(--accent);
-    color: #fff;
+    color: var(--on-accent);
     border: none;
     border-radius: 8px;
     padding: 0.55rem 1.1rem;
     font-weight: 600;
-}
-
-@media (prefers-color-scheme: dark) {
-    .ask-actions button { color: #10161d; }
 }
 
 .examples { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; margin-top: 0.9rem; font-size: 0.85rem; color: var(--muted); }
@@ -127,7 +149,7 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
 .example {
     background: var(--accent-soft);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 999px;
     padding: 0.2rem 0.7rem;
     font-size: 0.85rem;
@@ -153,6 +175,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 }
 
 .answer.declined { border-left-color: var(--muted); }
+.answer h2:focus { outline: none; } /* focus posé par le code à l'arrivée de la réponse, pas une étape du clavier */
 .answer-text > :first-child { margin-top: 0; }
 .answer-text > :last-child { margin-bottom: 0; }
 
@@ -190,7 +213,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .source:target { outline: 2px solid var(--source-rule); }
 .source header { display: flex; gap: 0.6rem; align-items: baseline; }
 .source h3 { margin: 0; font-size: 1rem; }
-.id { font-weight: 700; color: var(--source-rule); }
+.id { font-weight: 700; color: var(--source-ink); }
 
 .verbatim {
     margin: 0.6rem 0;
@@ -257,7 +280,7 @@ details.engine h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
     font: inherit;
     color: inherit;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: 1px solid var(--control-border);
     border-radius: 8px;
     padding: 0.5rem 0.7rem;
 }
@@ -285,7 +308,7 @@ details.engine summary { font-size: 1.05rem; }
 .story { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0 0; }
 .story li { counter-increment: step; position: relative; padding: 0 0 0.9rem 2.4rem; border-left: 2px solid var(--border); margin-left: 0.9rem; }
 .story li:last-child { border-left-color: transparent; }
-.story li::before { content: counter(step); position: absolute; left: -0.95rem; top: -0.1rem; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.story li::before { content: counter(step); position: absolute; left: -0.95rem; top: -0.1rem; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
 .story .step-title { font-weight: 700; }
 .story .ms { margin-left: 0.5rem; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .story p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.5; }
@@ -335,7 +358,3 @@ details.technical .hint { font-size: 0.82rem; color: var(--muted); }
 .runs tr.served td { background: var(--accent-soft); }
 
 .site-footer { padding-block: 1rem 2rem; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--border); }
-
-/* Erreurs du rendu Blazor */
-.blazor-error-boundary { background: #b32121; padding: 1rem; color: white; }
-.blazor-error-boundary::after { content: "Une erreur s'est produite."; }
