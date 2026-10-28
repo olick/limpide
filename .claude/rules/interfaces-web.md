@@ -29,3 +29,7 @@ paths:
   l'interface par le plugin `interfaces` (`better-accessibility`, WCAG 2.2 ; `better-writing`), sur lesquels
   s'appuie `/interface-review` pour relire une PR ; critique, système de design et passation par le plugin `design`.
   Ne pas employer `design:accessibility-review` ni `design:ux-copy`, qui font doublon.
+- **Démo en fil de questions, sans mémoire** (ADR-022) : chaque question reste traitée seule, et l'interface le dit
+  près du champ ; mention IA dans l'en-tête fixe ; conservation (ADR-019) sur une ligne sous le champ, détail dans
+  `/confidentialite` ; « Sous le capot » et l'avis rattachés à chaque réponse. Envoyer l'historique au modèle est une
+  autre décision, à mesurer par l'évaluation.

@@ -3,9 +3,37 @@
 **Objectif de fin de semaine** : quelqu'un qui ne connaît pas le projet comprend en 5 minutes ce que fait Limpide,
 comment, et pourquoi ces choix. Le dossier de gouvernance est complet.
 
-**Budget temps** : environ 10 heures, en 5 sessions.
+**Budget temps** : environ 10 heures, en 5 sessions, plus 8 à 10 heures pour la refonte de l'interface.
 
 **Prérequis** : semaines 1 à 8 terminées (ou arbitrées : ce qui manque est listé comme limite).
+
+---
+
+## Refonte de l'interface, avant le script de la vidéo (≈ 8 à 10 h, ajoutée le 2026-10-28)
+
+Décision : ADR-022 (fil de questions sans mémoire), d'après l'audit d'interface du 2026-10-28 (PR #63, à fusionner
+d'abord) et une maquette cliquable validée avec Alexandre. Une PR par étape, chacune relue par `relecteur-interface`
+puis vérifiée à la main dans un navigateur (320 px, thème sombre, clavier), et par `/interface-review`.
+
+1. **Squelette** (≈ 2 h) : en-tête fixe (titre, phrase courte, pastille IA), panneau latéral (menu sur mobile), zone
+   du fil, champ fixé en bas. Le contenu actuel de la page y est replacé tel quel.
+2. **Pages secondaires** (≈ 1 h 30) : Ce que fait Limpide (texte complet des trois encarts), Votre avis (formulaire
+   général), Comment il est construit (`TechStack.razor`), Sources et licences (mentions du pied de page actuel).
+   Liens du panneau vers ces pages, l'évaluation, « Vos données », le dépôt et le back office.
+3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts courts et
+   exemples en boutons, « Sous le capot » et « Mon avis » par réponse (l'avis joint cette question et cette
+   réponse), focus sur chaque nouvelle réponse.
+4. **Textes cités** (≈ 1 h 30) : cartes sous la réponse, aperçu de deux lignes sur ordinateur, repliées sur mobile ;
+   un renvoi `[P1]` ouvre et montre la carte ; pied de carte réduit (source, texte officiel, licence), version et
+   empreinte dans les détails techniques.
+5. **Champ et finitions** (≈ 1 h 30) : bouton flèche, Entrée pour envoyer et Maj+Entrée pour aller à la ligne, ligne
+   de conservation (ADR-019) avec sa case, sous le champ ; compteur à partir de 400 caractères et quota à partir de 3
+   questions restantes, limites écrites dans « Ce que fait Limpide », message de refus inchangé ; « chaque question
+   est traitée seule » près du champ ; relecture de `/confidentialite` (information à deux niveaux).
+
+**Terminé quand** : la démo en production suit l'ADR-022, l'encart IA et la case d'opposition sont visibles sans
+action, et les vérifications manuelles sont cochées dans chaque PR. Le script de la vidéo (session 4) s'écrit sur
+cette interface.
 
 ---
 

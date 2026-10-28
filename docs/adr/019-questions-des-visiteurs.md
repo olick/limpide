@@ -51,7 +51,8 @@ service, à condition d'informer au moment de la collecte et de rendre l'opposit
   Aucun droit pour `lecture_supervision` : Grafana ne la lit pas.
 - **Jamais dans la supervision** : la règle d'ADR-018 (ni texte dans les traces, les messages, `answer_log`) reste
   entière ; le texte n'existe qu'en base, dans cette table.
-- **Mention d'information** (`/confidentialite`, lien en bas de chaque page) : responsable, finalités, destinataires
+- **Mention d'information** (`/confidentialite`, lien en bas de chaque page ; sous le champ et dans le panneau
+  latéral depuis l'ADR-022) : responsable, finalités, destinataires
   (OVHcloud AI Endpoints, Mistral AI), durées de chaque traitement, droits, contact (`contact@limpide-ia.fr`),
   réclamation à la CNIL.
 

@@ -48,6 +48,7 @@ qu'il le maîtrise). Découvre Terraform et Airflow avec ce projet : expliquer l
   le jeton `gh` du poste n'a ni écriture du contenu, ni administration.
 - **Agents de `.claude/agents/`, lancés sans attendre la demande** : `relecteur-regles` avant chaque commit,
   `relecteur-infra` avant une PR qui touche `.github/`, `deploy/` ou `infrastructure/terraform/`,
+  `relecteur-interface` avant une PR qui touche `src/Limpide.Web/` ou `src/Limpide.Admin/`,
   `redacteur-linkedin` quand une étape du plan est faite.
 
 Décisions : `docs/adr/README.md` ; un numéro d'ADR s'attribue **à l'écriture**. Licence : Apache 2.0.
@@ -102,7 +103,8 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 
 S1–S8 faites (POC, démo, Airflow, versions, back office, Terraform, évaluation en CI et chaîne jusqu'au VPS ;
 S8 le 2026-10-28 : observabilité, coûts, sécurité, garde-fous v2, ADR-018 à 021).
-**Prochaine : S9** (gouvernance, documentation, démonstration), puis S10 (marge).
+**Prochaine : S9** (gouvernance, documentation, démonstration), avec la refonte de l'interface **avant** le script
+de la vidéo (fil de questions sans mémoire, ADR-022), puis S10 (marge).
 
 Points ouverts de la S8 : tableau en tête de `semaine-08.md` (dont la lenteur de la vectorisation chez OVHcloud,
 15 s par question le 2026-10-28 au soir, à remesurer).
