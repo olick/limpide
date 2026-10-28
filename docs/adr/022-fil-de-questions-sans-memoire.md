@@ -6,7 +6,8 @@
   implémentation : textes cités repliés en une ligne aussi sur ordinateur (au lieu de deux lignes d'aperçu),
   « chaque question est traitée seule » au-dessus du champ dès la première réponse, ligne de conservation
   reformulée, Back office en bas du panneau, menu mobile modal, focus et défilement précisés ; encarts de l'accueil
-  repliés sur leur titre, texte complet au clic (commentaire d'Alexandre sur la maquette).
+  repliés sur leur titre, texte complet au clic, et légende discrète au lieu du titre « Réponse de l'assistant »
+  (retours d'Alexandre sur la maquette).
 
 ## Contexte
 
@@ -62,7 +63,9 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   personnelle », durée de conservation, case « Ne pas conserver ma question » (libellé de l'ADR-019, cité par
   `/confidentialite`), lien « Vos données ». Dès la première réponse,
   au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
-- **Chaque réponse** garde ses textes cités, « Sous le capot » (replié, avec la durée et le coût dans son bouton) et un
+- **Chaque réponse** porte en tête une légende discrète, « Formulation de l'assistant · à vérifier dans les textes
+  cités » (pas de titre visible, redondant dans un fil), et un titre lu par les lecteurs d'écran seulement
+  (« Réponse à : … ») pour passer d'une réponse à l'autre. Elle garde ses textes cités, « Sous le capot » (replié, avec la durée et le coût dans son bouton) et un
   bouton « Donner mon avis » qui joint **cette** question et **cette** réponse (aujourd'hui, seule la dernière peut
   l'être). Après l'envoi, le fil se place au début de la nouvelle question, pas en bas d'une longue réponse.
 - **Textes cités** : cartes sous la réponse, **repliées en une ligne** (identifiant, titre, « Lire »), sur ordinateur
