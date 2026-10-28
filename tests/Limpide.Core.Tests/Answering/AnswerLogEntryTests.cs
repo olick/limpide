@@ -46,6 +46,16 @@ public class AnswerLogEntryTests
     }
 
     [Fact]
+    public void A_blocked_injection_has_its_own_outcome_and_no_steps()
+    {
+        var entry = AnswerLogEntry.From(
+            Result(declined: true, cited: false, new Guardrail(AnswerService.InjectionCode, "…")), null);
+
+        Assert.Equal(AnswerOutcome.Injection, entry.Outcome);
+        Assert.Equal((null, null, null, null, null), (entry.Model, entry.SearchStrategy, entry.Embedding, entry.Search, entry.Generation));
+    }
+
+    [Fact]
     public void A_failure_keeps_the_exception_type_never_its_message()
     {
         var timeout = AnswerLogEntry.Failed(new OperationCanceledException("question : …"), 42, TimeSpan.FromSeconds(60), null);

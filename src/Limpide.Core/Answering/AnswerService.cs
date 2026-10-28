@@ -27,6 +27,9 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
     /// <summary>Garde-fou du seuil de pertinence : la question n'a pas été soumise au modèle.</summary>
     public const string OutOfScopeCode = "hors-perimetre";
 
+    /// <summary>Garde-fou d'entrée : question repérée comme une tentative d'injection, ni recherchée ni soumise au modèle.</summary>
+    public const string InjectionCode = "injection-suspectee";
+
     public async Task<AnswerResult> AskAsync(string question, CancellationToken ct)
     {
         using var activity = AnswerTelemetry.Source.StartActivity("Réponse à une question");
@@ -49,6 +52,10 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
     private async Task<AnswerResult> AnswerAsync(string question, CancellationToken ct)
     {
         var total = Stopwatch.StartNew();
+        // Avant la recherche : une injection repérée n'est envoyée ni au service de vectorisation ni au modèle.
+        if (PromptInjection.Find(question) is { } technique)
+            return InjectionRefused(question, technique, total.Elapsed);
+
         SearchOutcome found;
         // Étape « recherche » : la vectorisation de la question et la requête SQL s'y rattachent.
         using (AnswerTelemetry.Source.StartActivity("Recherche des passages"))
@@ -96,7 +103,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             instructions.Version,
             new AnswerTimings(found.EmbeddingDuration, found.QueryDuration, generation.Elapsed, total.Elapsed),
             Usage(response.Usage),
-            Guardrails(answer, declined, mentionsDecline, citations, response.FinishReason));
+            Guardrails(question, answer, declined, mentionsDecline, citations, response.FinishReason));
     }
 
     /// <summary>Aucun passage assez proche : réponse fixe, sans appel au modèle (coût nul, aucun risque d'invention).</summary>
@@ -113,6 +120,19 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         [new Guardrail(OutOfScopeCode,
             $"Meilleur passage à {best:F3}, sous le seuil de pertinence ({settings.MinScore:F2}) : le modèle n'est pas appelé.")]);
 
+    /// <summary>Tentative d'injection repérée : réponse fixe, sans recherche ni appel au modèle.</summary>
+    private AnswerResult InjectionRefused(string question, string technique, TimeSpan elapsed) => new(
+        question,
+        AnswerPrompt.InjectionRefused,
+        Declined: true,
+        [],
+        search.Strategy,
+        Model: "(non appelé)",
+        instructions.Version,
+        new AnswerTimings(TimeSpan.Zero, TimeSpan.Zero, TimeSpan.Zero, elapsed),
+        new TokenUsage(0, 0, 0m),
+        [new Guardrail(InjectionCode, $"Tentative d'injection probable ({technique}) : ni recherche, ni appel au modèle.")]);
+
     private TokenUsage Usage(UsageDetails? usage)
     {
         var input = usage?.InputTokenCount;
@@ -124,7 +144,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
     }
 
     private List<Guardrail> Guardrails(
-        string answer, bool declined, bool mentionsDecline, CitationCheck citations, ChatFinishReason? finish)
+        string question, string answer, bool declined, bool mentionsDecline, CitationCheck citations, ChatFinishReason? finish)
     {
         var triggered = new List<Guardrail>();
 
@@ -136,7 +156,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             triggered.Add(new Guardrail("consigne-divulguee",
                 $"La réponse reprend un passage des consignes de l'assistant : « {leak} »."));
 
-        if (LegalQualification.Find(answer) is { } verdict)
+        if (LegalQualification.Find(answer, question) is { } verdict)
             triggered.Add(new Guardrail("qualification-juridique",
                 $"La réponse semble trancher la situation de la personne : « {Shorten(verdict, 160)} »"));
 

@@ -123,86 +123,103 @@
         <summary>Sous le capot : comment cette réponse a été produite</summary>
 
         @{ var outOfScope = r.Guardrails.Any(g => g.Code == "hors-perimetre");
+           var injection = r.Guardrails.Any(g => g.Code == "injection-suspectee");
            var best = r.Passages.Count == 0 ? 0 : r.Passages.Max(p => p.Passage.Score);
            var citedCount = r.CitedPassages.Count(); }
-        <ol class="story">
-            <li>
-                <span class="step-title">Votre question est traduite en « sens »</span>
-                <span class="ms">@Ms(r.Timings.Embedding)</span>
-                @* Phrase tirée du réglage Embedding : elle doit rester vraie quel que soit le fournisseur. *@
-                @if (Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback)
-                {
-                    <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres
-                        qui représente son sens. À cette étape, rien ne quitte le serveur.</p>
-                }
-                else
-                {
-                    <p>Un modèle de langue spécialisé (@Embedding.Model), @EmbeddingHost, transforme votre question en
-                        une suite de nombres qui représente son sens. Votre question lui est envoyée pour ce calcul :
-                        avec la rédaction, c'est la seule étape où elle quitte notre serveur.</p>
-                }
-            </li>
-            <li>
-                <span class="step-title">Recherche des passages les plus proches</span>
-                <span class="ms">@Ms(r.Timings.Search)</span>
-                <p>Limpide compare ce « sens » à celui de chaque passage des textes officiels, et retient les
-                    @r.Passages.Count plus proches. Leur proximité est notée de 0 à 1 : le meilleur obtient
-                    <strong>@best.ToString("0.00", French)</strong>.</p>
-            </li>
-            <li>
-                <span class="step-title">Est-ce bien le sujet des textes ?</span>
-                @if (outOfScope)
-                {
-                    <p><strong>Non.</strong> Même le meilleur passage est trop éloigné (@best.ToString("0.00", French), sous le seuil
-                        de @Generation.MinScore.ToString("0.00", French)). Limpide s'arrête là et répond qu'il ne sait pas, sans
-                        appeler le modèle de rédaction : rien d'inventé, rien de payé.</p>
-                }
-                else
-                {
-                    <p><strong>Oui.</strong> Le meilleur passage dépasse le seuil de @Generation.MinScore.ToString("0.00", French),
-                        en dessous duquel Limpide répond « je ne sais pas » sans aller plus loin.</p>
-                }
-            </li>
-            <li>
-                <span class="step-title">Rédaction de la réponse</span>
-                @if (outOfScope)
-                {
-                    <p>Étape sautée : le modèle de rédaction n'a pas été appelé.</p>
-                }
-                else
-                {
-                    <span class="ms">@Ms(r.Timings.Generation)</span>
-                    <p>@PlainLanguage.ModelName(r.Model), un modèle de Mistral AI hébergé en Europe, a reçu votre question et
-                        ces @r.Passages.Count passages, avec une consigne : répondre seulement à partir d'eux, renvoyer à
-                        chaque passage utilisé ([P1], [P2]…), dire « je ne sais pas » sinon, et ne jamais juger votre
-                        situation.
-                        @(r.Declined ? "Il a répondu ne pas savoir : les passages trouvés ne contenaient pas la réponse."
-                                     : $"Il s'est appuyé sur {citedCount} passage{(citedCount > 1 ? "s" : "")}, reproduit{(citedCount > 1 ? "s" : "")} ci-dessus.")</p>
-                }
-            </li>
-            <li>
-                <span class="step-title">Contrôles automatiques</span>
-                @if (r.Guardrails.Count == 0)
-                {
-                    <p class="ok">Tous réussis : chaque renvoi [P…] correspond bien à un passage fourni, et la réponse ne
-                        semble pas juger votre situation.</p>
-                }
-                else
-                {
-                    <ul class="guardrails">
-                        @foreach (var g in r.Guardrails)
-                        {
-                            var (title, meaning) = PlainLanguage.Guardrail(g.Code);
-                            <li><strong>@title.</strong> @meaning</li>
-                        }
-                    </ul>
-                }
-            </li>
-        </ol>
+        @if (injection)
+        {
+            <ol class="story">
+                <li>
+                    <span class="step-title">Votre question est d'abord contrôlée</span>
+                    <p><strong>Arrêt.</strong> Elle ressemble à une tentative de détourner l'assistant : elle s'adresse à
+                        ses consignes plutôt qu'aux textes. Limpide s'arrête là : votre question n'est ni traduite en
+                        « sens », ni comparée aux textes, ni envoyée au modèle de rédaction. Ce contrôle repose sur des
+                        règles simples, appliquées sur notre serveur, et peut se tromper : reformulez alors votre question
+                        sans instruction pour l'assistant.</p>
+                </li>
+            </ol>
+        }
+        else
+        {
+            <ol class="story">
+                <li>
+                    <span class="step-title">Votre question est traduite en « sens »</span>
+                    <span class="ms">@Ms(r.Timings.Embedding)</span>
+                    @* Phrase tirée du réglage Embedding : elle doit rester vraie quel que soit le fournisseur. *@
+                    @if (Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback)
+                    {
+                        <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres
+                            qui représente son sens. À cette étape, rien ne quitte le serveur.</p>
+                    }
+                    else
+                    {
+                        <p>Un modèle de langue spécialisé (@Embedding.Model), @EmbeddingHost, transforme votre question en
+                            une suite de nombres qui représente son sens. Votre question lui est envoyée pour ce calcul :
+                            avec la rédaction, c'est la seule étape où elle quitte notre serveur.</p>
+                    }
+                </li>
+                <li>
+                    <span class="step-title">Recherche des passages les plus proches</span>
+                    <span class="ms">@Ms(r.Timings.Search)</span>
+                    <p>Limpide compare ce « sens » à celui de chaque passage des textes officiels, et retient les
+                        @r.Passages.Count plus proches. Leur proximité est notée de 0 à 1 : le meilleur obtient
+                        <strong>@best.ToString("0.00", French)</strong>.</p>
+                </li>
+                <li>
+                    <span class="step-title">Est-ce bien le sujet des textes ?</span>
+                    @if (outOfScope)
+                    {
+                        <p><strong>Non.</strong> Même le meilleur passage est trop éloigné (@best.ToString("0.00", French), sous le seuil
+                            de @Generation.MinScore.ToString("0.00", French)). Limpide s'arrête là et répond qu'il ne sait pas, sans
+                            appeler le modèle de rédaction : rien d'inventé, rien de payé.</p>
+                    }
+                    else
+                    {
+                        <p><strong>Oui.</strong> Le meilleur passage dépasse le seuil de @Generation.MinScore.ToString("0.00", French),
+                            en dessous duquel Limpide répond « je ne sais pas » sans aller plus loin.</p>
+                    }
+                </li>
+                <li>
+                    <span class="step-title">Rédaction de la réponse</span>
+                    @if (outOfScope)
+                    {
+                        <p>Étape sautée : le modèle de rédaction n'a pas été appelé.</p>
+                    }
+                    else
+                    {
+                        <span class="ms">@Ms(r.Timings.Generation)</span>
+                        <p>@PlainLanguage.ModelName(r.Model), un modèle de Mistral AI hébergé en Europe, a reçu votre question et
+                            ces @r.Passages.Count passages, avec une consigne : répondre seulement à partir d'eux, renvoyer à
+                            chaque passage utilisé ([P1], [P2]…), dire « je ne sais pas » sinon, et ne jamais juger votre
+                            situation.
+                            @(r.Declined ? "Il a répondu ne pas savoir : les passages trouvés ne contenaient pas la réponse."
+                                         : $"Il s'est appuyé sur {citedCount} passage{(citedCount > 1 ? "s" : "")}, reproduit{(citedCount > 1 ? "s" : "")} ci-dessus.")</p>
+                    }
+                </li>
+                <li>
+                    <span class="step-title">Contrôles automatiques</span>
+                    @if (r.Guardrails.Count == 0)
+                    {
+                        <p class="ok">Tous réussis : chaque renvoi [P…] correspond bien à un passage fourni, et la réponse ne
+                            semble pas juger votre situation.</p>
+                    }
+                    else
+                    {
+                        <ul class="guardrails">
+                            @foreach (var g in r.Guardrails)
+                            {
+                                var (title, meaning) = PlainLanguage.Guardrail(g.Code);
+                                <li><strong>@title.</strong> @meaning</li>
+                            }
+                        </ul>
+                    }
+                </li>
+            </ol>
+        }
 
         <p class="cost">
             <strong>Coût de cette réponse : </strong>
-            @if (outOfScope)
+            @if (outOfScope || injection)
             {
                 <span>rien, le modèle de rédaction n'a pas été appelé.</span>
             }

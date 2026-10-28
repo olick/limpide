@@ -21,6 +21,9 @@ public static class PlainLanguage
         "hors-perimetre" => ("Question hors du sujet des textes",
             "Aucun passage ne parle vraiment de votre question. Plutôt que de laisser le modèle inventer une réponse, "
             + "Limpide ne l'a pas appelé."),
+        "injection-suspectee" => ("Question adressée aux consignes de l'assistant",
+            "Votre question cherche à modifier ou à lire les instructions de l'assistant (ou cite un passage [P…] qu'il "
+            + "ne vous a pas montré). Limpide ne l'a ni cherchée dans les textes, ni transmise au modèle de rédaction."),
         "qualification-juridique" => ("La réponse semble juger votre situation",
             "Limpide doit seulement montrer ce que disent les textes, pas dire si vous êtes en règle. "
             + "Fiez-vous aux extraits, et faites apprécier votre cas par un professionnel du droit."),

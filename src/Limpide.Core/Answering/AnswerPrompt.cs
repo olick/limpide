@@ -21,6 +21,14 @@ public static class AnswerPrompt
         + "(règlement européen sur l'IA, fiches pratiques IA de la CNIL).";
 
     /// <summary>
+    /// Réponse quand la question ressemble à une tentative d'injection (<see cref="PromptInjection"/>) : ni recherche,
+    /// ni modèle.
+    /// </summary>
+    public const string InjectionRefused =
+        "Je ne peux pas répondre à cette demande : elle s'adresse aux consignes de l'assistant plutôt qu'aux textes. "
+        + "Posez votre question sur le règlement européen sur l'IA ou les fiches pratiques IA de la CNIL.";
+
+    /// <summary>
     /// Avertissement affiché avec chaque réponse, quelle qu'elle soit. Texte fixe, jamais généré :
     /// il doit être présent même si le modèle ne suit pas ses consignes.
     /// </summary>

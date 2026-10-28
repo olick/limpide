@@ -24,6 +24,25 @@ public class LegalQualificationTests
         Assert.Null(LegalQualification.Find(answer));
     }
 
+    [Theory] // « Oui » / « Non » suivi d'un verdict, en réponse à une question sur la situation de la personne (S8).
+    [InlineData("Mon logiciel qui trie les CV est-il un système à haut risque ?", "Oui, les logiciels de tri de CV sont classés à haut risque [P3].")]
+    [InlineData("Ma start-up vend de la reconnaissance faciale aux magasins : est-ce interdit pour nous ?", "Non, cette pratique n'est pas interdite [P1].")]
+    [InlineData("Suis-je concerné par l'article 50 ?", "**Oui**, ce type de système est autorisé sous conditions [P2].")]
+    public void Flags_a_yes_or_no_verdict_on_the_persons_situation(string question, string answer)
+    {
+        Assert.NotNull(LegalQualification.Find(answer, question));
+    }
+
+    [Theory] // Même début, mais question générale, ou réponse sans verdict, ou au conditionnel.
+    [InlineData("Les logiciels de tri de CV sont-ils à haut risque ?", "Oui, les logiciels de tri de CV sont classés à haut risque [P3].")]
+    [InlineData("Dois-je prévenir les utilisateurs qu'ils parlent à un chatbot ?", "Oui, les fournisseurs doivent informer les personnes concernées [P1].")]
+    [InlineData("Mon logiciel est-il à haut risque ?", "Oui, il pourrait être classé à haut risque s'il sert au recrutement [P2].")]
+    [InlineData("Mon logiciel est-il à haut risque ?", "L'annexe III classe à haut risque les systèmes de recrutement [P2]. Oui, ce point concerne l'emploi.")]
+    public void Lets_through_general_questions_and_answers_without_verdict(string question, string answer)
+    {
+        Assert.Null(LegalQualification.Find(answer, question));
+    }
+
     [Fact]
     public void Returns_the_offending_sentence_only()
     {

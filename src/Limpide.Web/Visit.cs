@@ -89,6 +89,9 @@ public static partial class VisitorLog
         Message = "Hors périmètre : meilleur passage à {BestScore:F3}, sous le seuil de {MinScore:F2} ; modèle non appelé")]
     private static partial void OutOfScope(this ILogger logger, double? bestScore, double minScore);
 
+    [LoggerMessage(Level = LogLevel.Information, Message = "Injection probable dans la question : ni recherche, ni modèle")]
+    private static partial void InjectionBlocked(this ILogger logger);
+
     [LoggerMessage(Level = LogLevel.Information,
         Message = "Recherche : {Passages} passages, meilleur à {BestScore:F3} (seuil {MinScore:F2}) ; vectorisation {EmbeddingMs} ms, base {SearchMs} ms")]
     private static partial void Searched(this ILogger logger, int passages, double? bestScore, double minScore, int embeddingMs, int searchMs);
@@ -113,7 +116,9 @@ public static partial class VisitorLog
     {
         var entry = AnswerLogEntry.From(result, traceId: null);
         var t = result.Timings;
-        if (entry.Outcome == AnswerOutcome.OutOfScope)
+        if (entry.Outcome == AnswerOutcome.Injection)
+            logger.InjectionBlocked();
+        else if (entry.Outcome == AnswerOutcome.OutOfScope)
             logger.OutOfScope(entry.BestScore, minScore);
         else
         {
@@ -121,7 +126,7 @@ public static partial class VisitorLog
             logger.Generated(entry.Model, result.PromptVersion, entry.InputTokens, entry.OutputTokens, entry.CostEur, Ms(t.Generation));
         }
 
-        foreach (var code in entry.Guardrails.Where(c => c != AnswerService.OutOfScopeCode))
+        foreach (var code in entry.Guardrails.Where(c => c != AnswerService.OutOfScopeCode && c != AnswerService.InjectionCode))
             logger.GuardrailTriggered(code);
         logger.Answered(entry.Outcome, entry.Cited, Ms(t.Total));
     }
