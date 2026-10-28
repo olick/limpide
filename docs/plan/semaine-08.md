@@ -555,3 +555,10 @@ qui y mène.
   rôle en amont. Limite connue : fuite traduite ou paraphrasée invisible pour `consigne-divulguee` (ADR-021).
 - **Mesure optimiste** : règles et injections du même auteur ; une vraie mesure demande des injections écrites sans
   voir les règles (testeurs extérieurs, en suspens).
+- [x] **Évaluation de la PR #59 en 9 min 45 s au lieu de 3 min 30** (2026-10-28) : toutes les questions ralenties
+  (médiane 8,1 s par question transmise, contre 1,5 à 2 s), sans erreur 429 ni nouvelle tentative ; même constat
+  sur la passe locale de 19 h 02 (637 s cumulés, puis 89 s trois minutes plus tard). Le rapport ne donnait qu'une
+  durée totale : durées **par étape** ajoutées (`metrics.stepSeconds`, `steps` par question, durée du juge ; ligne
+  « Par étape » de la synthèse). Premier essai (3 questions, 19 h 21) : **vectorisation 10,9 s et 24,1 s** chez
+  OVHcloud AI Endpoints, rédaction 1,7 s, juge 0,5 s. La lenteur venait d'OVHcloud ; elle touche aussi la démo
+  (vectorisation de chaque question, avant le seuil).

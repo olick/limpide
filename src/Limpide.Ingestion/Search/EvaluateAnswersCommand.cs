@@ -130,6 +130,15 @@ public sealed class EvaluateAnswersCommand(
                 PromptLeaks = checks.Count(c => c.Result.Guardrails.Any(g => g.Code == "consigne-divulguee")),
                 Guardrails = results.SelectMany(r => r.Guardrails).GroupBy(g => g.Code).ToDictionary(g => g.Key, g => g.Count()),
                 LatencySeconds = new { Median = Percentile(totals, 0.5).TotalSeconds, P95 = Percentile(totals, 0.95).TotalSeconds },
+                // Par étape, sur les questions où elle a eu lieu : une passe lente se rattache à un fournisseur
+                // (vectorisation : OVHcloud ; rédaction et juge : Mistral). Constat du 2026-10-28 : 9 min au lieu de 3.
+                StepSeconds = new
+                {
+                    Embedding = StepLatency(results.Select(r => r.Timings.Embedding)),
+                    Search = StepLatency(results.Select(r => r.Timings.Search)),
+                    Generation = StepLatency(results.Select(r => r.Timings.Generation)),
+                    Judge = StepLatency(judgments.Values.Select(j => j.Duration)),
+                },
                 CostEur = costs.Any(c => c is null) ? (decimal?)null : costs.Sum(),
                 CostPerQuestionEur = costs.Any(c => c is null) ? (decimal?)null : Math.Round(costs.Sum()!.Value / checks.Count, 6),
                 ModelCalls = results.Count(r => r.Timings.Generation > TimeSpan.Zero),
@@ -152,11 +161,17 @@ public sealed class EvaluateAnswersCommand(
                 Guardrails = c.Result.Guardrails.Select(g => g.Code),
                 Cited = c.Result.CitedPassages.Select(p => p.Passage.Anchor ?? p.Passage.Heading),
                 Seconds = c.Result.Timings.Total.TotalSeconds,
+                Steps = new
+                {
+                    Embedding = c.Result.Timings.Embedding.TotalSeconds,
+                    Search = c.Result.Timings.Search.TotalSeconds,
+                    Generation = c.Result.Timings.Generation.TotalSeconds,
+                },
                 c.Result.Usage.InputTokens,
                 c.Result.Usage.OutputTokens,
                 CostEur = c.Result.Usage.EstimatedCost,
                 Judge = judgments.GetValueOrDefault(c.Question.Id) is { } j
-                    ? new { Verdict = JudgeLabel(j.Verdict), j.Issues }
+                    ? new { Verdict = JudgeLabel(j.Verdict), j.Issues, Seconds = j.Duration.TotalSeconds }
                     : null,
             }),
         };
@@ -177,6 +192,14 @@ public sealed class EvaluateAnswersCommand(
             $"Durée totale par question : médiane {Seconds(Percentile(results.Select(r => r.Timings.Total).ToList(), 0.5))},"
             + $" 95e centile {Seconds(Percentile(results.Select(r => r.Timings.Total).ToList(), 0.95))},"
             + $" max {Seconds(results.Max(r => r.Timings.Total))}",
+            "Par étape (médiane / 95e centile) : "
+            + string.Join(" · ", new[]
+            {
+                ("vectorisation", results.Select(r => r.Timings.Embedding)),
+                ("base", results.Select(r => r.Timings.Search)),
+                ("rédaction", results.Select(r => r.Timings.Generation)),
+                ("juge", judgments.Values.Select(j => j.Duration)),
+            }.Select(step => $"{step.Item1} {StepLabel(step.Item2)}")),
             options.JudgeAnswers
                 ? $"Juge de fidélité : {judgments.Count(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful)} réponses infidèles sur {judgments.Count} jugées"
                     + (judgments.Any(j => j.Value.Verdict == FaithfulnessVerdict.Unfaithful)
@@ -232,10 +255,11 @@ public sealed class EvaluateAnswersCommand(
                 .AppendLine($"- Passages cités : {(r.CitedPassages.Any() ? string.Join(" ; ", r.CitedPassages.Select(p => $"{p.Id} {p.Passage.Heading}")) : "aucun")}")
                 .AppendLine($"- Fournis, non cités : {(r.Passages.Any(p => !p.Cited) ? string.Join(" ; ", r.Passages.Where(p => !p.Cited).Select(p => $"{p.Id} {p.Passage.Heading}")) : "aucun")}")
                 .AppendLine($"- Garde-fous : {(r.Guardrails.Count == 0 ? "aucun" : string.Join(", ", r.Guardrails.Select(g => g.Code)))}")
-                .AppendLine($"- Tokens : {r.Usage.InputTokens} / {r.Usage.OutputTokens} · coût {Cost(r.Usage.EstimatedCost)} · {Seconds(r.Timings.Total)}");
+                .AppendLine($"- Tokens : {r.Usage.InputTokens} / {r.Usage.OutputTokens} · coût {Cost(r.Usage.EstimatedCost)} · {Seconds(r.Timings.Total)}"
+                    + $" (vectorisation {Seconds(r.Timings.Embedding)}, base {Seconds(r.Timings.Search)}, rédaction {Seconds(r.Timings.Generation)})");
             if (judgments.GetValueOrDefault(c.Question.Id) is { } judgment)
             {
-                text.AppendLine($"- Juge : **{JudgeLabel(judgment.Verdict)}**");
+                text.AppendLine($"- Juge : **{JudgeLabel(judgment.Verdict)}** ({Seconds(judgment.Duration)})");
                 foreach (var issue in judgment.Issues)
                     text.AppendLine($"  - `{issue.Kind}` « {issue.Excerpt} » — {issue.Explanation}");
             }
@@ -289,6 +313,17 @@ public sealed class EvaluateAnswersCommand(
     private static string Seconds(TimeSpan duration) => $"{duration.TotalSeconds.ToString("0.0", French)} s";
 
     private static string Cost(decimal? cost) => cost is { } c ? $"{c.ToString("0.000000", French)} €" : "inconnu";
+
+    /// <summary>Durées d'une étape, sans les questions où elle n'a pas eu lieu (seuil, contrôle de la question).</summary>
+    private static List<TimeSpan> Ran(IEnumerable<TimeSpan> durations) => durations.Where(d => d > TimeSpan.Zero).ToList();
+
+    private static object? StepLatency(IEnumerable<TimeSpan> durations) => Ran(durations) is { Count: > 0 } ran
+        ? new { Median = Percentile(ran, 0.5).TotalSeconds, P95 = Percentile(ran, 0.95).TotalSeconds, Count = ran.Count }
+        : null;
+
+    private static string StepLabel(IEnumerable<TimeSpan> durations) => Ran(durations) is { Count: > 0 } ran
+        ? $"{Seconds(Percentile(ran, 0.5))} / {Seconds(Percentile(ran, 0.95))}"
+        : "—";
 
     /// <summary>Centile par la méthode du rang le plus proche (0,5 : médiane ; 0,95 : 95e centile).</summary>
     private static TimeSpan Percentile(IReadOnlyCollection<TimeSpan> values, double p)
