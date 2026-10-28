@@ -25,3 +25,7 @@ paths:
 - Clés DataProtection persistées dans les volumes `web_keys` / `admin_keys`.
 - Tester dans un navigateur (à la main : pas d'outil d'automatisation sur le poste) ; l'image ne se construit pas
   si `blazor.web.js` manque.
+- **Skills de design, un par domaine** (audits comparables d'une fois sur l'autre) : accessibilité et textes de
+  l'interface par le plugin `interfaces` (`better-accessibility`, WCAG 2.2 ; `better-writing`), sur lesquels
+  s'appuie `/interface-review` pour relire une PR ; critique, système de design et passation par le plugin `design`.
+  Ne pas employer `design:accessibility-review` ni `design:ux-copy`, qui font doublon.
