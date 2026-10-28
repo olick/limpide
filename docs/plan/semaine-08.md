@@ -575,4 +575,8 @@ qui y mène.
   ne fait échouer aucune question. À refaire le lendemain (`time dotnet run --project src/Limpide.Ingestion --
   evaluate` : 10 à 15 s attendues) ; si elle persiste, page d'état ou ticket OVHcloud. Une sonde de vectorisation
   sans visiteur, seulement si l'épisode se répète (S10).
+- [x] **Contrôle de la question en production (2026-10-28, 19 h 29 UTC)** : i08 posée sur la démo par Alexandre ;
+  réponse fixe, « Sous le capot » à une étape, coût « rien » ; dans `answer_log` : `injection-bloquee`,
+  `{injection-suspectee}`, modèle, recherche, vectorisation et rédaction vides, 0 token. La question n'est partie ni
+  chez OVHcloud ni chez Mistral.
 - [x] **Session 4 terminée (2026-10-28). S8 terminée** : les 5 sessions faites, aucune sacrifiée.
