@@ -100,23 +100,19 @@ Production : https://www.limpide-ia.fr et https://admin.limpide-ia.fr, sur un VP
 Plan : `docs/plan/plan-global.md`. Un fichier par semaine, `docs/plan/semaine-NN.md` (plan, puis journal de
 réalisation) : **toujours lire celui de la semaine en cours**.
 
-S1–S7 faites (POC, démo, Airflow, versions, back office, Terraform ; S7 le 2026-10-18 : évaluation en CI, `gate`,
-chaîne jusqu'au VPS, bascule Qwen3-Embedding-8B, ADR-014 à 017) ; S9–S10 à venir (gouvernance, marge).
+S1–S8 faites (POC, démo, Airflow, versions, back office, Terraform, évaluation en CI et chaîne jusqu'au VPS ;
+S8 le 2026-10-28 : observabilité, coûts, sécurité, garde-fous v2, ADR-018 à 021).
+**Prochaine : S9** (gouvernance, documentation, démonstration), puis S10 (marge).
 
-**S8 en cours** (observabilité, coûts, sécurité), ADR-018. Session 1 (2026-10-19) : supervision auto-hébergée sur
-le VPS (`supervision/`), journal `answer_log`. Session 2 (19) : tableaux de bord, 8 alertes Discord, Grafana sur
-https://grafana.limpide-ia.fr/. Session 3 (20) : coûts en euros (migration 0008), alertes de budget, `docs/finops.md`.
-Session 5 (21 à 27) : questions conservées 30 jours (ADR-019), `web` en compte limité (migration 0010), revue des
-accès (`docs/acces.md`), Grafana sur sa propre inscription Microsoft, rotation de la clé Mistral, Dependabot,
-anti-bot : mesurer d'abord (ADR-020). Prochaine : session 4 (garde-fous v2, sacrifiable). Points ouverts : tableau
-en tête de `semaine-08.md`.
+Points ouverts de la S8 : tableau en tête de `semaine-08.md` (dont la lenteur de la vectorisation chez OVHcloud,
+15 s par question le 2026-10-28 au soir, à remesurer).
 
 **En suspens (Alexandre), reporté à la fin du plan initial — ne pas relancer** : validation de la page d'accueil
-par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2`, exercices Airflow,
+par des non-techniciens, message à Jedha, testeurs extérieurs, relecture de `jeu/2` et `jeu/3`, exercices Airflow,
 **tous les enregistrements** de démonstration (quarantaine, blocage par l'évaluation, vidéo de la S9).
 
-En retard : sacrifier les garde-fous v2 (S8), puis reporter en S10 le suivi en direct et les tableaux de bord du
-back office ; **jamais l'évaluation (S7)**. Après le plan : migration cloud, puis mise à l'échelle.
+En retard : reporter en S10 le suivi en direct et les tableaux de bord du back office ; **jamais l'évaluation
+(S7)**. Après le plan : migration cloud, puis mise à l'échelle.
 
 **Journal LinkedIn** : `.linkedin/linkedin-limpide.md` (règles dans sa section « Format »). À chaque étape faite du
 plan, **proposer l'épisode suivant** dans la série courte (`linkedin-limpide-serie-courte.md`).
