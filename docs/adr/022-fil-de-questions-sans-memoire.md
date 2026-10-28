@@ -5,7 +5,8 @@
 - **Précisé le 2026-10-29**, après l'audit de la maquette (`better-interface`, `design-critique`) et avant toute
   implémentation : textes cités repliés en une ligne aussi sur ordinateur (au lieu de deux lignes d'aperçu),
   « chaque question est traitée seule » au-dessus du champ dès la première réponse, ligne de conservation
-  reformulée, Back office en bas du panneau, menu mobile modal, focus et défilement précisés.
+  reformulée, Back office en bas du panneau, menu mobile modal, focus et défilement précisés ; encarts de l'accueil
+  repliés sur leur titre, texte complet au clic (commentaire d'Alexandre sur la maquette).
 
 ## Contexte
 
@@ -52,8 +53,9 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
 - **Panneau latéral** (menu sur mobile, en fenêtre modale), icône et libellé : Nouvelle question, Ce que fait
   Limpide, Comment il est construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert ; en bas, en
   petit, Sources et licences et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
-- **Accueil vide** : les trois encarts (« ce qu'il fait, ne fait pas, pourquoi il montre tout »), raccourcis, et les
-  exemples en boutons. Ils disparaissent à la première question ; le texte complet passe dans « Ce que fait Limpide ».
+- **Accueil vide** : les trois encarts (« ce qu'il fait, ne fait pas, pourquoi il montre tout »), repliés sur leur
+  titre, texte complet d'origine déplié au clic (pas au survol, qui ne marche pas au tactile), et les exemples en
+  boutons. Ils disparaissent à la première question ; le même texte reste dans « Ce que fait Limpide ».
   Pas de commande « / » : les visiteurs ne sont pas tous techniciens.
 - **Champ fixé en bas**, bouton flèche nommé « Poser la question », un exemple de question en texte d'aide, contour
   de focus visible sur le cadre du champ. Sous le champ, visibles sans action avant l'envoi : « pas de donnée

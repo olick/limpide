@@ -21,7 +21,7 @@ puis vérifiée à la main dans un navigateur (320 px, thème sombre, clavier), 
 2. **Pages secondaires** (≈ 1 h 30) : Ce que fait Limpide (texte complet des trois encarts), Votre avis (formulaire
    général), Comment il est construit (`TechStack.razor`), Sources et licences (mentions du pied de page actuel).
    Liens du panneau vers ces pages, l'évaluation, « Vos données », le dépôt et le back office.
-3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts courts et
+3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts repliés (texte complet au clic) et
    exemples en boutons, « Sous le capot » et « Donner mon avis » par réponse (l'avis joint cette question et cette
    réponse), le fil placé au début de la nouvelle question et le focus sur sa réponse.
 4. **Textes cités** (≈ 1 h 30) : cartes repliées en une ligne sous la réponse, sur ordinateur comme sur mobile ; un
