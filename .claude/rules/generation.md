@@ -21,6 +21,11 @@ paths:
 - **Garde-fous** déterministes (`citation-inventee`, `sans-citation`, `reponse-tronquee`, `reponse-vide`,
   `qualification-juridique`, `consigne-divulguee`…) : ils signalent, ils ne réécrivent pas. Citations précises
   acceptées (`[P1a]`, `[P5.1.a]`). Refus reconnus par `Refusals`. Texte du modèle nettoyé par `ModelText.Clean`.
+  `qualification-juridique` voit aussi un « Oui » / « Non » suivi d'un verdict à une question à la première personne.
+- **Seuls deux garde-fous bloquent, en amont** : `injection-suspectee` (`PromptInjection`, avant la recherche : ni
+  vectorisation ni modèle, réponse fixe `AnswerPrompt.InjectionRefused`) et `hors-perimetre` (seuil). Règles du
+  contrôle d'entrée étroites : toute règle ajoutée garde **zéro faux positif** sur les questions du jeu qui ne sont
+  pas des injections (test) ; pas de règle écrite pour une seule question du jeu (i07 reste au modèle).
 - Avertissement juridique fixe (`AnswerPrompt.Disclaimer`) et réponse hors périmètre fixe (`AnswerPrompt.OutOfScope`),
   jamais générés.
 - Seuil `Generation:MinScore = 0,60` (pas d'appel au LLM en dessous), propre à Qwen3-Embedding-8B+titre (bge-m3+titre :

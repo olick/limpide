@@ -64,7 +64,7 @@ public class RetrievalScoreTests
 
         var set = EvaluationSetLoader.Load(Path.Combine(directory.FullName, "eval", "questions.json"));
 
-        Assert.Equal(50, set.Questions.Count);
+        Assert.Equal(55, set.Questions.Count);
         Assert.Equal(30, set.Questions.Count(q => q.Behavior == ExpectedBehavior.Answer));
         Assert.Equal(set.Questions.Count, set.Questions.Select(q => q.Id).Distinct().Count());
     }

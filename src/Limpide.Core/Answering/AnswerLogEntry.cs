@@ -6,7 +6,9 @@ namespace Limpide.Core.Answering;
 /// <see cref="TraceId"/> mène à la trace détaillée tant que la supervision la garde.
 /// </summary>
 /// <param name="Outcome">Une des constantes de <see cref="AnswerOutcome"/>.</param>
-/// <param name="Model">Null quand le modèle n'a pas été appelé (hors périmètre, quota, erreur avant la génération).</param>
+/// <param name="Model">
+/// Null quand le modèle n'a pas été appelé (hors périmètre, injection, quota, erreur avant la génération).
+/// </param>
 /// <param name="BestScore">Similarité du meilleur passage ; null si aucune recherche n'a abouti.</param>
 /// <param name="Error">Type de l'exception seulement : un message peut reprendre la question.</param>
 public sealed record AnswerLogEntry(
@@ -35,19 +37,22 @@ public sealed record AnswerLogEntry(
     public static AnswerLogEntry From(AnswerResult result, string? traceId)
     {
         var outOfScope = result.Guardrails.Any(g => g.Code == AnswerService.OutOfScopeCode);
+        var injection = result.Guardrails.Any(g => g.Code == AnswerService.InjectionCode);
         return new AnswerLogEntry(
-            outOfScope ? AnswerOutcome.OutOfScope : result.Declined ? AnswerOutcome.Declined : AnswerOutcome.Answered,
+            injection ? AnswerOutcome.Injection
+                : outOfScope ? AnswerOutcome.OutOfScope
+                : result.Declined ? AnswerOutcome.Declined : AnswerOutcome.Answered,
             traceId,
             result.Question.Length,
-            result.SearchStrategy,
-            outOfScope ? null : result.Model,
+            injection ? null : result.SearchStrategy,
+            outOfScope || injection ? null : result.Model,
             result.PromptVersion,
             result.Passages.Count,
             result.CitedPassages.Count(),
             result.Passages.Count == 0 ? null : result.Passages.Max(p => p.Passage.Score),
-            result.Timings.Embedding,
-            result.Timings.Search,
-            result.Timings.Generation,
+            injection ? null : result.Timings.Embedding,
+            injection ? null : result.Timings.Search,
+            injection ? null : result.Timings.Generation,
             result.Timings.Total,
             result.Usage.InputTokens,
             result.Usage.OutputTokens,
@@ -72,6 +77,8 @@ public static class AnswerOutcome
     public const string Declined = "je-ne-sais-pas";
     /// <summary>Sous le seuil de pertinence : le modèle n'est pas appelé.</summary>
     public const string OutOfScope = "hors-perimetre";
+    /// <summary>Tentative d'injection repérée dans la question : ni recherche, ni modèle.</summary>
+    public const string Injection = "injection-bloquee";
     public const string QuotaVisitor = "quota-visiteur";
     public const string QuotaDaily = "quota-journalier";
     public const string Timeout = "delai-depasse";
