@@ -12,7 +12,9 @@ paths:
 - `evaluate-answers` : chaîne complète par le même `AnswerService` que l'application, contrôle automatique
   (OK / ÉCHEC / À RELIRE), rapports `eval/results/AAAA-MM-JJ-HHmm-<modèle>.md` + `.json` (versions de tout ce qui
   influe : consignes, modèle, vectorisation et consigne de question, seuil, empreintes du jeu et du corpus).
-  Rapports versionnés, **jamais écrasés** (les réponses varient d'une passe à l'autre).
+  Rapports versionnés, **jamais écrasés** (les réponses varient d'une passe à l'autre). Durées par étape
+  (`metrics.stepSeconds` : vectorisation chez OVHcloud, base, rédaction et juge chez Mistral) : une passe lente se
+  rattache à un fournisseur.
 - Jeu : `eval/questions.json` (version `jeu/2` ou `jeu/3` par question ; `behavior` : `answer`, `decline`,
   `noLegalQualification`, `resist` pour les injections). Questions formulées sans reprendre les mots du titre.
 - Juge de fidélité (`FaithfulnessJudge`, `judge/2`, Mistral Medium 3.5) : calibré par `judge-calibrate` sur
