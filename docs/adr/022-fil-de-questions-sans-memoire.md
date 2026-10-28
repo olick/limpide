@@ -2,6 +2,10 @@
 
 - **Statut** : accepté
 - **Date** : 2026-10-28
+- **Précisé le 2026-10-29**, après l'audit de la maquette (`better-interface`, `design-critique`) et avant toute
+  implémentation : textes cités repliés en une ligne aussi sur ordinateur (au lieu de deux lignes d'aperçu),
+  « chaque question est traitée seule » au-dessus du champ dès la première réponse, ligne de conservation
+  reformulée, Back office en bas du panneau, menu mobile modal, focus et défilement précisés.
 
 ## Contexte
 
@@ -45,20 +49,26 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
 
 - **En-tête fixe** : « Limpide », une phrase courte, et une pastille « IA · Vous échangez avec une IA : elle peut se
   tromper, ce n'est pas un conseil juridique », visible en permanence (article 50).
-- **Panneau latéral** (menu sur mobile), icône et libellé : Nouvelle question, Ce que fait Limpide, Comment il est
-  construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert, Back office, Sources et licences.
+- **Panneau latéral** (menu sur mobile, en fenêtre modale), icône et libellé : Nouvelle question, Ce que fait
+  Limpide, Comment il est construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert ; en bas, en
+  petit, Sources et licences et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
 - **Accueil vide** : les trois encarts (« ce qu'il fait, ne fait pas, pourquoi il montre tout »), raccourcis, et les
   exemples en boutons. Ils disparaissent à la première question ; le texte complet passe dans « Ce que fait Limpide ».
   Pas de commande « / » : les visiteurs ne sont pas tous techniciens.
-- **Champ fixé en bas**, bouton flèche nommé « Poser la question », texte d'aide « complète et sans donnée
-  personnelle ». Sous le champ, visible sans action avant l'envoi : case « Ne pas conserver ma question », durée,
-  lien « Vos données ».
+- **Champ fixé en bas**, bouton flèche nommé « Poser la question », un exemple de question en texte d'aide, contour
+  de focus visible sur le cadre du champ. Sous le champ, visibles sans action avant l'envoi : « pas de donnée
+  personnelle », durée de conservation, case « Ne pas conserver ma question » (libellé de l'ADR-019, cité par
+  `/confidentialite`), lien « Vos données ». Dès la première réponse,
+  au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
 - **Chaque réponse** garde ses textes cités, « Sous le capot » (replié, avec la durée et le coût dans son bouton) et un
-  bouton « Mon avis » qui joint **cette** question et **cette** réponse (aujourd'hui, seule la dernière peut l'être).
-- **Textes cités** : cartes sous la réponse, deux lignes d'aperçu sur ordinateur, repliées en une ligne sur mobile ;
-  un renvoi `[P1]` ouvre la carte. Pied de carte réduit à la source, au lien vers le texte officiel et à la licence ;
-  version et empreinte restent dans les détails techniques. Écartées : la fenêtre au clic (texte de référence caché,
-  focus à gérer) et le panneau à droite (deux panneaux et le fil sur ordinateur, à refaire pour le mobile).
+  bouton « Donner mon avis » qui joint **cette** question et **cette** réponse (aujourd'hui, seule la dernière peut
+  l'être). Après l'envoi, le fil se place au début de la nouvelle question, pas en bas d'une longue réponse.
+- **Textes cités** : cartes sous la réponse, **repliées en une ligne** (identifiant, titre, « Lire »), sur ordinateur
+  comme sur mobile ; le texte s'ouvre à la demande. Un renvoi `[P1]` ouvre la carte et y porte le focus. Pied de carte
+  (affiché carte ouverte) réduit à la source, au lien vers le texte officiel et à la licence ; version et empreinte
+  restent dans les détails techniques. Écartés : l'aperçu de deux lignes (trop de texte sous chaque réponse), la
+  fenêtre au clic (texte de référence caché, focus à gérer) et le panneau à droite (deux panneaux et le fil sur
+  ordinateur, à refaire pour le mobile).
 - Compteur de caractères et quota affichés **à l'approche des limites** seulement (à partir de 400 caractères, à
   partir de 3 questions restantes). Les limites restent écrites dans « Ce que fait Limpide », et le message de refus
   quand elles sont atteintes ne change pas.
