@@ -45,8 +45,8 @@ service, à condition d'informer au moment de la collecte et de rendre l'opposit
   sociale, numéros de téléphone, remplacés par leur type. Par motifs : ni les noms ni les adresses postales ; la
   mention demande de ne pas en écrire, et le back office permet de supprimer une question.
 - **Opposition** : case « Ne pas conserver ma question » sous le champ, décochée par défaut, avec l'information juste
-  au-dessus et un lien vers la page « Vos données » (`/confidentialite`). Une question refusée par le quota n'est
-  jamais conservée.
+  au-dessus et un lien vers la page « Vos données » (`/confidentialite`) ; depuis l'ADR-022, information, case et lien
+  sur une même ligne sous le champ. Une question refusée par le quota n'est jamais conservée.
 - **Accès** : le back office seulement (page « Questions », suppression notée dans `admin_actions` sans le texte).
   Aucun droit pour `lecture_supervision` : Grafana ne la lit pas.
 - **Jamais dans la supervision** : la règle d'ADR-018 (ni texte dans les traces, les messages, `answer_log`) reste

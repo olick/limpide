@@ -15,21 +15,23 @@ Décision : ADR-022 (fil de questions sans mémoire), d'après l'audit d'interfa
 d'abord) et une maquette cliquable validée avec Alexandre. Une PR par étape, chacune relue par `relecteur-interface`
 puis vérifiée à la main dans un navigateur (320 px, thème sombre, clavier), et par `/interface-review`.
 
-1. **Squelette** (≈ 2 h) : en-tête fixe (titre, phrase courte, pastille IA), panneau latéral (menu sur mobile), zone
-   du fil, champ fixé en bas. Le contenu actuel de la page y est replacé tel quel.
+1. **Squelette** (≈ 2 h) : en-tête fixe (titre, phrase courte, pastille IA), panneau latéral (menu sur mobile en
+   `<dialog>` modal, page en cours marquée par `aria-current`), zone du fil, champ fixé en bas (hauteur en `100dvh`
+   pour le clavier mobile). Le contenu actuel de la page y est replacé tel quel.
 2. **Pages secondaires** (≈ 1 h 30) : Ce que fait Limpide (texte complet des trois encarts), Votre avis (formulaire
    général), Comment il est construit (`TechStack.razor`), Sources et licences (mentions du pied de page actuel).
    Liens du panneau vers ces pages, l'évaluation, « Vos données », le dépôt et le back office.
-3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts courts et
-   exemples en boutons, « Sous le capot » et « Mon avis » par réponse (l'avis joint cette question et cette
-   réponse), focus sur chaque nouvelle réponse.
-4. **Textes cités** (≈ 1 h 30) : cartes sous la réponse, aperçu de deux lignes sur ordinateur, repliées sur mobile ;
-   un renvoi `[P1]` ouvre et montre la carte ; pied de carte réduit (source, texte officiel, licence), version et
-   empreinte dans les détails techniques.
+3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts repliés (texte complet au clic) et
+   exemples en boutons, « Sous le capot » et « Donner mon avis » par réponse (l'avis joint cette question et cette
+   réponse), le fil placé au début de la nouvelle question et le focus sur sa réponse.
+4. **Textes cités** (≈ 1 h 30) : cartes repliées en une ligne sous la réponse, sur ordinateur comme sur mobile ; un
+   renvoi `[P1]` ouvre la carte et y porte le focus ; pied de carte réduit (source, texte officiel, licence), version
+   et empreinte dans les détails techniques.
 5. **Champ et finitions** (≈ 1 h 30) : bouton flèche, Entrée pour envoyer et Maj+Entrée pour aller à la ligne, ligne
    de conservation (ADR-019) avec sa case, sous le champ ; compteur à partir de 400 caractères et quota à partir de 3
    questions restantes, limites écrites dans « Ce que fait Limpide », message de refus inchangé ; « chaque question
-   est traitée seule » près du champ ; relecture de `/confidentialite` (information à deux niveaux).
+   est traitée seule » au-dessus du champ dès la première réponse ; contour de focus sur le cadre du champ ;
+   relecture de `/confidentialite` (information à deux niveaux).
 
 **Terminé quand** : la démo en production suit l'ADR-022, l'encart IA et la case d'opposition sont visibles sans
 action, et les vérifications manuelles sont cochées dans chaque PR. Le script de la vidéo (session 4) s'écrit sur
