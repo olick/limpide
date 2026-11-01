@@ -171,10 +171,11 @@ l'appareil » par défaut.
   d'utilisation, consentement trop lourd), avec une mise en balance écrite dans `docs/gouvernance/`.
 - [ ] **Purge à l'écriture seulement** (`AnswerLogStore`, `FeedbackStore`) : sans nouvelle question, une question
   peut rester au-delà des 30 jours annoncés.
-- [ ] **Mentions légales (LCEN, article 6)** : maquette faite (page « Mentions légales, sources et licences »).
-  Éditeur : une EURL (siège, SIRET donnés le 2026-11-01). Restent à fournir : dénomination, capital social,
-  téléphone, ville du greffe (RCS), qualité du directeur de la publication ; téléphone d'OVHcloud (absent de ses
-  mentions légales).
+- [x] **Mentions légales (LCEN, article 6)** : page `/mentions-legales` (étape 2a), éditeur complet (informations
+  d'Alexandre, confirmées au registre des entreprises le 2026-11-01). **Sans téléphone, par choix d'Alexandre** :
+  son seul numéro est personnel, l'adresse électronique sert de contact ; l'article 6, III, 1, b demande un
+  téléphone pour une société, écart signalé et accepté. Celui d'OVHcloud manque aussi (absent de ses mentions
+  légales) : lien vers son site.
 - [ ] **Responsable du traitement** : `Confidentialite.razor` nomme Alexandre Leclerc à titre personnel ; si Limpide
   est publié par l'EURL, c'est elle le responsable (représentée par son gérant). À aligner sur les mentions légales.
 - [ ] **Passages CNIL** : lien vers le texte de la licence CC-BY-ND 4.0 FR sous chaque extrait.

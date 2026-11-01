@@ -14,3 +14,5 @@ eval/results/
 scripts/
 db/
 *.md
+# sauf l'index des décisions d'architecture : page « Comment il est construit » (image web)
+!docs/adr/README.md

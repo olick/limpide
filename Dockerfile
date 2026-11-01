@@ -22,6 +22,8 @@ COPY src/ src/
 # Rapports d'évaluation versionnés, copiés avec l'application web (page publique /evaluation, Limpide.Web.csproj).
 # Le motif doit trouver au moins un fichier, sinon les trois images échouent : garder un rapport versionné.
 COPY eval/results/*.json eval/results/
+# Index des décisions d'architecture (page « Comment il est construit », Limpide.Web.csproj).
+COPY docs/adr/README.md docs/adr/
 # Pas de --no-restore : la restauration précédente ne voyait que les .csproj ; or le SDK n'ajoute le paquet des
 # fichiers Blazor (Microsoft.AspNetCore.App.Internal.Assets, dont _framework/blazor.web.js) qu'en voyant les
 # composants .razor. Sans nouvelle restauration, l'image publiée n'a pas blazor.web.js (404 constaté le 2026-10-06).

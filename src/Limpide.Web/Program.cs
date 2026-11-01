@@ -23,6 +23,8 @@ builder.Services.AddScoped<Limpide.Web.Visit>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Server.Circuits.CircuitHandler, Limpide.Web.VisitCircuitHandler>();
 // Page publique d'évaluation : rapports versionnés copiés avec l'application (dossier evaluation).
 builder.Services.AddSingleton<Limpide.Web.EvaluationReports>();
+// Page « Comment il est construit » : index des ADR copié avec l'application (dossier adr).
+builder.Services.AddSingleton<Limpide.Web.ArchitectureDecisions>();
 // Anti-spam du formulaire de retours : 5 envois par heure et par visiteur, 200 par jour au total.
 builder.Services.AddKeyedSingleton("feedback", (services, _) =>
     new QuestionQuota(new QuotaOptions(PerClientPerHour: 5, GlobalPerDay: 200), services.GetRequiredService<TimeProvider>()));

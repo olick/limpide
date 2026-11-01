@@ -28,6 +28,8 @@
     <None Include="..\prompts\**\*.txt" Link="prompts\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Page publique d'évaluation (S7, session 5) : rapports JSON versionnés du dépôt, lus au démarrage. -->
     <None Include="..\..\eval\results\*.json" Link="evaluation\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Index des décisions d'architecture, lu par la page « Comment il est construit » : la liste du site suit le dépôt. -->
+    <None Include="..\..\docs\adr\README.md" Link="adr\README.md" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>
