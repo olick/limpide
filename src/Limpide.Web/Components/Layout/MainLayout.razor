@@ -82,6 +82,17 @@
                 }
             </ul>
         </nav>
+        @* Thème : choix gardé dans le navigateur, jamais envoyé au serveur ; coché et appliqué par limpide.js (le
+           serveur ne connaît pas ce choix). Automatique suit le réglage de l'appareil. *@
+        <fieldset class="theme-choice">
+            <legend>Apparence</legend>
+            <div class="theme-segments">
+                <label><input type="radio" name="theme" value="auto" /> Automatique</label>
+                <label><input type="radio" name="theme" value="clair" /> Clair</label>
+                <label><input type="radio" name="theme" value="sombre" /> Sombre</label>
+            </div>
+            <p class="theme-hint">Automatique suit le réglage de votre appareil.</p>
+        </fieldset>
         @if (AdminUrl is { } admin)
         {
             <p class="menu-foot"><a href="@admin" rel="nofollow">Back office</a></p>
