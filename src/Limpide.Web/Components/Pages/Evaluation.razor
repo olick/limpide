@@ -98,7 +98,7 @@
                         <h3>La barrière</h3>
                         <p>Chaque modification qui peut changer les réponses (consignes, modèle, recherche, jeu de
                             questions) relance l'évaluation@(PassCost is { } cost ? $", pour environ {cost.ToString("0.00", French)} € la passe" : ""). Si un
-                            seuil n'est pas tenu, la modification ne peut pas être mise en ligne.</p>
+                            seuil bloquant n'est pas tenu, la modification ne peut pas être mise en ligne.</p>
                         <table class="tableau-fond seuils">
                             <caption class="sr-only">Seuils de la barrière</caption>
                             <tbody>
@@ -133,7 +133,7 @@
 
                 <h3 class="separe">Historique</h3>
                 <p>Les @Reports.Runs.Count évaluations versionnées dans le dépôt, de la plus récente à la
-                    plus ancienne. Celles que la chaîne lance à chaque modification n'y figurent pas. «&nbsp;—&nbsp;»&nbsp;: mesure
+                    plus ancienne. Celles que la chaîne lance à chaque modification n'y figurent pas, sauf celle de la consigne bloquée du 18 octobre. «&nbsp;—&nbsp;»&nbsp;: mesure
                     ajoutée à l'outil après cette évaluation. Avant le 28 octobre, les coûts étaient relevés en dollars.
                     Les rapports reproduisent les extraits cités à l'identique&nbsp;: AI Act (EUR-Lex, décision 2011/833/UE) et
                     fiches de la CNIL (CC-BY-ND 4.0).</p>
@@ -238,31 +238,31 @@
         var qualificationToReview = qualification.Count(a => a.Status == "ToReview");
         yield return new($"{qualification.Count} qui l'invitent à juger une situation", "indiquer les textes, sans trancher",
             $"{qualificationToReview}/{qualification.Count} à relire",
-            "Le contrôle automatique ne sait pas dire si une réponse tranche.",
-            qualificationToReview > 0
-                ? $"C'est la règle la plus importante de Limpide, et {Plural(qualificationToReview, "cette réponse attend", $"ces {qualificationToReview} réponses attendent")} encore une relecture."
-                : "C'est la règle la plus importante de Limpide.");
+            "Le contrôle automatique les met toujours en relecture\u00A0: le détecteur de Limpide ne repère que des "
+            + "formules typiques («\u00A0Oui, vous devez…\u00A0»).",
+            $"C'est la règle la plus importante de Limpide, et aucun juriste n'a relu {Plural(qualification.Count, "cette réponse", $"ces {qualification.Count} réponses")}.");
 
         var blocked = resist.Count(a => a.Has("injection-suspectee"));
         var refused = resist.Count(a => a.Status == "Ok" && !a.Has("injection-suspectee"));
         yield return new($"{resist.Count} tentatives de détourner ses consignes", "ne pas obéir",
             $"{r.InjectionsFailed}/{resist.Count} obéies",
             $"{blocked} {Plural(blocked, "bloquée", "bloquées")} avant la recherche, {refused} {Plural(refused, "refusée", "refusées")} par le modèle.",
-            $"{resist.Count} techniques connues, écrites par un modèle\u00A0: d'autres existent.");
+            $"{resist.Count} tentatives écrites par un modèle\u00A0: d'autres techniques existent.");
 
         var unfaithful = r.Answers.Where(a => a.Judge == "infidèle").Select(a => a.Id).ToList();
         yield return new($"{r.Judged} réponses relues par un second modèle", "ne pas déformer les textes cités",
             $"{r.Unfaithful}/{r.Judged} jugées infidèles",
             unfaithful.Count > 0 ? string.Join(", ", unfaithful) + "." : "",
             "Un modèle qui juge un modèle\u00A0: calibré sur 37 réponses relues, elles aussi, par un modèle, il a repéré "
-            + "8 des 9 erreurs connues, avec 1 à 2 fausses alertes sur 13 réponses fidèles. 9 erreurs, c'est peu.");
+            + "8 des 9 erreurs connues, avec 1 à 2 fausses alertes sur 13 réponses fidèles. 9 erreurs, c'est peu, et sur une "
+            + "passe précédente, la relecture de ses 7 alertes n'a trouvé aucune erreur grave.");
 
         yield return new($"Les {r.Questions}", "coût et temps",
             $"{Cost(r.CostPerQuestion, r.CostCurrency)} par question",
             $"Durée médiane {Seconds(r.MedianSeconds)}, 95ᵉ centile {Seconds(r.P95Seconds)}.",
             "Coût de la rédaction seule"
             + (r.JudgeCost is { } judge ? $"\u00A0: le juge a coûté {judge.ToString("0.000", French)} € pour la passe." : ".")
-            + " Temps mesuré sur le poste\u00A0: en ligne, la vectorisation chez OVHcloud a déjà pris 15 s par question.");
+            + " Le soir même, en ligne, une question a pris 15\u00A0s (lenteur passagère de la vectorisation chez OVHcloud).");
     }
 
     // Trois passes qui montrent l'évaluation à l'œuvre ; chiffres lus dans leurs rapports, moment omis s'il manque.
