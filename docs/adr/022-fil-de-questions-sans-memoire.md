@@ -8,6 +8,9 @@
   reformulée, Back office en bas du panneau, menu mobile modal, focus et défilement précisés ; encarts de l'accueil
   repliés sur leur titre, texte complet au clic, et légende discrète au lieu du titre « Réponse de l'assistant »
   (retours d'Alexandre sur la maquette).
+- **Précisé le 2026-11-01**, d'après la maquette finale (direction 2, « la réponse en coupe ») : en-tête réduit au
+  nom, à la mention de l'article 50 et au menu ; « Reprendre cette question » à côté de « Donner mon avis » ;
+  radiographie en direct ; « Mentions légales, sources et licences » en bas du panneau ; pages secondaires en coupe.
 
 ## Contexte
 
@@ -26,7 +29,8 @@ Contraintes qui ne bougent pas :
 - **Article 50 de l'AI Act** : la personne sait qu'elle échange avec une IA.
 - **ADR-019** : information sur la conservation de la question et case d'opposition au moment de la saisie.
 - **Licences du corpus** (`docs/sources.md`) : extraits reproduits à l'identique, source et licence sur chaque extrait.
-- **Distinction visuelle** : réponse (encadré bleu, sans serif) et textes officiels (fond papier, filet doré, serif).
+- **Distinction visuelle** : réponse (sans serif, sur blanc) et textes officiels (fond papier, serif, identifiants
+  dorés).
 - Limpide traite **chaque question seule** : ni la recherche ni la rédaction ne reçoivent les questions précédentes.
 
 Une interface de conversation laisse croire le contraire : un visiteur posera « et pour les PME ? », et la réponse
@@ -49,11 +53,13 @@ portera sur une question privée de son sujet.
 **Option 3, décidée avec Alexandre le 2026-10-28**, d'après une maquette cliquable (ordinateur, mobile, trois
 façons d'afficher les textes cités). Détail de la présentation retenue :
 
-- **En-tête fixe** : « Limpide », une phrase courte, et une pastille « IA · Vous échangez avec une IA : elle peut se
-  tromper, ce n'est pas un conseil juridique », visible en permanence (article 50).
+- **En-tête fixe** : « Limpide », la mention « IA · Vous échangez avec une IA : elle peut se tromper, ce n'est pas
+  un conseil juridique », visible en permanence (article 50), et le bouton « Menu ». Pas de raccourcis ni de
+  « Nouvelle question » dans l'en-tête, sur ordinateur comme sur mobile : le panneau suffit.
 - **Panneau latéral** (menu sur mobile, en fenêtre modale), icône et libellé : Nouvelle question, Ce que fait
   Limpide, Comment il est construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert ; en bas, en
-  petit, Sources et licences et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
+  petit, Mentions légales, sources et licences (une seule page : éditeur et hébergeur, licences du corpus, code et
+  crédits) et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
 - **Accueil vide** : les trois encarts (« ce qu'il fait, ne fait pas, pourquoi il montre tout »), repliés sur leur
   titre, texte complet d'origine déplié au clic (pas au survol, qui ne marche pas au tactile), et les exemples en
   boutons. Ils disparaissent à la première question ; le même texte reste dans « Ce que fait Limpide ».
@@ -63,11 +69,18 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   personnelle », durée de conservation, case « Ne pas conserver ma question » (libellé de l'ADR-019, cité par
   `/confidentialite`), lien « Vos données ». Dès la première réponse,
   au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
-- **Chaque réponse** porte en tête une légende discrète, « Formulation de l'assistant · à vérifier dans les textes
-  cités » (pas de titre visible, redondant dans un fil), et un titre lu par les lecteurs d'écran seulement
-  (« Réponse à : … ») pour passer d'une réponse à l'autre. Elle garde ses textes cités, « Sous le capot » (replié, avec la durée et le coût dans son bouton) et un
-  bouton « Donner mon avis » qui joint **cette** question et **cette** réponse (aujourd'hui, seule la dernière peut
-  l'être). Après l'envoi, le fil se place au début de la nouvelle question, pas en bas d'une longue réponse.
+- **Chaque réponse est un bloc « en coupe »** à trois couches : en surface la réponse, dessous les textes cités,
+  au fond le calcul (« Sous le capot », replié sur une ligne avec les étapes, la durée, le coût et les contrôles).
+  Elle porte en tête une légende discrète, « Formulation de l'assistant, à vérifier dans les textes dessous » (pas de
+  titre visible, redondant dans un fil), et un titre lu par les lecteurs d'écran seulement (« Réponse à : … ») pour
+  passer d'une réponse à l'autre. Sous le bloc, « Reprendre cette question » (recopie la question dans le champ,
+  pour la compléter ; rien n'est conservé de plus, et la case « Ne pas conserver ma question » garde son état) et
+  « Donner mon avis », qui joint **cette** question et **cette** réponse (aujourd'hui, seule la
+  dernière peut l'être). Le fond déplié renvoie aux résultats d'évaluation. Après l'envoi, le fil se place au début
+  de la nouvelle question, pas en bas d'une longue réponse.
+- **Radiographie en direct** : pendant le traitement, le fond est ouvert et se remplit à chaque vrai point d'étape
+  du service (vectorisation, passages trouvés et leur proximité sur une règle avec le seuil, rédaction) ; rien
+  n'est simulé. Une seule animation (l'étape en cours), coupée sous `prefers-reduced-motion`.
 - **Textes cités** : cartes sous la réponse, **repliées en une ligne** (identifiant, titre, « Lire »), sur ordinateur
   comme sur mobile ; le texte s'ouvre à la demande. Un renvoi `[P1]` ouvre la carte et y porte le focus. Pied de carte
   (affiché carte ouverte) réduit à la source, au lien vers le texte officiel et à la licence ; version et empreinte
@@ -91,7 +104,10 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
 - **Le fil vit dans la session Blazor** : perdu au rechargement de la page, jamais enregistré en plus de ce que
   `answer_log` et `question_log` gardent déjà. Le quota et le délai de 60 s par question ne changent pas.
 - **Pages nouvelles** : Ce que fait Limpide, Votre avis, Comment il est construit (`TechStack.razor`, toujours à
-  tenir à jour), Sources et licences. Aucune ne crée de traitement de données.
+  tenir à jour, avec ses icônes), Mentions légales, sources et licences (LCEN, article 6 : éditeur et hébergeur).
+  Aucune ne crée de traitement de données. « Vos données » nomme le même éditeur que les mentions légales comme
+  responsable du traitement. Les pages secondaires suivent la même coupe que les réponses (l'essentiel,
+  le détail, la méthode) ; le papier et le serif restent réservés aux textes officiels.
 - **Revue** : l'agent `relecteur-interface` relit chaque PR qui touche `src/Limpide.Web/` ou `src/Limpide.Admin/`.
 - Pas de nouvelle évaluation : la chaîne de réponse ne change pas.
 

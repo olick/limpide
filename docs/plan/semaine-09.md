@@ -19,7 +19,8 @@ puis vérifiée à la main dans un navigateur (320 px, thème sombre, clavier), 
    `<dialog>` modal, page en cours marquée par `aria-current`), zone du fil, champ fixé en bas (hauteur en `100dvh`
    pour le clavier mobile). Le contenu actuel de la page y est replacé tel quel.
 2. **Pages secondaires** (≈ 1 h 30) : Ce que fait Limpide (texte complet des trois encarts), Votre avis (formulaire
-   général), Comment il est construit (`TechStack.razor`), Sources et licences (mentions du pied de page actuel).
+   général), Comment il est construit (`TechStack.razor`, avec ses icônes),
+   Mentions légales, sources et licences (mentions du pied de page actuel, éditeur et hébergeur).
    Liens du panneau vers ces pages, l'évaluation, « Vos données », le dépôt et le back office.
 3. **Fil de questions** (≈ 2 h 30) : réponses empilées (session Blazor), accueil vide avec encarts repliés (texte complet au clic) et
    exemples en boutons, « Sous le capot » et « Donner mon avis » par réponse (l'avis joint cette question et cette
@@ -131,3 +132,54 @@ du plan.
 - README final
 - Script de la vidéo de démonstration (tournage à la fin du plan)
 - Profils mis à jour, version « rendez-vous client »
+
+---
+
+## Journal de réalisation
+
+### Maquette finale de la refonte (2026-10-30 et 31)
+
+Toile Design (claude.ai, privée), rangées « Maquette finale : direction 2 » (écrans O1 à O10, M1 à M6 ; prototypes
+`F2-ordinateur` et `F2-mobile`) et « Maquette finale : les autres pages » (Résultats d'évaluation, Ce que fait
+Limpide, Vos données). Données réelles uniquement ; ce qui manque est entre crochets.
+
+**Décisions prises avec Alexandre, reportées dans l'ADR-022 le 2026-11-01** :
+
+- bandeau ordinateur : « Limpide », mention article 50 et « Menu » seulement (ni raccourcis, ni « Nouvelle
+  question ») ; pastille « IA » à 8 px du nom, texte de la mention à 18 px de la pastille ;
+- « Reprendre cette question » sous la réponse, à gauche de « Donner mon avis » ;
+- lien vers l'évaluation au fond de la réponse dépliée, sous les garde-fous ;
+- menu : « Mentions légales, sources et licences » et « Back office » en bas ; « Sources et licences » seul retiré ;
+- pages secondaires en coupe (surface, dessous, fond) ; papier et Literata réservés aux textes officiels (sauf le
+  titre « Les textes officiels », comme sur l'accueil) ; titre de la page en `h1`.
+
+**Points ouverts** :
+
+- [ ] **Bases légales de « Vos données »** (session 1, point 4) : la page actuelle n'en donne pas pour l'envoi de la
+  question à OVHcloud et Mistral, ni pour le journal des réponses, les traces et l'adresse IP (article 13 du RGPD).
+  Proposition à trancher : intérêt légitime (6.1.f) pour ces quatre finalités (pas de contrat faute de conditions
+  d'utilisation, consentement trop lourd), avec une mise en balance écrite dans `docs/gouvernance/`.
+- [ ] **Purge à l'écriture seulement** (`AnswerLogStore`, `FeedbackStore`) : sans nouvelle question, une question
+  peut rester au-delà des 30 jours annoncés.
+- [ ] **Mentions légales (LCEN, article 6)** : maquette faite (page « Mentions légales, sources et licences »).
+  Éditeur : une EURL (siège, SIRET donnés le 2026-11-01). Restent à fournir : dénomination, capital social,
+  téléphone, ville du greffe (RCS), qualité du directeur de la publication ; téléphone d'OVHcloud (absent de ses
+  mentions légales).
+- [ ] **Responsable du traitement** : `Confidentialite.razor` nomme Alexandre Leclerc à titre personnel ; si Limpide
+  est publié par l'EURL, c'est elle le responsable (représentée par son gérant). À aligner sur les mentions légales.
+- [ ] **Passages CNIL** : lien vers le texte de la licence CC-BY-ND 4.0 FR sous chaque extrait.
+- [ ] **Rapports d'évaluation** : ils ne versionnent pas le code des garde-fous. Les passes du 2026-10-28 à 19 h 02
+  (sans détecteur) et 19 h 05 (avec) déclarent les mêmes versions ; `Evaluation.razor` présente donc à tort la
+  première comme « même configuration qu'en ligne ». Ajouter le commit ou une version des garde-fous.
+- [ ] **`Evaluation.razor` périmé** : « 50 questions » (55), « 3 tentatives » (8), « 0,30 $ » (≈ 0,25 € par passe).
+- [ ] **`Confidentialite.razor`** : « scores des passages » (seul le meilleur est gardé) ; « formulaire en bas de
+  la page d'accueil » (disparaît avec la refonte).
+- [ ] **Cas hors sujet (O10)** : `answer_log` ne garde ni la question ni les 5 scores ; seul le refus n° 13 du poste
+  (2026-10-21, meilleur 0,481) sert d'exemple. Les vrais scores hors sujet (0,34 à 0,48) sont sous l'échelle
+  0,55–0,85 de la règle : échelle élargie à 0,30 pour un refus, à confirmer.
+- [ ] Formulation de l'alerte de quota (« Il vous reste 3 questions pour cette heure. »), à valider.
+- [ ] **Icônes de « Comment il est construit »** (souhait d'Alexandre) : garder celles de `TechStack.razor`
+  (`wwwroot/tech`, Simple Icons, CC0, servies par le site, colorées par masque CSS), l'initiale encadrée pour les
+  briques sans logo, et la mention sur les marques. Ajoutées à la maquette le 2026-11-01.
+- [ ] Textes nouveaux de « Ce que fait Limpide » à relire (Une question à la fois, Ce qu'il ne connaît pas, les
+  5 étapes, le coût, Où part votre question).
