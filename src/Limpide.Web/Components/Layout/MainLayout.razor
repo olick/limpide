@@ -1,25 +1,93 @@
 @inherits LayoutComponentBase
+@implements IDisposable
 @inject IConfiguration Configuration
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
-<main class="page">
-    @Body
-</main>
+@* Squelette de l'ADR-022 : en-tête fixe, fil qui défile, champ de question fixé en bas (fourni par la page, section
+   « composer »), panneau du menu en <dialog> modal. *@
+<div class="app">
+    <header class="site-header">
+        <a class="brand" href="/">Limpide</a>
+        @* Obligation de transparence (AI Act, article 50) : visible en permanence, sur toutes les pages. *@
+        <p class="ai-notice" role="note">
+            <span class="ai-badge">IA</span><strong>Vous échangez avec une IA</strong> : elle peut se tromper, ce n'est
+            pas un conseil juridique.
+        </p>
+        @* Ouverture en JavaScript pur (limpide.js) : le bouton répond avant la connexion de Blazor, ou si elle est coupée. *@
+        <button type="button" class="menu-button" aria-haspopup="dialog" aria-controls="menu" data-menu-open>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                 stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" /></svg>
+            <span class="menu-label">Menu</span>
+        </button>
+    </header>
 
-<footer class="site-footer">
-    <p>
-        Textes : <a href="https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689" target="_blank" rel="noopener noreferrer">règlement (UE) 2024/1689</a>
-        (EUR-Lex, réutilisation selon la décision 2011/833/UE) et fiches pratiques IA de la
-        <a href="https://www.cnil.fr/fr/les-fiches-pratiques-ia" target="_blank" rel="noopener noreferrer">CNIL</a>
-        (CC-BY-ND 4.0). Extraits reproduits sans modification.
-    </p>
-    <p><a href="/evaluation">Résultats d'évaluation</a> : comment la qualité des réponses est mesurée.
-        · <a href="/confidentialite">Vos données</a> : ce qui est conservé, et pour combien de temps.</p>
-    <p>Projet ouvert : <a href="https://github.com/olick/limpide" target="_blank" rel="noopener noreferrer">github.com/olick/limpide</a></p>
-    @if (AdminUrl is { } admin)
-    {
-        <p><a href="@admin" rel="nofollow">Back office</a> (accès réservé à l'administrateur)</p>
-    }
-</footer>
+    @* Le pied de page est hors de <main> pour garder son rôle de repère (attribution du corpus), mais dans la zone
+       qui défile. *@
+    <div class="thread">
+        <main class="page">
+            @Body
+        </main>
+
+        <footer class="site-footer">
+            <p>
+                Textes : <a href="https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689" target="_blank" rel="noopener noreferrer">règlement (UE) 2024/1689</a>
+                (EUR-Lex, réutilisation selon la décision 2011/833/UE) et fiches pratiques IA de la
+                <a href="https://www.cnil.fr/fr/les-fiches-pratiques-ia" target="_blank" rel="noopener noreferrer">CNIL</a>
+                (CC-BY-ND 4.0). Extraits reproduits sans modification.
+            </p>
+            <p><a href="/confidentialite">Vos données</a> : ce qui est conservé, et pour combien de temps.</p>
+        </footer>
+    </div>
+
+    <SectionOutlet SectionName="composer" />
+</div>
+
+@* <dialog> modal natif : focus piégé, Échap et focus rendu au bouton par le navigateur ; ouverture, fermeture, clic
+   sur le fond et clic sur un lien par limpide.js. *@
+<dialog id="menu" class="menu-panel" aria-labelledby="menu-title">
+    <div class="menu-content">
+        <div class="menu-head">
+            <h2 id="menu-title">Menu</h2>
+            <button type="button" class="menu-close" data-menu-close>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                     stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                Fermer le menu
+            </button>
+        </div>
+        <nav aria-label="Menu principal">
+            <ul class="menu-links">
+                @foreach (var link in Links)
+                {
+                    var current = link.Href == CurrentPath;
+                    <li>
+                        <a href="@link.Href" aria-current="@(current ? "page" : null)" class="@(current ? "current" : null)"
+                           target="@(link.External ? "_blank" : null)" rel="@(link.External ? "noopener noreferrer" : null)">
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                                @foreach (var path in link.Icon)
+                                {
+                                    <path d="@path" />
+                                }
+                            </svg>
+                            <span>
+                                @link.Label
+                                @if (link.Hint is { } hint)
+                                {
+                                    <span class="menu-hint">@hint</span>
+                                }
+                            </span>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+        @if (AdminUrl is { } admin)
+        {
+            <p class="menu-foot"><a href="@admin" rel="nofollow">Back office</a></p>
+        }
+    </div>
+</dialog>
 
 <div id="blazor-error-ui" data-nosnippet>
     Une erreur inattendue s'est produite.
@@ -29,6 +97,19 @@
 </div>
 
 @code {
+    private sealed record MenuLink(string Label, string Href, string[] Icon, string? Hint = null, bool External = false);
+
+    // Pages existantes ; Ce que fait Limpide, Comment il est construit, Votre avis et les mentions légales viennent à
+    // l'étape suivante de la refonte (docs/plan/semaine-09.md).
+    private static readonly MenuLink[] Links =
+    [
+        new("Nouvelle question", "/", ["M12 5v14", "M5 12h14"]),
+        new("Résultats d'évaluation", "/evaluation", ["M5 20V11M12 20V5M19 20v-6", "M3 20h18"]),
+        new("Vos données", "/confidentialite", ["M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6l8-3z"]),
+        new("Projet ouvert", "https://github.com/olick/limpide", ["M8 8l-5 4 5 4", "M16 8l5 4-5 4"],
+            Hint: "github.com/olick/limpide", External: true),
+    ];
+
     // Adresse du back office (Site:AdminUrl) ; en production, ADMIN_ADDRESS sans schéma (« admin.limpide-ia.fr ») :
     // HTTPS par défaut. Absente : pas de lien.
     private string? AdminUrl => Configuration["Site:AdminUrl"] switch
@@ -37,4 +118,24 @@
         var url when url.Contains("://") => url,
         var host => $"https://{host}",
     };
+
+    private string CurrentPath => "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
+
+    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+
+    /// <summary>Un lien du menu suivi : le panneau se ferme et l'entrée de la page en cours change.</summary>
+    private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        try
+        {
+            await InvokeAsync(StateHasChanged);
+            await JS.InvokeVoidAsync("limpide.closeMenu");
+        }
+        catch (JSDisconnectedException)
+        {
+            // Circuit fermé pendant la navigation : rien à fermer.
+        }
+    }
+
+    public void Dispose() => Navigation.LocationChanged -= OnLocationChanged;
 }

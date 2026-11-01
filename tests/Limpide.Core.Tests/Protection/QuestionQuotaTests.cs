@@ -20,6 +20,19 @@ public class QuestionQuotaTests
     }
 
     [Fact]
+    public void An_accepted_question_says_when_the_remaining_count_stops_being_true()
+    {
+        var quota = new QuestionQuota(new QuotaOptions(PerClientPerHour: 10, GlobalPerDay: 100), clock);
+        quota.TryConsume("a");
+        clock.Advance(TimeSpan.FromMinutes(45));
+
+        var decision = quota.TryConsume("a");
+
+        Assert.Equal(8, decision.Remaining);
+        Assert.Equal(TimeSpan.FromMinutes(15), decision.WindowResetsIn); // fenêtre ouverte à la première question
+    }
+
+    [Fact]
     public void The_visitor_window_reopens_after_an_hour()
     {
         var quota = new QuestionQuota(new QuotaOptions(PerClientPerHour: 2, GlobalPerDay: 100), clock);

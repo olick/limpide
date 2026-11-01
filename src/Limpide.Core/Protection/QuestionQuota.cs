@@ -16,7 +16,11 @@ public enum QuotaVerdict
 
 /// <param name="RetryAfter">Délai avant qu'une nouvelle question soit acceptée (zéro si autorisée).</param>
 /// <param name="Remaining">Questions restantes pour ce visiteur dans la fenêtre en cours.</param>
-public sealed record QuotaDecision(QuotaVerdict Verdict, TimeSpan RetryAfter, int Remaining)
+/// <param name="WindowResetsIn">
+/// Délai avant la fin de la fenêtre du visiteur, où <paramref name="Remaining"/> cesse d'être vrai (question acceptée ;
+/// zéro sinon).
+/// </param>
+public sealed record QuotaDecision(QuotaVerdict Verdict, TimeSpan RetryAfter, int Remaining, TimeSpan WindowResetsIn = default)
 {
     public bool Allowed => Verdict == QuotaVerdict.Allowed;
 }
@@ -66,7 +70,8 @@ public sealed class QuestionQuota(QuotaOptions options, TimeProvider clock)
 
             clients[client] = (window.Start, window.Count + 1);
             global = (today, global.Count + 1);
-            return new QuotaDecision(QuotaVerdict.Allowed, TimeSpan.Zero, options.PerClientPerHour - window.Count - 1);
+            return new QuotaDecision(QuotaVerdict.Allowed, TimeSpan.Zero, options.PerClientPerHour - window.Count - 1,
+                window.Start + ClientWindow - now);
         }
     }
 

@@ -38,50 +38,54 @@
     </li>
 </ul>
 
-@* Obligation de transparence (AI Act, article 50) : la personne sait qu'elle échange avec un système d'IA. *@
-<aside class="transparency" role="note">
-    <strong>Vous échangez avec une IA.</strong>
-    Les réponses sont rédigées automatiquement à partir des textes cités : elles peuvent contenir des erreurs
-    et ne constituent pas un conseil juridique.
-</aside>
+<div class="examples">
+    <span>Exemples :</span>
+    @foreach (var example in Examples)
+    {
+        <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
+    }
+</div>
 
+@* Mention de l'article 50 : dans l'en-tête fixe (MainLayout), visible en permanence. Le champ est fixé en bas de la
+   fenêtre (section « composer » du gabarit), hors de la zone qui défile. *@
+<SectionContent SectionName="composer">
+<div class="composer">
 <form class="ask" @onsubmit="AskAsync">
-    <label for="question">Votre question</label>
-    <textarea id="question" rows="3" maxlength="@MaxLength" disabled="@busy"
+    @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, limites
+       affichées seulement à leur approche. *@
+    <label for="question" class="sr-only">Votre question</label>
+    <textarea id="question" rows="2" maxlength="@MaxLength" disabled="@busy"
               placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
+              aria-describedby="@(LimitsText is null ? null : "question-limits")"
               @bind="question" @bind:event="oninput"></textarea>
-    <div class="examples">
-        <span>Exemples :</span>
-        @foreach (var example in Examples)
-        {
-            <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
-        }
-    </div>
-    @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case, avant l'envoi. *@
-    <div class="keep">
-        <p>
-            Votre question est conservée @KeptQuestion.Retention.Days jours pour améliorer Limpide, sans adresse IP ;
-            adresses électroniques et numéros de téléphone masqués. N'y écrivez ni nom ni autre donnée personnelle.
-            <a href="/confidentialite">Vos données</a>
-        </p>
-        <label><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
-    </div>
+    @if (LimitsText is { } limits)
+    {
+        <p class="count" id="question-limits">@limits</p>
+    }
+    @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : la ligne courte avant l'envoi, le
+       détail (masquage, adresse IP, destinataires) dans « Vos données » ; opposition par la case. *@
+    <p class="keep">
+        N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.
+        <a href="/confidentialite">Vos données</a>
+    </p>
+    @* Erreur (quota, délai, panne) près du bouton : visible même si le fil a défilé. *@
+    @if (error is not null)
+    {
+        <p class="error" role="alert">@error</p>
+    }
     <div class="ask-actions">
-        <span class="count">@question.Length / @MaxLength · @QuotaPerHour questions par heure et par visiteur</span>
+        <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
         <button type="submit" disabled="@busy">
             @(busy ? "Recherche en cours…" : "Poser la question")
         </button>
     </div>
 </form>
+</div>
+</SectionContent>
 
 @* Région d'annonce présente dès le départ (une région créée avec son texte n'est souvent pas lue) : l'attente
    dure plusieurs secondes, bouton désactivé. La réponse arrivée, le focus passe sur son titre. *@
 <p class="sr-only" role="status">@(busy ? "Recherche en cours, la réponse peut prendre plusieurs secondes." : "")</p>
-
-@if (error is not null)
-{
-    <p class="error" role="alert">@error</p>
-}
 
 @if (result is { } r)
 {
@@ -351,6 +355,8 @@
     private bool doNotKeep;
     private ElementReference answerHeading;
     private bool focusAnswer;
+    private int? remaining;
+    private DateTimeOffset remainingUntil;
 
     /// <summary>Adresse IP du visiteur (App.razor) ; sans elle, tous les visiteurs partagent un même quota.</summary>
     [CascadingParameter(Name = "ClientAddress")]
@@ -359,7 +365,22 @@
     [Inject]
     private QuotaOptions QuotaSettings { get; set; } = default!;
 
-    private int QuotaPerHour => QuotaSettings.PerClientPerHour;
+    /// <summary>
+    /// Limites affichées seulement à leur approche (ADR-022) : le compteur à partir de 400 caractères, le quota à partir
+    /// de 3 questions restantes. Null sinon.
+    /// </summary>
+    private string? LimitsText
+    {
+        get
+        {
+            var parts = new List<string>();
+            if (remaining is > 0 and <= 3 && DateTimeOffset.UtcNow < remainingUntil)
+                parts.Add(remaining == 1 ? "Il vous reste 1 question pour cette heure." : $"Il vous reste {remaining} questions pour cette heure.");
+            if (question.Length >= 400)
+                parts.Add($"{question.Length} / {MaxLength} caractères");
+            return parts.Count == 0 ? null : string.Join(" · ", parts);
+        }
+    }
 
     private string EmbeddingHost => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase)
         ? "hébergé par OVHcloud en France"
@@ -397,6 +418,8 @@
             return;
         }
 
+        remaining = quota.Remaining;
+        remainingUntil = DateTimeOffset.UtcNow + quota.WindowResetsIn; // passé ce délai, le quota du visiteur repart à zéro
         busy = true;
         var started = System.Diagnostics.Stopwatch.StartNew();
         try
