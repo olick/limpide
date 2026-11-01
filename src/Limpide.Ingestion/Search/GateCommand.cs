@@ -4,12 +4,6 @@ using Limpide.Core.Evaluation;
 
 namespace Limpide.Ingestion.Search;
 
-/// <summary>Seuils de la section « EvaluationGate » (appsettings de la console), justifiés dans l'ADR-014.</summary>
-public sealed class EvaluationGateOptions
-{
-    public List<GateRule> Rules { get; set; } = [];
-}
-
 /// <summary>
 /// Barrière de qualité (S7) : lit un rapport JSON d'evaluate-answers (le plus récent par défaut) et le compare aux
 /// seuils. Code de sortie 1 si un seuil bloquant échoue : c'est ce code qui arrête la CI. Écrit aussi le tableau en

@@ -170,20 +170,23 @@ l'appareil » par défaut.
   Proposition à trancher : intérêt légitime (6.1.f) pour ces quatre finalités (pas de contrat faute de conditions
   d'utilisation, consentement trop lourd), avec une mise en balance écrite dans `docs/gouvernance/`.
 - [ ] **Purge à l'écriture seulement** (`AnswerLogStore`, `FeedbackStore`) : sans nouvelle question, une question
-  peut rester au-delà des 30 jours annoncés.
+  peut rester au-delà des 30 jours annoncés. Dit tel quel dans « Vos données » depuis l'étape 2b (la maquette le
+  présentait comme un avantage) ; une purge planifiée reste à décider.
 - [x] **Mentions légales (LCEN, article 6)** : page `/mentions-legales` (étape 2a), éditeur complet (informations
   d'Alexandre, confirmées au registre des entreprises le 2026-11-01). **Sans téléphone, par choix d'Alexandre** :
   son seul numéro est personnel, l'adresse électronique sert de contact ; l'article 6, III, 1, b demande un
   téléphone pour une société, écart signalé et accepté. Celui d'OVHcloud manque aussi (absent de ses mentions
   légales) : lien vers son site.
-- [ ] **Responsable du traitement** : `Confidentialite.razor` nomme Alexandre Leclerc à titre personnel ; si Limpide
+- [x] **Responsable du traitement** (étape 2a) : `Confidentialite.razor` nomme Alexandre Leclerc à titre personnel ; si Limpide
   est publié par l'EURL, c'est elle le responsable (représentée par son gérant). À aligner sur les mentions légales.
 - [ ] **Passages CNIL** : lien vers le texte de la licence CC-BY-ND 4.0 FR sous chaque extrait.
 - [ ] **Rapports d'évaluation** : ils ne versionnent pas le code des garde-fous. Les passes du 2026-10-28 à 19 h 02
   (sans détecteur) et 19 h 05 (avec) déclarent les mêmes versions ; `Evaluation.razor` présente donc à tort la
-  première comme « même configuration qu'en ligne ». Ajouter le commit ou une version des garde-fous.
-- [ ] **`Evaluation.razor` périmé** : « 50 questions » (55), « 3 tentatives » (8), « 0,30 $ » (≈ 0,25 € par passe).
-- [ ] **`Confidentialite.razor`** : « scores des passages » (seul le meilleur est gardé) ; « formulaire en bas de
+  première comme « même configuration qu'en ligne ». Ajouter le commit ou une version des garde-fous. Étape 2b : la
+  page ne marque plus que la dernière passe de la configuration servie (« version en ligne ») et annote la passe de
+  19 h 02 (« avant le contrôle de la question ») ; le versionnement des garde-fous reste à faire.
+- [x] **`Evaluation.razor` périmé** (étape 2b, chiffres lus dans les rapports) : « 50 questions » (55), « 3 tentatives » (8), « 0,30 $ » (≈ 0,25 € par passe).
+- [x] **`Confidentialite.razor`** (étape 2b) : « scores des passages » (seul le meilleur est gardé) ; « formulaire en bas de
   la page d'accueil » (disparaît avec la refonte).
 - [ ] **Cas hors sujet (O10)** : `answer_log` ne garde ni la question ni les 5 scores ; seul le refus n° 13 du poste
   (2026-10-21, meilleur 0,481) sert d'exemple. Les vrais scores hors sujet (0,34 à 0,48) sont sous l'échelle
@@ -196,3 +199,21 @@ l'appareil » par défaut.
   `script-src` est ajoutée en production, lui donner une empreinte ou un nonce, sinon le thème clignote.
 - [ ] Textes nouveaux de « Ce que fait Limpide » à relire (Une question à la fois, Ce qu'il ne connaît pas, les
   5 étapes, le coût, Où part votre question).
+
+
+### Refonte, étape 2b : Résultats d'évaluation et Vos données en coupe (2026-11-01)
+
+- **Résultats d'évaluation** : résumé, quatre chiffres, « Mesure par mesure » (ce que chaque chiffre ne dit pas), la
+  barrière, trois moments, l'historique. Tout est lu dans les rapports versionnés (détail par question ajouté à
+  `EvaluationReports` : comportement, verdict, garde-fous, juge ; coût d'une passe, 95ᵉ centile) ; seuls restent
+  écrits à la main la calibration du juge et la lenteur mesurée en ligne (15 s).
+- **Seuils de la barrière** déplacés de l'appsettings de la console vers `src/appsettings.shared.json`
+  (`EvaluationGateOptions` dans `Limpide.Core`) : la page affiche les 11 seuils réels, traduits par
+  `PlainLanguage.GateRule`, au lieu des 6 recopiés de la maquette. `gate` vérifié sur le rapport servi (11 seuils lus,
+  code 0) ; l'évaluation tourne sur la PR (fichier partagé modifié).
+- **Vos données** : l'essentiel en chiffres, droits et responsable, tableau donnée par donnée, protections. Fondements
+  laissés tels quels (question conservée, avis) : les quatre manquants restent un point ouvert. Effacement décrit tel
+  qu'il est (à l'écriture).
+- Tableaux empilés sous 40rem (en-têtes de colonne en libellés), comme la maquette mobile.
+- Corrections de la relecture de la PR #69 : espaces insécables avant « ? : ; » et dans les guillemets, jeton
+  `--paper-rule` supprimé, séparateur du pied de page masqué aux lecteurs d'écran. Styles des anciennes pages retirés.

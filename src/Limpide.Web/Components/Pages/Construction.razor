@@ -30,7 +30,7 @@
                 <dl class="chiffres">
                     <div><dt>décisions d'architecture écrites</dt><dd>@Decisions.All.Count</dd></div>
                     <div><dt>serveur, en France</dt><dd>1</dd></div>
-                    <div><dt>GPU : modèles appelés par API</dt><dd>0</dd></div>
+                    <div><dt>GPU&nbsp;: modèles appelés par API</dt><dd>0</dd></div>
                     @if (Served is { } served)
                     {
                         <div><dt>questions de test avant chaque mise en ligne</dt><dd>@served.Questions</dd></div>
@@ -39,16 +39,16 @@
 
                 <h3 class="separe">Quatre choix qui comptent</h3>
                 <ul class="liste-filets deux-colonnes" role="list">
-                    <li><strong>Une seule base.</strong> PostgreSQL avec pgvector plutôt qu'une base vectorielle dédiée :
+                    <li><strong>Une seule base.</strong> PostgreSQL avec pgvector plutôt qu'une base vectorielle dédiée&nbsp;:
                         une base de moins à opérer, sauvegarder et sécuriser. <span class="muted">@Adr("001")</span></li>
-                    <li><strong>Mesurer avant de compliquer.</strong> La recherche hybride a été mesurée : elle
+                    <li><strong>Mesurer avant de compliquer.</strong> La recherche hybride a été mesurée&nbsp;: elle
                         n'améliorait pas les résultats, Limpide garde la recherche par le sens seule. Même méthode pour le
                         découpage des textes. <span class="muted">@Adr("005") et @Adr("010")</span></li>
                     <li><strong>Des modèles en France et en Europe.</strong> Vectorisation chez OVHcloud AI Endpoints, en
-                        France ; rédaction par Mistral AI, hébergé dans l'Union européenne. Pas de modèle local, pas de GPU
+                        France&nbsp;; rédaction par Mistral AI, hébergé dans l'Union européenne. Pas de modèle local, pas de GPU
                         à payer. <span class="muted">@Adr("004") et @Adr("012")</span></li>
                     <li><strong>Rien en ligne sans évaluation.</strong> Chaque modification passe la compilation et les
-                        tests ; avant chaque mise en ligne, l'évaluation tourne dans un environnement jetable, et un seuil
+                        tests&nbsp;; avant chaque mise en ligne, l'évaluation tourne dans un environnement jetable, et un seuil
                         manqué la bloque. <span class="muted">@Adr("014"), @Adr("015") et @Adr("016")</span></li>
                 </ul>
             </div>
@@ -63,10 +63,10 @@
                     <li><span class="boite controle"><strong>Contrôle de la question</strong><span>règles, avant tout envoi</span></span></li>
                     <li><span class="boite"><strong>Vectorisation</strong><span>OVHcloud AI Endpoints, France</span></span></li>
                     <li><span class="boite"><strong>Recherche</strong><span>PostgreSQL + pgvector</span></span></li>
-                    <li><span class="boite controle"><strong>Seuil @Generation.MinScore.ToString("0.00", French)</strong><span>sinon « je ne sais pas »</span></span></li>
+                    <li><span class="boite controle"><strong>Seuil @Generation.MinScore.ToString("0.00", French)</strong><span>sinon «&nbsp;je ne sais pas&nbsp;»</span></span></li>
                     <li><span class="boite"><strong>Rédaction</strong><span>Mistral AI, Union européenne</span></span></li>
                     <li><span class="boite controle"><strong>Contrôles</strong><span>renvois, verdict, consignes</span></span></li>
-                    <li><span class="boite"><strong>Réponse</strong><span>et « sous le capot »</span></span></li>
+                    <li><span class="boite"><strong>Réponse</strong><span>et «&nbsp;sous le capot&nbsp;»</span></span></li>
                 </ol>
                 <p class="muted">Le contrôle de la question, le seuil et les contrôles de la réponse peuvent arrêter la
                     question (encadrés en pointillés). Chaque étape est mesurée (durée, coût, garde-fou) et affichée sous
@@ -84,7 +84,7 @@
                     <li><span class="boite"><strong><code>publish</code></strong><span>sert la nouvelle version</span></span></li>
                 </ol>
                 <p class="muted">Une nouvelle version d'un texte reste candidate tant qu'elle n'a pas passé les contrôles de
-                    qualité ; la version publiée continue d'être servie jusque-là.</p>
+                    qualité&nbsp;; la version publiée continue d'être servie jusque-là.</p>
             </div>
         </section>
 
@@ -95,10 +95,10 @@
                 <TechStack />
 
                 <h2 class="separe" id="co-decisions">Les décisions</h2>
-                <p class="couche-promise">Une décision par fichier : le contexte, les options envisagées, la décision, ses
+                <p class="couche-promise">Une décision par fichier&nbsp;: le contexte, les options envisagées, la décision, ses
                     conséquences et ce qui la ferait réviser.</p>
                 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="co-decisions">
-                    <table class="decisions" aria-labelledby="co-decisions">
+                    <table class="tableau-fond decisions" aria-labelledby="co-decisions">
                         <thead><tr><th scope="col">N°</th><th scope="col">Décision</th><th scope="col">Date</th></tr></thead>
                         <tbody>
                             @foreach (var d in Decisions.All)
@@ -113,7 +113,7 @@
                     </table>
                 </div>
                 <div class="separe">
-                    <p>Tout le code est public, sous licence Apache 2.0 :
+                    <p>Tout le code est public, sous licence Apache 2.0&nbsp;:
                         <a href="https://github.com/olick/limpide">github.com/olick/limpide</a>.</p>
                 </div>
             </div>

@@ -6,8 +6,8 @@ namespace Limpide.Infrastructure;
 
 /// <summary>
 /// Réglages communs à la console et à l'application web (src/appsettings.shared.json, copié à côté de chaque
-/// exécutable) : connexion, embeddings, recherche, génération. Un seuil ou un tarif ne peut pas diverger
-/// entre les deux applications.
+/// exécutable) : connexion, embeddings, recherche, génération, seuils de l'évaluation. Un seuil ou un tarif ne peut
+/// pas diverger entre les deux applications.
 /// </summary>
 public static class SharedSettings
 {

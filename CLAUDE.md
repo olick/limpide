@@ -62,8 +62,8 @@ Décisions : `docs/adr/README.md` ; un numéro d'ADR s'attribue **à l'écriture
 - `src/Limpide.Ingestion` : console (commandes, mode interactif) ; aucun accès direct à Npgsql ni Ollama.
 - `src/Limpide.Web` (démo, Blazor serveur, page `Components/Pages/Home.razor`) et `src/Limpide.Admin` (back office,
   OpenID Connect) ; mêmes user-secrets que la console.
-- `src/appsettings.shared.json` : connexion, Embedding, Search, Generation, communs aux applications ; ne pas les
-  dupliquer ailleurs.
+- `src/appsettings.shared.json` : connexion, Embedding, Search, Generation, EvaluationGate, communs aux
+  applications ; ne pas les dupliquer ailleurs.
 - Modèles : Qwen3-Embedding-8B réduit à 1 024 dimensions, par OVHcloud AI Endpoints partout, poste compris (clé
   `Embedding:ApiKey`) ; bge-m3 par Ollama seulement hors ligne (surcharges dans `appsettings.shared.json`) ;
   Mistral **Medium 3.5** (`mistral-medium-2604`) par défaut, Small 4 pour des essais
