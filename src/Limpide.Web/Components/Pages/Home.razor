@@ -38,25 +38,23 @@
     </li>
 </ul>
 
-@* Obligation de transparence (AI Act, article 50) : la personne sait qu'elle échange avec un système d'IA. *@
-<aside class="transparency" role="note">
-    <strong>Vous échangez avec une IA.</strong>
-    Les réponses sont rédigées automatiquement à partir des textes cités : elles peuvent contenir des erreurs
-    et ne constituent pas un conseil juridique.
-</aside>
+<div class="examples">
+    <span>Exemples :</span>
+    @foreach (var example in Examples)
+    {
+        <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
+    }
+</div>
 
+@* Mention de l'article 50 : dans l'en-tête fixe (MainLayout), visible en permanence. Le champ est fixé en bas de la
+   fenêtre (section « composer » du gabarit), hors de la zone qui défile. *@
+<SectionContent SectionName="composer">
+<div class="composer">
 <form class="ask" @onsubmit="AskAsync">
     <label for="question">Votre question</label>
-    <textarea id="question" rows="3" maxlength="@MaxLength" disabled="@busy"
+    <textarea id="question" rows="2" maxlength="@MaxLength" disabled="@busy"
               placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
               @bind="question" @bind:event="oninput"></textarea>
-    <div class="examples">
-        <span>Exemples :</span>
-        @foreach (var example in Examples)
-        {
-            <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
-        }
-    </div>
     @* Conservation du texte (ADR-019) : information au moment de la collecte, opposition par la case, avant l'envoi. *@
     <div class="keep">
         <p>
@@ -66,6 +64,11 @@
         </p>
         <label><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
     </div>
+    @* Erreur (quota, délai, panne) près du bouton : visible même si le fil a défilé. *@
+    @if (error is not null)
+    {
+        <p class="error" role="alert">@error</p>
+    }
     <div class="ask-actions">
         <span class="count">@question.Length / @MaxLength · @QuotaPerHour questions par heure et par visiteur</span>
         <button type="submit" disabled="@busy">
@@ -73,15 +76,12 @@
         </button>
     </div>
 </form>
+</div>
+</SectionContent>
 
 @* Région d'annonce présente dès le départ (une région créée avec son texte n'est souvent pas lue) : l'attente
    dure plusieurs secondes, bouton désactivé. La réponse arrivée, le focus passe sur son titre. *@
 <p class="sr-only" role="status">@(busy ? "Recherche en cours, la réponse peut prendre plusieurs secondes." : "")</p>
-
-@if (error is not null)
-{
-    <p class="error" role="alert">@error</p>
-}
 
 @if (result is { } r)
 {
