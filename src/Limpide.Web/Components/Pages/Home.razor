@@ -332,10 +332,12 @@
 
 <FeedbackForm LastResult="result" />
 
-<TechStack />
-
 @code {
-    private const int MaxLength = 500;
+    /// <summary>Longueur maximale d'une question, rappelée dans « Ce que fait Limpide ».</summary>
+    public const int MaxLength = 500;
+
+    /// <summary>Délai au-delà duquel la réponse est abandonnée.</summary>
+    public static readonly TimeSpan AnswerTimeout = TimeSpan.FromSeconds(60);
 
     private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
 
@@ -424,7 +426,7 @@
         var started = System.Diagnostics.Stopwatch.StartNew();
         try
         {
-            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            using var timeout = new CancellationTokenSource(AnswerTimeout);
             result = await Answers.AskAsync(question.Trim(), timeout.Token);
             var cited = result.CitedPassages.Select(p => p.Id).ToHashSet();
             answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);

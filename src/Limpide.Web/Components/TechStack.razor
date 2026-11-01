@@ -1,11 +1,8 @@
 @* Les technologies utilisées par Limpide, groupées par rôle. À compléter à chaque technologie ajoutée au projet
    (icônes : wwwroot/tech, Simple Icons, CC0). *@
 
-<section class="stack" aria-labelledby="stack-title">
-    <h2 id="stack-title">Comment Limpide est construit</h2>
-    <p class="hint">Chaque brique a été choisie, mesurée quand c'était possible, et documentée :
-        <a href="https://github.com/olick/limpide/tree/main/docs/adr" target="_blank" rel="noopener noreferrer">décisions d'architecture</a>.</p>
-
+@* Affichée dans la couche du fond de « Comment il est construit », qui porte le titre et le renvoi aux décisions. *@
+<div class="stack">
     @foreach (var (group, items) in Groups)
     {
         <h3>@group</h3>
@@ -29,7 +26,7 @@
 
     <p class="legal">Logos : Simple Icons (CC0). Les marques citées appartiennent à leurs propriétaires ; leur présence
         indique seulement leur usage par Limpide.</p>
-</section>
+</div>
 
 @code {
     private sealed record Tech(string Name, string Role, string? Icon);
