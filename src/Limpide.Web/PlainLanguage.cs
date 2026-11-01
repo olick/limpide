@@ -26,20 +26,21 @@ public static class PlainLanguage
     /// </summary>
     public static (string Metric, string Rule) GateRule(GateRule rule, IFormatProvider culture)
     {
-        var (label, unit) = rule.Metric switch
+        // Féminin : pour « aucune tolérée » quand le seuil est 0 (une règle, pas le résultat d'une passe).
+        var (label, unit, feminine) = rule.Metric switch
         {
-            "versions.corpus.missingEmbeddings" => ("Passages servis sans vecteur", ""),
-            "metrics.promptLeaks" => ("Consignes divulguées", ""),
-            "metrics.injectionsFailed" => ("Détournements obéis", ""),
-            "metrics.correctDeclineShare" => ("Refus attendus obtenus", "%"),
-            "metrics.failed" => ("Échecs du contrôle", ""),
-            "metrics.expectedPassageProvidedShare" => ("Passage attendu retrouvé par la recherche", "%"),
-            "metrics.expectedPassageCitedShare" => ("Passage attendu cité", "%"),
-            "metrics.judge.unfaithfulShare" => ("Réponses jugées infidèles", "%"),
-            "metrics.judge.unreadable" => ("Verdicts du juge illisibles", ""),
-            "metrics.costPerQuestionEur" => ("Coût de rédaction", "€"),
-            "metrics.latencySeconds.p95" => ("Temps de réponse, 95ᵉ centile", "s"),
-            _ => (rule.Metric, "?"),
+            "versions.corpus.missingEmbeddings" => ("Passages introuvables par la recherche", "", false),
+            "metrics.promptLeaks" => ("Consignes divulguées", "", true),
+            "metrics.injectionsFailed" => ("Détournements obéis", "", false),
+            "metrics.correctDeclineShare" => ("Refus attendus obtenus", "%", false),
+            "metrics.failed" => ("Échecs du contrôle", "", false),
+            "metrics.expectedPassageProvidedShare" => ("Passage attendu retrouvé par la recherche", "%", false),
+            "metrics.expectedPassageCitedShare" => ("Passage attendu cité", "%", false),
+            "metrics.judge.unfaithfulShare" => ("Réponses jugées infidèles", "%", true),
+            "metrics.judge.unreadable" => ("Verdicts du juge inexploitables", "", false),
+            "metrics.costPerQuestionEur" => ("Coût de rédaction", "€", false),
+            "metrics.latencySeconds.p95" => ("Temps de réponse, 95ᵉ centile", "s", false),
+            _ => (rule.Metric, "?", false),
         };
         if (unit == "?")
             return (label, EvaluationGate.Describe(rule));
@@ -55,7 +56,7 @@ public static class PlainLanguage
         {
             ({ } min, { } max) => $"entre {Value(min)} et {Value(max)}",
             ({ } min, null) => $"au moins {Value(min)}",
-            (null, 0) => "0",
+            (null, 0) => feminine ? "aucune tolérée" : "aucun toléré",
             (null, { } max) => $"au plus {Value(max)}",
             _ => "présente",
         };
