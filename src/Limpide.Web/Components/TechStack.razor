@@ -5,6 +5,7 @@
 <div class="stack">
     @foreach (var (group, items) in Groups)
     {
+        <div class="stack-group">
         <h3>@group</h3>
         <ul>
             @foreach (var tech in items)
@@ -22,6 +23,7 @@
                 </li>
             }
         </ul>
+        </div>
     }
 
     <p class="legal">Logos : Simple Icons (CC0). Les marques citées appartiennent à leurs propriétaires ; leur présence
