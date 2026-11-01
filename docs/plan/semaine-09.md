@@ -141,7 +141,9 @@ du plan.
 
 Toile Design (claude.ai, privée), rangées « Maquette finale : direction 2 » (écrans O1 à O10, M1 à M6 ; prototypes
 `F2-ordinateur` et `F2-mobile`) et « Maquette finale : les autres pages » (Résultats d'évaluation, Ce que fait
-Limpide, Vos données). Données réelles uniquement ; ce qui manque est entre crochets.
+Limpide, Vos données). Données réelles uniquement ; ce qui manque est entre crochets. **Font foi : les écrans
+`F2-*`, page « Maquette finale »** ; les pistes écartées (directions 1 à 5, texte annoté, premières versions) sont
+rangées dans la page « Explorations », pour mémoire seulement.
 
 **Décisions prises avec Alexandre, reportées dans l'ADR-022 le 2026-11-01** :
 
