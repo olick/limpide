@@ -2,43 +2,55 @@
    l'identique, panneau « sous le capot ».
    Règle visuelle : la réponse de l'assistant et les textes officiels ne doivent jamais se confondre. */
 
+/* Polices servies par le site (aucune requête vers un tiers) : Public Sans pour l'interface et la réponse, Literata
+   pour les seuls textes officiels. Sous-ensemble latin de Fontsource 5.3.0, licence SIL OFL 1.1 (wwwroot/fonts). */
+@font-face { font-family: "Public Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/public-sans-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Public Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/public-sans-latin-600-normal.woff2") format("woff2"); }
+@font-face { font-family: "Public Sans"; font-style: italic; font-weight: 400; font-display: swap; src: url("fonts/public-sans-latin-400-italic.woff2") format("woff2"); }
+@font-face { font-family: "Public Sans"; font-style: normal; font-weight: 800; font-display: swap; src: url("fonts/public-sans-latin-800-normal.woff2") format("woff2"); }
+@font-face { font-family: "Literata"; font-style: normal; font-weight: 400; font-display: swap; src: url("fonts/literata-latin-400-normal.woff2") format("woff2"); }
+@font-face { font-family: "Literata"; font-style: normal; font-weight: 600; font-display: swap; src: url("fonts/literata-latin-600-normal.woff2") format("woff2"); }
+
+/* Palette de la direction 2 (bleu-vert), claire puis sombre ; contrastes mesurés, tous au moins AA.
+   Thème : réglage « Apparence » du menu. Automatique (par défaut) suit l'appareil ; Clair et Sombre posent
+   data-theme sur <html> (App.razor et limpide.js). Le bloc sombre est donc écrit deux fois. */
 :root {
-    --bg: #f7f7f4;
-    --surface: #ffffff;
-    --text: #1d2125;
-    --muted: #5f666d;
-    --border: #dcdfe3;
-    --control-border: #858b92; /* contour des champs : au moins 3:1 contre --surface et --bg */
-    --accent: #1f5fa8;
-    --on-accent: #ffffff; /* texte posé sur --accent */
-    --accent-soft: #e8f0fa;
-    --source-bg: #fbfaf5;
+    --bg: #F2F5F4;
+    --surface: #FFFFFF;
+    --text: #14212B;
+    --muted: #4F5F69;
+    --border: #D3DCDA;
+    --control-border: #4F5F69; /* contour des champs : au moins 3:1 contre --surface et --bg */
+    --accent: #0E5A6B;
+    --on-accent: #FFFFFF; /* texte posé sur --accent */
+    --accent-soft: #E3EFF1;
+    --source-bg: #FBFAF5;
     --source-rule: #b9a25a; /* filet décoratif */
-    --source-ink: #7a6628; /* texte doré (repères [P1]) : 5,35:1 sur --source-bg */
+    --source-ink: #7A6628; /* identifiants [P1] : 5,35:1 sur --source-bg */
     --warn-bg: #fff6e0;
     --warn-border: #e2b74a;
     --danger: #a32020;
     --ok: #2d7a46;
     --radius: 10px;
-    --font: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-    --serif: Georgia, "Times New Roman", serif;
+    --font: "Public Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --serif: Literata, Georgia, "Times New Roman", serif;
     color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
-    :root {
-        --bg: #15181b;
-        --surface: #1d2125;
-        --text: #e6e8ea;
-        --muted: #a0a7ae;
-        --border: #343a40;
-        --control-border: #737b83;
-        --accent: #7fb0ec;
-        --on-accent: #10161d;
-        --accent-soft: #1e2b3a;
-        --source-bg: #201f1a;
+    :root:not([data-theme="clair"]) {
+        --bg: #0F171D;
+        --surface: #17232B;
+        --text: #E3EAEE;
+        --muted: #A9B8C1;
+        --border: #2C3B45;
+        --control-border: #6F808A;
+        --accent: #7FC4D1;
+        --on-accent: #0F171D;
+        --accent-soft: #1E3A42;
+        --source-bg: #1D1B15;
         --source-rule: #a08a45;
-        --source-ink: #a08a45;
+        --source-ink: #D9C27A;
         --warn-bg: #2d2615;
         --warn-border: #8a6d22;
         --danger: #ef8a8a;
@@ -47,13 +59,37 @@
     }
 }
 
+:root[data-theme="sombre"] {
+    --bg: #0F171D;
+    --surface: #17232B;
+    --text: #E3EAEE;
+    --muted: #A9B8C1;
+    --border: #2C3B45;
+    --control-border: #6F808A;
+    --accent: #7FC4D1;
+    --on-accent: #0F171D;
+    --accent-soft: #1E3A42;
+    --source-bg: #1D1B15;
+    --source-rule: #a08a45;
+    --source-ink: #D9C27A;
+    --warn-bg: #2d2615;
+    --warn-border: #8a6d22;
+    --danger: #ef8a8a;
+    --ok: #7fcf98;
+    color-scheme: dark;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
     margin: 0;
     background: var(--bg);
     color: var(--text);
-    font: 16px/1.6 var(--font);
+    font: 1rem/1.55 var(--font);
+}
+
+@media (min-width: 40rem) {
+    body { font-size: 1.0625rem; } /* 17 px sur ordinateur, 16 px sur mobile */
 }
 
 a { color: var(--accent); }
@@ -177,7 +213,38 @@ a { color: var(--accent); }
 .menu-links svg { flex: 0 0 auto; color: var(--accent); }
 .menu-links a.current { background: var(--accent-soft); font-weight: 800; }
 .menu-hint { display: block; font-size: 0.82rem; font-weight: 400; color: var(--muted); overflow-wrap: anywhere; }
-.menu-foot { margin: auto 0 0; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.82rem; }
+/* Réglage « Apparence » : trois boutons radio en segments, en bas du panneau. Chaque segment prend la largeur de son
+   libellé (« Automatique » tient à 320 px), puis l'espace restant se partage. */
+.theme-choice { margin: auto 0 0; padding: 0.9rem 0 0; border: 0; border-top: 1px solid var(--border); }
+.theme-choice legend { padding: 0; font-size: 0.875rem; font-weight: 800; }
+.theme-segments {
+    display: flex;
+    margin-top: 0.5rem;
+    border: 1.5px solid var(--control-border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+.theme-segments label {
+    flex: 1 1 auto;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+    padding: 0 0.25rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+.theme-segments input { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.theme-segments label:has(input:checked) { background: var(--accent); color: var(--on-accent); }
+.theme-segments label:has(input:focus-visible) { outline: 2px solid currentColor; outline-offset: -5px; }
+/* Contraste élevé : les fonds disparaissent, le choix actif garde un contour et un soulignement. */
+@media (forced-colors: active) {
+    .theme-segments label:has(input:checked) { outline: 3px solid Highlight; outline-offset: -4px; text-decoration: underline; }
+}
+.theme-hint { margin: 0.4rem 0 0; font-size: 0.8125rem; color: var(--muted); }
+.menu-foot { margin: 0.75rem 0 0; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.82rem; }
 .menu-foot a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--muted); }
 
 /* Champ de question fixé en bas de la fenêtre. */
@@ -331,7 +398,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .source:target { outline: 2px solid var(--source-rule); }
 .source header { display: flex; gap: 0.6rem; align-items: baseline; }
 .source h3 { margin: 0; font-size: 1rem; }
-.id { font-weight: 700; color: var(--source-ink); }
+.id { font-weight: 800; color: var(--source-ink); }
 
 .verbatim {
     margin: 0.6rem 0;
@@ -350,7 +417,7 @@ details.engine {
     padding: 0.75rem 1.25rem;
 }
 
-details.engine summary { cursor: pointer; font-weight: 700; }
+details.engine summary { cursor: pointer; font-weight: 800; }
 details.engine h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
 
 .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 0.6rem 1.5rem; margin: 1rem 0 0; }
@@ -362,7 +429,7 @@ details.engine h3 { font-size: 0.95rem; margin: 1.2rem 0 0.4rem; }
 .timings .bar { background: var(--bg); border-radius: 4px; height: 0.6rem; overflow: hidden; }
 .timings .bar span { display: block; height: 100%; background: var(--accent); }
 .timings .ms { text-align: right; font-variant-numeric: tabular-nums; }
-.timings .total { font-weight: 700; border-top: 1px solid var(--border); margin-top: 0.3rem; padding-top: 0.3rem; }
+.timings .total { font-weight: 800; border-top: 1px solid var(--border); margin-top: 0.3rem; padding-top: 0.3rem; }
 
 @media (max-width: 34rem) {
     .timings li { grid-template-columns: 1fr 5rem; }
@@ -426,8 +493,8 @@ details.engine summary { font-size: 1.05rem; }
 .story { counter-reset: step; list-style: none; padding: 0; margin: 1rem 0 0; }
 .story li { counter-increment: step; position: relative; padding: 0 0 0.9rem 2.4rem; border-left: 2px solid var(--border); margin-left: 0.9rem; }
 .story li:last-child { border-left-color: transparent; }
-.story li::before { content: counter(step); position: absolute; left: -0.95rem; top: -0.1rem; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 700; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
-.story .step-title { font-weight: 700; }
+.story li::before { content: counter(step); position: absolute; left: -0.95rem; top: -0.1rem; width: 1.8rem; height: 1.8rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-weight: 800; display: flex; align-items: center; justify-content: center; font-size: 0.9rem; }
+.story .step-title { font-weight: 800; }
 .story .ms { margin-left: 0.5rem; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
 .story p { margin: 0.3rem 0 0; font-size: 0.92rem; line-height: 1.5; }
 .story .guardrails { margin: 0.4rem 0 0; padding-left: 1.1rem; font-size: 0.92rem; }
@@ -459,7 +526,7 @@ details.technical .hint { font-size: 0.82rem; color: var(--muted); }
 .stack .icon.text {
     background: none; -webkit-mask: none; mask: none;
     display: inline-flex; align-items: center; justify-content: center;
-    border: 1.5px solid var(--text); border-radius: 4px; font-weight: 700; font-size: 0.8rem;
+    border: 1.5px solid var(--text); border-radius: 4px; font-weight: 800; font-size: 0.8rem;
 }
 .stack .legal { font-size: 0.75rem; color: var(--muted); margin: 1.2rem 0 0; }
 
@@ -471,7 +538,7 @@ details.technical .hint { font-size: 0.82rem; color: var(--muted); }
 .scorecards { display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: 0.6rem; margin: 1rem 0 0; }
 .scorecards div { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 0.7rem 0.9rem; }
 .scorecards dt { font-size: 0.82rem; color: var(--muted); }
-.scorecards dd { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+.scorecards dd { margin: 0.2rem 0 0; font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
 .runs td { vertical-align: top; font-variant-numeric: tabular-nums; }
 .runs tr.served td { background: var(--accent-soft); }
 

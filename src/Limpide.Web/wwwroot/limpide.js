@@ -7,7 +7,10 @@ document.addEventListener("click", (event) => {
     const opener = event.target.closest("[data-menu-open]");
     if (opener) {
         const dialog = document.getElementById(opener.getAttribute("aria-controls"));
-        if (dialog && !dialog.open) dialog.showModal();
+        if (dialog && !dialog.open) {
+            syncThemeChoice();
+            dialog.showModal();
+        }
         return;
     }
 
@@ -15,9 +18,47 @@ document.addEventListener("click", (event) => {
     if (dialog && (event.target === dialog || event.target.closest("[data-menu-close], a[href]"))) dialog.close();
 });
 
+// Réglage « Apparence » : Automatique (suit l'appareil), Clair ou Sombre. Le choix reste dans le navigateur
+// (localStorage), jamais envoyé au serveur ; App.razor le relit avant le premier affichage.
+const themeKey = "limpide-theme";
+
+function savedTheme() {
+    try {
+        const theme = localStorage.getItem(themeKey);
+        return theme === "clair" || theme === "sombre" ? theme : "auto";
+    } catch {
+        return "auto";
+    }
+}
+
+function syncThemeChoice() {
+    const theme = savedTheme();
+    for (const input of document.querySelectorAll('input[name="theme"]')) input.checked = input.value === theme;
+}
+
+document.addEventListener("change", (event) => {
+    const input = event.target.closest('input[name="theme"]');
+    if (!input) return;
+
+    if (input.value === "auto") delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = input.value;
+
+    try {
+        if (input.value === "auto") localStorage.removeItem(themeKey);
+        else localStorage.setItem(themeKey, input.value);
+    } catch {
+        // Stockage refusé (navigation privée stricte) : le thème vaut pour la page en cours seulement.
+    }
+});
+
 window.limpide = {
-    // Appelé par le gabarit à chaque navigation de Blazor.
+    // Appelé par le gabarit à chaque navigation de Blazor : ferme le panneau et réapplique le thème choisi, au cas où
+    // un rendu aurait remplacé l'attribut de <html>.
     closeMenu() {
+        // Seulement un choix enregistré : sans stockage, un choix fait pour la page en cours doit survivre.
+        const theme = savedTheme();
+        if (theme !== "auto") document.documentElement.dataset.theme = theme;
+
         const dialog = document.getElementById("menu");
         if (dialog && dialog.open) dialog.close();
     },

@@ -9,7 +9,8 @@ paths:
 
 - **Réponse du modèle = texte non fiable** : Markdown (Markdig) sans HTML, liens ni images (un
   `[x](javascript:...)` passait sinon) ; seuls liens : les citations `[P1]`, ajoutées après coup (`AnswerMarkdown`).
-- Réponse (encadré bleu, sans-serif) et textes officiels (fond papier, filet doré, serif) visuellement distincts ;
+- Réponse (sans-serif, sur la surface, couleur d'accent bleu-vert) et textes officiels (fond papier, filet doré, serif
+  Literata réservée à eux) visuellement distincts, en clair comme en sombre ;
   encart « Vous échangez avec une IA » obligatoire (AI Act, article 50). Garde-fous traduits par `PlainLanguage.cs`.
 - Question limitée à 500 caractères, 60 s maximum par réponse ; quota (`QuestionQuota`) appliqué dans `Home.razor`
   avant l'appel au modèle, IP relevée dans `App.razor`, jamais journalisée.

@@ -5,6 +5,8 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, interactive-widget=resizes-content" />
     <base href="/" />
+    @* Thème choisi dans le menu (limpide.js), appliqué avant le premier affichage : pas d'éclair clair en sombre. *@
+    <script>try { var t = localStorage.getItem("limpide-theme"); if (t === "clair" || t === "sombre") document.documentElement.dataset.theme = t; } catch (e) { }</script>
     <ResourcePreloader />
     <link rel="stylesheet" href="@Assets["app.css"]" />
     <link rel="stylesheet" href="@Assets["Limpide.Web.styles.css"]" />

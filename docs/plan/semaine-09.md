@@ -18,6 +18,10 @@ puis vérifiée à la main dans un navigateur (320 px, thème sombre, clavier), 
 1. **Squelette** (≈ 2 h) : en-tête fixe (titre, phrase courte, pastille IA), panneau latéral (menu sur mobile en
    `<dialog>` modal, page en cours marquée par `aria-current`), zone du fil, champ fixé en bas (hauteur en `100dvh`
    pour le clavier mobile). Le contenu actuel de la page y est replacé tel quel.
+1 bis. **Système visuel** (ajouté le 2026-11-01, ≈ 1 h) : palette claire de la direction 2 et palette sombre
+   validée par Alexandre (contrastes mesurés, tous AA), réglage « Apparence » en bas du panneau (Automatique, Clair,
+   Sombre ; choix gardé dans le navigateur et appliqué avant l'affichage), polices Public Sans et Literata servies
+   par le site (Fontsource 5.3.0, sous-ensemble latin, SIL OFL), mention du stockage local dans `/confidentialite`.
 2. **Pages secondaires** (≈ 1 h 30) : Ce que fait Limpide (texte complet des trois encarts), Votre avis (formulaire
    général), Comment il est construit (`TechStack.razor`, avec ses icônes),
    Mentions légales, sources et licences (mentions du pied de page actuel, éditeur et hébergeur).
@@ -155,6 +159,10 @@ rangées dans la page « Explorations », pour mémoire seulement.
 - pages secondaires en coupe (surface, dessous, fond) ; papier et Literata réservés aux textes officiels (sauf le
   titre « Les textes officiels », comme sur l'accueil) ; titre de la page en `h1`.
 
+**Thème sombre** (2026-11-01) : palette sombre déduite de la direction 2, montrée sur la toile (planche « Système
+visuel ») et validée par Alexandre ; réglage à trois choix plutôt qu'un interrupteur, pour garder « suit
+l'appareil » par défaut.
+
 **Points ouverts** :
 
 - [ ] **Bases légales de « Vos données »** (session 1, point 4) : la page actuelle n'en donne pas pour l'envoi de la
@@ -183,5 +191,7 @@ rangées dans la page « Explorations », pour mémoire seulement.
 - [ ] **Icônes de « Comment il est construit »** (souhait d'Alexandre) : garder celles de `TechStack.razor`
   (`wwwroot/tech`, Simple Icons, CC0, servies par le site, colorées par masque CSS), l'initiale encadrée pour les
   briques sans logo, et la mention sur les marques. Ajoutées à la maquette le 2026-11-01.
+- [ ] **Script en ligne d'`App.razor`** (thème appliqué avant l'affichage) : si une Content-Security-Policy
+  `script-src` est ajoutée en production, lui donner une empreinte ou un nonce, sinon le thème clignote.
 - [ ] Textes nouveaux de « Ce que fait Limpide » à relire (Une question à la fois, Ce qu'il ne connaît pas, les
   5 étapes, le coût, Où part votre question).
