@@ -234,13 +234,12 @@ h1, h2, h3 { line-height: 1.25; }
 
 .ask textarea:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
 
-.ask-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 0.6rem; gap: 1rem; }
-.count { color: var(--muted); font-size: 0.85rem; }
-.keep { margin-top: 0.6rem; }
-.keep p { color: var(--muted); font-size: 0.85rem; margin: 0 0 0.4rem; }
-/* Opposition (ADR-019) : sur sa ligne, en couleur de texte, pour qu'on la voie sans chercher. */
-.ask .keep label { display: inline-flex; align-items: center; gap: 0.45rem; margin: 0; font-weight: 600; color: var(--text); cursor: pointer; }
-.keep input[type="checkbox"] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
+.ask-actions { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; margin-top: 0.4rem; gap: 0.4rem 1rem; }
+.count { margin: 0.35rem 0 0; color: var(--text); font-size: 0.85rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+.keep { margin: 0.4rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
+/* Opposition (ADR-019) : à côté du bouton, en couleur de texte, pour qu'on la voie sans chercher. */
+.ask .keep-choice { display: inline-flex; align-items: center; gap: 0.45rem; min-height: 2.75rem; margin: 0; font-size: 0.92rem; font-weight: 600; color: var(--text); cursor: pointer; }
+.keep-choice input[type="checkbox"] { width: 1.05rem; height: 1.05rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
 
 button { font: inherit; cursor: pointer; }
 button:disabled { cursor: not-allowed; opacity: 0.6; }
@@ -269,7 +268,8 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
 .error { color: var(--danger); font-weight: 600; margin: 0.6rem 0 0; }
 
 /* Fenêtre trop basse (zoom à 400 %, téléphone à l'horizontale, clavier ouvert) : plus rien n'est fixé, toute la page
-   défile, pour que le fil ne soit jamais écrasé entre l'en-tête et le champ (WCAG 1.4.10). */
+   défile, pour que le fil ne soit jamais écrasé entre l'en-tête et le champ (WCAG 1.4.10). Au-dessus, le champ compact
+   tient entier jusqu'à 320 × 568. */
 @media (max-height: 34rem) {
     .app { height: auto; min-height: 100dvh; }
     .thread { overflow: visible; }
