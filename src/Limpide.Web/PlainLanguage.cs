@@ -1,3 +1,5 @@
+using Limpide.Core.Evaluation;
+
 namespace Limpide.Web;
 
 /// <summary>
@@ -14,6 +16,52 @@ public static class PlainLanguage
         "mistral-small-2603" => "Mistral Small 4",
         _ => model,
     };
+
+    /// <summary>Nom lisible d'un réglage de vectorisation : « Qwen3-Embedding-8B+titre » → « Qwen3-Embedding-8B ».</summary>
+    public static string EmbeddingName(string label) => label.Replace("+titre", "", StringComparison.Ordinal);
+
+    /// <summary>
+    /// Un seuil de la barrière (section EvaluationGate) en langage courant : la métrique, puis la règle. Une métrique
+    /// sans traduction garde son chemin technique : la page reste complète quand un seuil est ajouté.
+    /// </summary>
+    public static (string Metric, string Rule) GateRule(GateRule rule, IFormatProvider culture)
+    {
+        // Féminin : pour « aucune tolérée » quand le seuil est 0 (une règle, pas le résultat d'une passe).
+        var (label, unit, feminine) = rule.Metric switch
+        {
+            "versions.corpus.missingEmbeddings" => ("Passages introuvables par la recherche", "", false),
+            "metrics.promptLeaks" => ("Consignes divulguées", "", true),
+            "metrics.injectionsFailed" => ("Détournements obéis", "", false),
+            "metrics.correctDeclineShare" => ("Refus attendus obtenus", "%", false),
+            "metrics.failed" => ("Échecs du contrôle", "", false),
+            "metrics.expectedPassageProvidedShare" => ("Passage attendu retrouvé par la recherche", "%", false),
+            "metrics.expectedPassageCitedShare" => ("Passage attendu cité", "%", false),
+            "metrics.judge.unfaithfulShare" => ("Réponses jugées infidèles", "%", true),
+            "metrics.judge.unreadable" => ("Verdicts du juge inexploitables", "", false),
+            "metrics.costPerQuestionEur" => ("Coût de rédaction", "€", false),
+            "metrics.latencySeconds.p95" => ("Temps de réponse, 95ᵉ centile", "s", false),
+            _ => (rule.Metric, "?", false),
+        };
+        if (unit == "?")
+            return (label, EvaluationGate.Describe(rule));
+
+        string Value(double v) => unit switch
+        {
+            "%" => $"{Math.Round(v * 100).ToString(culture)}\u00A0%",
+            "€" => $"{v.ToString("0.####", culture)}\u00A0€ par question",
+            "s" => $"{v.ToString("0.#", culture)}\u00A0s",
+            _ => v.ToString("0.####", culture),
+        };
+        var text = (rule.Min, rule.Max) switch
+        {
+            ({ } min, { } max) => $"entre {Value(min)} et {Value(max)}",
+            ({ } min, null) => $"au moins {Value(min)}",
+            (null, 0) => feminine ? "aucune tolérée" : "aucun toléré",
+            (null, { } max) => $"au plus {Value(max)}",
+            _ => "présente",
+        };
+        return (label, rule.Blocking ? text : $"{text}, signalé sans bloquer");
+    }
 
     /// <summary>Un garde-fou déclenché : ce qui s'est passé, et ce que le contrôle protège.</summary>
     public static (string Title, string Meaning) Guardrail(string code) => code switch

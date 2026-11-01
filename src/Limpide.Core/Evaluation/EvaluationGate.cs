@@ -25,6 +25,15 @@ public enum GateStatus
 public sealed record GateResult(GateRule Rule, double? Value, GateStatus Status);
 
 /// <summary>
+/// Seuils de la section « EvaluationGate » (src/appsettings.shared.json), justifiés dans l'ADR-014 : appliqués par la
+/// commande gate, affichés par la page « Résultats d'évaluation ».
+/// </summary>
+public sealed class EvaluationGateOptions
+{
+    public List<GateRule> Rules { get; set; } = [];
+}
+
+/// <summary>
 /// Compare un rapport d'évaluation aux seuils. Sans E/S : le rapport arrive déjà lu, les seuils viennent de la
 /// configuration.
 /// </summary>

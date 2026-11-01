@@ -14,25 +14,25 @@
 
     @if (sent)
     {
-        <p class="ok" role="status">Merci : votre retour est enregistré.</p>
+        <p class="ok" role="status">Merci&nbsp;: votre retour est enregistré.</p>
     }
     else
     {
         <form @onsubmit="SendAsync">
-            <label for="fb-understood">Qu'avez-vous compris de ce que fait Limpide ?</label>
+            <label for="fb-understood">Qu'avez-vous compris de ce que fait Limpide&nbsp;?</label>
             <textarea id="fb-understood" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="understood"></textarea>
 
-            <label for="fb-misleading">Une réponse vous a-t-elle paru fausse ou trompeuse ? Laquelle, et pourquoi ?</label>
+            <label for="fb-misleading">Une réponse vous a-t-elle paru fausse ou trompeuse&nbsp;? Laquelle, et pourquoi&nbsp;?</label>
             <textarea id="fb-misleading" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="misleading"></textarea>
 
-            <label for="fb-under-the-hood">Le panneau « sous le capot » vous a-t-il servi à quelque chose ?</label>
+            <label for="fb-under-the-hood">Le panneau «&nbsp;sous le capot&nbsp;» vous a-t-il servi à quelque chose&nbsp;?</label>
             <textarea id="fb-under-the-hood" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="underTheHood"></textarea>
 
             @if (LastResult is not null)
             {
                 <label class="checkbox">
                     <input type="checkbox" @bind="attachLastAnswer" disabled="@sending" />
-                    Joindre ma dernière question et la réponse obtenue (« @Shorten(LastResult.Question, 80) »)
+                    Joindre ma dernière question et la réponse obtenue («&nbsp;@Shorten(LastResult.Question, 80)&nbsp;»)
                 </label>
             }
             else if (!General)

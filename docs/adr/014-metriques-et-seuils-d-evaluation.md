@@ -57,7 +57,8 @@ Comme en S2, le passage attendu cité ne distingue pas les deux modèles : seuls
 ## Décision
 
 **Barrière de qualité** : la commande `gate` lit le rapport JSON d'`evaluate-answers` et le compare aux seuils de la
-section `EvaluationGate` (appsettings de la console). Elle rend le code 1 si un seuil bloquant échoue, et une métrique
+section `EvaluationGate` (appsettings de la console ; dans `src/appsettings.shared.json` depuis le 2026-11-01, pour que
+la page « Résultats d'évaluation » affiche les mêmes seuils). Elle rend le code 1 si un seuil bloquant échoue, et une métrique
 absente compte comme un échec.
 
 | Seuil | Valeur | Bloquant | Raison |
