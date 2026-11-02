@@ -18,7 +18,7 @@
     <span class="regle-borne fin" aria-hidden="true">@Number(Max, "0.00")</span>
     @foreach (var (p, up, labelled) in Placed())
     {
-        <span class="regle-point @(p.Cited ? "est-cite" : null)" style="left: @Pos(p.Passage.Score)" aria-hidden="true"></span>
+        <span class="regle-point @(p.Cited || Live ? "est-cite" : null)" style="left: @Pos(p.Passage.Score)" aria-hidden="true"></span>
         @if (labelled)
         {
             <span class="regle-trait @(up ? "haut" : "bas")" style="left: @Pos(p.Passage.Score)" aria-hidden="true"></span>
@@ -26,7 +26,7 @@
         }
     }
 </div>
-@if (Refused || Passages.Any(p => p.Cited))
+@if (!Live && (Refused || Passages.Any(p => p.Cited)))
 {
     <p class="regle-legende">
         <span><span class="pastille est-cite" aria-hidden="true"></span>cité dans la réponse</span>
@@ -42,6 +42,10 @@
 
     [Parameter, EditorRequired]
     public double Threshold { get; set; }
+
+    /// <summary>Pendant le traitement : passages pleins, sans légende (on ne sait pas encore lesquels seront cités).</summary>
+    [Parameter]
+    public bool Live { get; set; }
 
     /// <summary>Question sous le seuil : seul le meilleur passage est nommé.</summary>
     [Parameter]

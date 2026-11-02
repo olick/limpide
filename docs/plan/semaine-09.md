@@ -256,7 +256,7 @@ l'appareil » par défaut.
 - **Pas fait** : la radiographie en direct (O2, O3 : étapes qui s'allument pendant l'attente) demande que
   `AnswerService` publie son avancement ; l'attente affiche une phrase fixe. **Décidé le 2026-11-02** : les étapes en
   direct juste après la refonte, avant le script de la vidéo (prévues par l'ADR-022) ; la réponse écrite en continu
-  (« suivi en direct » du plan global, S8) reportée en S10.
+  (« suivi en direct » du plan global, S8) reportée en S10. Faites le jour même : voir « Radiographie en direct ».
 - Vérifié avec de vraies questions, Firefox piloté par WebDriver BiDi (script Node sans dépendance, hors dépôt) :
   1440 px clair, 390 px clair et sombre, 320 px ; débordements corrigés (`minmax(0, 1fr)` sur les couches et le
   détail du fond).
@@ -298,3 +298,24 @@ Avancée avant l'étape 4 : le champ se voit sur tous les écrans, et l'étape 3
   #73 (opacité du bouton en attente retirée, message `<noscript>` sous le champ).
 - Vérifié au pilote avec de vraies questions : cartes repliées, [P2] ouvre P2 avec le focus sur son titre ; 1440 px,
   390 px en sombre ; aucun défilement horizontal.
+
+### Radiographie en direct (2026-11-02, après la refonte)
+
+Prévue par l'ADR-022, décidée le jour même (avant le script de la vidéo).
+
+- **Un vrai point d'étape** : `AnswerService.AskAsync` accepte un `IProgress<AnswerProgress>` facultatif et publie la
+  fin de la recherche (passages, durées de vectorisation et de requête, seuil atteint ou non) avant la rédaction.
+  Rien n'est simulé : ce sont les valeurs que la réponse finale reprend. Console et évaluation inchangées (paramètre
+  facultatif). 3 tests (publié avant l'appel au modèle, seuil non atteint, rien pour une injection).
+- **Pendant l'attente**, le fond est ouvert (« En ce moment ») : la vectorisation en cours et les autres étapes en
+  attente ; puis, la recherche finie, étapes 1 à 3 faites avec leurs vraies durées, rédaction en cours, passages sur
+  la règle de proximité, et leur liste dessous avec leur proximité (écrans O2, O3). Annonce « 5 passages trouvés.
+  Rédaction de la réponse en cours. » Une seule animation (l'étape en cours), coupée sous `prefers-reduced-motion`.
+- La réponse arrivée, le fond se replie sur sa ligne de résumé, comme avant.
+- Relectures : avant la fin de la recherche, « contrôle de la question, puis vectorisation » (une question arrêtée
+  par le contrôle d'injection ne publie aucun point d'étape : rien n'affirme une vectorisation qui n'a pas lieu) ;
+  relais protégé si la page se ferme pendant l'attente ; accords au singulier (« 1 passage trouvé ») ; classe des
+  étapes en attente distincte de celle du texte d'attente.
+- Relecture de la PR #74 corrigée en passant : à 320 px, titre des cartes sur toute la largeur et action dessous
+  (les titres longs des fiches de la CNIL se coupaient au milieu des mots).
+- Vérifié au pilote (captures pendant l'attente) : 1440 px, 320 px en sombre.

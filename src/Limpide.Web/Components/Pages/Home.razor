@@ -245,7 +245,10 @@ else
         try
         {
             using var timeout = new CancellationTokenSource(AnswerTimeout);
-            var result = await Answers.AskAsync(text, timeout.Token);
+            // Radiographie en direct (ADR-022) : la fin de la recherche s'affiche avant la réponse ; un point d'étape
+            // arrivé après la réponse est ignoré.
+            var progress = new Relay(live => _ = ShowProgressAsync(entry, live));
+            var result = await Answers.AskAsync(text, timeout.Token, progress);
             var cited = result.CitedPassages.Select(p => p.Id).ToHashSet();
             entry.AnswerHtml = AnswerMarkdown.ToHtml(result.Answer, cited, entry.Id + "-");
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
@@ -327,7 +330,34 @@ else
         }
     }
 
+    private async Task ShowProgressAsync(ThreadEntry entry, AnswerProgress live)
+    {
+        try
+        {
+            await InvokeAsync(() =>
+            {
+                if (entry.Result is not null)
+                    return;
+                entry.Live = live;
+                status = live.AboveThreshold
+                    ? (live.Passages.Count == 1 ? "1 passage trouvé" : $"{live.Passages.Count} passages trouvés") + ". Rédaction de la réponse en cours."
+                    : "Passages trouvés, trop éloignés de la question.";
+                StateHasChanged();
+            });
+        }
+        catch (ObjectDisposedException)
+        {
+            // Page fermée pendant l'attente : plus rien à afficher.
+        }
+    }
+
     private static string? TraceId() => System.Diagnostics.Activity.Current?.TraceId.ToHexString();
+
+    /// <summary>Progression relayée telle quelle (Progress&lt;T&gt; repasserait par le contexte de synchronisation).</summary>
+    private sealed class Relay(Action<AnswerProgress> onReport) : IProgress<AnswerProgress>
+    {
+        public void Report(AnswerProgress value) => onReport(value);
+    }
 
     private static string Duration(TimeSpan delay) =>
         delay.TotalMinutes < 1 ? "moins d'une minute"

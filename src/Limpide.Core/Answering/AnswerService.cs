@@ -30,13 +30,14 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
     /// <summary>Garde-fou d'entrée : question repérée comme une tentative d'injection, ni recherchée ni soumise au modèle.</summary>
     public const string InjectionCode = "injection-suspectee";
 
-    public async Task<AnswerResult> AskAsync(string question, CancellationToken ct)
+    /// <param name="progress">Reçoit la fin de la recherche, avant la rédaction (affichage en direct) ; facultatif.</param>
+    public async Task<AnswerResult> AskAsync(string question, CancellationToken ct, IProgress<AnswerProgress>? progress = null)
     {
         using var activity = AnswerTelemetry.Source.StartActivity("Réponse à une question");
         activity?.SetTag("limpide.question.length", question.Length);
         try
         {
-            var result = await AnswerAsync(question, ct);
+            var result = await AnswerAsync(question, progress, ct);
             AnswerTelemetry.Describe(activity, result);
             return result;
         }
@@ -49,7 +50,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
         }
     }
 
-    private async Task<AnswerResult> AnswerAsync(string question, CancellationToken ct)
+    private async Task<AnswerResult> AnswerAsync(string question, IProgress<AnswerProgress>? progress, CancellationToken ct)
     {
         var total = Stopwatch.StartNew();
         // Avant la recherche : une injection repérée n'est envoyée ni au service de vectorisation ni au modèle.
@@ -62,6 +63,7 @@ public sealed class AnswerService(IPassageSearch search, IChatClient chat, Gener
             found = await search.SearchAsync(question, settings.PassageCount, ct);
 
         var best = found.Passages.Count == 0 ? 0 : found.Passages.Max(p => p.Score);
+        progress?.Report(new AnswerProgress(found.Passages, found.EmbeddingDuration, found.QueryDuration, best >= settings.MinScore));
         if (best < settings.MinScore)
             return OutOfScope(question, found, best, total.Elapsed);
 

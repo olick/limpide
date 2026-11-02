@@ -16,7 +16,7 @@
                 <h3 id="@Entry.Id-surface" class="sr-only">Réponse à : @Entry.Question</h3>
                 @if (Entry.Result is not { } r)
                 {
-                    <p class="attente">Recherche des passages, puis rédaction de la réponse : cela peut prendre plusieurs secondes.</p>
+                    <p class="attente">@(Entry.Live is { AboveThreshold: true } ? "La réponse est en cours de rédaction." : "La réponse sera rédigée à partir des textes trouvés.")</p>
                 }
                 else
                 {
@@ -44,6 +44,16 @@
             <span class="couche-label">Dessous</span>
             <div>
                 <h3 id="@Entry.Id-textes" class="legende">@TextsCaption</h3>
+                @if (Entry.Result is null && Entry.Live is { } found)
+                {
+                    @* Passages trouvés, avant la rédaction : la liste et leur proximité, pas encore leur texte. *@
+                    <ul class="trouves" role="list">
+                        @foreach (var (p, i) in found.Passages.Select((p, i) => (p, i)))
+                        {
+                            <li><span class="id">@AnswerPrompt.Id(i)</span><span class="carte-titre">@p.Heading</span><span class="proximite">proximité @p.Score.ToString("0.000", French)</span></li>
+                        }
+                    </ul>
+                }
                 @if (Entry.Result is { } res)
                 {
                     @foreach (var (id, p, _) in res.CitedPassages)
@@ -95,20 +105,7 @@
                                 </button>
                             </div>
 
-                            <ol class="etapes-reponse" role="list">
-                                @foreach (var step in Steps(result))
-                                {
-                                    <li class="@step.State">
-                                        <span class="etape-nom"><span class="etape-marque" aria-hidden="true"></span>@step.Number. @step.Name</span>
-                                        <span class="sr-only">@StateText(step.State)</span>
-                                        <span class="etape-resultat">@step.Result</span>
-                                        @if (step.Duration is { } d)
-                                        {
-                                            <span class="etape-ms">@Ms(d)</span>
-                                        }
-                                    </li>
-                                }
-                            </ol>
+                            @StepList(Steps(result))
 
                             @if (result.Guardrails.Count > 0)
                             {
@@ -184,6 +181,33 @@
                 }
             </section>
         }
+        else
+        {
+            @* Radiographie en direct (ADR-022, écrans O2 et O3) : le fond ouvert, rempli à chaque vrai point d'étape. *@
+            <section class="couche-fond fond" aria-labelledby="@Entry.Id-fond">
+                <div class="couche">
+                    <span class="couche-label">Au fond</span>
+                    <div>
+                        <h3 id="@Entry.Id-fond" class="en-ce-moment">En ce moment</h3>
+                        @StepList(LiveSteps())
+                        <h4>Proximité des passages trouvés</h4>
+                        <p class="fond-note">Ressemblance de sens avec votre question, de 0 à 1.</p>
+                        @if (Entry.Live is { } live)
+                        {
+                            <ProximityRuler Passages="Numbered(live)" Threshold="Generation.MinScore" Refused="!live.AboveThreshold" Live="true" />
+                            @if (live.AboveThreshold)
+                            {
+                                <p class="fond-note">Au-dessus du seuil : la question entre dans le sujet, le modèle est appelé.</p>
+                            }
+                        }
+                        else
+                        {
+                            <p class="fond-note">Aucun passage encore : la recherche est en cours.</p>
+                        }
+                    </div>
+                </div>
+            </section>
+        }
     </div>
 
     @if (!Entry.Pending)
@@ -238,7 +262,9 @@
         get
         {
             if (Entry.Result is not { } r)
-                return "Recherche des passages les plus proches de votre question…";
+                return Entry.Live is { } live
+                    ? Found(live.Passages.Count) + (live.AboveThreshold ? (live.Passages.Count == 1 ? ", envoyé au modèle" : ", envoyés au modèle") : ", sous le seuil de proximité")
+                    : "Recherche des passages les plus proches de votre question…";
             var cited = r.CitedPassages.Count();
             if (Injection(r))
                 return "Aucun texte consulté : la question s'adresse aux consignes de l'assistant.";
@@ -276,7 +302,7 @@
         var cited = r.CitedPassages.Count();
         var threshold = Generation.MinScore.ToString("0.00", French);
         yield return new(1, "Sens", EmbeddingWhere, r.Timings.Embedding, "fait");
-        yield return new(2, "Recherche", $"{r.Passages.Count} passages, meilleur {best.ToString("0.00", French)}", r.Timings.Search, "fait");
+        yield return new(2, "Recherche", $"{Passages(r.Passages.Count)}, meilleur {best.ToString("0.00", French)}", r.Timings.Search, "fait");
         yield return outOfScope
             ? new(3, "Sujet", "sous le seuil : modèle non appelé", null, "arret")
             : new(3, "Sujet", $"au-dessus du seuil de {threshold}", null, "fait");
@@ -295,8 +321,61 @@
         "fait" => "terminée :",
         "arret" => "arrêt :",
         "alerte" => "alerte :",
+        "encours" => "en cours :",
+        "en-attente" => "en attente :",
         _ => "",
     };
+
+    private RenderFragment StepList(IEnumerable<Step> steps) =>
+        @<ol class="etapes-reponse" role="list">
+            @foreach (var step in steps)
+            {
+                <li class="@step.State">
+                    <span class="etape-nom"><span class="etape-marque" aria-hidden="true"></span>@step.Number. @step.Name</span>
+                    <span class="sr-only">@StateText(step.State)</span>
+                    <span class="etape-resultat">@step.Result</span>
+                    @if (step.Duration is { } d)
+                    {
+                        <span class="etape-ms">@Ms(d)</span>
+                    }
+                </li>
+            }
+        </ol>;
+
+    // Étapes pendant le traitement : la vectorisation tant que la recherche tourne, puis la rédaction (ou l'arrêt).
+    private IEnumerable<Step> LiveSteps()
+    {
+        var model = PlainLanguage.ModelName(Generation.Model);
+        if (Entry.Live is not { } live)
+        {
+            // Avant la fin de la recherche : le contrôle de la question, puis la vectorisation (une question arrêtée par le
+            // contrôle ne publie aucun point d'étape ; rien n'affirme donc une vectorisation qui n'aurait pas lieu).
+            yield return new(1, "Sens", "contrôle de la question, puis vectorisation", null, "encours");
+            yield return new(2, "Recherche", "en attente", null, "en-attente");
+            yield return new(3, "Sujet", "en attente", null, "en-attente");
+            yield return new(4, "Rédaction", "en attente", null, "en-attente");
+            yield return new(5, "Contrôles", "en attente", null, "en-attente");
+            yield break;
+        }
+        var best = live.Passages.Count == 0 ? 0 : live.Passages.Max(p => p.Score);
+        yield return new(1, "Sens", EmbeddingWhere, live.EmbeddingDuration, "fait");
+        yield return new(2, "Recherche", $"{Passages(live.Passages.Count)}, meilleur {best.ToString("0.00", French)}", live.QueryDuration, "fait");
+        if (!live.AboveThreshold)
+        {
+            yield return new(3, "Sujet", "sous le seuil\u00A0: modèle non appelé", null, "arret");
+            yield break;
+        }
+        yield return new(3, "Sujet", $"au-dessus du seuil de {Generation.MinScore.ToString("0.00", French)}", null, "fait");
+        yield return new(4, "Rédaction", $"{model} rédige à partir {(live.Passages.Count == 1 ? "du passage" : $"des {live.Passages.Count} passages")}", null, "encours");
+        yield return new(5, "Contrôles", "en attente", null, "en-attente");
+    }
+
+    private static string Passages(int n) => n == 1 ? "1 passage" : $"{n} passages";
+
+    private static string Found(int n) => n == 1 ? "1 passage trouvé" : $"{n} passages trouvés";
+
+    private static IReadOnlyList<SourcePassage> Numbered(AnswerProgress live) =>
+        live.Passages.Select((p, i) => new SourcePassage(AnswerPrompt.Id(i), p, Cited: false)).ToList();
 
     private string StepCount(AnswerResult r) => Injection(r) ? "1 étape" : "5 étapes";
 
