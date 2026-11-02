@@ -54,7 +54,7 @@ else
     <form class="ask" @onsubmit="AskAsync">
         @if (Thread.Entries.Count > 0)
         {
-            <p class="seule"><strong>Chaque question est traitée seule</strong> : redonnez le contexte.</p>
+            <p class="seule"><strong><span class="libelle-long">Chaque question est traitée seule</span><span class="libelle-court">Question traitée seule</span></strong> : redonnez le contexte.</p>
         }
         @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, bouton
            dans le cadre, Entrée pour envoyer et Maj+Entrée pour aller à la ligne (limpide.js), limites affichées
@@ -65,22 +65,21 @@ else
                Entrée ferait un envoi natif qui recharge la page. *@
             <textarea id="question" rows="1" maxlength="@MaxLength" enterkeyhint="send" @ref="field"
                       disabled="@(!RendererInfo.IsInteractive)"
-                      placeholder="Ex. : Un chatbot doit-il dire qu'il est une IA ?"
+                      placeholder="Posez votre question"
                       aria-describedby="@(LimitsShown ? "question-limites" : null)"
                       @bind="question" @bind:event="oninput"></textarea>
             @* aria-disabled plutôt que disabled pendant l'attente : le bouton garde le focus et son nom. *@
             <button type="submit" aria-disabled="@(busy ? "true" : null)" disabled="@(!RendererInfo.IsInteractive)">
-                @if (!busy)
-                {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
-                }
+                @* Icône seule (flèche, sablier pendant l'attente) ; le libellé, masqué à l'écran, reste le nom du bouton. *@
                 @if (busy)
                 {
-                    <span>En cours…</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 22h14M5 2h14M17 22v-4.17a2 2 0 0 0-.59-1.42L12 12l-4.41 4.41A2 2 0 0 0 7 17.83V22M7 2v4.17a2 2 0 0 0 .59 1.42L12 12l4.41-4.41A2 2 0 0 0 17 6.17V2" /></svg>
+                    <span class="bouton-libelle">En cours…</span>
                 }
                 else
                 {
-                    <span>Poser<span class="libelle-long"> la question</span></span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+                    <span class="bouton-libelle">Poser la question</span>
                 }
             </button>
         </div>
@@ -97,8 +96,9 @@ else
         @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : une ligne avant l'envoi, avec la case
            d'opposition ; le détail (masquage, adresse IP, destinataires) dans « Vos données ». *@
         <div class="conservation">
-            <span>N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span>
-            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> Ne pas conserver ma question</label>
+            @* Sur téléphone, la même information en une ligne, puis la case et le lien sur la suivante. *@
+            <span class="conservation-texte"><span class="libelle-long">N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span><span class="libelle-court">Gardée @KeptQuestion.Retention.Days jours : pas de donnée personnelle.</span></span>
+            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> <span class="libelle-long">Ne pas conserver ma question</span><span class="libelle-court">Ne pas garder ma question</span></label>
             <a href="/confidentialite">Vos données</a>
         </div>
     </form>

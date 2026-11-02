@@ -307,7 +307,11 @@ h1, h2, h3 { line-height: 1.25; }
 .champ textarea::placeholder { color: var(--muted); opacity: 1; }
 .champ button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.75rem; padding: 0 1.125rem; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .champ button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.champ button[aria-disabled="true"] { cursor: progress; } /* « En cours… » dit l'état ; sans opacité, le texte garde son contraste */
+.champ button[aria-disabled="true"] { cursor: progress; } /* le sablier dit l'état ; sans opacité, le contraste reste */
+/* Bouton réduit à son icône (le texte d'aide dit déjà « Posez votre question ») : le libellé reste son nom. */
+.champ button { position: relative; width: 2.75rem; padding: 0; }
+.bouton-libelle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.libelle-court { display: none; } /* variante téléphone d'un libellé (.libelle-long sur ordinateur) */
 .limites { display: flex; gap: 1rem; margin: 0; font-size: 0.875rem; font-weight: 600; }
 .limites > :first-child { flex: 1 1 auto; }
 .compteur { font-variant-numeric: tabular-nums; }
@@ -466,7 +470,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .couche-dessous { background: var(--bg); }
 /* Papier et Literata : réservés aux textes officiels reproduits (extraits sous les réponses), jamais à un texte de
    Limpide, même quand il parle de ces textes. */
-.couche-fond { background: var(--band); color: var(--band-ink); }
+.couche-fond { background: var(--band); color: var(--band-ink); color-scheme: dark; scrollbar-color: var(--band-muted) var(--band-rule); } /* bande sombre dans les deux thèmes : barres de défilement sombres */
 .couche-fond.couche { border-top-color: var(--band-rule); }
 .couche-fond .couche-label, .couche-fond .couche-promise, .couche-fond .muted { color: var(--band-muted); }
 .couche-fond a { color: var(--band-ink); }
@@ -616,9 +620,9 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .fond-ligne button { width: 100%; display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; gap: 1.25rem; align-items: center; min-height: 3.5rem; padding: 0.9rem 1.75rem; border: 0; background: none; color: inherit; font: inherit; font-weight: 400; text-align: start; cursor: pointer; }
 .fond-ligne .couche-label { padding-top: 0; }
 .fond-action { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; font-weight: 600; white-space: nowrap; }
-.fond-tete { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.1rem; }
+.fond-tete { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem 1rem; margin-bottom: 1.1rem; }
 .fond-tete h3 { flex: 1 1 auto; margin: 0; font-size: 1.375rem; font-weight: 800; line-height: 1.25; }
-.bouton-fond { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.75rem; padding: 0.35rem 0.9rem; border: 1px solid var(--band-muted); border-radius: 8px; background: none; color: var(--band-ink); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
+.bouton-fond { display: inline-flex; align-items: center; gap: 0.35rem; white-space: nowrap; min-height: 2.75rem; padding: 0.35rem 0.9rem; border: 1px solid var(--band-muted); border-radius: 8px; background: none; color: var(--band-ink); font: inherit; font-size: 0.875rem; font-weight: 600; cursor: pointer; }
 .etapes-reponse { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 7rem), 1fr)); gap: 0.9rem; }
 .etapes-reponse li { display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.75rem; border-top: 2px solid var(--band-step); font-size: 0.95rem; }
 .etapes-reponse li.arret, .etapes-reponse li.alerte { border-top-color: var(--band-ink); }
@@ -687,12 +691,46 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
 .pastille { display: inline-block; width: 12px; height: 12px; margin-right: 0.5rem; vertical-align: -1px; box-sizing: border-box; border: 2px solid var(--band-muted); border-radius: 50%; }
 .pastille.est-cite { border-color: var(--band-ink); background: var(--band-ink); }
 
+/* Largeurs intermédiaires (fenêtre en demi-écran, tablette) : chaque composant passe sur une colonne quand la sienne
+   deviendrait trop étroite, sans attendre la mise en page du téléphone (40rem, plus bas). */
+@media (max-width: 64rem) {
+    .fond-colonnes { grid-template-columns: minmax(0, 1fr); gap: 0; }
+
+    /* Historique des évaluations (7 colonnes insécables) : une ligne devient un bloc, l'en-tête de colonne passe en
+       libellé (data-label), lu une seule fois : l’en-tête de colonne suffit. */
+    .historique thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .historique td[data-label]::before { content: attr(data-label) " : " / ""; font-weight: 600; }
+    .historique tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.2rem 1rem; padding: 0.75rem 0; border-top: 1px solid var(--band-rule); }
+    .historique td { padding: 0; border: 0; white-space: normal; }
+    .historique td:nth-child(-n+2), .historique td:last-child { grid-column: 1 / -1; }
+    .historique td:nth-child(n+3) { white-space: normal; }
+}
+
+@media (max-width: 62rem) {
+    /* l'accueil réserve 37,5rem à la coupe : en dessous, le titre se serrait sur une colonne d'une centaine de pixels */
+    .intro { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 0.5rem; }
+}
+
+@media (max-width: 48rem) {
+    /* étiquette de couche au-dessus du contenu : ses 7rem reviennent au texte et aux tableaux */
+    .couche { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; } /* minmax : un tableau large défile au lieu d'élargir la couche */
+    .couche-label { padding-top: 0; }
+    .fond-ligne button { grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; }
+    .fond-ligne .couche-label { grid-column: 1 / -1; }
+
+    /* Tableaux empilés : une ligne devient un bloc, l'en-tête de colonne passe en libellé (data-label). */
+    .tableau-empile thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .tableau-empile tr { display: block; padding: 0.9rem 0; border-top: 1px solid var(--border); }
+    .tableau-empile th, .tableau-empile td, .tableau-empile th:nth-child(n) { display: block; width: auto; padding: 0; border: 0; }
+    .tableau-empile td { margin-top: 0.4rem; }
+    .tableau-empile td[data-label]::before { content: attr(data-label) " : " / ""; /* lu une seule fois : l’en-tête de colonne suffit */ font-weight: 600; }
+}
+
 @media (max-width: 40rem) {
     .coupe-page h1 { font-size: 2rem; }
     .fiche { grid-template-columns: 1fr; gap: 0 0; }
     .fiche dd { margin-bottom: 0.5rem; }
-    .couche { grid-template-columns: minmax(0, 1fr); gap: 0.35rem; padding: 1.1rem 1rem 1.25rem; } /* minmax : un tableau large défile au lieu d'élargir la couche */
-    .couche-label { padding-top: 0; }
+    .couche { padding: 1.1rem 1rem 1.25rem; }
     .couche h2 { font-size: 1.35rem; }
     .chemin { flex-direction: column; align-items: stretch; }
     .chemin li { flex-direction: column; align-items: stretch; }
@@ -700,18 +738,17 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1rem; }
     .chiffres dd { font-size: 1.625rem; }
 
-    .intro { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 0.5rem; }
     .strate > button, .fond-ligne button { grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; padding: 1rem; }
-    .strate .couche-label, .fond-ligne .couche-label { grid-column: 1 / -1; }
+    .strate .couche-label { grid-column: 1 / -1; }
     .strate p { padding: 0 1rem 1.1rem; }
     .question > h2 { font-size: 1.5rem; }
-    .fond-tete { flex-wrap: wrap; }
-    .fond-colonnes { grid-template-columns: minmax(0, 1fr); gap: 0; }
     .question-actions { justify-content: stretch; }
     .question-actions .bouton-secondaire { flex: 1 1 100%; }
     .champ { gap: 0.5rem; padding: 0.25rem 0.25rem 0.25rem 0.75rem; }
-    .champ button { min-width: 4rem; padding: 0 0.75rem; font-size: 0.9375rem; }
-    .libelle-long { display: none; } /* « Poser », comme la maquette mobile */
+    /* Pied de page compact, textes courts : le champ tient sur une ligne, l'information de conservation sur une autre,
+       la case et le lien sur la troisième. */
+    .libelle-long { display: none; }
+    .libelle-court { display: inline; }
     /* Cartes des textes cités : le titre prend toute la largeur, l'action passe dessous (relecture de la PR #74 :
        à 320 px, les titres longs des fiches de la CNIL se coupaient au milieu des mots). */
     .carte > summary, .trouves li { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.6rem; }
@@ -719,18 +756,13 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .carte-titre { font-size: 1rem; }
     .composer .ask { gap: 0.25rem; }
     .seule, .limites, .conservation { font-size: 0.8125rem; line-height: 1.4; }
-    .conservation { gap: 0 0.75rem; }
-    .conservation a { min-height: 2rem; }
+    .conservation { gap: 0 1rem; }
+    .conservation-texte { flex: 1 1 100%; }
     /* La case d'opposition (ADR-019) garde sa cible de 44 px : un appui manqué vaut un choix non exercé. */
 
-    /* Tableaux empilés : une ligne devient un bloc, l'en-tête de colonne passe en libellé (data-label). */
-    .tableau-empile thead, .historique thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-    .tableau-empile tr { display: block; padding: 0.9rem 0; border-top: 1px solid var(--border); }
-    .tableau-empile th, .tableau-empile td, .tableau-empile th:nth-child(n) { display: block; width: auto; padding: 0; border: 0; }
-    .tableau-empile td { margin-top: 0.4rem; }
-    .tableau-empile td[data-label]::before, .historique td[data-label]::before { content: attr(data-label) " : " / ""; /* lu une seule fois : l’en-tête de colonne suffit */ font-weight: 600; }
-    .historique tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.2rem 1rem; padding: 0.75rem 0; border-top: 1px solid var(--band-rule); }
-    .historique td { padding: 0; border: 0; white-space: normal; }
-    .historique td:nth-child(-n+2), .historique td:last-child { grid-column: 1 / -1; }
-    .historique td:nth-child(n+3) { white-space: normal; }
+    /* Décisions d'architecture : la date passe sous le titre (trois colonnes ne tiennent pas, même en date courte). */
+    .decisions thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .decisions tr { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--band-rule); }
+    .decisions td { padding: 0; border: 0; }
+    .decisions td:last-child { grid-column: 2; font-size: 0.8125rem; }
 }

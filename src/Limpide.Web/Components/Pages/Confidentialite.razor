@@ -25,7 +25,7 @@
             <div>
                 <h2 id="vd-essentiel">L'essentiel</h2>
                 <dl class="chiffres">
-                    <div><dt>conservation de votre question, sauf si vous cochez «&nbsp;Ne pas conserver ma question&nbsp;»</dt><dd>@KeptQuestion.Retention.Days jours</dd></div>
+                    <div><dt>conservation de votre question, sauf si vous cochez, sous le champ, la case pour ne pas la conserver</dt><dd>@KeptQuestion.Retention.Days jours</dd></div>
                     <div><dt>reçoivent votre question pour y répondre&nbsp;: OVHcloud (France), puis Mistral AI (Union européenne)</dt><dd>2 services</dd></div>
                     <div><dt>adresse IP écrite dans les journaux de l'application</dt><dd>Aucune</dd></div>
                     <div><dt>cookie de mesure d'audience ou de publicité</dt><dd>Aucun</dd></div>
@@ -66,50 +66,50 @@
                     <tbody role="rowgroup">
                         <tr role="row">
                             <th role="rowheader" scope="row">Votre question, pour y répondre</th>
-                            <td role="cell">Son texte est envoyé à OVHcloud AI Endpoints (France), qui le transforme en vecteur pour
+                            <td role="cell" data-label="À quoi elle sert">Son texte est envoyé à OVHcloud AI Endpoints (France), qui le transforme en vecteur pour
                                 chercher les passages proches, puis, si des passages assez proches existent, à Mistral AI
                                 (API hébergée dans l'Union européenne), qui rédige la réponse. Chacun la traite selon ses
                                 propres conditions d'utilisation.</td>
-                            <td role="cell" class="duree"><strong>Le temps de la réponse</strong><span class="muted">chez ces deux services&nbsp;: selon leurs conditions</span></td>
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>Le temps de la réponse</strong><span class="muted">chez ces deux services&nbsp;: selon leurs conditions</span></td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Votre question, pour améliorer Limpide</th>
-                            <td role="cell">Comprendre ce que demandent les visiteurs et écrire de nouvelles questions de test, relues
+                            <td role="cell" data-label="À quoi elle sert">Comprendre ce que demandent les visiteurs et écrire de nouvelles questions de test, relues
                                 par une personne. Ni la réponse ni votre adresse IP ne sont conservées avec la question.
                                 Seul l'administrateur y a accès, par un back office protégé.
                                 <span class="fondement">Fondement&nbsp;: l'intérêt légitime à améliorer le service (RGPD, article
                                     6.1.f).</span></td>
-                            <td role="cell" class="duree"><strong>@KeptQuestion.Retention.Days jours</strong><span class="muted">jusqu'à
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@KeptQuestion.Retention.Days jours</strong><span class="muted">jusqu'à
                                 8 jours de plus dans les sauvegardes&nbsp;; rien si vous cochez la case, ni si la limite de
                                 questions est atteinte</span></td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Journal des réponses</th>
-                            <td role="cell">Suivi du coût et de la qualité&nbsp;: date, issue (réponse, refus, hors sujet, erreur), score
+                            <td role="cell" data-label="À quoi elle sert">Suivi du coût et de la qualité&nbsp;: date, issue (réponse, refus, hors sujet, erreur), score
                                 du meilleur passage, durées, coût, contrôles déclenchés, longueur de la question. Ni le
                                 texte de la question ni celui de la réponse.</td>
-                            <td role="cell" class="duree"><strong>@Months(AnswerLogEntry.Retention) mois</strong></td>
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@Months(AnswerLogEntry.Retention) mois</strong></td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Journaux techniques et traces</th>
-                            <td role="cell">Les mêmes mesures, étape par étape, et un identifiant de visite tiré au hasard à
+                            <td role="cell" data-label="À quoi elle sert">Les mêmes mesures, étape par étape, et un identifiant de visite tiré au hasard à
                                 l'ouverture de la page, qui ne vous suit pas d'une visite à l'autre (ni cookie, ni adresse
                                 IP).</td>
-                            <td role="cell" class="duree"><strong>14 jours</strong></td>
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>14 jours</strong></td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Adresse IP</th>
-                            <td role="cell">Limiter le nombre de questions par heure et par visiteur. Elle n'est écrite dans aucun
+                            <td role="cell" data-label="À quoi elle sert">Limiter le nombre de questions par heure et par visiteur. Elle n'est écrite dans aucun
                                 journal de l'application.</td>
-                            <td role="cell" class="duree"><strong>En mémoire seulement</strong><span class="muted">effacée au
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>En mémoire seulement</strong><span class="muted">effacée au
                                 redémarrage de l'application</span></td>
                         </tr>
                         <tr role="row">
                             <th role="rowheader" scope="row">Votre avis</th>
-                            <td role="cell">Améliorer Limpide et constituer ses questions de test. Une question et sa réponse n'y sont
+                            <td role="cell" data-label="À quoi elle sert">Améliorer Limpide et constituer ses questions de test. Une question et sa réponse n'y sont
                                 jointes que si vous cochez la case prévue, proposée seulement par «&nbsp;Donner mon avis sur cette réponse&nbsp;».
                                 <span class="fondement">Fondement&nbsp;: votre consentement, pour la question jointe.</span></td>
-                            <td role="cell" class="duree"><strong>@Months(VisitorFeedback.Retention) mois</strong><span class="muted">sans
+                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@Months(VisitorFeedback.Retention) mois</strong><span class="muted">sans
                                 adresse IP ni identifiant</span></td>
                         </tr>
                     </tbody>
