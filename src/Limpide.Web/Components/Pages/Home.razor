@@ -56,33 +56,49 @@ else
         {
             <p class="seule"><strong>Chaque question est traitée seule</strong> : redonnez le contexte.</p>
         }
-        @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, limites
-           affichées seulement à leur approche. *@
+        @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, bouton
+           dans le cadre, Entrée pour envoyer et Maj+Entrée pour aller à la ligne (limpide.js), limites affichées
+           seulement à leur approche. Le champ reste modifiable pendant l'attente : on peut préparer la suite. *@
         <label for="question" class="sr-only">Votre question</label>
-        <textarea id="question" rows="2" maxlength="@MaxLength" disabled="@busy" @ref="field"
-                  placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
-                  aria-describedby="@(LimitsText is null ? null : "question-limits")"
-                  @bind="question" @bind:event="oninput"></textarea>
-        @if (LimitsText is { } limits)
+        <div class="champ">
+            @* Inactif tant que la page n'est pas interactive : une saisie serait perdue au branchement de Blazor, et
+               Entrée ferait un envoi natif qui recharge la page. *@
+            <textarea id="question" rows="1" maxlength="@MaxLength" enterkeyhint="send" @ref="field"
+                      disabled="@(!RendererInfo.IsInteractive)"
+                      placeholder="Ex. : Un chatbot doit-il dire qu'il est une IA ?"
+                      aria-describedby="@(LimitsShown ? "question-limites" : null)"
+                      @bind="question" @bind:event="oninput"></textarea>
+            @* aria-disabled plutôt que disabled pendant l'attente : le bouton garde le focus et son nom. *@
+            <button type="submit" aria-disabled="@(busy ? "true" : null)" disabled="@(!RendererInfo.IsInteractive)">
+                @if (!busy)
+                {
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+                }
+                @if (busy)
+                {
+                    <span>En cours…</span>
+                }
+                else
+                {
+                    <span>Poser<span class="libelle-long"> la question</span></span>
+                }
+            </button>
+        </div>
+        @if (LimitsShown)
         {
-            <p class="count" id="question-limits">@limits</p>
+            <p class="limites" id="question-limites"><span>@QuotaText</span><span class="compteur">@CounterText@if (CounterText.Length > 0) {<span class="sr-only"> caractères</span>}</span></p>
         }
-        @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : la ligne courte avant l'envoi, le
-           détail (masquage, adresse IP, destinataires) dans « Vos données » ; opposition par la case. *@
-        <p class="keep">
-            N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.
-            <a href="/confidentialite">Vos données</a>
-        </p>
-        @* Erreur (quota, délai, panne) près du bouton : visible même si le fil a défilé. *@
+        @* Erreur (quota, délai, panne) près du champ : visible même si le fil a défilé. *@
         @if (error is not null)
         {
             <p class="error" role="alert">@error</p>
         }
-        <div class="ask-actions">
-            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
-            <button type="submit" disabled="@busy">
-                @(busy ? "Recherche en cours…" : "Poser la question")
-            </button>
+        @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : une ligne avant l'envoi, avec la case
+           d'opposition ; le détail (masquage, adresse IP, destinataires) dans « Vos données ». *@
+        <div class="conservation">
+            <span>N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span>
+            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> Ne pas conserver ma question</label>
+            <a href="/confidentialite">Vos données</a>
         </div>
     </form>
     </div>
@@ -112,6 +128,7 @@ else
     private string? showEntry;
     private string? focusEntry;
     private bool focusField;
+    private bool fitField; // texte changé par le code : la hauteur du champ suit (limpide.js)
     private bool focusFeedback;
 
     /// <summary>« Nouvelle question » du menu (/?nouvelle=1) : le fil repart de zéro.</summary>
@@ -125,22 +142,16 @@ else
     [Inject]
     private QuotaOptions QuotaSettings { get; set; } = default!;
 
-    /// <summary>
-    /// Limites affichées seulement à leur approche (ADR-022) : le compteur à partir de 400 caractères, le quota à partir
-    /// de 3 questions restantes. Null sinon.
-    /// </summary>
-    private string? LimitsText
-    {
-        get
-        {
-            var parts = new List<string>();
-            if (remaining is > 0 and <= 3 && DateTimeOffset.UtcNow < remainingUntil)
-                parts.Add(remaining == 1 ? "Il vous reste 1 question pour cette heure." : $"Il vous reste {remaining} questions pour cette heure.");
-            if (question.Length >= 400)
-                parts.Add($"{question.Length} / {MaxLength} caractères");
-            return parts.Count == 0 ? null : string.Join(" · ", parts);
-        }
-    }
+    // Limites affichées seulement à leur approche (ADR-022) : le quota à partir de 3 questions restantes, le compteur à
+    // partir de 400 caractères.
+    private string QuotaText =>
+        remaining is > 0 and <= 3 && DateTimeOffset.UtcNow < remainingUntil
+            ? remaining == 1 ? "Il vous reste 1 question pour cette heure." : $"Il vous reste {remaining} questions pour cette heure."
+            : "";
+
+    private string CounterText => question.Length >= 400 ? $"{question.Length} / {MaxLength}" : "";
+
+    private bool LimitsShown => QuotaText.Length > 0 || CounterText.Length > 0;
 
     protected override void OnParametersSet()
     {
@@ -152,21 +163,21 @@ else
         question = "";
         error = null;
         status = "";
-        focusField = true;
+        focusField = fitField = true;
         Navigation.NavigateTo("/", replace: true);
     }
 
     private void PickExample(string example)
     {
         question = example;
-        focusField = true;
+        focusField = fitField = true;
     }
 
     private void Resume(ThreadEntry entry)
     {
         question = entry.Question;
         error = null;
-        focusField = true;
+        focusField = fitField = true;
     }
 
     private void OpenFeedback(ThreadEntry entry)
@@ -191,6 +202,12 @@ else
         if (text.Length == 0)
         {
             error = "Écrivez d'abord votre question, ou choisissez un des exemples.";
+            return;
+        }
+        // maxlength ne protège que le navigateur : la limite (et donc le coût) est aussi tenue ici, avant le quota.
+        if (text.Length > MaxLength)
+        {
+            error = $"Votre question dépasse {MaxLength} caractères : raccourcissez-la.";
             return;
         }
 
@@ -219,6 +236,7 @@ else
         var entry = Thread.Add(text);
         var kept = doNotKeep ? null : KeptQuestion.From(text);
         question = "";
+        fitField = true;
         showEntry = entry.Id;
         status = "Recherche en cours, la réponse peut prendre plusieurs secondes.";
         busy = true;
@@ -242,11 +260,12 @@ else
             // Jamais le texte de la question dans les messages : ils sont conservés et consultables (ADR-018).
             Logger.LogError(ex, "Échec de la réponse à une question de {Length} caractères", text.Length);
             await SaveToLogAsync(AnswerLogEntry.Failed(ex, text.Length, started.Elapsed, TraceId()), kept);
-            // La question quitte le fil et revient dans le champ : rien à retaper pour réessayer.
+            // La question quitte le fil et revient dans le champ, sauf si le visiteur y prépare déjà la suite.
             Thread.Remove(entry);
-            question = text;
+            if (question.Length == 0)
+                question = text;
             status = "";
-            focusField = true;
+            focusField = fitField = true;
             error = ex is OperationCanceledException
                 ? "La réponse a pris trop de temps (plus de 60 secondes). Réessayez dans un instant."
                 : "La réponse n'a pas pu être produite (service de recherche ou de génération indisponible). Réessayez dans un instant.";
@@ -277,6 +296,11 @@ else
         {
             focusFeedback = false;
             await JS.InvokeVoidAsync("limpide.showForm", "feedback-title");
+        }
+        if (fitField)
+        {
+            fitField = false;
+            await JS.InvokeVoidAsync("limpide.fitQuestion");
         }
         if (focusField)
         {

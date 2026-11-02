@@ -245,3 +245,23 @@ l'appareil » par défaut.
 - Vérifié avec de vraies questions, Firefox piloté par WebDriver BiDi (script Node sans dépendance, hors dépôt) :
   1440 px clair, 390 px clair et sombre, 320 px ; débordements corrigés (`minmax(0, 1fr)` sur les couches et le
   détail du fond).
+
+### Refonte, étape 5 : champ et finitions (2026-11-02, avant l'étape 4)
+
+Avancée avant l'étape 4 : le champ se voit sur tous les écrans, et l'étape 3 ayant refait `Home.razor`, les deux
+étapes ne touchent plus les mêmes fichiers.
+
+- **Bouton dans le cadre** (« Poser la question », « Poser » sur mobile, flèche) ; contour de focus sur le cadre ;
+  **Entrée envoie, Maj+Entrée va à la ligne** (`limpide.js`, sauf pendant une saisie composée) ; hauteur qui suit le
+  texte, de 1 à 5 lignes. Le champ reste modifiable pendant l'attente ; le bouton passe en `aria-disabled`.
+- **Ligne de conservation** sur une ligne : la phrase, la case « Ne pas conserver ma question » et « Vos données »
+  (ADR-019) ; limites (quota à 3 questions restantes, compteur à 400 caractères) sur leur propre ligne, à leur approche.
+- Relectures : limite de 500 caractères aussi tenue côté serveur (avant, `maxlength` seul) ; champ et bouton inactifs
+  tant que la page n'est pas interactive (`RendererInfo.IsInteractive` : une saisie aurait été perdue, Entrée aurait
+  rechargé la page) ; compteur lu avec son unité ; case d'opposition à 44 px sur mobile ; un échec n'écrase plus une
+  question préparée pendant l'attente. Sur téléphone, Entrée envoie (pas de Maj+Entrée sur un clavier virtuel) :
+  choix assumé pour des questions courtes.
+- Le reste de l'étape était déjà fait : limites écrites dans « Ce que fait Limpide » (2a), « Chaque question est
+  traitée seule » (3), « Vos données » relue en 2b ; message de refus inchangé.
+- Vérifié au pilote : Entrée, Maj+Entrée, hauteur (1 puis 3 lignes, retour à 1 après l'envoi), 1440 px, 390 px en
+  sombre, 320 × 568 (champ entier, 247 px).
