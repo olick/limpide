@@ -28,7 +28,7 @@ services:
     <<: *commun
     # Étiquette « -amd64 » (même image que 0.162.0 sur le serveur) : Dependabot lit « -386 » (x86 32 bits) comme un
     # numéro de version plus récent et le proposait (PR #50, fermée) ; un suffixe en lettres le cantonne à « -amd64 ».
-    image: otel/opentelemetry-collector-contrib:0.162.0-amd64
+    image: otel/opentelemetry-collector-contrib:0.163.1-amd64
     command: ["--config=/etc/otelcol/collecteur.yaml"]
     volumes:
       - ./collecteur.yaml:/etc/otelcol/collecteur.yaml:ro
