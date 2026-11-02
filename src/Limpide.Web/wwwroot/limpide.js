@@ -51,6 +51,19 @@ document.addEventListener("change", (event) => {
     }
 });
 
+// Renvoi [P1] d'une réponse (étape 4) : ouvre la carte de l'extrait, la place en haut du fil et y porte le focus.
+// En capture, avant la navigation de Blazor ; sans script, le lien mène quand même à la carte.
+document.addEventListener("click", (event) => {
+    const link = event.target.closest("a.cite");
+    const card = link && document.getElementById(decodeURIComponent(link.hash.slice(1)));
+    if (!card || card.tagName !== "DETAILS") return;
+    event.preventDefault();
+    card.open = true;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    card.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    card.querySelector("summary")?.focus({ preventScroll: true });
+}, true);
+
 // Champ de question (ADR-022) : Entrée envoie, Maj+Entrée va à la ligne ; pendant une saisie en cours (accents
 // composés, méthodes d'entrée), Entrée valide la saisie, pas la question. La hauteur suit le texte, de 1 à 5 lignes.
 document.addEventListener("keydown", (event) => {

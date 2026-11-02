@@ -179,7 +179,8 @@ l'appareil » par défaut.
   légales) : lien vers son site.
 - [x] **Responsable du traitement** (étape 2a) : `Confidentialite.razor` nomme Alexandre Leclerc à titre personnel ; si Limpide
   est publié par l'EURL, c'est elle le responsable (représentée par son gérant). À aligner sur les mentions légales.
-- [ ] **Passages CNIL** : lien vers le texte de la licence CC-BY-ND 4.0 FR sous chaque extrait.
+- [x] **Passages CNIL** : lien vers le texte de la licence CC-BY-ND 4.0 FR sous chaque extrait (étape 4, « Lire la
+  licence », reconnue au début des conditions de `corpus.json` ; décision 2011/833/UE pour EUR-Lex).
 - [ ] **Rapports d'évaluation** : ils ne versionnent pas le code des garde-fous. Les passes du 2026-10-28 à 19 h 02
   (sans détecteur) et 19 h 05 (avec) déclarent les mêmes versions ; `Evaluation.razor` présente donc à tort la
   première comme « même configuration qu'en ligne ». Ajouter le commit ou une version des garde-fous. Étape 2b : la
@@ -265,3 +266,21 @@ Avancée avant l'étape 4 : le champ se voit sur tous les écrans, et l'étape 3
   traitée seule » (3), « Vos données » relue en 2b ; message de refus inchangé.
 - Vérifié au pilote : Entrée, Maj+Entrée, hauteur (1 puis 3 lignes, retour à 1 après l'envoi), 1440 px, 390 px en
   sombre, 320 × 568 (champ entier, 247 px).
+
+### Refonte, étape 4 : textes cités (2026-11-02)
+
+- **Cartes repliées** (`<details>` natif) dans la couche « Dessous », seule couche sur papier : identifiant, titre en
+  Literata, « Lire » / « Replier ». Ouverte : le texte à l'identique (filet doré, serif), puis source, « Texte
+  officiel », conditions de réutilisation et **« Lire la licence »** (CC-BY-ND 4.0 FR ou décision 2011/833/UE). Version
+  et date de collecte passent dans le tableau du fond (colonne et infobulle « Version »).
+- **Un renvoi [P1] ouvre sa carte**, la place en haut du fil et y porte le focus (`limpide.js`, en capture avant la
+  navigation de Blazor ; sans script, le lien mène quand même à la carte) ; nom accessible « Ouvrir le texte cité P1 ».
+- Relectures : « Licence : » devant les conditions ; date de collecte en clair dans le pied de carte (la version reste
+  au fond) ; « Lire » / « Replier » dans le nom du résumé (commande vocale) ; **jamais d'extrait sans lien de
+  licence** : licence non reconnue, lien vers « Sources et licences » des mentions légales (plutôt qu'un test, qui
+  aurait mis le code dans `Limpide.Core` et relancé l'évaluation).
+- Réponses bien plus courtes à l'écran : la réponse, trois lignes de textes, la ligne du fond.
+- Corrigés en passant : bande vide entre les textes et le fond (marge des anciennes sections) ; relecture de la PR
+  #73 (opacité du bouton en attente retirée, message `<noscript>` sous le champ).
+- Vérifié au pilote avec de vraies questions : cartes repliées, [P2] ouvre P2 avec le focus sur son titre ; 1440 px,
+  390 px en sombre ; aucun défilement horizontal.

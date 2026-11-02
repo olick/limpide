@@ -37,7 +37,10 @@
             </div>
         </section>
 
-        <section class="couche couche-dessous" aria-labelledby="@Entry.Id-textes">
+        @* Textes officiels reproduits : seule couche sur papier, en Literata. Chaque extrait est une carte repliée (étape 4,
+           écrans O5 et M4) ; un renvoi [P1] l'ouvre et y porte le focus (limpide.js). Source, texte officiel et licence
+           restent sous chaque extrait ; version et empreinte sont dans le tableau du fond. *@
+        <section class="couche couche-textes" aria-labelledby="@Entry.Id-textes">
             <span class="couche-label">Dessous</span>
             <div>
                 <h3 id="@Entry.Id-textes" class="legende">@TextsCaption</h3>
@@ -45,21 +48,19 @@
                 {
                     @foreach (var (id, p, _) in res.CitedPassages)
                     {
-                        <article class="source" id="@Entry.Id-@id">
-                            <header>
+                        <details class="carte" id="@Entry.Id-@id">
+                            <summary>
                                 <span class="id">@id</span>
-                                <h4>@p.Heading</h4>
-                            </header>
+                                <span class="carte-titre">@p.Heading</span>
+                                @* « Lire » ou « Replier » (l'autre est masqué) fait partie du nom : la commande vocale peut le viser. *@
+                                <span class="carte-action"><span class="lire">Lire</span><span class="replier">Replier</span>
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg></span>
+                            </summary>
                             <blockquote class="verbatim">@p.Content</blockquote>
-                            <footer>
-                                <span>@p.SourceName — @p.DocumentTitle</span>
-                                <a href="@p.Url">Texte officiel</a>
-                                <span title="Empreinte SHA-256 du texte collecté : @p.Origin.VersionHash">
-                                    Version collectée le @p.FetchedAt.ToString("d MMMM yyyy", French) · <code>@p.Origin.ShortHash</code>
-                                </span>
-                                <span class="licence">Licence : @p.ReuseTerms</span>
-                            </footer>
-                        </article>
+                            <p class="carte-pied">@p.SourceName — @p.DocumentTitle, collecté le @p.FetchedAt.ToString("d MMMM yyyy", French).
+                                <a href="@p.Url">Texte officiel</a>. Licence : @p.ReuseTerms @Licence(p.ReuseTerms)</p>
+                        </details>
                     }
                 }
             </div>
@@ -161,7 +162,7 @@
                                                             <td>@p.Heading</td>
                                                             <td>@p.Score.ToString("0.000", French)</td>
                                                             <td>@(cited ? "oui" : "non")</td>
-                                                            <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
+                                                            <td><code title="Collectée le @p.FetchedAt.ToString("d MMMM yyyy", French) · extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
                                                         </tr>
                                                     }
                                                 </tbody>
@@ -248,6 +249,15 @@
             return cited == 1 ? "1 texte officiel cité, reproduit à l'identique" : $"{cited} textes officiels cités, reproduits à l'identique";
         }
     }
+
+    // Lien vers le texte de la licence, reconnue au début de ses conditions (corpus.json, docs/sources.md). Licence
+    // inconnue (conditions reformulées, nouvelle source) : la page des sources et licences, jamais un extrait sans lien.
+    private static RenderFragment Licence(string reuseTerms) =>
+        reuseTerms.StartsWith("CC-BY-ND 4.0", StringComparison.Ordinal) ? Link("https://creativecommons.org/licenses/by-nd/4.0/deed.fr", "Lire la licence")
+        : reuseTerms.StartsWith("Décision 2011/833/UE", StringComparison.Ordinal) ? Link("https://eur-lex.europa.eu/legal-content/FR/TXT/?uri=CELEX:32011D0833", "Lire la décision")
+        : Link("/mentions-legales#sources-licences", "Sources et licences");
+
+    private static RenderFragment Link(string href, string text) => @<a href="@href">@text</a>;
 
     private string EmbeddingWhere =>
         Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback ? "calculé sur notre serveur"
