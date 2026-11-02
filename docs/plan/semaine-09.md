@@ -310,12 +310,18 @@ Prévue par l'ADR-022, décidée le jour même (avant le script de la vidéo).
 - **Pendant l'attente**, le fond est ouvert (« En ce moment ») : la vectorisation en cours et les autres étapes en
   attente ; puis, la recherche finie, étapes 1 à 3 faites avec leurs vraies durées, rédaction en cours, passages sur
   la règle de proximité, et leur liste dessous avec leur proximité (écrans O2, O3). Annonce « 5 passages trouvés.
-  Rédaction de la réponse en cours. » Une seule animation (l'étape en cours), coupée sous `prefers-reduced-motion`.
+  Rédaction de la réponse en cours. »
+- **Animation d'attente** (renforcée après essai d'Alexandre : le point qui pulse ne se voyait pas, et la liste des
+  passages repousse le fond sous le champ dès la recherche finie) : un segment qui balaie le filet de l'étape en
+  cours et une barre sous le texte d'attente de la surface, là où le regard se pose ; « en cours… » écrit sous
+  l'étape. Rien ne bouge sous `prefers-reduced-motion` (barre de la surface masquée, textes suffisants).
 - La réponse arrivée, le fond se replie sur sa ligne de résumé, comme avant.
 - Relectures : avant la fin de la recherche, « contrôle de la question, puis vectorisation » (une question arrêtée
   par le contrôle d'injection ne publie aucun point d'étape : rien n'affirme une vectorisation qui n'a pas lieu) ;
   relais protégé si la page se ferme pendant l'attente ; accords au singulier (« 1 passage trouvé ») ; classe des
-  étapes en attente distincte de celle du texte d'attente.
+  étapes en attente distincte de celle du texte d'attente. `/interface-review` : « en cours » écrit, pas seulement
+  animé ; textes d'attente qui n'annoncent ni une recherche ni une rédaction que le chemin suivi ne prendra pas
+  (« Préparation de la réponse », puis « le modèle ne sera pas appelé » sous le seuil).
 - Relecture de la PR #74 corrigée en passant : à 320 px, titre des cartes sur toute la largeur et action dessous
   (les titres longs des fiches de la CNIL se coupaient au milieu des mots).
 - Vérifié au pilote (captures pendant l'attente) : 1440 px, 320 px en sombre.

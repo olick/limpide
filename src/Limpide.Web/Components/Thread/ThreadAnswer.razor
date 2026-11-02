@@ -16,7 +16,14 @@
                 <h3 id="@Entry.Id-surface" class="sr-only">Réponse à : @Entry.Question</h3>
                 @if (Entry.Result is not { } r)
                 {
-                    <p class="attente">@(Entry.Live is { AboveThreshold: true } ? "La réponse est en cours de rédaction." : "La réponse sera rédigée à partir des textes trouvés.")</p>
+                    @* Rien n'annonce une étape que le chemin suivi ne prendra pas (contrôle d'injection, refus sous le seuil). *@
+                    <p class="attente">@(Entry.Live switch
+                    {
+                        { AboveThreshold: true } => "La réponse est en cours de rédaction.",
+                        { } => "Passages trop éloignés de la question : le modèle ne sera pas appelé.",
+                        null => "Préparation de la réponse : cela peut prendre plusieurs secondes.",
+                    })</p>
+                    <span class="attente-barre" aria-hidden="true"></span>
                 }
                 else
                 {
@@ -202,7 +209,7 @@
                         }
                         else
                         {
-                            <p class="fond-note">Aucun passage encore : la recherche est en cours.</p>
+                            <p class="fond-note">Aucun passage pour l'instant.</p>
                         }
                     </div>
                 </div>
@@ -337,6 +344,11 @@
                     @if (step.Duration is { } d)
                     {
                         <span class="etape-ms">@Ms(d)</span>
+                    }
+                    else if (step.State == "encours")
+                    {
+                        @* écrit, pas seulement animé (déjà lu par le lecteur d'écran avant le résultat) *@
+                        <span class="etape-ms" aria-hidden="true">en cours…</span>
                     }
                 </li>
             }

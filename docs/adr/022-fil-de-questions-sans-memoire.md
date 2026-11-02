@@ -80,7 +80,8 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   de la nouvelle question, pas en bas d'une longue réponse.
 - **Radiographie en direct** : pendant le traitement, le fond est ouvert et se remplit à chaque vrai point d'étape
   du service (vectorisation, passages trouvés et leur proximité sur une règle avec le seuil, rédaction) ; rien
-  n'est simulé. Une seule animation (l'étape en cours), coupée sous `prefers-reduced-motion`.
+  n'est simulé. Un seul motif animé, « en cours » (un segment qui balaie l'étape en cours et, en surface, une barre
+  sous le texte d'attente), coupé sous `prefers-reduced-motion` ; l'état en cours est aussi écrit.
 - **Textes cités** : cartes sous la réponse, **repliées en une ligne** (identifiant, titre, « Lire »), sur ordinateur
   comme sur mobile ; le texte s'ouvre à la demande. Un renvoi `[P1]` ouvre la carte et y porte le focus. Pied de carte
   (affiché carte ouverte) réduit à la source, au lien vers le texte officiel et à la licence ; version et empreinte
