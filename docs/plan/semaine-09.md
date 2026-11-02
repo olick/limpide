@@ -216,6 +216,14 @@ l'appareil » par défaut.
   laissés tels quels (question conservée, avis) : les quatre manquants restent un point ouvert. Effacement décrit tel
   qu'il est (à l'écriture).
 - Tableaux empilés sous 40rem (en-têtes de colonne en libellés), comme la maquette mobile.
+- **Page d'évaluation vérifiée contre ses sources** (2026-11-02, à la demande d'Alexandre, commit 821f74a) : les
+  chiffres « 50 questions », « 3 tentatives », « 0,30 $ » étaient écrits en dur dans l'ancien `Evaluation.razor`.
+  Six formulations corrigées : le contrôle met *toujours* les questions de qualification en relecture ; « aucun
+  juriste n'a relu ces 3 réponses » au lieu d'une relecture « en attente » non établie ; « tentatives écrites par un
+  modèle » au lieu de « techniques connues » ; les 15 s, un épisode ponctuel en ligne (rien n'établissait que la passe
+  avait tourné sur le poste) ; « seuil bloquant » (le 95ᵉ centile ne bloque pas) ; l'historique contient une passe de
+  la chaîne (consigne bloquée du 18 octobre). Ajouté : sur une passe précédente, aucune erreur grave dans les 7
+  alertes du juge (ADR-014).
 - Corrections de la relecture de la PR #69 : espaces insécables avant « ? : ; » et dans les guillemets, jeton
   `--paper-rule` supprimé, séparateur du pied de page masqué aux lecteurs d'écran. Styles des anciennes pages retirés.
 
@@ -234,15 +242,21 @@ l'appareil » par défaut.
   ouvert d'emblée si un garde-fou s'est déclenché. Ancres des extraits préfixées par question (`q2-P1`).
 - **« Reprendre cette question »** et **« Donner mon avis sur cette réponse »** sous chaque réponse ; l'avis remplace
   le fil (« Revenir à vos questions »), la case « Joindre ma question et la réponse obtenue (« … ») » **décochée par
-  défaut** (consentement ; cochée dans la maquette).
+  défaut** (consentement ; cochée dans la maquette, écart vu en codant l'étape, pas par une relecture).
 - **Placement** : la nouvelle question en haut de la zone qui défile (sans animation si mouvement réduit), le focus
   sur son titre à l'arrivée de la réponse ; au retour de l'avis, focus sur la question concernée.
+- **Relectures** (`relecteur-interface`, `/interface-review`) : focus perdu au dépli du fond (le bouton activé était
+  remplacé : le focus suit maintenant le nouveau bouton, vérifié avec la touche Entrée), contour de focus rogné par le
+  conteneur arrondi, `role="alert"` perdu sur l'alerte de qualification, `aria-controls` vers un élément absent,
+  garde-fous en code brut ; tous corrigés.
 - **« Sous le capot » devient « Au fond »** partout (accueil, « Ce que fait Limpide », schéma de « Comment il est
   construit ») ; la troisième question de l'avis aussi, par choix d'Alexandre : « La couche « Au fond » (comment la
   réponse a été produite) vous a-t-elle servi à quelque chose ? ». Les avis d'avant le 2026-11-02 répondaient à
   l'ancienne formulation (libellé du back office).
 - **Pas fait** : la radiographie en direct (O2, O3 : étapes qui s'allument pendant l'attente) demande que
-  `AnswerService` publie son avancement ; l'attente affiche une phrase fixe. À décider.
+  `AnswerService` publie son avancement ; l'attente affiche une phrase fixe. **Décidé le 2026-11-02** : les étapes en
+  direct juste après la refonte, avant le script de la vidéo (prévues par l'ADR-022) ; la réponse écrite en continu
+  (« suivi en direct » du plan global, S8) reportée en S10.
 - Vérifié avec de vraies questions, Firefox piloté par WebDriver BiDi (script Node sans dépendance, hors dépôt) :
   1440 px clair, 390 px clair et sombre, 320 px ; débordements corrigés (`minmax(0, 1fr)` sur les couches et le
   détail du fond).

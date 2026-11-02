@@ -15,7 +15,12 @@ Les traiter dans cet ordre :
 1. **Ce qui casse la démo publique** : disponibilité, sécurité, budget.
 2. **L'évaluation (S7)** : c'est ce qui distingue le projet.
 3. **Le dossier de gouvernance (S9)** et les ADR.
-4. Le reste.
+4. Le reste, dont les reports de la S8 (plan global) :
+   - **réponse écrite en continu** (streaming), suite du suivi en direct : les étapes en direct sont faites en S9
+     (radiographie, ADR-022) ; reste le texte qui s'affiche au fil de la génération, avec « vérification des
+     citations… » tant que les garde-fous n'ont pas vu la réponse complète ;
+   - **tableaux de bord du back office** : coût par jour et par modèle, quota consommé, garde-fous déclenchés, taux
+     de « je ne sais pas », latences (Grafana, ADR-018).
 
 Ce qui ne peut pas être terminé devient une **limite documentée** dans le README, avec la raison et la piste de solution.
 Une limite assumée vaut mieux qu'une fonctionnalité bâclée.
