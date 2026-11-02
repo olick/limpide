@@ -24,10 +24,11 @@ public static partial class AnswerMarkdown
         return builder.Build();
     }
 
-    public static string ToHtml(string answer, IReadOnlySet<string> citedIds) =>
+    /// <param name="anchorPrefix">Préfixe des ancres (« q2- ») : plusieurs réponses du fil citent chacune leur P1.</param>
+    public static string ToHtml(string answer, IReadOnlySet<string> citedIds, string anchorPrefix = "") =>
         Citation().Replace(Markdown.ToHtml(answer, Pipeline), match =>
             citedIds.Contains(match.Groups[1].Value)
-                ? $"""<a class="cite" href="#{match.Groups[1].Value}">{match.Value}</a>"""
+                ? $"""<a class="cite" href="#{anchorPrefix}{match.Groups[1].Value}">{match.Value}</a>"""
                 : match.Value);
 
     [GeneratedRegex(@"\[(P\d+)[a-z]{0,4}\]")]

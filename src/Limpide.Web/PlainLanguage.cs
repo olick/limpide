@@ -3,7 +3,7 @@ using Limpide.Core.Evaluation;
 namespace Limpide.Web;
 
 /// <summary>
-/// Traductions en langage courant pour le panneau « sous le capot » : un visiteur sans connaissance technique doit
+/// Traductions en langage courant pour la couche « Au fond » de chaque réponse : un visiteur sans connaissance technique doit
 /// comprendre ce qui s'est passé (demande du 2026-10-12, premier retour : « je n'ai pas tout compris »). Les termes
 /// techniques restent disponibles dans les détails repliés.
 /// </summary>

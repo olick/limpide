@@ -62,4 +62,22 @@ window.limpide = {
         const dialog = document.getElementById("menu");
         if (dialog && dialog.open) dialog.close();
     },
+
+    // Fil de questions (ADR-022) : place une question en haut de la zone qui défile (sous l'en-tête fixe, grâce à
+    // scroll-margin), sans animation si le visiteur a demandé moins de mouvement.
+    showQuestion(id) {
+        const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+        document.getElementById(id)?.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" });
+    },
+
+    // Avis sur une réponse : le formulaire remplace le fil ; on remonte en haut, le focus sur son titre.
+    showForm(id) {
+        document.querySelector(".thread")?.scrollTo({ top: 0 });
+        document.getElementById(id)?.focus({ preventScroll: true });
+    },
+
+    // Focus sur le titre d'une question sans déplacer le fil : la réponse est lue à partir de là.
+    focusQuestion(id) {
+        document.getElementById(id + "-titre")?.focus({ preventScroll: true });
+    },
 };

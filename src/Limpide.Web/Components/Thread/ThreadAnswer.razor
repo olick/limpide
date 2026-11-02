@@ -1,0 +1,339 @@
+@using System.Globalization
+@using Limpide.Core.Answering
+@using Limpide.Infrastructure
+@inject GenerationSettings Generation
+@inject EmbeddingOptions Embedding
+
+@* Une question du fil, en coupe (ADR-022, écrans O4 à O6) : la réponse en surface, les textes cités dessous, le calcul
+   au fond (une ligne de résumé, le détail au clic). La question est le titre, focalisable : le fil s'y place. *@
+<article class="question" id="@Entry.Id" aria-labelledby="@Entry.Id-titre">
+    <h2 id="@Entry.Id-titre" tabindex="-1">@Entry.Question</h2>
+
+    <div class="coupe">
+        <section class="couche couche-surface" aria-labelledby="@Entry.Id-surface">
+            <span class="couche-label">En surface</span>
+            <div>
+                <h3 id="@Entry.Id-surface" class="sr-only">Réponse à : @Entry.Question</h3>
+                @if (Entry.Result is not { } r)
+                {
+                    <p class="attente">Recherche des passages, puis rédaction de la réponse : cela peut prendre plusieurs secondes.</p>
+                }
+                else
+                {
+                    @if (!r.Declined)
+                    {
+                        <p class="couche-promise">Formulation de l'assistant, à vérifier dans les textes dessous</p>
+                    }
+                    <div class="answer-text">@((MarkupString)Entry.AnswerHtml)</div>
+                    @if (r.Guardrails.Any(g => g.Code == "qualification-juridique"))
+                    {
+                        <p class="warning" role="alert">
+                            Cette réponse semble trancher votre situation, ce que Limpide ne doit pas faire.
+                            Fiez-vous aux textes cités dessous, et faites apprécier votre cas par un professionnel du droit.
+                        </p>
+                    }
+                    <p class="disclaimer">@r.Disclaimer</p>
+                }
+            </div>
+        </section>
+
+        <section class="couche couche-dessous" aria-labelledby="@Entry.Id-textes">
+            <span class="couche-label">Dessous</span>
+            <div>
+                <h3 id="@Entry.Id-textes" class="legende">@TextsCaption</h3>
+                @if (Entry.Result is { } res)
+                {
+                    @foreach (var (id, p, _) in res.CitedPassages)
+                    {
+                        <article class="source" id="@Entry.Id-@id">
+                            <header>
+                                <span class="id">@id</span>
+                                <h4>@p.Heading</h4>
+                            </header>
+                            <blockquote class="verbatim">@p.Content</blockquote>
+                            <footer>
+                                <span>@p.SourceName — @p.DocumentTitle</span>
+                                <a href="@p.Url">Texte officiel</a>
+                                <span title="Empreinte SHA-256 du texte collecté : @p.Origin.VersionHash">
+                                    Version collectée le @p.FetchedAt.ToString("d MMMM yyyy", French) · <code>@p.Origin.ShortHash</code>
+                                </span>
+                                <span class="licence">Licence : @p.ReuseTerms</span>
+                            </footer>
+                        </article>
+                    }
+                }
+            </div>
+        </section>
+
+        @if (Entry.Result is { } result)
+        {
+            <section class="couche-fond fond" id="@Entry.Id-detail" aria-labelledby="@Entry.Id-fond">
+                @if (!Entry.DetailOpen)
+                {
+                    <h3 class="fond-ligne">
+                        <button type="button" aria-expanded="false" aria-controls="@Entry.Id-detail" @onclick="Toggle" @ref="openButton">
+                            <span class="couche-label">Au fond</span>
+                            <span id="@Entry.Id-fond"><strong>@StepCount(result)</strong>@SummaryRest(result)</span>
+                            <span class="fond-action">Voir le détail
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                     stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg></span>
+                        </button>
+                    </h3>
+                }
+                else
+                {
+                    <div class="couche">
+                        <span class="couche-label">Au fond</span>
+                        <div>
+                            <div class="fond-tete">
+                                <h3 id="@Entry.Id-fond">Comment cette réponse a été produite</h3>
+                                <button type="button" class="bouton-fond" aria-expanded="true" aria-controls="@Entry.Id-detail" @onclick="Toggle" @ref="closeButton">
+                                    Replier les détails
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                         stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+                                </button>
+                            </div>
+
+                            <ol class="etapes-reponse" role="list">
+                                @foreach (var step in Steps(result))
+                                {
+                                    <li class="@step.State">
+                                        <span class="etape-nom"><span class="etape-marque" aria-hidden="true"></span>@step.Number. @step.Name</span>
+                                        <span class="sr-only">@StateText(step.State)</span>
+                                        <span class="etape-resultat">@step.Result</span>
+                                        @if (step.Duration is { } d)
+                                        {
+                                            <span class="etape-ms">@Ms(d)</span>
+                                        }
+                                    </li>
+                                }
+                            </ol>
+
+                            @if (result.Guardrails.Count > 0)
+                            {
+                                <ul class="guardrails">
+                                    @foreach (var g in result.Guardrails)
+                                    {
+                                        var (title, meaning) = PlainLanguage.Guardrail(g.Code);
+                                        <li><strong>@title.</strong> @meaning</li>
+                                    }
+                                </ul>
+                            }
+
+                            @if (!Injection(result) && result.Passages.Count > 0)
+                            {
+                                <h4>Proximité des passages trouvés</h4>
+                                <p class="fond-note">Ressemblance de sens avec votre question, de 0 à 1.</p>
+                                <ProximityRuler Passages="result.Passages" Threshold="Generation.MinScore" Refused="OutOfScope(result)" />
+                            }
+
+                            <div class="fond-colonnes">
+                                <div>
+                                    <h4>Où passe le temps</h4>
+                                    @foreach (var (label, duration) in Bars(result.Timings))
+                                    {
+                                        <div class="barre">
+                                            <span>@label</span>
+                                            <span class="barre-piste"><span style="width: @Percent(duration, result.Timings.Total)"></span></span>
+                                            <span class="etape-ms">@Ms(duration)</span>
+                                        </div>
+                                    }
+                                    <p class="barre-total"><strong>Total</strong><span>@Ms(result.Timings.Total)</span></p>
+
+                                    <h4>Ce que ça a coûté</h4>
+                                    <p class="cout">@Cost(result)</p>
+                                    <p class="fond-note">@CostText(result)</p>
+                                </div>
+                                @if (result.Passages.Count > 0)
+                                {
+                                    <div>
+                                        <h4 id="@Entry.Id-passages">Passages fournis au modèle</h4>
+                                        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="@Entry.Id-passages">
+                                            <table class="tableau-fond passages-fournis">
+                                                <thead>
+                                                    <tr><th scope="col">Id</th><th scope="col">Passage</th><th scope="col">Proximité</th><th scope="col">Cité</th><th scope="col">Version</th></tr>
+                                                </thead>
+                                                <tbody>
+                                                    @foreach (var (id, p, cited) in result.Passages)
+                                                    {
+                                                        <tr class="@(cited ? "est-cite" : null)">
+                                                            <td>@id</td>
+                                                            <td>@p.Heading</td>
+                                                            <td>@p.Score.ToString("0.000", French)</td>
+                                                            <td>@(cited ? "oui" : "non")</td>
+                                                            <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
+                                                        </tr>
+                                                    }
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <p class="fond-note">Proximité : ressemblance de sens entre votre question et le passage, de 0 à 1.
+                                            Version : empreinte du texte collecté, pour remonter au fichier téléchargé.</p>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="separe">
+                                <p class="fond-note">@GuardText(result)</p>
+                                <p class="fond-note">La même chaîne est évaluée sur un jeu de questions de test :
+                                    <a href="/evaluation">voir les résultats d'évaluation</a>.</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </section>
+        }
+    </div>
+
+    @if (!Entry.Pending)
+    {
+        <div class="question-actions">
+            <button type="button" class="bouton-secondaire" @onclick="() => OnResume.InvokeAsync(Entry)">Reprendre cette question</button>
+            <button type="button" class="bouton-secondaire" @onclick="() => OnFeedback.InvokeAsync(Entry)">Donner mon avis sur cette réponse</button>
+        </div>
+    }
+</article>
+
+@code {
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    private sealed record Step(int Number, string Name, string Result, TimeSpan? Duration, string State);
+
+    [Parameter, EditorRequired]
+    public ThreadEntry Entry { get; set; } = default!;
+
+    /// <summary>« Reprendre cette question » : son texte revient dans le champ, à compléter.</summary>
+    [Parameter]
+    public EventCallback<ThreadEntry> OnResume { get; set; }
+
+    [Parameter]
+    public EventCallback<ThreadEntry> OnFeedback { get; set; }
+
+    private ElementReference openButton;
+    private ElementReference closeButton;
+    private bool focusToggle;
+
+    // Le bouton activé est remplacé par celui de l'autre état : le focus le suit, sinon il retomberait sur la page.
+    private void Toggle()
+    {
+        Entry.DetailOpen = !Entry.DetailOpen;
+        focusToggle = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!focusToggle)
+            return;
+        focusToggle = false;
+        await (Entry.DetailOpen ? closeButton : openButton).FocusAsync();
+    }
+
+    private static bool Injection(AnswerResult r) => r.Guardrails.Any(g => g.Code == "injection-suspectee");
+
+    private static bool OutOfScope(AnswerResult r) => r.Guardrails.Any(g => g.Code == "hors-perimetre");
+
+    private string TextsCaption
+    {
+        get
+        {
+            if (Entry.Result is not { } r)
+                return "Recherche des passages les plus proches de votre question…";
+            var cited = r.CitedPassages.Count();
+            if (Injection(r))
+                return "Aucun texte consulté : la question s'adresse aux consignes de l'assistant.";
+            if (OutOfScope(r))
+                return $"Aucun texte cité : les {r.Passages.Count} passages trouvés sont sous le seuil de proximité.";
+            if (cited == 0)
+                return $"Aucun texte cité : les {r.Passages.Count} passages trouvés ne contenaient pas la réponse.";
+            return cited == 1 ? "1 texte officiel cité, reproduit à l'identique" : $"{cited} textes officiels cités, reproduits à l'identique";
+        }
+    }
+
+    private string EmbeddingWhere =>
+        Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback ? "calculé sur notre serveur"
+        : Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase) ? "calculé chez OVHcloud, en France"
+        : $"calculé chez {Embedding.Endpoint.Host}";
+
+    private IEnumerable<Step> Steps(AnswerResult r)
+    {
+        if (Injection(r))
+        {
+            yield return new(1, "Contrôle de la question", "arrêt : elle s'adresse aux consignes de l'assistant ; ni recherche, ni modèle", null, "arret");
+            yield break;
+        }
+        var best = r.Passages.Count == 0 ? 0 : r.Passages.Max(p => p.Passage.Score);
+        var outOfScope = OutOfScope(r);
+        var cited = r.CitedPassages.Count();
+        var threshold = Generation.MinScore.ToString("0.00", French);
+        yield return new(1, "Sens", EmbeddingWhere, r.Timings.Embedding, "fait");
+        yield return new(2, "Recherche", $"{r.Passages.Count} passages, meilleur {best.ToString("0.00", French)}", r.Timings.Search, "fait");
+        yield return outOfScope
+            ? new(3, "Sujet", "sous le seuil : modèle non appelé", null, "arret")
+            : new(3, "Sujet", $"au-dessus du seuil de {threshold}", null, "fait");
+        yield return outOfScope
+            ? new(4, "Rédaction", "sans objet", null, "saute")
+            : new(4, "Rédaction", $"{PlainLanguage.ModelName(r.Model)}, " + (cited == 0 ? "aucun passage cité" : cited == 1 ? "1 passage cité" : $"{cited} passages cités"), r.Timings.Generation, "fait");
+        yield return outOfScope
+            ? new(5, "Contrôles", "sans objet", null, "saute")
+            : r.Guardrails.Count == 0
+                ? new(5, "Contrôles", "tous réussis", null, "fait")
+                : new(5, "Contrôles", r.Guardrails.Count == 1 ? "1 déclenché" : $"{r.Guardrails.Count} déclenchés", null, "alerte");
+    }
+
+    private static string StateText(string state) => state switch
+    {
+        "fait" => "terminée :",
+        "arret" => "arrêt :",
+        "alerte" => "alerte :",
+        _ => "",
+    };
+
+    private string StepCount(AnswerResult r) => Injection(r) ? "1 étape" : "5 étapes";
+
+    private string SummaryRest(AnswerResult r)
+    {
+        var seconds = $"{r.Timings.Total.TotalSeconds.ToString("0.0", French)} s";
+        if (Injection(r))
+            return $", {seconds}, 0 €, question arrêtée avant la recherche";
+        if (OutOfScope(r))
+            return $", dont 2 sans objet, {seconds}, 0 €, modèle non appelé";
+        var checks = r.Guardrails.Count == 0 ? "contrôles réussis"
+            : r.Guardrails.Count == 1 ? "1 contrôle déclenché" : $"{r.Guardrails.Count} contrôles déclenchés";
+        return $", {seconds}, {Cost(r)}, {checks}";
+    }
+
+    private static string Cost(AnswerResult r) =>
+        Injection(r) || OutOfScope(r) ? "0 €"
+        : r.Usage.EstimatedCost is { } cost ? $"{cost.ToString("0.0000", French)} €" : "coût inconnu";
+
+    private static string CostText(AnswerResult r) =>
+        Injection(r) || OutOfScope(r) ? "Le modèle n'a pas été appelé : rien n'a été facturé par Mistral."
+        : r.Usage.EstimatedCost is { } cost
+            ? $"facturés par Mistral pour lire {Number(r.Usage.InputTokens)} tokens (question, passages, consigne) et en écrire "
+              + $"{Number(r.Usage.OutputTokens)}. Soit {(cost * 1000).ToString("0.00", French)} € pour 1 000 questions."
+            : "Tarif du modèle non configuré.";
+
+    private string GuardText(AnswerResult r)
+    {
+        var guards = r.Guardrails.Count == 0 ? "aucun déclenché"
+            : string.Join(", ", r.Guardrails.Select(g => $"{Lower(PlainLanguage.Guardrail(g.Code).Title)} ({g.Code})"));
+        return $"Garde-fous : {guards}. Consignes {r.PromptVersion}, modèle {r.Model}, recherche {r.SearchStrategy}, "
+            + $"seuil {Generation.MinScore.ToString("0.00", French)}.";
+    }
+
+    private static string Lower(string text) => text.Length == 0 ? text : char.ToLowerInvariant(text[0]) + text[1..];
+
+    private static IEnumerable<(string Label, TimeSpan Duration)> Bars(AnswerTimings t) =>
+    [
+        ("Vectorisation", t.Embedding),
+        ("Recherche", t.Search),
+        ("Rédaction", t.Generation),
+    ];
+
+    private static string Ms(TimeSpan duration) => $"{duration.TotalMilliseconds.ToString("N0", French)} ms";
+
+    private static string Percent(TimeSpan part, TimeSpan total) =>
+        total <= TimeSpan.Zero ? "0%" : $"{Math.Min(100, part / total * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
+
+    private static string Number(long? value) => value?.ToString("N0", French) ?? "?";
+}

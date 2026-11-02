@@ -99,7 +99,7 @@
                         ne doit ni trancher votre situation, ni divulguer ses consignes.</li>
                 </ol>
                 <div class="separe">
-                    <p>Sous chaque réponse, «&nbsp;Sous le capot&nbsp;» explique comment elle a été produite&nbsp;: quels textes ont été
+                    <p>Sous chaque réponse, la couche «&nbsp;Au fond&nbsp;» explique comment elle a été produite&nbsp;: quels textes ont été
                         retenus, par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.</p>
                 </div>
 
@@ -151,7 +151,7 @@
 
     private EvaluationRun? Served => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
 
-    // Même règle que « Sous le capot » (Home.razor) : la phrase suit le réglage Embedding, quel que soit le fournisseur.
+    // Même règle que la couche « Au fond » d'une réponse (Thread/ThreadAnswer.razor) : la phrase suit le réglage Embedding, quel que soit le fournisseur.
     private bool AtOvh => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase);
 
     private string EmbeddingWhere => AtOvh ? "chez OVHcloud, en France" : $"chez {Embedding.Endpoint.Host}";

@@ -23,6 +23,7 @@ builder.Services.AddScoped<Limpide.Web.Visit>();
 builder.Services.AddScoped<Microsoft.AspNetCore.Components.Server.Circuits.CircuitHandler, Limpide.Web.VisitCircuitHandler>();
 // Page publique d'évaluation : rapports versionnés copiés avec l'application (dossier evaluation).
 builder.Services.AddSingleton<Limpide.Web.EvaluationReports>();
+builder.Services.AddScoped<Limpide.Web.QuestionThread>(); // un fil par circuit, donc par visite
 builder.Services.AddSingleton(builder.Configuration.GetSection("EvaluationGate").Get<Limpide.Core.Evaluation.EvaluationGateOptions>() ?? new Limpide.Core.Evaluation.EvaluationGateOptions());
 // Page « Comment il est construit » : index des ADR copié avec l'application (dossier adr).
 builder.Services.AddSingleton<Limpide.Web.ArchitectureDecisions>();

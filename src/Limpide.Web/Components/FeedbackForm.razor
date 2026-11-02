@@ -9,7 +9,7 @@
 <section class="feedback" aria-labelledby="@(General ? null : "feedback-title")" aria-label="@(General ? "Formulaire d'avis" : null)">
     @if (!General)
     {
-        <h2 id="feedback-title">Votre avis <span class="label">facultatif, chaque question l'est aussi</span></h2>
+        <h2 id="feedback-title" tabindex="-1">Votre avis <span class="label">facultatif, chaque question l'est aussi</span></h2>
     }
 
     @if (sent)
@@ -25,14 +25,14 @@
             <label for="fb-misleading">Une réponse vous a-t-elle paru fausse ou trompeuse&nbsp;? Laquelle, et pourquoi&nbsp;?</label>
             <textarea id="fb-misleading" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="misleading"></textarea>
 
-            <label for="fb-under-the-hood">Le panneau «&nbsp;sous le capot&nbsp;» vous a-t-il servi à quelque chose&nbsp;?</label>
+            <label for="fb-under-the-hood">La couche «&nbsp;Au fond&nbsp;» (comment la réponse a été produite) vous a-t-elle servi à quelque chose&nbsp;?</label>
             <textarea id="fb-under-the-hood" rows="2" maxlength="@VisitorFeedback.MaxLength" disabled="@sending" @bind="underTheHood"></textarea>
 
-            @if (LastResult is not null)
+            @if (Attached is not null)
             {
                 <label class="checkbox">
-                    <input type="checkbox" @bind="attachLastAnswer" disabled="@sending" />
-                    Joindre ma dernière question et la réponse obtenue («&nbsp;@Shorten(LastResult.Question, 80)&nbsp;»)
+                    <input type="checkbox" @bind="attach" disabled="@sending" />
+                    Joindre ma question et la réponse obtenue («&nbsp;@Shorten(Attached.Question, 80)&nbsp;»)
                 </label>
             }
             else if (!General)
@@ -57,9 +57,12 @@
 </section>
 
 @code {
-    /// <summary>Dernière réponse affichée : proposée en pièce jointe, avec l'accord du visiteur.</summary>
+    /// <summary>
+    /// Réponse dont on donne son avis (« Donner mon avis sur cette réponse ») : jointe seulement si le visiteur coche
+    /// la case, décochée par défaut (consentement, RGPD).
+    /// </summary>
     [Parameter]
-    public AnswerResult? LastResult { get; set; }
+    public AnswerResult? Attached { get; set; }
 
     /// <summary>Avis général, sur la page « Votre avis » : le titre est celui de la page, aucune question à joindre.</summary>
     [Parameter]
@@ -75,7 +78,7 @@
     private string? understood;
     private string? misleading;
     private string? underTheHood;
-    private bool attachLastAnswer;
+    private bool attach;
     private bool sending;
     private bool sent;
     private string? error;
@@ -83,7 +86,7 @@
     private async Task SendAsync()
     {
         error = null;
-        var feedback = VisitorFeedback.From(understood, misleading, underTheHood, attachLastAnswer ? LastResult : null);
+        var feedback = VisitorFeedback.From(understood, misleading, underTheHood, attach ? Attached : null);
         if (feedback is null)
         {
             error = "Répondez à au moins une des trois questions.";
