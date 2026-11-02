@@ -71,7 +71,7 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
   Sur téléphone (2026-11-02, le pied de page prenait plus du tiers d'un écran de 320 px), mêmes informations en
   version courte : « Gardée 30 jours : pas de donnée
-  personnelle. », case « Ne pas la conserver » sur la ligne du lien, « **Question traitée seule** : redonnez le
+  personnelle. », case « Ne pas garder ma question » sur la ligne du lien, « **Question traitée seule** : redonnez le
   contexte. » Les pages qui renvoient à la case la décrivent sans citer son libellé.
 - **Chaque réponse est un bloc « en coupe »** à trois couches : en surface la réponse, dessous les textes cités,
   au fond le calcul (« Sous le capot », replié sur une ligne avec les étapes, la durée, le coût et les contrôles).

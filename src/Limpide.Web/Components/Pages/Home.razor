@@ -54,7 +54,7 @@ else
     <form class="ask" @onsubmit="AskAsync">
         @if (Thread.Entries.Count > 0)
         {
-            <p class="seule"><strong><span class="libelle-long">Chaque question est traitée seule</span><span class="libelle-court">Question traitée seule</span></strong> : redonnez le contexte.</p>
+            <p class="seule"><strong><span class="libelle-long">Chaque question est traitée seule</span><span class="libelle-court">Question traitée seule</span></strong> : redonnez le contexte.</p>
         }
         @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, bouton
            dans le cadre, Entrée pour envoyer et Maj+Entrée pour aller à la ligne (limpide.js), limites affichées
@@ -97,8 +97,8 @@ else
            d'opposition ; le détail (masquage, adresse IP, destinataires) dans « Vos données ». *@
         <div class="conservation">
             @* Sur téléphone, la même information en une ligne, puis la case et le lien sur la suivante. *@
-            <span class="conservation-texte"><span class="libelle-long">N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span><span class="libelle-court">Gardée @KeptQuestion.Retention.Days jours : pas de donnée personnelle.</span></span>
-            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> <span class="libelle-long">Ne pas conserver ma question</span><span class="libelle-court">Ne pas la conserver</span></label>
+            <span class="conservation-texte"><span class="libelle-long">N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span><span class="libelle-court">Gardée @KeptQuestion.Retention.Days jours : pas de donnée personnelle.</span></span>
+            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> <span class="libelle-long">Ne pas conserver ma question</span><span class="libelle-court">Ne pas garder ma question</span></label>
             <a href="/confidentialite">Vos données</a>
         </div>
     </form>
