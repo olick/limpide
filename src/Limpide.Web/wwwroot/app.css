@@ -307,7 +307,7 @@ h1, h2, h3 { line-height: 1.25; }
 .champ textarea::placeholder { color: var(--muted); opacity: 1; }
 .champ button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.75rem; padding: 0 1.125rem; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .champ button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.champ button[aria-disabled="true"] { cursor: progress; opacity: 0.75; }
+.champ button[aria-disabled="true"] { cursor: progress; } /* « En cours… » dit l'état ; sans opacité, le texte garde son contraste */
 .limites { display: flex; gap: 1rem; margin: 0; font-size: 0.875rem; font-weight: 600; }
 .limites > :first-child { flex: 1 1 auto; }
 .compteur { font-variant-numeric: tabular-nums; }
@@ -362,30 +362,22 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 
 .disclaimer { margin: 1rem 0 0; font-size: 0.85rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 0.6rem; }
 
-/* Textes officiels : fond papier, filet doré, serif */
-.source {
-    background: var(--source-bg);
-    border: 1px solid var(--border);
-    border-left: 4px solid var(--source-rule);
-    border-radius: var(--radius);
-    padding: 0.9rem 1.25rem;
-    margin-bottom: 0.8rem;
-    scroll-margin-top: 1rem;
-}
-
-.source:target { outline: 2px solid var(--source-rule); }
-.source header { display: flex; gap: 0.6rem; align-items: baseline; }
-.source h3 { margin: 0; font-size: 1rem; }
+/* Textes officiels reproduits : fond papier, filet doré, serif. La couche « Dessous » d'une réponse est la seule sur
+   papier ; chaque extrait y est une carte repliée (<details>), ouverte au clic ou par son renvoi [P1]. */
+.couche-textes { background: var(--source-bg); }
+.carte { border-top: 1px solid var(--border); scroll-margin-top: 1rem; }
+.carte > summary { display: flex; align-items: baseline; gap: 0.75rem; min-height: 2.75rem; padding: 0.6rem 0; list-style: none; cursor: pointer; }
+.carte > summary::-webkit-details-marker { display: none; }
+.carte > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .id { font-weight: 800; color: var(--source-ink); }
-
-.verbatim {
-    margin: 0.6rem 0;
-    font-family: var(--serif);
-    white-space: pre-wrap;
-}
-
-.source footer { display: flex; flex-wrap: wrap; gap: 0.3rem 1rem; font-size: 0.82rem; color: var(--muted); }
-.licence { flex-basis: 100%; }
+.carte-titre { flex: 1 1 auto; min-width: 0; font: 600 1.125rem/1.3 var(--serif); overflow-wrap: anywhere; }
+.carte-action { display: inline-flex; align-items: center; gap: 0.35rem; font-size: 0.875rem; font-weight: 600; color: var(--accent); white-space: nowrap; }
+.carte .replier, .carte[open] .lire { display: none; }
+.carte[open] .replier { display: inline; }
+.carte[open] .carte-action svg { transform: rotate(180deg); }
+.verbatim { font-family: var(--serif); white-space: pre-wrap; } /* reproduit à l'identique, retours à la ligne compris */
+.carte .verbatim { margin: 0.1rem 0 0.75rem; padding-left: 1rem; border-left: 3px solid var(--source-rule); font-size: 1.0625rem; line-height: 1.7; }
+.carte-pied { margin: 0 0 1rem; font-size: 0.8125rem; color: var(--muted); }
 
 .guardrails { margin: 0; padding-left: 1.2rem; }
 .ok { color: var(--ok); margin: 0; }
@@ -613,6 +605,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .question .coupe { margin-top: 0; }
 .attente { margin: 0; color: var(--muted); }
 .couche .legende { margin: 0 0 0.6rem; font-size: 0.875rem; font-weight: 400; line-height: 1.5; color: var(--muted); }
+.fond { margin: 0; } /* sans la marge des anciennes sections, collée à la couche du dessus */
 .fond-ligne { margin: 0; }
 .fond-ligne button { width: 100%; display: grid; grid-template-columns: 7rem minmax(0, 1fr) auto; gap: 1.25rem; align-items: center; min-height: 3.5rem; padding: 0.9rem 1.75rem; border: 0; background: none; color: inherit; font: inherit; font-weight: 400; text-align: start; cursor: pointer; }
 .fond-ligne .couche-label { padding-top: 0; }
