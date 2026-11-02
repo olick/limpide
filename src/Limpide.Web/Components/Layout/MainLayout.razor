@@ -55,7 +55,7 @@
             <ul class="menu-links">
                 @foreach (var link in Links)
                 {
-                    var current = link.Href == CurrentPath;
+                    var current = link.Href.Split('?')[0] == CurrentPath;
                     <li>
                         <a href="@link.Href" aria-current="@(current ? "page" : null)" class="@(current ? "current" : null)"
                            target="@(link.External ? "_blank" : null)" rel="@(link.External ? "noopener noreferrer" : null)">
@@ -112,7 +112,7 @@
     // Entrées de l'ADR-022, dans l'ordre ; en bas du panneau, les mentions légales et le back office.
     private static readonly MenuLink[] Links =
     [
-        new("Nouvelle question", "/", ["M12 5v14", "M5 12h14"]),
+        new("Nouvelle question", "/?nouvelle=1", ["M12 5v14", "M5 12h14"]), // vide le fil (Home)
         new("Ce que fait Limpide", "/a-propos", ["M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z", "M12 11v5M12 8h.01"]),
         new("Comment il est construit", "/construction", ["M12 3l9 5-9 5-9-5 9-5z", "M3 13l9 5 9-5"]),
         new("Résultats d'évaluation", "/evaluation", ["M5 20V11M12 20V5M19 20v-6", "M3 20h18"]),

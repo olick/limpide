@@ -1,0 +1,128 @@
+@using System.Globalization
+@using Limpide.Core.Answering
+
+@* Règle de proximité (maquette, couche « Au fond ») : chaque passage trouvé placé selon son score, le seuil en tirets,
+   la zone de refus hachurée. Le dessin est décoratif ; sa description complète est dans aria-label. *@
+<div class="regle" role="img" aria-label="@Description">
+    <span class="regle-refus" style="width: @Pos(Threshold)" aria-hidden="true"></span>
+    <span class="regle-refus-texte" aria-hidden="true">réponse refusée</span>
+    <span class="regle-axe" aria-hidden="true"></span>
+    <span class="regle-seuil" style="left: @Pos(Threshold)" aria-hidden="true"></span>
+    <span class="regle-seuil-texte" style="left: @Pos(Threshold)" aria-hidden="true">seuil @Number(Threshold, "0.00")</span>
+    @foreach (var tick in Ticks)
+    {
+        <span class="regle-graduation" style="left: @Pos(tick)" aria-hidden="true"></span>
+        <span class="regle-graduation-texte" style="left: @Pos(tick)" aria-hidden="true">@Number(tick, "0.00")</span>
+    }
+    <span class="regle-borne" aria-hidden="true">@Number(Min, "0.00")</span>
+    <span class="regle-borne fin" aria-hidden="true">@Number(Max, "0.00")</span>
+    @foreach (var (p, up, labelled) in Placed())
+    {
+        <span class="regle-point @(p.Cited ? "est-cite" : null)" style="left: @Pos(p.Passage.Score)" aria-hidden="true"></span>
+        @if (labelled)
+        {
+            <span class="regle-trait @(up ? "haut" : "bas")" style="left: @Pos(p.Passage.Score)" aria-hidden="true"></span>
+            <span class="regle-etiquette @(up ? "haut" : "bas") @(p.Cited ? "est-cite" : null)" style="left: @Pos(p.Passage.Score)" aria-hidden="true">@Label(p)</span>
+        }
+    }
+</div>
+@if (Refused || Passages.Any(p => p.Cited))
+{
+    <p class="regle-legende">
+        <span><span class="pastille est-cite" aria-hidden="true"></span>cité dans la réponse</span>
+        <span><span class="pastille" aria-hidden="true"></span>trouvé, non cité</span>
+    </p>
+}
+
+@code {
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<SourcePassage> Passages { get; set; } = [];
+
+    [Parameter, EditorRequired]
+    public double Threshold { get; set; }
+
+    /// <summary>Question sous le seuil : seul le meilleur passage est nommé.</summary>
+    [Parameter]
+    public bool Refused { get; set; }
+
+    // Du score le plus haut au plus bas : étiquettes alternées en haut et en bas, pour ne pas se chevaucher.
+    private List<SourcePassage> Ordered => Passages.OrderByDescending(p => p.Passage.Score).ToList();
+
+    // Échelle de 0,55 à 0,85 (maquette), élargie par pas de 0,05 pour contenir tous les scores et le seuil.
+    private double Min => Math.Min(0.55, Math.Floor(Math.Min(Threshold, Passages.Select(p => p.Passage.Score).DefaultIfEmpty(1).Min()) * 20 - 1) / 20);
+
+    private double Max => Math.Max(0.85, Math.Ceiling(Passages.Select(p => p.Passage.Score).DefaultIfEmpty(0).Max() * 20) / 20);
+
+    private IEnumerable<double> Ticks
+    {
+        get
+        {
+            for (var t = Math.Ceiling(Min * 10 + 0.001) / 10; t < Max - 0.04; t += 0.1)
+                // ni sur le seuil, ni contre les bornes de l'échelle, dont les nombres sont déjà écrits
+                if (Math.Abs(t - Threshold) > 0.04 && Fraction(t) is >= 0.16 and <= 0.86)
+                    yield return Math.Round(t, 2);
+        }
+    }
+
+    /// <summary>
+    /// Étiquettes alternées en haut et en bas ; une étiquette trop proche de la précédente du même côté est omise (le
+    /// point reste, le passage est dans le tableau et dans la description).
+    /// </summary>
+    private IEnumerable<(SourcePassage Passage, bool Up, bool Labelled)> Placed()
+    {
+        double? lastUp = null, lastDown = null;
+        for (var i = 0; i < Ordered.Count; i++)
+        {
+            var p = Ordered[i];
+            var up = i % 2 == 0;
+            var at = Fraction(p.Passage.Score);
+            var last = up ? lastUp : lastDown;
+            var labelled = (!Refused || i == 0) && (last is null || Math.Abs(last.Value - at) >= MinLabelGap);
+            if (labelled)
+            {
+                if (up) lastUp = at;
+                else lastDown = at;
+            }
+            yield return (p, up, labelled);
+        }
+    }
+
+    private const double MinLabelGap = 0.06;
+
+    private string Label(SourcePassage p) =>
+        Refused ? $"{p.Id}, meilleur : {Number(p.Passage.Score, "0.000")}" : p.Id;
+
+    private double Fraction(double value) => Math.Clamp((value - Min) / (Max - Min), 0, 1);
+
+    private string Pos(double value) => (100 * Fraction(value)).ToString("0.##", CultureInfo.InvariantCulture) + "%";
+
+    private static string Number(double value, string format) => value.ToString(format, French);
+
+    private string Description
+    {
+        get
+        {
+            if (Passages.Count == 0)
+                return "Aucun passage trouvé.";
+            var best = Ordered[0];
+            if (Refused)
+                return $"Le meilleur passage trouvé a un score de {Number(best.Passage.Score, "0.000")}, sous le seuil de "
+                    + $"{Number(Threshold, "0.00")} : la réponse est refusée et le modèle n'est pas appelé.";
+            var low = Ordered[^1].Passage.Score;
+            var above = Passages.All(p => p.Passage.Score >= Threshold);
+            var cited = Passages.Where(p => p.Cited).Select(p => p.Id).ToList();
+            var notCited = Passages.Where(p => !p.Cited).Select(p => p.Id).ToList();
+            var text = $"Les {Passages.Count} passages trouvés ont des scores de {Number(low, "0.000")} à "
+                + $"{Number(best.Passage.Score, "0.000")}" + (above ? $", tous au-dessus du seuil de {Number(Threshold, "0.00")}." : $" ; le seuil est de {Number(Threshold, "0.00")}.");
+            if (cited.Count > 0)
+                text += $" {List(cited)} {(cited.Count > 1 ? "sont cités" : "est cité")} dans la réponse"
+                    + (notCited.Count > 0 ? $", {List(notCited)} non." : ".");
+            return text;
+        }
+    }
+
+    private static string List(IReadOnlyList<string> ids) =>
+        ids.Count == 1 ? ids[0] : string.Join(", ", ids.Take(ids.Count - 1)) + " et " + ids[^1];
+}

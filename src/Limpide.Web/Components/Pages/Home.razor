@@ -1,336 +1,93 @@
-﻿@page "/"
-@using System.Globalization
+@page "/"
 @using Limpide.Core.Protection
 @using Limpide.Infrastructure
+@using Limpide.Web.Components.Thread
 @inject AnswerService Answers
 @inject QuestionQuota Quota
 @inject ILogger<Home> Logger
 @inject GenerationSettings Generation
-@inject EmbeddingOptions Embedding
 @inject Limpide.Infrastructure.Storage.AnswerLogStore AnswerLog
 @inject Visit CurrentVisit
+@inject QuestionThread Thread
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <PageTitle>Limpide — l'AI Act et la CNIL, cartes sur table</PageTitle>
 
-<header class="hero">
-    <h1>Limpide</h1>
-    <p class="tagline">
-        Posez une question sur les règles de l'intelligence artificielle en Europe : Limpide retrouve les passages des
-        textes officiels qui y répondent, vous les cite mot pour mot, et vous montre comment il a fait.
-    </p>
-</header>
-
-<ul class="promises" aria-label="Ce que fait Limpide">
-    <li>
-        <strong><span aria-hidden="true">✔</span> Ce qu'il fait</strong>
-        Il cherche dans le règlement européen sur l'IA (AI Act) et les 17 fiches pratiques IA de la CNIL les passages
-        qui répondent à votre question, et rédige une réponse qui renvoie à chacun d'eux.
-    </li>
-    <li>
-        <strong><span aria-hidden="true">✘</span> Ce qu'il ne fait pas</strong>
-        Il ne dit pas si votre situation est conforme : c'est le rôle d'un professionnel du droit. C'est une IA, qui
-        peut se tromper : les textes cités font foi, pas sa formulation.
-    </li>
-    <li>
-        <strong><span aria-hidden="true">🔍</span> Pourquoi il montre tout</strong>
-        Sous chaque réponse, « Sous le capot » explique comment elle a été produite : quels textes ont été retenus,
-        par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.
-    </li>
-</ul>
-
-<div class="examples">
-    <span>Exemples :</span>
-    @foreach (var example in Examples)
-    {
-        <button type="button" class="example" disabled="@busy" @onclick="() => question = example">@example</button>
-    }
-</div>
-
-@* Mention de l'article 50 : dans l'en-tête fixe (MainLayout), visible en permanence. Le champ est fixé en bas de la
-   fenêtre (section « composer » du gabarit), hors de la zone qui défile. *@
-<SectionContent SectionName="composer">
-<div class="composer">
-<form class="ask" @onsubmit="AskAsync">
-    @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, limites
-       affichées seulement à leur approche. *@
-    <label for="question" class="sr-only">Votre question</label>
-    <textarea id="question" rows="2" maxlength="@MaxLength" disabled="@busy"
-              placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
-              aria-describedby="@(LimitsText is null ? null : "question-limits")"
-              @bind="question" @bind:event="oninput"></textarea>
-    @if (LimitsText is { } limits)
-    {
-        <p class="count" id="question-limits">@limits</p>
-    }
-    @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : la ligne courte avant l'envoi, le
-       détail (masquage, adresse IP, destinataires) dans « Vos données » ; opposition par la case. *@
-    <p class="keep">
-        N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.
-        <a href="/confidentialite">Vos données</a>
-    </p>
-    @* Erreur (quota, délai, panne) près du bouton : visible même si le fil a défilé. *@
-    @if (error is not null)
-    {
-        <p class="error" role="alert">@error</p>
-    }
-    <div class="ask-actions">
-        <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
-        <button type="submit" disabled="@busy">
-            @(busy ? "Recherche en cours…" : "Poser la question")
-        </button>
-    </div>
-</form>
-</div>
-</SectionContent>
-
-@* Région d'annonce présente dès le départ (une région créée avec son texte n'est souvent pas lue) : l'attente
-   dure plusieurs secondes, bouton désactivé. La réponse arrivée, le focus passe sur son titre. *@
-<p class="sr-only" role="status">@(busy ? "Recherche en cours, la réponse peut prendre plusieurs secondes." : "")</p>
-
-@if (result is { } r)
+@* Fil de questions sans mémoire (ADR-022) : l'accueil tant que le fil est vide, puis les questions empilées, chacune
+   traitée seule. L'avis sur une réponse remplace le fil le temps de l'écrire ; « Revenir à vos questions » le rend. *@
+@if (feedbackFor is { } target)
 {
-    <section class="answer @(r.Declined ? "declined" : "")">
-        <h2 tabindex="-1" @ref="answerHeading">Réponse de l'assistant <span class="label">formulation générée, à vérifier dans les textes cités</span></h2>
-        <div class="answer-text">@((MarkupString)answerHtml)</div>
-        @if (r.Guardrails.Any(g => g.Code == "qualification-juridique"))
+    <div class="coupe-page avis-page">
+        <button type="button" class="back-link" @onclick="BackToThread">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
+            Revenir à vos questions
+        </button>
+        <h1 class="sr-only">Votre avis sur une réponse</h1>
+        <FeedbackForm Attached="target.Result" />
+    </div>
+}
+else if (Thread.Entries.Count == 0)
+{
+    <ThreadIntro OnExample="PickExample" />
+}
+else
+{
+    <h1 class="sr-only">Vos questions</h1>
+    <div class="fil">
+        @foreach (var entry in Thread.Entries)
         {
-            <p class="warning" role="alert">
-                Cette réponse semble trancher votre situation, ce que Limpide ne doit pas faire.
-                Fiez-vous aux textes cités ci-dessous, et faites apprécier votre cas par un professionnel du droit.
-            </p>
+            <ThreadAnswer @key="entry.Id" Entry="entry" OnResume="Resume" OnFeedback="OpenFeedback" />
         }
-        <p class="disclaimer">@r.Disclaimer</p>
-    </section>
-
-    @if (r.CitedPassages.Any())
-    {
-        <section class="sources">
-            <h2>Textes cités <span class="label">reproduits à l'identique</span></h2>
-            @foreach (var (id, p, _) in r.CitedPassages)
-            {
-                <article class="source" id="@id">
-                    <header>
-                        <span class="id">@id</span>
-                        <h3>@p.Heading</h3>
-                    </header>
-                    <blockquote class="verbatim">@p.Content</blockquote>
-                    <footer>
-                        <span>@p.SourceName — @p.DocumentTitle</span>
-                        <a href="@p.Url" target="_blank" rel="noopener noreferrer">Texte officiel</a>
-                        <span title="Empreinte SHA-256 du texte collecté : @p.Origin.VersionHash">
-                            Version collectée le @p.FetchedAt.ToString("d MMMM yyyy", French) · <code>@p.Origin.ShortHash</code>
-                        </span>
-                        <span class="licence">Licence : @p.ReuseTerms</span>
-                    </footer>
-                </article>
-            }
-        </section>
-    }
-
-    <details class="engine" open="@engineOpen">
-        <summary>Sous le capot : comment cette réponse a été produite</summary>
-
-        @{ var outOfScope = r.Guardrails.Any(g => g.Code == "hors-perimetre");
-           var injection = r.Guardrails.Any(g => g.Code == "injection-suspectee");
-           var best = r.Passages.Count == 0 ? 0 : r.Passages.Max(p => p.Passage.Score);
-           var citedCount = r.CitedPassages.Count(); }
-        @if (injection)
-        {
-            <ol class="story">
-                <li>
-                    <span class="step-title">Votre question est d'abord contrôlée</span>
-                    <p><strong>Arrêt.</strong> Elle ressemble à une tentative de détourner l'assistant : elle s'adresse à
-                        ses consignes plutôt qu'aux textes. Limpide s'arrête là : votre question n'est ni traduite en
-                        « sens », ni comparée aux textes, ni envoyée au modèle de rédaction. Ce contrôle repose sur des
-                        règles simples, appliquées sur notre serveur, et peut se tromper : reformulez alors votre question
-                        sans instruction pour l'assistant.</p>
-                </li>
-            </ol>
-        }
-        else
-        {
-            <ol class="story">
-                <li>
-                    <span class="step-title">Votre question est traduite en « sens »</span>
-                    <span class="ms">@Ms(r.Timings.Embedding)</span>
-                    @* Phrase tirée du réglage Embedding : elle doit rester vraie quel que soit le fournisseur. *@
-                    @if (Embedding.Provider == EmbeddingOptions.Ollama || Embedding.Endpoint.IsLoopback)
-                    {
-                        <p>Un modèle de langue installé sur notre serveur transforme votre question en une suite de nombres
-                            qui représente son sens. À cette étape, rien ne quitte le serveur.</p>
-                    }
-                    else
-                    {
-                        <p>Un modèle de langue spécialisé (@Embedding.Model), @EmbeddingHost, transforme votre question en
-                            une suite de nombres qui représente son sens. Votre question lui est envoyée pour ce calcul :
-                            avec la rédaction, c'est la seule étape où elle quitte notre serveur.</p>
-                    }
-                </li>
-                <li>
-                    <span class="step-title">Recherche des passages les plus proches</span>
-                    <span class="ms">@Ms(r.Timings.Search)</span>
-                    <p>Limpide compare ce « sens » à celui de chaque passage des textes officiels, et retient les
-                        @r.Passages.Count plus proches. Leur proximité est notée de 0 à 1 : le meilleur obtient
-                        <strong>@best.ToString("0.00", French)</strong>.</p>
-                </li>
-                <li>
-                    <span class="step-title">Est-ce bien le sujet des textes ?</span>
-                    @if (outOfScope)
-                    {
-                        <p><strong>Non.</strong> Même le meilleur passage est trop éloigné (@best.ToString("0.00", French), sous le seuil
-                            de @Generation.MinScore.ToString("0.00", French)). Limpide s'arrête là et répond qu'il ne sait pas, sans
-                            appeler le modèle de rédaction : rien d'inventé, rien de payé.</p>
-                    }
-                    else
-                    {
-                        <p><strong>Oui.</strong> Le meilleur passage dépasse le seuil de @Generation.MinScore.ToString("0.00", French),
-                            en dessous duquel Limpide répond « je ne sais pas » sans aller plus loin.</p>
-                    }
-                </li>
-                <li>
-                    <span class="step-title">Rédaction de la réponse</span>
-                    @if (outOfScope)
-                    {
-                        <p>Étape sautée : le modèle de rédaction n'a pas été appelé.</p>
-                    }
-                    else
-                    {
-                        <span class="ms">@Ms(r.Timings.Generation)</span>
-                        <p>@PlainLanguage.ModelName(r.Model), un modèle de Mistral AI hébergé en Europe, a reçu votre question et
-                            ces @r.Passages.Count passages, avec une consigne : répondre seulement à partir d'eux, renvoyer à
-                            chaque passage utilisé ([P1], [P2]…), dire « je ne sais pas » sinon, et ne jamais juger votre
-                            situation.
-                            @(r.Declined ? "Il a répondu ne pas savoir : les passages trouvés ne contenaient pas la réponse."
-                                         : $"Il s'est appuyé sur {citedCount} passage{(citedCount > 1 ? "s" : "")}, reproduit{(citedCount > 1 ? "s" : "")} ci-dessus.")</p>
-                    }
-                </li>
-                <li>
-                    <span class="step-title">Contrôles automatiques</span>
-                    @if (r.Guardrails.Count == 0)
-                    {
-                        <p class="ok">Tous réussis : chaque renvoi [P…] correspond bien à un passage fourni, et la réponse ne
-                            semble pas juger votre situation.</p>
-                    }
-                    else
-                    {
-                        <ul class="guardrails">
-                            @foreach (var g in r.Guardrails)
-                            {
-                                var (title, meaning) = PlainLanguage.Guardrail(g.Code);
-                                <li><strong>@title.</strong> @meaning</li>
-                            }
-                        </ul>
-                    }
-                </li>
-            </ol>
-        }
-
-        <p class="cost">
-            <strong>Coût de cette réponse : </strong>
-            @if (outOfScope || injection)
-            {
-                <span>rien, le modèle de rédaction n'a pas été appelé.</span>
-            }
-            else if (r.Usage.EstimatedCost is { } answerCost)
-            {
-                <span>@PlainLanguage.Cost(answerCost, French), le prix facturé par Mistral pour lire @Number(r.Usage.InputTokens)
-                    « tokens » (des morceaux de mots : votre question, les passages et la consigne) et en écrire
-                    @Number(r.Usage.OutputTokens).</span>
-            }
-            else
-            {
-                <span>inconnu (tarif du modèle non configuré).</span>
-            }
-        </p>
-
-        <details class="technical">
-            <summary>Détails techniques</summary>
-            <dl class="metrics">
-                <div>
-                    <dt>Recherche</dt>
-                    <dd>@r.SearchStrategy</dd>
-                </div>
-                <div>
-                    <dt>Modèle</dt>
-                    <dd>@r.Model <span class="muted">· consignes @r.PromptVersion</span></dd>
-                </div>
-                <div>
-                    <dt>Tokens</dt>
-                    <dd>@Number(r.Usage.InputTokens) en entrée · @Number(r.Usage.OutputTokens) en sortie</dd>
-                </div>
-                <div>
-                    <dt>Coût estimé</dt>
-                    <dd>
-                        @if (r.Usage.EstimatedCost is { } cost)
-                        {
-                            <span>@cost.ToString("0.000000", French) €</span>
-                            <span class="muted"> · @((cost * 1000).ToString("0.00", French)) € pour 1 000 questions</span>
-                        }
-                        else
-                        {
-                            <span>inconnu (tarif du modèle non configuré)</span>
-                        }
-                    </dd>
-                </div>
-            </dl>
-
-            <h3>Durées</h3>
-            <ul class="timings">
-                @foreach (var (label, duration) in Steps(r.Timings))
-                {
-                    <li>
-                        <span class="step">@label</span>
-                        <span class="bar"><span style="width: @Percent(duration, r.Timings.Total)"></span></span>
-                        <span class="ms">@Ms(duration)</span>
-                    </li>
-                }
-                <li class="total"><span class="step">Total</span><span></span><span class="ms">@Ms(r.Timings.Total)</span></li>
-            </ul>
-
-            <h3>Garde-fous</h3>
-            @if (r.Guardrails.Count == 0)
-            {
-                <p class="ok">Aucun déclenché.</p>
-            }
-            else
-            {
-                <ul class="guardrails">
-                    @foreach (var g in r.Guardrails)
-                    {
-                        <li><code>@g.Code</code> @g.Description</li>
-                    }
-                </ul>
-            }
-
-            <h3>Passages fournis au modèle</h3>
-            <div class="table-scroll">
-                <table class="passages">
-                    <thead>
-                        <tr><th>Id</th><th>Passage</th><th>Ancre</th><th>Score</th><th>Cité</th><th>Version</th></tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var (id, p, cited) in r.Passages)
-                        {
-                            <tr class="@(cited ? "cited" : "")">
-                                <td>@id</td>
-                                <td>@p.Heading</td>
-                                <td>@(p.Anchor ?? "—")</td>
-                                <td>@p.Score.ToString("0.000", French)</td>
-                                <td>@(cited ? "oui" : "non")</td>
-                                <td><code title="Extracteur @p.Origin.ExtractorVersion · découpeur @p.Origin.ChunkerVersion · SHA-256 @p.Origin.VersionHash">@p.Origin.ShortHash</code></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-    
-            <p class="hint">Score : proximité de sens entre votre question et le passage (similarité cosinus, de 0 à 1).
-                Version : empreinte du texte collecté, pour remonter jusqu'au fichier téléchargé.</p>
-        </details>
-    </details>
+    </div>
 }
 
-<FeedbackForm LastResult="result" />
+@* Région d'annonce présente dès le départ (une région créée avec son texte n'est souvent pas lue). *@
+<p class="sr-only" role="status">@status</p>
+
+@if (feedbackFor is null)
+{
+    @* Mention de l'article 50 : dans l'en-tête fixe (MainLayout). Le champ est fixé en bas de la fenêtre (section
+       « composer » du gabarit), hors de la zone qui défile. *@
+    <SectionContent SectionName="composer">
+    <div class="composer">
+    <form class="ask" @onsubmit="AskAsync">
+        @if (Thread.Entries.Count > 0)
+        {
+            <p class="seule"><strong>Chaque question est traitée seule</strong> : redonnez le contexte.</p>
+        }
+        @* Champ compact, pour tenir entier jusqu'à 320 × 568 (ADR-022) : étiquette lue par les lecteurs d'écran, limites
+           affichées seulement à leur approche. *@
+        <label for="question" class="sr-only">Votre question</label>
+        <textarea id="question" rows="2" maxlength="@MaxLength" disabled="@busy" @ref="field"
+                  placeholder="Ex. : Quelles utilisations de l'IA sont interdites en Europe ?"
+                  aria-describedby="@(LimitsText is null ? null : "question-limits")"
+                  @bind="question" @bind:event="oninput"></textarea>
+        @if (LimitsText is { } limits)
+        {
+            <p class="count" id="question-limits">@limits</p>
+        }
+        @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : la ligne courte avant l'envoi, le
+           détail (masquage, adresse IP, destinataires) dans « Vos données » ; opposition par la case. *@
+        <p class="keep">
+            N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.
+            <a href="/confidentialite">Vos données</a>
+        </p>
+        @* Erreur (quota, délai, panne) près du bouton : visible même si le fil a défilé. *@
+        @if (error is not null)
+        {
+            <p class="error" role="alert">@error</p>
+        }
+        <div class="ask-actions">
+            <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" disabled="@busy" /> Ne pas conserver ma question</label>
+            <button type="submit" disabled="@busy">
+                @(busy ? "Recherche en cours…" : "Poser la question")
+            </button>
+        </div>
+    </form>
+    </div>
+    </SectionContent>
+}
 
 @code {
     /// <summary>Longueur maximale d'une question, rappelée dans « Ce que fait Limpide ».</summary>
@@ -339,26 +96,27 @@
     /// <summary>Délai au-delà duquel la réponse est abandonnée.</summary>
     public static readonly TimeSpan AnswerTimeout = TimeSpan.FromSeconds(60);
 
-    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
-
-    private static readonly string[] Examples =
-    [
-        "Quelles utilisations de l'IA sont interdites en Europe ?",
-        "Dois-je prévenir les utilisateurs qu'ils discutent avec un chatbot ?",
-        "Comment informer les personnes quand on entraîne un modèle sur des données collectées par webscraping ?",
-    ];
-
     private string question = "";
     private bool busy;
     private string? error;
-    private AnswerResult? result;
-    private string answerHtml = "";
-    private bool engineOpen;
+    private string status = "";
     private bool doNotKeep;
-    private ElementReference answerHeading;
-    private bool focusAnswer;
     private int? remaining;
     private DateTimeOffset remainingUntil;
+    private ElementReference field;
+
+    /// <summary>Question dont on donne son avis : le formulaire remplace le fil.</summary>
+    private ThreadEntry? feedbackFor;
+
+    // Après le rendu : placer le fil au début d'une question, y poser le focus, ou le poser dans le champ.
+    private string? showEntry;
+    private string? focusEntry;
+    private bool focusField;
+    private bool focusFeedback;
+
+    /// <summary>« Nouvelle question » du menu (/?nouvelle=1) : le fil repart de zéro.</summary>
+    [SupplyParameterFromQuery(Name = "nouvelle")]
+    public string? NewQuestion { get; set; }
 
     /// <summary>Adresse IP du visiteur (App.razor) ; sans elle, tous les visiteurs partagent un même quota.</summary>
     [CascadingParameter(Name = "ClientAddress")]
@@ -384,9 +142,44 @@
         }
     }
 
-    private string EmbeddingHost => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase)
-        ? "hébergé par OVHcloud en France"
-        : $"appelé chez {Embedding.Endpoint.Host}";
+    protected override void OnParametersSet()
+    {
+        if (NewQuestion is null)
+            return;
+
+        Thread.Clear();
+        feedbackFor = null;
+        question = "";
+        error = null;
+        status = "";
+        focusField = true;
+        Navigation.NavigateTo("/", replace: true);
+    }
+
+    private void PickExample(string example)
+    {
+        question = example;
+        focusField = true;
+    }
+
+    private void Resume(ThreadEntry entry)
+    {
+        question = entry.Question;
+        error = null;
+        focusField = true;
+    }
+
+    private void OpenFeedback(ThreadEntry entry)
+    {
+        feedbackFor = entry;
+        focusFeedback = true;
+    }
+
+    private void BackToThread()
+    {
+        showEntry = focusEntry = feedbackFor?.Id;
+        feedbackFor = null;
+    }
 
     private async Task AskAsync()
     {
@@ -394,7 +187,8 @@
             return;
 
         // Bouton toujours actif, contrôle à l'envoi : un bouton grisé sans explication ne dit pas quoi faire.
-        if (string.IsNullOrWhiteSpace(question))
+        var text = question.Trim();
+        if (text.Length == 0)
         {
             error = "Écrivez d'abord votre question, ou choisissez un des exemples.";
             return;
@@ -403,7 +197,7 @@
         error = null;
         using var visitScope = CurrentVisit.Scope(Logger);
         CurrentVisit.QuestionAsked();
-        Logger.QuestionReceived(question.Trim().Length);
+        Logger.QuestionReceived(text.Length);
         var quota = Quota.TryConsume(ClientAddress ?? "inconnue");
         if (!quota.Allowed)
         {
@@ -411,7 +205,7 @@
             Logger.LogInformation("Question refusée par le quota : {Verdict}", quota.Verdict);
             await SaveToLogAsync(AnswerLogEntry.Refused(
                 quota.Verdict == QuotaVerdict.ClientLimitReached ? AnswerOutcome.QuotaVisitor : AnswerOutcome.QuotaDaily,
-                question.Trim().Length, TraceId()), question: null); // refusée : rien à améliorer, texte non gardé
+                text.Length, TraceId()), kept: null); // refusée : rien à améliorer, texte non gardé
             error = quota.Verdict == QuotaVerdict.ClientLimitReached
                 ? $"Limite atteinte : {QuotaSettings.PerClientPerHour} questions par heure et par visiteur, pour maîtriser le coût "
                   + $"de cette démo publique. Nouvelle question possible dans {Duration(quota.RetryAfter)}."
@@ -422,26 +216,37 @@
 
         remaining = quota.Remaining;
         remainingUntil = DateTimeOffset.UtcNow + quota.WindowResetsIn; // passé ce délai, le quota du visiteur repart à zéro
+        var entry = Thread.Add(text);
+        var kept = doNotKeep ? null : KeptQuestion.From(text);
+        question = "";
+        showEntry = entry.Id;
+        status = "Recherche en cours, la réponse peut prendre plusieurs secondes.";
         busy = true;
         var started = System.Diagnostics.Stopwatch.StartNew();
         try
         {
             using var timeout = new CancellationTokenSource(AnswerTimeout);
-            result = await Answers.AskAsync(question.Trim(), timeout.Token);
+            var result = await Answers.AskAsync(text, timeout.Token);
             var cited = result.CitedPassages.Select(p => p.Id).ToHashSet();
-            answerHtml = AnswerMarkdown.ToHtml(result.Answer, cited);
+            entry.AnswerHtml = AnswerMarkdown.ToHtml(result.Answer, cited, entry.Id + "-");
             // Un garde-fou déclenché est montré d'emblée : la transparence vaut surtout quand quelque chose cloche.
-            engineOpen = result.Guardrails.Count > 0;
-            focusAnswer = true;
+            entry.DetailOpen = result.Guardrails.Count > 0;
+            entry.Result = result;
+            focusEntry = entry.Id;
+            status = "Réponse prête.";
             Logger.AnswerSteps(result, Generation.MinScore);
-            await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()), Kept());
+            await SaveToLogAsync(AnswerLogEntry.From(result, TraceId()), kept);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
             // Jamais le texte de la question dans les messages : ils sont conservés et consultables (ADR-018).
-            Logger.LogError(ex, "Échec de la réponse à une question de {Length} caractères", question.Trim().Length);
-            await SaveToLogAsync(AnswerLogEntry.Failed(ex, question.Trim().Length, started.Elapsed, TraceId()), Kept());
-            result = null;
+            Logger.LogError(ex, "Échec de la réponse à une question de {Length} caractères", text.Length);
+            await SaveToLogAsync(AnswerLogEntry.Failed(ex, text.Length, started.Elapsed, TraceId()), kept);
+            // La question quitte le fil et revient dans le champ : rien à retaper pour réessayer.
+            Thread.Remove(entry);
+            question = text;
+            status = "";
+            focusField = true;
             error = ex is OperationCanceledException
                 ? "La réponse a pris trop de temps (plus de 60 secondes). Réessayez dans un instant."
                 : "La réponse n'a pas pu être produite (service de recherche ou de génération indisponible). Réessayez dans un instant.";
@@ -453,28 +258,43 @@
     }
 
     /// <summary>
-    /// Focus sur le titre de la réponse une fois affichée : le bouton désactivé pendant l'attente a perdu le focus,
-    /// et un lecteur d'écran lit la réponse à partir de là.
+    /// Après le rendu : la nouvelle question est placée en haut de la zone qui défile, puis, la réponse arrivée, le
+    /// focus va sur son titre (le bouton désactivé pendant l'attente l'avait perdu ; un lecteur d'écran lit la suite).
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (!focusAnswer || result is null)
-            return;
-
-        focusAnswer = false;
-        await answerHeading.FocusAsync();
+        if (showEntry is { } shown)
+        {
+            showEntry = null;
+            await JS.InvokeVoidAsync("limpide.showQuestion", shown);
+        }
+        if (focusEntry is { } focused)
+        {
+            focusEntry = null;
+            await JS.InvokeVoidAsync("limpide.focusQuestion", focused);
+        }
+        if (focusFeedback)
+        {
+            focusFeedback = false;
+            await JS.InvokeVoidAsync("limpide.showForm", "feedback-title");
+        }
+        if (focusField)
+        {
+            focusField = false;
+            await field.FocusAsync();
+        }
     }
 
     /// <summary>
     /// Journal des réponses (ADR-018), avec le texte de la question s'il est conservé (ADR-019) : son échec ne doit
     /// jamais priver le visiteur de sa réponse.
     /// </summary>
-    private async Task SaveToLogAsync(AnswerLogEntry entry, KeptQuestion? question)
+    private async Task SaveToLogAsync(AnswerLogEntry entry, KeptQuestion? kept)
     {
         try
         {
             using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            await AnswerLog.SaveAsync(entry, question, timeout.Token);
+            await AnswerLog.SaveAsync(entry, kept, timeout.Token);
         }
         catch (Exception ex) when (ex is not OutOfMemoryException)
         {
@@ -482,27 +302,10 @@
         }
     }
 
-    /// <summary>Texte à conserver, masqué ; null si le visiteur s'y oppose.</summary>
-    private KeptQuestion? Kept() => doNotKeep ? null : KeptQuestion.From(question);
-
     private static string? TraceId() => System.Diagnostics.Activity.Current?.TraceId.ToHexString();
-
-    private static IEnumerable<(string Label, TimeSpan Duration)> Steps(AnswerTimings t) =>
-    [
-        ("Vectorisation de la question", t.Embedding),
-        ("Recherche des passages", t.Search),
-        ("Génération de la réponse", t.Generation),
-    ];
 
     private static string Duration(TimeSpan delay) =>
         delay.TotalMinutes < 1 ? "moins d'une minute"
         : delay.TotalHours < 1 ? $"{Math.Ceiling(delay.TotalMinutes):0} min"
         : $"{(int)delay.TotalHours} h {delay.Minutes:00}";
-
-    private static string Ms(TimeSpan duration) => $"{duration.TotalMilliseconds.ToString("N0", French)} ms";
-
-    private static string Percent(TimeSpan part, TimeSpan total) =>
-        total <= TimeSpan.Zero ? "0%" : $"{Math.Min(100, part / total * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
-
-    private static string Number(long? value) => value?.ToString("N0", French) ?? "?";
 }

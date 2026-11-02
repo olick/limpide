@@ -217,3 +217,31 @@ l'appareil » par défaut.
 - Tableaux empilés sous 40rem (en-têtes de colonne en libellés), comme la maquette mobile.
 - Corrections de la relecture de la PR #69 : espaces insécables avant « ? : ; » et dans les guillemets, jeton
   `--paper-rule` supprimé, séparateur du pied de page masqué aux lecteurs d'écran. Styles des anciennes pages retirés.
+
+### Refonte, étape 3 : fil de questions (2026-11-02)
+
+- **Fil** : questions empilées dans un service propre au circuit (`QuestionThread`, « scoped ») : il survit au passage
+  par les autres pages, disparaît avec la visite ; « Nouvelle question » (`/?nouvelle=1`) le vide. Rien n'est envoyé
+  au modèle avec la question suivante (ADR-022) ; « Chaque question est traitée seule » au-dessus du champ dès la
+  première question. « Vos données » le dit (bloc « Le fil de vos questions »).
+- **Accueil, fil vide** (O1) : promesse, exemples, coupe des trois couches repliées (texte complet au clic). La
+  couche « Les textes officiels » de la coupe sans papier ni Literata, comme en 2a (texte de Limpide).
+- **Chaque question en coupe** (O4 à O6) : la question en titre ; en surface la réponse (avertissement fixe
+  conservé : `AnswerPrompt.Disclaimer` doit accompagner toute réponse) ; dessous les textes cités (tels quels, l'étape
+  4 les repliera) ; au fond une ligne de résumé (étapes, durée, coût, contrôles) et le détail au clic : 5 étapes, règle
+  de proximité (nouvelle, `ProximityRuler`), temps, coût, passages fournis, garde-fous, lien vers l'évaluation. Détail
+  ouvert d'emblée si un garde-fou s'est déclenché. Ancres des extraits préfixées par question (`q2-P1`).
+- **« Reprendre cette question »** et **« Donner mon avis sur cette réponse »** sous chaque réponse ; l'avis remplace
+  le fil (« Revenir à vos questions »), la case « Joindre ma question et la réponse obtenue (« … ») » **décochée par
+  défaut** (consentement ; cochée dans la maquette).
+- **Placement** : la nouvelle question en haut de la zone qui défile (sans animation si mouvement réduit), le focus
+  sur son titre à l'arrivée de la réponse ; au retour de l'avis, focus sur la question concernée.
+- **« Sous le capot » devient « Au fond »** partout (accueil, « Ce que fait Limpide », schéma de « Comment il est
+  construit ») ; la troisième question de l'avis aussi, par choix d'Alexandre : « La couche « Au fond » (comment la
+  réponse a été produite) vous a-t-elle servi à quelque chose ? ». Les avis d'avant le 2026-11-02 répondaient à
+  l'ancienne formulation (libellé du back office).
+- **Pas fait** : la radiographie en direct (O2, O3 : étapes qui s'allument pendant l'attente) demande que
+  `AnswerService` publie son avancement ; l'attente affiche une phrase fixe. À décider.
+- Vérifié avec de vraies questions, Firefox piloté par WebDriver BiDi (script Node sans dépendance, hors dépôt) :
+  1440 px clair, 390 px clair et sombre, 320 px ; débordements corrigés (`minmax(0, 1fr)` sur les couches et le
+  détail du fond).
