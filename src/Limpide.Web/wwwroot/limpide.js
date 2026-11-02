@@ -51,7 +51,33 @@ document.addEventListener("change", (event) => {
     }
 });
 
+// Champ de question (ADR-022) : Entrée envoie, Maj+Entrée va à la ligne ; pendant une saisie en cours (accents
+// composés, méthodes d'entrée), Entrée valide la saisie, pas la question. La hauteur suit le texte, de 1 à 5 lignes.
+document.addEventListener("keydown", (event) => {
+    if (event.target.id !== "question" || event.key !== "Enter" || event.shiftKey || event.isComposing) return;
+    event.preventDefault();
+    event.target.form?.requestSubmit();
+});
+
+document.addEventListener("input", (event) => {
+    if (event.target.id === "question") fitQuestion(event.target);
+});
+
+function fitQuestion(field) {
+    const style = getComputedStyle(field);
+    const max = (parseFloat(style.lineHeight) || 24) * 5 + parseFloat(style.paddingTop) + parseFloat(style.paddingBottom);
+    field.style.height = "auto";
+    field.style.height = Math.min(field.scrollHeight, max) + "px";
+    field.style.overflowY = field.scrollHeight > max ? "auto" : "hidden";
+}
+
 window.limpide = {
+    // Le texte du champ a été changé par le code (exemple, « Reprendre », envoi) : la hauteur suit.
+    fitQuestion() {
+        const field = document.getElementById("question");
+        if (field) fitQuestion(field);
+    },
+
     // Appelé par le gabarit à chaque navigation de Blazor : ferme le panneau et réapplique le thème choisi, au cas où
     // un rendu aurait remplacé l'attribut de <html>.
     closeMenu() {
