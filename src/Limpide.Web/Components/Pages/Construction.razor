@@ -98,15 +98,16 @@
                 <p class="couche-promise">Une décision par fichier&nbsp;: le contexte, les options envisagées, la décision, ses
                     conséquences et ce qui la ferait réviser.</p>
                 <div class="table-scroll" tabindex="0" role="region" aria-labelledby="co-decisions">
-                    <table class="tableau-fond decisions" aria-labelledby="co-decisions">
-                        <thead><tr><th scope="col">N°</th><th scope="col">Décision</th><th scope="col">Date</th></tr></thead>
-                        <tbody>
+                    @* role explicites : la date passe sous le titre sur téléphone (display: grid), sans que le tableau cesse d'en être un. *@
+                    <table role="table" class="tableau-fond decisions" aria-labelledby="co-decisions">
+                        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">N°</th><th role="columnheader" scope="col">Décision</th><th role="columnheader" scope="col">Date</th></tr></thead>
+                        <tbody role="rowgroup">
                             @foreach (var d in Decisions.All)
                             {
-                                <tr>
-                                    <td><a href="@(AdrBase + d.File)" aria-label="Décision @d.Number : @d.Title">@d.Number</a></td>
-                                    <td>@d.Title</td>
-                                    <td>@d.Date.ToString("d MMM yyyy", French)</td>
+                                <tr role="row">
+                                    <td role="cell"><a href="@(AdrBase + d.File)" aria-label="Décision @d.Number : @d.Title">@d.Number</a></td>
+                                    <td role="cell">@d.Title</td>
+                                    <td role="cell">@d.Date.ToString("d MMM yyyy", French)</td>
                                 </tr>
                             }
                         </tbody>

@@ -307,7 +307,11 @@ h1, h2, h3 { line-height: 1.25; }
 .champ textarea::placeholder { color: var(--muted); opacity: 1; }
 .champ button { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; min-height: 2.75rem; padding: 0 1.125rem; border: 0; border-radius: 8px; background: var(--accent); color: var(--on-accent); font-weight: 600; }
 .champ button:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
-.champ button[aria-disabled="true"] { cursor: progress; } /* « En cours… » dit l'état ; sans opacité, le texte garde son contraste */
+.champ button[aria-disabled="true"] { cursor: progress; } /* le sablier dit l'état ; sans opacité, le contraste reste */
+/* Bouton réduit à son icône (le texte d'aide dit déjà « Posez votre question ») : le libellé reste son nom. */
+.champ button { position: relative; width: 2.75rem; padding: 0; }
+.bouton-libelle { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.libelle-court { display: none; } /* variante téléphone d'un libellé (.libelle-long sur ordinateur) */
 .limites { display: flex; gap: 1rem; margin: 0; font-size: 0.875rem; font-weight: 600; }
 .limites > :first-child { flex: 1 1 auto; }
 .compteur { font-variant-numeric: tabular-nums; }
@@ -719,11 +723,19 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .question-actions { justify-content: stretch; }
     .question-actions .bouton-secondaire { flex: 1 1 100%; }
     .champ { gap: 0.5rem; padding: 0.25rem 0.25rem 0.25rem 0.75rem; }
-    .champ button { min-width: 4rem; padding: 0 0.75rem; font-size: 0.9375rem; }
-    .libelle-long { display: none; } /* « Poser », comme la maquette mobile */
+    /* Pied de page compact, textes courts : le champ tient sur une ligne, l'information de conservation sur une autre,
+       la case et le lien sur la troisième. */
+    .libelle-long { display: none; }
+    .libelle-court { display: inline; }
     .composer .ask { gap: 0.25rem; }
     .seule, .limites, .conservation { font-size: 0.8125rem; line-height: 1.4; }
-    .conservation { gap: 0 0.75rem; }
-    .conservation a { min-height: 2rem; }
+    .conservation { gap: 0 1rem; }
+    .conservation-texte { flex: 1 1 100%; }
     /* La case d'opposition (ADR-019) garde sa cible de 44 px : un appui manqué vaut un choix non exercé. */
+
+    /* Décisions d'architecture : la date passe sous le titre (trois colonnes ne tiennent pas, même en date courte). */
+    .decisions thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+    .decisions tr { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 0.75rem; padding: 0.5rem 0; border-top: 1px solid var(--band-rule); }
+    .decisions td { padding: 0; border: 0; }
+    .decisions td:last-child { grid-column: 2; font-size: 0.8125rem; }
 }
