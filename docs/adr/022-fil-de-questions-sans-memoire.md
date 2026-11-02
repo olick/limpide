@@ -64,15 +64,15 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   titre, texte complet d'origine déplié au clic (pas au survol, qui ne marche pas au tactile), et les exemples en
   boutons. Ils disparaissent à la première question ; le même texte reste dans « Ce que fait Limpide ».
   Pas de commande « / » : les visiteurs ne sont pas tous techniciens.
-- **Champ fixé en bas**, bouton flèche nommé « Poser la question » (icône seule, sablier pendant l'attente), texte d'aide court (« Posez votre question » ; les
-  exemples sont sur l'accueil), contour de focus visible sur le cadre du champ. Sous le champ, visibles sans action
-  avant l'envoi : « pas de donnée personnelle », durée de conservation, case « Ne pas conserver ma question »
-  (libellé de l'ADR-019), lien « Vos données ». Dès la première réponse,
+- **Champ fixé en bas**, bouton flèche nommé « Poser la question » (icône seule, sablier pendant l'attente), texte
+  d'aide court (« Posez votre question » ; les exemples sont sur l'accueil), contour de focus visible sur le cadre du
+  champ. Sous le champ, visibles sans action avant l'envoi : « pas de donnée personnelle », durée de conservation,
+  case « Ne pas conserver ma question » (libellé de l'ADR-019), lien « Vos données ». Dès la première réponse,
   au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
   Sur téléphone (2026-11-02, le pied de page prenait plus du tiers d'un écran de 320 px), mêmes informations en
-  version courte : « Gardée 30 jours : pas de donnée
-  personnelle. », case « Ne pas garder ma question » sur la ligne du lien, « **Question traitée seule** : redonnez le
-  contexte. » Les pages qui renvoient à la case la décrivent sans citer son libellé.
+  version courte : « Gardée 30 jours : pas de donnée personnelle. », case « Ne pas garder ma question » sur la ligne
+  du lien, « **Question traitée seule** : redonnez le contexte. » Les pages qui renvoient à la case la décrivent sans
+  citer son libellé.
 - **Chaque réponse est un bloc « en coupe »** à trois couches : en surface la réponse, dessous les textes cités,
   au fond le calcul (« Sous le capot », replié sur une ligne avec les étapes, la durée, le coût et les contrôles).
   Elle porte en tête une légende discrète, « Formulation de l'assistant, à vérifier dans les textes dessous » (pas de
@@ -84,7 +84,8 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   de la nouvelle question, pas en bas d'une longue réponse.
 - **Radiographie en direct** : pendant le traitement, le fond est ouvert et se remplit à chaque vrai point d'étape
   du service (vectorisation, passages trouvés et leur proximité sur une règle avec le seuil, rédaction) ; rien
-  n'est simulé. Une seule animation (l'étape en cours), coupée sous `prefers-reduced-motion`.
+  n'est simulé. Un seul motif animé, « en cours » (un segment qui balaie l'étape en cours et, en surface, une barre
+  sous le texte d'attente), coupé sous `prefers-reduced-motion` ; l'état en cours est aussi écrit.
 - **Textes cités** : cartes sous la réponse, **repliées en une ligne** (identifiant, titre, « Lire »), sur ordinateur
   comme sur mobile ; le texte s'ouvre à la demande. Un renvoi `[P1]` ouvre la carte et y porte le focus. Pied de carte
   (affiché carte ouverte) réduit à la source, au lien vers le texte officiel et à la licence ; version et empreinte

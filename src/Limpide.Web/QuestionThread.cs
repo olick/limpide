@@ -15,6 +15,9 @@ public sealed class ThreadEntry
     /// <summary>Réponse en HTML (<see cref="AnswerMarkdown"/>), calculée une fois à l'arrivée.</summary>
     public string AnswerHtml { get; set; } = "";
 
+    /// <summary>Fin de la recherche, avant la réponse (radiographie en direct) ; null tant que la recherche tourne.</summary>
+    public AnswerProgress? Live { get; set; }
+
     /// <summary>Couche « Au fond » dépliée.</summary>
     public bool DetailOpen { get; set; }
 
