@@ -49,7 +49,9 @@ public sealed class ExtractCommand(
 
     private async Task ExtractAsync(ActiveVersion version, CancellationToken ct)
     {
-        var extractor = Extractors.ForSource(Slugs.From(version.SourceName));
+        // Le fichier brut est relu à chaque passage : pour EUR-Lex, c'est son format qui désigne l'extracteur.
+        var raw = await ReadRawAsync(version, ct);
+        var extractor = Extractors.For(Slugs.From(version.SourceName), raw);
         var outputPath = Path.Combine(options.ExtractedDataPath, Path.ChangeExtension(version.RawPath, ".json"));
 
         if (File.Exists(outputPath))
@@ -65,7 +67,6 @@ public sealed class ExtractCommand(
             }
         }
 
-        var raw = await ReadRawAsync(version, ct);
         var blocks = extractor.Extract(new MemoryStream(raw));
         if (blocks.Count == 0)
             throw new InvalidDataException("aucun texte extrait");

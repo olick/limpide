@@ -325,3 +325,28 @@ Prévue par l'ADR-022, décidée le jour même (avant le script de la vidéo).
 - Relecture de la PR #74 corrigée en passant : à 320 px, titre des cartes sur toute la largeur et action dessous
   (les titres longs des fiches de la CNIL se coupaient au milieu des mots).
 - Vérifié au pilote (captures pendant l'attente) : 1440 px, 320 px en sombre.
+
+### AI Act consolidé : Omnibus numérique et rectificatif (2026-11-05, hors plan)
+
+Constat du 2026-11-04 : le corpus servait le texte d'origine de l'AI Act (JO du 12.7.2024) ; l'Omnibus numérique
+(règlement 2026/1744, en vigueur le 27.7.2026) en a modifié 41 articles et annexes, dont l'article 113 : la démo
+annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre 2027. Décisions et mesures : ADR-023.
+
+- **Nouvel extracteur** `eur-lex-consolide/1` (format HTML d'une consolidation, sans rapport avec celui du JO),
+  choisi selon le format du fichier ; découpeur `ai-act/1` (accepte « art_4a ») sans incrément de version : ses 634
+  passages du JO redécoupés sont identiques au caractère près à ceux de la base (exception validée par Alexandre). 13 tests sur un extrait
+  réel (`Fixtures/ai-act-consolide-extraits.html`), 1 test du découpeur, 2 tests du chargeur de corpus.
+- **Renommage d'un document** par `previousUrls` (`corpus.json`) : la version consolidée devient une nouvelle version
+  du même document, avec le lien de la version consolidée datée. Vérifié dans la copie : un document, deux
+  versions, nouvelle collecte « inchangée ».
+- **Mesure dans une copie de la base** (`rag_consolide`) : `fetch` → candidate → **quarantaine** (32 % de passages en
+  moins : les 250 considérants, absents d'une consolidation) → `release` → `embed` (0,012 €) → `publish`. Recherche :
+  17 → 21/30 en 1re position, MRR 0,72 → 0,80 ; réponses : 49/55 vérifiées, 1 échec (`q06`, article 99 redécoupé),
+  `gate` passée. Considérants abandonnés (choix d'Alexandre).
+- **Interface** : avertissement de la version consolidée sous chaque extrait (conditions de réutilisation) et dans
+  les mentions légales ; lien de la carte « Lire à la source ».
+- **Reste à faire en production**, après fusion et déploiement : `fetch`, `extract`, `chunk`, `validate` (quarantaine
+  attendue), `release <empreinte> <motif>`, `embed`, `publish`, sans attendre entre `fetch` et `publish` (titre et
+  lien déjà renommés) ; puis `deploy/exporter-corpus.sh --vps`.
+- **Points ouverts** : `q06` (passage des amendes hors des 5 fournis) ; l'évaluation ne vérifie pas une date ou un
+  montant dans la réponse (`q05`, ajouter une question sur l'article 4) ; veille des actes modificatifs, manuelle.

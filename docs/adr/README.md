@@ -30,3 +30,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [020](020-pas-de-defi-anti-robot-sans-mesure.md) | Pas de défi anti-robot tant qu'aucun abus n'est mesuré ; alerte quand le quota du jour est atteint | 2026-10-27 |
 | [021](021-controle-de-la-question.md) | Contrôle de la question avant la recherche, par règles, qui bloque les injections probables | 2026-10-28 |
 | [022](022-fil-de-questions-sans-memoire.md) | Interface en fil de questions, sans mémoire de conversation | 2026-10-28 |
+| [023](023-version-consolidee-de-l-ai-act.md) | AI Act servi dans sa version consolidée (Omnibus 2026/1744), sans considérants ; extracteur choisi selon le format, document renommé | 2026-11-05 |

@@ -5,12 +5,19 @@ Ce fichier alimente aussi le dossier de gouvernance (bloc 1 de la RNCP).
 
 | Source  | Document                         | Format | URL                                                                     | Conditions de réutilisation                                                                  | Vérifié le |
 | ------- | -------------------------------- | ------ | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- | ---------- |
-| EUR-Lex | AI Act (règlement 2024/1689), FR | HTML   | https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689 | Décision 2011/833/UE : réutilisation autorisée, mention de la source, sans dénaturer le sens | 2026-09-28 |
+| EUR-Lex | AI Act (règlement 2024/1689), FR, version consolidée au 27.7.2026 | HTML   | https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02024R1689-20260727 | Décision 2011/833/UE : réutilisation autorisée, mention de la source, sans dénaturer le sens | 2026-11-05 |
 | CNIL    | Fiches pratiques IA (17 pages)   | HTML   | https://www.cnil.fr/fr/les-fiches-pratiques-ia                          | CC-BY-ND 4.0 FR : attribution, aucune modification. Images exclues (CC-BY-NC-ND)             | 2026-10-11 |
 
 Vérification du 2026-10-11 (élargissement, S5) : la page « Informations publiques » de la CNIL
 (https://www.cnil.fr/fr/informations-publiques) indique « Licence CC BY-ND » pour les « fiches web », et
 « CC BY-NC-ND » pour les images et iconographies (exclues par l'extracteur). Inchangé depuis le 2026-09-28.
+
+Vérification du 2026-11-05 (version consolidée, ADR-023) : même source, même décision 2011/833/UE. Le texte
+consolidé porte lui-même l'avertissement « Ce texte constitue seulement un outil de documentation et n'a aucun effet
+juridique […] Les versions faisant foi des actes concernés, y compris leurs préambules, sont celles qui ont été
+publiées au Journal officiel de l'Union européenne » : repris dans `reuseTerms`, donc sous chaque extrait, et dans les
+mentions légales. Le texte d'origine (JO L du 12.7.2024) n'est plus servi : il ne tient compte ni de l'Omnibus
+numérique (règlement 2026/1744, en vigueur le 27.7.2026), ni du rectificatif du 9.10.2025.
 
 ## Périmètre
 
@@ -37,8 +44,9 @@ La liste exacte est dans [`corpus.json`](../corpus.json) :
 
 - **EUR-Lex** : `eur-lex.europa.eu` impose un défi JavaScript (AWS WAF) aux scripts, qui reçoivent
   une réponse `202` vide. On ne le contourne pas : le texte est téléchargé par l'API CELLAR de l'Office des
-  publications (`http://publications.europa.eu/resource/celex/32024R1689`, en-têtes
-  `Accept: application/xhtml+xml` et `Accept-Language: fra`). Même texte officiel, même licence.
+  publications (`http://publications.europa.eu/resource/celex/02024R1689-20260727` pour la version consolidée,
+  `…/32024R1689` pour le Journal officiel ; en-têtes `Accept: application/xhtml+xml` et `Accept-Language: fra`).
+  Même texte, même licence ; la version consolidée a son propre format HTML, et son propre extracteur.
   L'URL EUR-Lex reste celle qui est citée aux utilisateurs.
 - **CNIL** : pages HTML téléchargées directement. Le HTML brut change plusieurs fois par jour (identifiants
   techniques) sans que le texte change (constaté à partir du 2026-09-29) : `extract` compare l'empreinte du texte

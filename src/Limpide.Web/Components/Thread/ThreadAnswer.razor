@@ -75,8 +75,11 @@
                                          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg></span>
                             </summary>
                             <blockquote class="verbatim">@p.Content</blockquote>
+                            @* Deux paragraphes : la source, puis la licence (et, pour une version consolidée d'EUR-Lex,
+                               l'avertissement « sans effet juridique », qui suit la licence dans reuseTerms). *@
                             <p class="carte-pied">@p.SourceName — @p.DocumentTitle, collecté le @p.FetchedAt.ToString("d MMMM yyyy", French).
-                                <a href="@p.Url">Texte officiel</a>. Licence : @p.ReuseTerms @Licence(p.ReuseTerms)</p>
+                                <a href="@p.Url" aria-label="Texte officiel : @p.DocumentTitle">Texte officiel</a>.</p>
+                            <p class="carte-pied">Licence : @p.ReuseTerms @Licence(p.ReuseTerms)</p>
                         </details>
                     }
                 }
