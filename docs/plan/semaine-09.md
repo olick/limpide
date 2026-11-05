@@ -329,7 +329,7 @@ Prévue par l'ADR-022, décidée le jour même (avant le script de la vidéo).
 ### AI Act consolidé : Omnibus numérique et rectificatif (2026-11-05, hors plan)
 
 Constat du 2026-11-04 : le corpus servait le texte d'origine de l'AI Act (JO du 12.7.2024) ; l'Omnibus numérique
-(règlement 2026/1744, en vigueur le 27.7.2026) en a modifié 41 articles et annexes, dont l'article 113 : la démo
+(règlement 2026/1744, en vigueur le 27.7.2026) en a modifié ou ajouté au moins 41 articles et annexes, dont l'article 113 : la démo
 annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre 2027. Décisions et mesures : ADR-023.
 
 - **Nouvel extracteur** `eur-lex-consolide/1` (format HTML d'une consolidation, sans rapport avec celui du JO),
@@ -340,7 +340,7 @@ annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre
   du même document, avec le lien de la version consolidée datée. Vérifié dans la copie : un document, deux
   versions, nouvelle collecte « inchangée ».
 - **Mesure dans une copie de la base** (`rag_consolide`) : `fetch` → candidate → **quarantaine** (32 % de passages en
-  moins : les 250 considérants, absents d'une consolidation) → `release` → `embed` (0,012 €) → `publish`. Recherche :
+  moins : les 250 passages de considérants, absents d'une consolidation) → `release` → `embed` (0,012 €) → `publish`. Recherche :
   17 → 21/30 en 1re position, MRR 0,72 → 0,80 ; réponses : 49/55 vérifiées, 1 échec (`q06`, article 99 redécoupé),
   `gate` passée. Considérants abandonnés (choix d'Alexandre).
 - **Interface** : avertissement de la version consolidée sous chaque extrait (conditions de réutilisation) et dans

@@ -12,8 +12,8 @@ Deux textes l'ont modifié depuis :
 - l'**Omnibus numérique sur l'IA** (règlement (UE) 2026/1744, JO du 24 juillet 2026, en vigueur le 27 juillet 2026).
   Il reporte les obligations des systèmes à haut risque (annexe III : 2 décembre 2027 ; annexe I : 2 août 2028),
   réécrit l'article 4 (maîtrise de l'IA : « prennent des mesures pour favoriser », au lieu d'une obligation de
-  résultat), ajoute les articles 4 bis, 60 bis, 75 bis à 75 quinquies et l'annexe XIV, et modifie 34 autres articles
-  ou annexes.
+  résultat), ajoute les articles 4 bis, 60 bis, 75 bis à 75 quinquies et l'annexe XIV, et modifie au moins 33 autres
+  articles ou annexes (41 au total, nouveaux compris : décompte des articles dont le texte change de plus de 3 %).
 
 Conséquence constatée le 2026-11-04 : la démo citait, à l'identique et avec sa source, un article 113 qui n'est plus
 le droit en vigueur (« haut risque au 2 août 2026 »). L'évaluation ne le voyait pas : la question `q05` vérifie que
@@ -53,7 +53,7 @@ Option 2, sans considérants (choix d'Alexandre, 2026-11-05, après mesure).
 
 ## Mesures (2026-11-05, copie de la base locale `rag_consolide`)
 
-| | Journal officiel 2024 (634 passages dont 250 considérants) | Version consolidée (429 passages) |
+| | Journal officiel 2024 (634 passages, dont 250 de considérants) | Version consolidée (429 passages) |
 |---|---|---|
 | `evaluate` : bon passage en 1re position | 17/30 | **21/30** |
 | `evaluate` : dans le top 5 | 28/30 | **29/30** |
