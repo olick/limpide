@@ -390,3 +390,18 @@ Les déploiements des PR #79 et #80 ont échoué à l'analyse des images : CVE-2
 apt ; aucune image ne lance apt, et elles tournent sans droits root. Exception datée dans `deploy/grype.yaml`, vérifiée
 par `deploy/analyser-images.sh` (2 exceptions, ✅). Rien ne rappelle l'échéance : **retirer l'exception au plus tard le
 2026-11-30**, dès qu'une image de base embarque apt 2.8.4ubuntu0.1.
+
+### Barrière : le juge de fidélité varie plus que sa marge (2026-11-06, hors plan)
+
+La chaîne de la PR #84 (`MaxOutputTokens` à 1 500) a bloqué deux fois sur `judge.unfaithfulShare`, puis est passée, sur
+le **même commit** : 11/36, 11/36, 7/36. Le seuil de 0,30 tolère 10 réponses sur 36. Passes du jour avant elle : 7, 9, 7,
+7, 9.
+
+- **La PR n'est pas en cause.** Seule `q01` a dépassé 1 000 tokens (1 122, essai 1 ; 834 et 692 ensuite) : le relèvement
+  a évité une troncature, et il ne peut pas avoir changé plus d'un verdict sur 36.
+- **Un noyau stable et une frange** : `j02`, `q01`, `q03`, `q07`, `q16`, `q21` sont infidèles aux trois essais ; `q06`,
+  `q08`, `q13`, `q15`, `q25`, `q33`, `t05` vont et viennent. Verdicts d'un modèle, à relire.
+- **Le vert du troisième essai ne prouve rien** : il tient au tirage, comme les deux blocages. La fusion se justifie par
+  le premier point, pas par ce vert.
+- **Non tranché** : le niveau tourne autour de 0,25, au-dessus des références de l'ADR-014 (0,15 et 0,22). Vrai recul,
+  ou effet du corpus consolidé et des 6 passages ? Mesure de la dispersion en S10 (plan global).

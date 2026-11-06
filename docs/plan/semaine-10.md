@@ -13,7 +13,8 @@ Reprendre les critères « terminé quand » des semaines 1 à 9 et lister ceux 
 Les traiter dans cet ordre :
 
 1. **Ce qui casse la démo publique** : disponibilité, sécurité, budget.
-2. **L'évaluation (S7)** : c'est ce qui distingue le projet.
+2. **L'évaluation (S7)** : c'est ce qui distingue le projet. Dont la **dispersion de la barrière de fidélité** (11, 11
+   et 7 sur 36 sur un même commit, jugées par un modèle) : corriger le noyau stable, mesurer sur 5 passes, puis décider du seuil (plan global).
 3. **Le dossier de gouvernance (S9)** et les ADR.
 4. Le reste, dont les reports de la S8 (plan global) :
    - **réponse écrite en continu** (streaming), suite du suivi en direct : les étapes en direct sont faites en S9
