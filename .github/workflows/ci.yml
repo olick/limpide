@@ -1,7 +1,9 @@
 # Chaîne d'intégration (S7, session 4a) : build et tests à chaque pull request et à chaque push sur main.
 # Principe (ADR-015) : ce fichier n'orchestre que des commandes lançables en local ;
-# ici, exactement `dotnet build && dotnet test` (CLAUDE.md, « Environnement local »).
+# ici, `dotnet build && dotnet test` (CLAUDE.md, « Environnement local ») et deploy/analyser-secrets.sh.
 # Tests : seul Limpide.Core.Tests, sans base ni réseau.
+# Secrets : tout l'historique Git, à chaque fois. Pas de filtre de chemins ici : un contrôle requis qui ne se déclenche
+# pas laisse la PR en attente, et un secret peut arriver dans n'importe quel fichier.
 name: CI
 
 on:
@@ -37,3 +39,15 @@ jobs:
       - run: dotnet restore
       - run: dotnet build --configuration Release --no-restore
       - run: dotnet test --configuration Release --no-build
+
+  secrets:
+    name: Secrets
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # tout l'historique : le script refuse un clone partiel
+          persist-credentials: false
+
+      - run: deploy/analyser-secrets.sh

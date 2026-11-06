@@ -21,6 +21,10 @@ paths:
 - Outils tiers, surtout de sécurité (Grype) : lancés par un script depuis leur image Docker **épinglée par empreinte**,
   dans une version publiée depuis au moins deux semaines, dans un job sans secret quand c'est possible ; pas d'action
   du catalogue (compromission de `trivy-action`, mars 2026).
+- **Secrets** (S10) : job « Secrets » de `ci.yml`, `deploy/analyser-secrets.sh` (Gitleaks), tout l'historique à chaque
+  fois, secrets masqués dans le journal. Pas de filtre de chemins (contrôle requis). Vrai secret : le renouveler
+  d'abord. Faux positif : empreinte dans `.gitleaksignore`, avec la raison et la date. Le contrôle tourne depuis le
+  code de la PR, qui peut donc l'affaiblir : lire le diff de `.gitleaksignore` et du script dans chaque PR.
 - **Images tierces du serveur** (S8) : `deploy/analyser-images.sh --tierces` le lundi, rapport sans échec (correctifs
   chez l'éditeur) ; le signal d'action, ce sont les PR de Dependabot (`.github/dependabot.yml`, docker-compose,
   délai de 14 jours, majeures ignorées) ; **lire le diff de chaque PR** : la CI ne contrôle pas l'architecture

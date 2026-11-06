@@ -275,6 +275,16 @@ d'évaluation, et **back office, v2** : un retour « réponse fausse » devient 
 le jeu d'évaluation est une nouvelle finalité de traitement, à couvrir par l'information des visiteurs avant de
 l'outiller. Ils rejoignent les testeurs extérieurs ci-dessus, qui fourniront les premières questions.
 
+**Scanner de secrets** (demandé le 2026-11-06, indépendant du coffre) : le dépôt est public, une clé commitée est
+une clé exposée. Gitleaks, par `deploy/analyser-secrets.sh` :
+
+- ✔ **premier passage sur tout l'historique Git** (2026-11-06) : aucun constat sur 232 commits, toutes branches ; un
+  secret trouvé est considéré comme compromis : le renouveler d'abord, réécrire l'historique ne suffit pas ;
+- ✔ **en CI, sur chaque PR** : job « Secrets » de `ci.yml` ; reste à l'ajouter aux contrôles requis de `main`, une fois
+  fusionné (Alexandre) ;
+- **avant le commit sur le poste**, pour arrêter la clé avant qu'elle ne parte ; contournable, donc en plus de la CI ;
+- faux positifs dans `.gitleaksignore`, avec la raison et la date (aucun à ce jour).
+
 **Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
 projet) : **étude de migration vers un cloud souverain**, en
 partant du comparatif de coûts de la S6 (alternative la moins chère qui tient les exigences de la démo).
@@ -295,6 +305,40 @@ Lien : le post LinkedIn du jour 10 (`.linkedin/linkedin-limpide.md`) annonce « 
 test » ; vrai en intention dès maintenant, en pratique avec ce bonus.
 
 
+## Après le projet · Secrets dans un coffre (demandée le 2026-11-06)
+
+Avant la migration cloud : l'évaluation et la vitrine lisent leurs clés dans le coffre Azure, qui disparaît avec Azure.
+Objectif : **une seule source de vérité pour les secrets**, dans un coffre choisi sur mesures, pas forcément Azure.
+
+**Point de départ** : les secrets sont répartis en quatre endroits : `.env.prod` en clair sur le VPS (mots de passe
+PostgreSQL, clés Mistral et OVHcloud, secret OIDC du back office), coffre Azure `kvlimpide024b1e9f` (évaluation,
+vitrine), secrets GitHub (clé SSH de déploiement, identifiants OVHcloud), `dotnet user-secrets` sur le poste, stockés
+en clair dans le dossier personnel, donc lisibles par un agent de codage.
+
+**Fonctionnement visé**, du meilleur au moins bon :
+
+1. pas de secret de longue durée quand le service le permet : OIDC, jetons courts au nom de l'appelant ;
+2. sinon, la valeur vit dans le coffre et arrive au lancement dans une variable d'environnement du processus ; la
+   configuration versionnée ne contient qu'une référence ;
+3. aucun secret de production sur le poste : clés de développement à faibles droits, faciles à renouveler. Partir du
+   principe qu'un agent de codage lit tout ce que le développeur peut lire.
+
+**Étude de coût et de souveraineté**, critères écrits avant de comparer :
+
+- coût mensuel réel, relevé et daté, y compris le temps d'exploitation d'une solution auto-hébergée ;
+- souveraineté : mêmes exigences que la migration cloud (société et juridiction européennes, données en France,
+  statut SecNumCloud vérifié dans la liste officielle de l'ANSSI) ;
+- fonctions : versions, rotation, droits par application, journal des accès, utilisation depuis Compose et la CI ;
+- **le secret de départ** : comment le VPS et la CI s'authentifient au coffre sans poser un nouveau secret en clair ;
+- réversibilité, et ce qu'un coffre sur le même VPS protège réellement si le serveur est compromis.
+
+**Candidats, à vérifier** : gestionnaires de secrets d'OVHcloud et de Scaleway, OpenBao ou Infisical auto-hébergés,
+SOPS avec age (fichiers chiffrés, sans serveur) ; Azure Key Vault comme référence de comparaison.
+
+**Livrables** : ADR « coffre de secrets » (tableau des critères, coûts datés, ce qui se perd), secrets de production et
+de CI déplacés, `.env.prod` sans valeur sensible, rotation refaite après le déplacement, `deploy/README.md` à jour.
+Le scanner de secrets n'attend pas cette étape (S10). **Blocs RNCP** : BC02 (sécurité, arbitrages d'hébergement), BC01.
+
 ## Après le projet · Migration cloud (demandée le 2026-10-13)
 
 Après les 10 semaines, avant la mise à l'échelle (qui en dépend : la cible doit tenir un corpus plus gros).
@@ -302,7 +346,8 @@ Objectif : **quitter Azure pour un hébergeur moins cher et plus souverain**, ch
 réellement l'environnement industrialisé (préproduction, production, CI/CD), et pas seulement l'étudier.
 
 **Entrées** : le comparatif de coûts de la S6 (Azure / Scaleway / OVHcloud / Hetzner / Clever Cloud / auto-hébergement)
-et l'étude de la S10 (statut SecNumCloud vérifié sur la liste de l'ANSSI, effort par composant, équivalences).
+et l'étude de la S10 (statut SecNumCloud vérifié sur la liste de l'ANSSI, effort par composant, équivalences),
+ainsi que le coffre de secrets choisi à l'étape précédente.
 
 **Critères du choix**, écrits avant de comparer :
 
@@ -423,6 +468,7 @@ désignent par leur sujet. Index des ADR écrits : `docs/adr/README.md`.
 | Évaluation dans un environnement jetable sur le runner, recréation d'Azure à part (ADR-016, écrit le 2026-10-17) | S7 |
 | Supervision : pile auto-hébergée sur le VPS et journal des réponses en base (ADR-018, écrit le 2026-10-19) | S8 |
 | Questions des visiteurs : texte conservé 30 jours, table à part, masqué, sauf opposition (ADR-019, écrit le 2026-10-21) | S8 |
+| Coffre de secrets : produit et hébergeur (coût, souveraineté) | Après le projet |
 
 ## Risques du planning
 
