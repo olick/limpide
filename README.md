@@ -33,7 +33,7 @@ flowchart LR
     U((Visiteur)) -->|HTTPS| P[Caddy]
     P --> W[Application web<br/>Blazor Server]
     W -->|question vectorisée| O[Qwen3-Embedding-8B<br/>OVHcloud AI Endpoints, France]
-    W -->|5 passages les plus proches| DB
+    W -->|6 passages les plus proches| DB
     W -->|passages + question| L[Mistral Medium<br/>API, inférence UE]
     W --> G{{Contrôles :<br/>citations, seuil,<br/>qualification juridique}}
 ```
@@ -41,7 +41,7 @@ flowchart LR
 Architecture physique (serveur de la démo, vitrine Azure, flux et secrets) : [`docs/architecture-physique.md`](docs/architecture-physique.md).
 Coûts et empreinte énergétique (coût par question, coût mensuel, plafonds, projection) : [`docs/finops.md`](docs/finops.md).
 
-Une question : vectorisation (Qwen3-Embedding-8B, par l'API d'OVHcloud) → recherche des 5 passages les plus proches (pgvector) →
+Une question : vectorisation (Qwen3-Embedding-8B, par l'API d'OVHcloud) → recherche des 6 passages les plus proches (pgvector) →
 si aucun n'est assez proche, « je ne sais pas » sans appeler le modèle → sinon réponse rédigée par Mistral à partir
 de ces seuls passages → contrôles déterministes (citations vérifiées, qualification juridique détectée).
 

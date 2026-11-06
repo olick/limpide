@@ -41,7 +41,7 @@ exécutions l'ont sautée (`deploy/evaluation-requise.sh`).
 
 | Opération | Coût | Détail |
 |---|---|---|
-| Question de la démo, avec réponse | ≈ 0,44 centime | Mistral Medium 3.5 : ≈ 1 800 tokens lus (question, 5 passages, consigne), ≈ 250 écrits, à 1,4025 € et 7,0125 € par million |
+| Question de la démo, avec réponse | ≈ 0,44 centime | Mistral Medium 3.5 : ≈ 2 200 tokens lus (question, 6 passages, consigne), ≈ 190 écrits (rapport `2026-11-06-0844`), à 1,4025 € et 7,0125 € par million |
 | Question hors sujet (sous le seuil) | 0 € chez Mistral | le modèle n'est pas appelé |
 | Vectorisation d'une question | ≈ 0,0003 centime | ≈ 30 tokens à ≈ 0,10 € par million |
 | Évaluation complète en CI | ≈ 0,26 € | 50 questions : 44 rédactions (6 arrêtées par le seuil) et 34 jugements |

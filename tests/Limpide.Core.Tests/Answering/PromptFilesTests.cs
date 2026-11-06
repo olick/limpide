@@ -12,6 +12,7 @@ public class PromptFilesTests
     {
         ["answer/3"] = "aba69c5e5308d425b6d2928b2cd4268aa57f38d5ede278ac503aa4fc5da7f25f",
         ["answer/5"] = "5168c3c036f2ada4fdced9376b1d5dc969c1c7747997c715ee019a637ff16f78",
+        ["answer/7"] = "fd89eb2a9db2f71df750fb9bb5d02478228a37dd83e9dcf5da462db32f35d8f0",
         ["judge/2"] = "aad4887216d54ce732a8a0da8cfa694af09f4ea68d5c00036faa2197d35abbce",
     };
 
