@@ -377,8 +377,11 @@ Suite de l'AI Act consolidé : l'évaluation contrôlait l'article cité, jamais
   Rapport `2026-11-06-0844` : 51/58 vérifiées, 2 échecs (`q30`, `q33`), aucun chiffre sans passage cité, 8/36 infidèles.
 - **Points ouverts, à traiter avant la vidéo de la S9** : `q33` reste fausse à moitié (« s'applique dès que ces
   conditions sont remplies », sans la date : la règle et sa date sont dans deux articles), `expectedFactsMissing` à
-  ramener à 0 ; aucune marge sur `failed` (`q30` et `q33`) ; `qualification-juridique` sur `q30` et `t05` dans `0844`,
-  à relire et à surveiller.
+  ramener à 0.
+- **`q30` : faux positif corrigé.** `qualification-juridique` réagissait à « base légale » (terme du RGPD) dans une
+  phrase avec « votre » ou « vous » : ce n'était ni « vous pouvez… à condition », ni un effet des 6 passages. Passe de
+  la chaîne de la PR #81 : `q30` passe, mais `q01` est tronquée (`reponse-tronquee`), donc toujours 2 échecs : à mesurer,
+  `MaxOutputTokens` à relever si ça se confirme avec 6 passages.
 
 ### Déploiement bloqué par une faille d'apt (2026-11-06, hors plan)
 
