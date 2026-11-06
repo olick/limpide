@@ -81,3 +81,42 @@ Passe de référence ci-dessus, 32 réponses jugées, **7 signalées infidèles*
 7 alertes). Il sert à **trier la relecture** et comme **métrique agrégée** comparée à une référence avec tolérance
 (7/32 aujourd'hui) : une consigne dégradée ou un modèle moins fidèle doit faire monter ce compte (à démontrer en
 session 5).
+
+## Rendre l'évaluation plus déterministe : options (2026-11-06)
+
+La barrière a bloqué puis laissé passer le même commit (PR #84 : 11, 11 et 7 réponses jugées infidèles sur 36, verdicts
+d'un modèle ; journal de la S9). Le but n'est pas un déterminisme complet : les réponses varient aussi pour les
+visiteurs, et l'évaluation doit le montrer. Il s'agit de réduire le bruit de la mesure.
+
+**D'où vient la variation** (les 3 essais de la PR #84) :
+
+- **La rédaction, surtout** : à température 0, 3 réponses sur 36 seulement sont identiques aux trois essais.
+- **Le juge aussi** : `q08` et `q13`, mot pour mot identiques aux essais 2 et 3, y reçoivent deux verdicts différents.
+
+| Option | Effet attendu | Coût | État |
+|---|---|---|---|
+| `random_seed` de Mistral | Aucun mesuré | Nul | **Écartée**, voir ci-dessous |
+| Vote du juge à 3, majorité par réponse | Réduit le bruit du juge, pas celui de la rédaction | Environ 0,20 € de plus par passe | **À essayer d'abord** |
+| Médiane de 3 passes, seulement quand la barrière bloque sur le juge | Lisse les deux sources, règle écrite d'avance | Environ 0,60 € par blocage, quelques minutes | À essayer ensuite |
+| Plusieurs passes à chaque PR | Mesure la plus solide | Environ 0,60 € de plus par PR | Écartée pour l'instant : le budget de la clé d'évaluation est de 10 € par mois |
+| Réutiliser les réponses si rien n'a changé | Déterminisme total | Beaucoup de code | **Déconseillée** : fige un tirage et cache le comportement réel |
+
+Aucune de ces options ne règle le niveau : avec la médiane, la PR #84 serait restée bloquée (11, 11, 7), alors que le
+relèvement de `MaxOutputTokens` n'y était pour rien. Le noyau stable est à relire d'abord (plan global, S10).
+
+**Test de `random_seed`** (`mistral-medium-2604`, point d'accès UE, température 0, même question de 200 mots, 6 appels
+par réglage, appels directs à l'API) :
+
+| Réglage | Textes différents sur 6 |
+|---|---|
+| Sans graine | 6 |
+| `random_seed=42` | 5 |
+| `random_seed=7` | 6 |
+| `seed=42` | Refusé : erreur 422, `extra_forbidden` |
+
+- **La graine ne stabilise pas**, malgré la documentation de Mistral (« deterministic results »). Une option de
+  configuration n'apporterait rien : pas de code ajouté.
+- **`seed` est refusé** : c'est le nom du paramètre de l'API OpenAI. `ChatOptions.Seed` ferait sans doute échouer les
+  appels, à vérifier si on y revient : il faudrait passer `random_seed` par le client.
+- **Limites** : une seule question, 6 appels, rédaction seule. Non testés : le juge, et une graine à température non
+  nulle. À refaire si le modèle ou le fournisseur change.
