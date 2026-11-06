@@ -49,7 +49,8 @@ Option 2, sans considérants (choix d'Alexandre, 2026-11-05, après mesure).
   pas de retrait de document). À chaque nouvelle consolidation : nouvelle date dans `url`, `fetchUrl` et `title`,
   ancienne URL ajoutée à `previousUrls`.
 - **Avertissement** repris de la version consolidée dans les conditions de réutilisation (sous chaque extrait) et
-  dans les mentions légales ; lien de la carte « Lire à la source » au lieu de « Texte officiel ».
+  dans les mentions légales ; le lien de la carte garde le libellé « Texte officiel »,
+  avec un nom accessible propre à chaque document.
 
 ## Mesures (2026-11-05, copie de la base locale `rag_consolide`)
 
