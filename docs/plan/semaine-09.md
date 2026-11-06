@@ -423,7 +423,7 @@ par un juriste : à valider par Alexandre.**
 | `q03` | Vraie erreur, grave | Dit le recrutement absent de l'annexe III ; il y est (point 4) |
 | `q16` | Vraie erreur | Range sous l'annexe XIII des risques tirés d'un passage de la CNIL sur l'intérêt légitime |
 | `q01` | Vraie erreur | Reprend « sans exception ni dérogation » de la question, la liste contient des exceptions |
-| `j02` | Faute légère | « Analyse d'impact » absente des passages fournis |
+| `j02` | Vraie erreur, grave | « Votre logiciel est destiné aux magasins, donc à un usage non répressif », aux 3 essais : qualifie la situation (corrigé le même jour : d'abord classée « faute légère » à tort, constat de la session sur la monétisation) ; « analyse d'impact » absente des passages fournis |
 | `q07` | Excès du juge | Détails (« en tant que de besoin ») |
 | `q21` | Excès du juge, surtout | L'article 16 dit bien de prouver la conformité sur demande ; « points 2 à 8 » non sourcé à l'essai 3 |
 
@@ -447,3 +447,34 @@ par un juriste : à valider par Alexandre.**
   dit) ; piste à mesurer pour `q03` : suivre le renvoi de l'article 6 vers l'annexe III ; `q07` et `q21` à ajouter à la
   calibration du juge ; fait attendu sur le recrutement pour `q03`, à livrer avec la correction (il bloquerait la barrière).
 
+### Consignes `answer/8` et garde-fou de déduction (2026-11-06, hors plan)
+
+Suite de la relecture du noyau stable. Mesures sur `rag_consolide` (même empreinte que la chaîne, `d1ab6824e180`), 3 passes
+par version, comparées aux 3 essais de la PR #84. Verdicts d'un modèle ; comptes de phrases par recherche de texte.
+
+| | `answer/7` | 1re rédaction | **`answer/8` retenue** | Sans la règle 10 |
+|---|---|---|---|---|
+| Infidèles sur 36 | 11, 11, 7 | 7, 7, 6 | **6, 6, 5** | 6, 7, 6 |
+| `j02` « votre logiciel…, donc… » | 3/3 | 0/3 | **0/3** | 0/3 |
+| `q01` « sans exception » | 3/3 | 3/3 | **0/3** | 0/3 |
+| `q03` dit le recrutement absent | 3/3 | 3/3 | **0/3** | 3/3 |
+| `q33` « dès que ces conditions… » | 1/3 | 1/3 | **0/3** | 2/3 |
+| `q16` risques éthiques sous l'annexe XIII | 2/3 | 1/3 | 3/3 | 2/3 |
+| `q28` infidèle | 0/3 | 0/3 | 3/3 | 0/3 |
+
+- **Retenue** : rapports `2026-11-06-2159`, `2203` et `2207`, `gate` passée aux trois ; 1 échec (`q33`), passage attendu cité
+  31/33, aucun refus nouveau (le piège de `answer/6`), 0,0035 € par question.
+- **La règle 10 sert, mais pas à ce qu'elle visait** : elle ne corrige pas `q16`, et la retirer ramène la fausse affirmation
+  de `q03` (3/3, contre 0/7 avec la règle, essais ciblés compris). La cause n'est pas comprise. Leçon : regarder toutes les
+  questions avant de retirer une consigne, pas seulement celle qu'elle visait.
+- **Un écart de 4 à 1 entre passes**, sur 3 passes seulement : à confirmer par la mesure de dispersion (S10).
+- **Reculs assumés** : `q28` écrit « vous êtes responsable du traitement » sans rappeler le critère des objectifs et des
+  moyens, et durcit « peut être » en « est ». `q16` reste fausse.
+- **`q03` n'est pas résolue** : plus de fausse affirmation, mais la réponse parle d'enseignement (3/3), fidèle aux passages et
+  à côté de la question. Le juge la dit fidèle : la baisse du compte flatte ce cas. Seule la recherche peut la corriger.
+- **Garde-fou** : `qualification-juridique` voit aussi « votre X est…, donc… », sans mot de verdict. `j02` passait 2 fois
+  sur 3. Vérifié sur 1 301 réponses des rapports : 6 phrases, toutes de ce type, aucune fausse alerte.
+- **`q33`** : la date manque toujours aux trois essais, l'article 113 n'est pas fourni. Reste à vérifier si l'article 5 y
+  renvoie : si non, suivre les renvois ne suffira pas.
+- **Points ouverts** : renvoi de l'article 6 vers l'annexe III (`q03`), `q16`, `q28`, `q33` ; à mesurer ensuite, Large 3 en
+  rédaction et gpt-oss-120b comme juge.

@@ -9,6 +9,7 @@ public class LegalQualificationTests
     [InlineData("Si votre logiciel ne relève pas de ces cas, il n'est pas interdit, mais il est **à haut risque** et doit se conformer aux exigences de l'AI Act [P2][P5].")]
     [InlineData("Votre traitement est légal.")]
     [InlineData("En revanche, aucune disposition ne les interdit explicitement dans ce contexte. Vous n'êtes donc pas *en infraction* par principe.")]
+    [InlineData("Votre logiciel est destiné aux **magasins**, donc à un usage **non répressif** (commercial/privé).")] // j02, 2026-11-06
     public void Flags_answers_that_decide_the_persons_situation(string answer)
     {
         Assert.NotNull(LegalQualification.Find(answer));
@@ -23,6 +24,8 @@ public class LegalQualificationTests
     [InlineData("Vous avez une base légale.")] // limite assumée : « base légale » n'est jamais un verdict pour ce motif
     [InlineData("- que le tiers qui vous a vendu les données ait lui-même respecté le RGPD (base légale, information des personnes, etc.) [P5] ;")]
     [InlineData("Le règlement n'interdit pas explicitement cette pratique, mais impose des obligations strictes [P5].")]
+    [InlineData("Votre question porte sur l'article 50, donc sur les obligations de transparence [P1].")] // pas de verbe d'état : pas une déduction sur le système
+    [InlineData("Pour savoir si votre système est destiné à ce domaine, et donc concerné, un professionnel du droit peut apprécier votre situation.")]
     public void Lets_through_rules_conditions_and_referrals(string answer)
     {
         Assert.Null(LegalQualification.Find(answer));

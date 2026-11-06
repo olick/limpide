@@ -19,6 +19,11 @@ namespace Limpide.Core.Answering;
 /// de CV sont à haut risque » tranche autant que « votre logiciel est à haut risque » (gpt-oss-120b, q03,
 /// 2026-10-13, docs/notes/observations-modeles-ovh.md). « Oui, vous devez prévenir… » n'a pas de verdict : permis.
 /// </para>
+/// <para>
+/// Troisième cas (2026-11-06) : une phrase sur le système de la personne qui en tire une conclusion, sans mot de verdict :
+/// « Votre logiciel est destiné aux magasins, donc à un usage non répressif » (Medium, j02, aux 3 essais de la PR #84).
+/// Vérifiée sur 1 301 réponses des rapports : 6 phrases, toutes de ce type, aucune fausse alerte.
+/// </para>
 /// </remarks>
 public static partial class LegalQualification
 {
@@ -31,7 +36,8 @@ public static partial class LegalQualification
             && YesOrNo().IsMatch(first) && Verdict().IsMatch(first) && !Hedged().IsMatch(first))
             return first;
 
-        return sentences.FirstOrDefault(s => SecondPerson().IsMatch(s) && Verdict().IsMatch(s) && !Hedged().IsMatch(s));
+        return sentences.FirstOrDefault(s => !Hedged().IsMatch(s)
+            && (Deduction().IsMatch(s) || (SecondPerson().IsMatch(s) && Verdict().IsMatch(s))));
     }
 
     [GeneratedRegex(@"(?<=[.!?:])\s+|\n+")]
@@ -39,6 +45,11 @@ public static partial class LegalQualification
 
     [GeneratedRegex(@"\b(vous|votre|vos)\b", RegexOptions.IgnoreCase)]
     private static partial Regex SecondPerson();
+
+    // « votre X est…, donc… » : ce que décrit la personne, puis une conclusion sur son cas.
+    [GeneratedRegex(@"\b(votre|vos)\b[^.]{0,80}?\b(est|sont|relève|relèvent|entre|entrent|constitue|constituent)\b[^.]*\bdonc\b",
+        RegexOptions.IgnoreCase)]
+    private static partial Regex Deduction();
 
     [GeneratedRegex(@"\b(je|j'|j’|mon|ma|mes|nous|notre|nos)\b|-je\b|-nous\b", RegexOptions.IgnoreCase)]
     private static partial Regex FirstPerson();
