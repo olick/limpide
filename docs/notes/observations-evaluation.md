@@ -91,13 +91,14 @@ visiteurs, et l'évaluation doit le montrer. Il s'agit de réduire le bruit de l
 **D'où vient la variation** (les 3 essais de la PR #84) :
 
 - **La rédaction, surtout** : à température 0, 3 réponses sur 36 seulement sont identiques aux trois essais.
-- **Le juge aussi** : `q08` et `q13`, mot pour mot identiques aux essais 2 et 3, y reçoivent deux verdicts différents.
+- **Le juge aussi, mais d'une passe à l'autre** : `q08` et `q13`, avec la même réponse et les mêmes passages aux essais 2
+  et 3, y reçoivent deux verdicts différents. Répété à la suite, il ne varie pas (voir le test ci-dessous).
 
 | Option | Effet attendu | Coût | État |
 |---|---|---|---|
 | `random_seed` de Mistral | Aucun mesuré | Nul | **Écartée**, voir ci-dessous |
-| Vote du juge à 3, majorité par réponse | Réduit le bruit du juge, pas celui de la rédaction | Environ 0,20 € de plus par passe | **À essayer d'abord** |
-| Médiane de 3 passes, seulement quand la barrière bloque sur le juge | Lisse les deux sources, règle écrite d'avance | Environ 0,60 € par blocage, quelques minutes | À essayer ensuite |
+| Vote du juge à 3, appels à la suite | Aucun mesuré | Environ 0,20 € de plus par passe | **Écartée**, voir ci-dessous |
+| Médiane de 3 passes, seulement quand la barrière bloque sur le juge | Lisse les deux sources, règle écrite d'avance | Environ 0,60 € par blocage, quelques minutes | **Seule option retenue pour la suite**, à décider après la relecture du noyau stable |
 | Plusieurs passes à chaque PR | Mesure la plus solide | Environ 0,60 € de plus par PR | Écartée pour l'instant : le budget de la clé d'évaluation est de 10 € par mois |
 | Réutiliser les réponses si rien n'a changé | Déterminisme total | Beaucoup de code | **Déconseillée** : fige un tirage et cache le comportement réel |
 
@@ -120,3 +121,14 @@ par réglage, appels directs à l'API) :
   appels, à vérifier si on y revient : il faudrait passer `random_seed` par le client.
 - **Limites** : une seule question, 6 appels, rédaction seule. Non testés : le juge, et une graine à température non
   nulle. À refaire si le modèle ou le fournisseur change.
+
+**Test du vote du juge** (2026-11-06, une passe sur le poste, chaque réponse jugée 5 fois à la suite, code jetable) :
+
+- **Aucun désaccord** : 35 réponses, 5 verdicts identiques à chaque fois (31 fidèles, 4 infidèles). Une majorité de 3
+  aurait donné le même résultat qu'un seul vote, pour trois fois le prix.
+- **Ce n'est pas une preuve que le juge est stable** : `q08` et `q13` ont bien changé de verdict entre deux passes
+  espacées de quelques minutes. Des appels à la suite ne tirent pas ce bruit-là. La cause est inconnue (cache, serveur
+  différent ?) ; un vote espacé dans le temps n'a pas été testé.
+- **Limite** : le corpus du poste n'est pas celui de la chaîne (1 130 passages contre 925, empreintes différentes). Cette
+  passe a 4 échecs (`q05`, `q31`, `q32`, `q33`) et ne se compare pas aux passes de la chaîne, ni en niveau ni en échecs.
+  Seule la répétition du juge sur une même réponse est valable.
