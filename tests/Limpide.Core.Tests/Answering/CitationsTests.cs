@@ -44,4 +44,53 @@ public class CitationsTests
         Assert.Empty(check.Cited);
         Assert.Empty(check.Invented);
     }
+
+    private static string Linked(string text) => Citations.Link(text, (id, shown) => id == "P9" ? null : $"<{id}>{shown}</{id}>");
+
+    [Theory] // Formes réelles de Mistral Medium (rapports du 2026-11-06).
+    [InlineData("[P1]", "<P1>[P1]</P1>")]
+    [InlineData("[P1a]", "<P1>[P1a]</P1>")]
+    [InlineData("[P6.3]", "<P6>[P6.3]</P6>")]
+    [InlineData("[P4.6 bis]", "<P4>[P4.6 bis]</P4>")]
+    [InlineData("[P1c.ii]", "<P1>[P1c.ii]</P1>")]
+    [InlineData("[P1, paragraphe 4]", "<P1>[P1, paragraphe 4]</P1>")]
+    [InlineData("[P2, §3]", "<P2>[P2, §3]</P2>")]
+    public void A_detailed_reference_links_to_its_passage(string citation, string expected)
+    {
+        Assert.Equal(expected, Linked(citation));
+    }
+
+    [Fact]
+    public void Several_passages_in_one_bracket_get_one_link_each()
+    {
+        Assert.Equal("[<P1>P1</P1>, <P3>P3</P3>]", Linked("[P1, P3]"));
+    }
+
+    [Theory]
+    [InlineData("[P1; P3]", "[<P1>P1</P1>; <P3>P3</P3>]")] // séparateur d'origine conservé
+    [InlineData("[P01]", "<P1>[P01]</P1>")]
+    [InlineData("[P1 &amp; suite]", "<P1>[P1 &amp; suite]</P1>")] // entité HTML intacte
+    [InlineData("[P1 <em>x</em>]", "[P1 <em>x</em>]")] // une balise dans les crochets : pas de lien
+    public void Html_and_separators_survive_linking(string citation, string expected)
+    {
+        Assert.Equal(expected, Linked(citation));
+    }
+
+    [Fact]
+    public void A_citation_without_link_stays_as_it_is_and_other_text_is_untouched()
+    {
+        Assert.Equal("Sauf [P9.2] et [note] [P2].".Replace("[P2]", "<P2>[P2]</P2>"), Linked("Sauf [P9.2] et [note] [P2]."));
+    }
+
+    [Theory] // Ce que le contrôle compte comme une citation s'affiche comme une citation.
+    [InlineData("[P6.3]")]
+    [InlineData("[p2]")]
+    [InlineData("[P1, 3]")]
+    public void Linking_reads_citations_like_the_check(string citation)
+    {
+        var linked = new List<string>();
+        Citations.Link(citation, (id, _) => { linked.Add(id); return null; });
+
+        Assert.Equal(Citations.Check(citation, passageCount: 6).Cited.Select(n => $"P{n}"), linked);
+    }
 }
