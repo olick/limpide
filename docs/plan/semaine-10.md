@@ -31,6 +31,8 @@ Une limite assumée vaut mieux qu'une fonctionnalité bâclée.
   ce que tu referais autrement. C'est une excellente matière pour les entretiens.
 - **Temps réel passé** par semaine et par sujet, comparé au plan : utile pour chiffrer une mission similaire chez un client.
 - **Relecture croisée** : faire relire le dépôt par un pair, noter ses questions. Ce sont celles d'un jury ou d'un client.
+- **Scanner de secrets** : historique et CI faits le 2026-11-06 (`deploy/analyser-secrets.sh`) ; reste le contrôle avant
+  le commit sur le poste (plan global, S10).
 
 ## Priorité 3 : préparer la soutenance (si la certification se confirme)
 
@@ -54,5 +56,6 @@ Une limite assumée vaut mieux qu'une fonctionnalité bâclée.
 ## Livrables
 
 - Limites documentées dans le README
+- Scanner de secrets en CI, historique Git vérifié
 - `docs/retrospective.md`, suivi du temps passé
 - Si certification : tableau de correspondance compétences / preuves, support de soutenance
