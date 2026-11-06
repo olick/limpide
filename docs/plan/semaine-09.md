@@ -380,8 +380,15 @@ Suite de l'AI Act consolidé : l'évaluation contrôlait l'article cité, jamais
   ramener à 0.
 - **`q30` : faux positif corrigé.** `qualification-juridique` réagissait à « base légale » (terme du RGPD) dans une
   phrase avec « votre » ou « vous » : ce n'était ni « vous pouvez… à condition », ni un effet des 6 passages. Passe de
-  la chaîne de la PR #81 : `q30` passe, mais `q01` est tronquée (`reponse-tronquee`), donc toujours 2 échecs : à mesurer,
-  `MaxOutputTokens` à relever si ça se confirme avec 6 passages.
+  la chaîne de la PR #81 : `q30` passe, mais `q01` est tronquée (`reponse-tronquee`), donc toujours 2 échecs : voir
+  « Réponses tronquées » ci-dessous.
+
+### Réponses tronquées : `MaxOutputTokens` à 1 500 (2026-11-06, hors plan)
+
+`q01` (pratiques interdites) a été tronquée sur la passe de la chaîne de la PR #81. Reposée sur `rag_consolide`, 6 passages,
+`answer/7` : à 1 000 tokens, 1 réponse coupée sur 6 (527 à 1 000 en sortie) ; à 1 500, aucune sur 8 (560 à 1 139), dont 4
+au-delà de 1 000. Le texte est une vraie liste, pas une boucle, et sa longueur varie du simple au double à température 0.
+Coût : 1,16 centime au plus sur cette question, contre 0,75 pour la plus courte. `q33` reste ouverte.
 
 ### Déploiement bloqué par une faille d'apt (2026-11-06, hors plan)
 
