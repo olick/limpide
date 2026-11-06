@@ -344,9 +344,15 @@ annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre
   17 → 21/30 en 1re position, MRR 0,72 → 0,80 ; réponses : 49/55 vérifiées, 1 échec (`q06`, article 99 redécoupé),
   `gate` passée. Considérants abandonnés (choix d'Alexandre).
 - **Interface** : avertissement de la version consolidée sous chaque extrait (conditions de réutilisation) et dans
-  les mentions légales ; lien de la carte « Lire à la source ».
-- **Reste à faire en production**, après fusion et déploiement : `fetch`, `extract`, `chunk`, `validate` (quarantaine
-  attendue), `release <empreinte> <motif>`, `embed`, `publish`, sans attendre entre `fetch` et `publish` (titre et
-  lien déjà renommés) ; puis `deploy/exporter-corpus.sh --vps`.
+  les mentions légales ; le lien de la carte garde le libellé « Texte officiel », avec un nom accessible propre à
+  chaque document.
+- **En production (2026-11-06)** : PR #77 fusionnée et déployée. DAG `ingestion` lancé à la main, deux passages :
+  - premier passage : quarantaine (écart de 0,323, seuil 0,3), candidate `248c47ff5dd6`, la même empreinte que dans la
+    copie ;
+  - `release`, puis second passage (1 min 38 s) : 18 documents vérifiés, 1 version publiée, 429 passages vectorisés,
+    120 950 tokens, ≈ 0,0121 € ; 2 versions collectées écartées (texte identique) ;
+  - `/sante` : 925 passages (1 130 avant), `missingEmbeddings` 0, empreinte `d1ab6824e180` ; la question sur la date
+    du haut risque, posée à la démo, donne les nouvelles dates.
+  Reste `deploy/exporter-corpus.sh --vps`, pour que la chaîne évalue le nouveau corpus.
 - **Points ouverts** : `q06` (passage des amendes hors des 5 fournis) ; l'évaluation ne vérifie pas une date ou un
   montant dans la réponse (`q05`, ajouter une question sur l'article 4) ; veille des actes modificatifs, manuelle.
