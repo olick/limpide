@@ -9,4 +9,14 @@
 #     package:
 #       name: nom-du-paquet
 #     reason: "pourquoi on l'accepte, jusqu'à quand (AAAA-MM-JJ)"
-ignore: []
+ignore:
+  # Attaque de l'installation d'un paquet par apt : aucune image ne lance apt, ni à la construction, ni à l'exécution
+  # (utilisateur non root). Correctif absent de l'image Microsoft du 2026-11-05 (apt 2.8.3).
+  - vulnerability: CVE-2026-109518
+    package:
+      name: apt
+    reason: "apt jamais lancé dans les images ; à retirer dès une image de base avec apt 2.8.4ubuntu0.1, au plus tard 2026-11-30"
+  - vulnerability: CVE-2026-109518
+    package:
+      name: libapt-pkg6.0t64
+    reason: "bibliothèque d'apt, même raison ; à retirer dès une image de base avec apt 2.8.4ubuntu0.1, au plus tard 2026-11-30"
