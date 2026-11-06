@@ -74,6 +74,17 @@ public class AiActChunkerTests
     }
 
     [Fact]
+    public void A_consolidated_version_gives_its_inserted_article_a_unit_of_its_own()
+    {
+        var chunks = new AiActChunker().Split(Fixtures.Extract(new EurLexConsolidatedExtractor(), "ai-act-consolide-extraits.html"));
+
+        var article4a = chunks.Where(c => c.Anchor == "art_4a").ToList();
+        Assert.NotEmpty(article4a);
+        Assert.All(article4a, c => Assert.StartsWith("Article 4 bis — ", c.Heading));
+        Assert.DoesNotContain(chunks.Where(c => c.Anchor == "art_4"), c => c.Content.Contains("détection et à la correction des biais"));
+    }
+
+    [Fact]
     public void Text_outside_any_unit_is_an_error_rather_than_a_silent_loss()
     {
         Block[] blocks = [new(BlockKind.Paragraph, "Texte orphelin", 0, "000.001")];

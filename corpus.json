@@ -6,15 +6,21 @@
     {
       "name": "EUR-Lex",
       "baseUrl": "https://eur-lex.europa.eu",
-      "reuseTerms": "Décision 2011/833/UE : réutilisation autorisée avec mention de la source, sans dénaturer le sens.",
+      // Avertissement repris de la version consolidée elle-même, affiché sous chaque extrait avec la licence.
+      "reuseTerms": "Décision 2011/833/UE : réutilisation autorisée avec mention de la source, sans dénaturer le sens. Version consolidée : outil de documentation sans effet juridique, seul le texte publié au Journal officiel de l'Union européenne fait foi.",
       "documents": [
         {
-          "title": "Règlement (UE) 2024/1689 (AI Act)",
-          "url": "https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689",
+          // Version consolidée (texte en vigueur, modifications intégrées), depuis le 2026-11-05 : Omnibus numérique
+          // 2026/1744 et rectificatif du 9.10.2025. Pas de considérants dans une consolidation (mesure : ADR-023).
+          // Nouvelle consolidation : changer la date dans url, fetchUrl et title, et ajouter l'url actuelle à
+          // previousUrls (le document est renommé, ses versions sont gardées).
+          "title": "Règlement (UE) 2024/1689 (AI Act), version consolidée au 27 juillet 2026",
+          "url": "https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=CELEX:02024R1689-20260727",
+          "previousUrls": ["https://eur-lex.europa.eu/legal-content/FR/TXT/HTML/?uri=OJ:L_202401689"],
           "format": "html",
           // eur-lex.europa.eu impose un défi JavaScript (AWS WAF) aux scripts : on passe par
-          // l'API CELLAR de l'Office des publications, qui sert le même texte officiel.
-          "fetchUrl": "http://publications.europa.eu/resource/celex/32024R1689",
+          // l'API CELLAR de l'Office des publications, qui sert le même texte (format consolidé, ≠ Journal officiel).
+          "fetchUrl": "http://publications.europa.eu/resource/celex/02024R1689-20260727",
           "accept": "application/xhtml+xml",
           "acceptLanguage": "fra"
         }

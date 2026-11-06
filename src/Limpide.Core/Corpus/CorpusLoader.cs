@@ -63,10 +63,18 @@ public static class CorpusLoader
                     errors.Add($"{source.Name} : url invalide « {document.Url} »");
                 if (document.FetchUrl is not null && !IsHttpUrl(document.FetchUrl))
                     errors.Add($"{source.Name} : fetchUrl invalide « {document.FetchUrl} »");
+                foreach (var previous in document.PreviousUrls ?? [])
+                {
+                    if (!IsHttpUrl(previous))
+                        errors.Add($"{source.Name} : previousUrls invalide « {previous} »");
+                }
             }
         }
 
-        foreach (var url in Duplicates(corpus.Sources.SelectMany(s => s.Documents).Select(d => d.Url)))
+        // Une ancienne URL compte comme une déclaration du document : elle ne peut être ni l'URL d'un autre document,
+        // ni l'ancienne URL de deux documents.
+        var documents = corpus.Sources.SelectMany(s => s.Documents).ToList();
+        foreach (var url in Duplicates(documents.SelectMany(d => (d.PreviousUrls ?? []).Prepend(d.Url))))
             errors.Add($"document déclaré deux fois : {url}");
 
         if (errors.Count > 0)

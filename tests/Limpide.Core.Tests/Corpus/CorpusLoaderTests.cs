@@ -90,6 +90,27 @@ public class CorpusLoaderTests
     }
 
     [Fact]
+    public void Parse_reads_previous_urls_of_a_renamed_document()
+    {
+        var json = ValidCorpus.Replace("\"accept\": \"application/xhtml+xml\"",
+            "\"accept\": \"application/xhtml+xml\", \"previousUrls\": [\"https://eur-lex.europa.eu/ancienne\"]");
+
+        var document = CorpusLoader.Parse(json).Sources[0].Documents[0];
+
+        Assert.Equal(["https://eur-lex.europa.eu/ancienne"], document.PreviousUrls);
+    }
+
+    [Fact]
+    public void Parse_rejects_a_previous_url_that_is_another_document()
+    {
+        var json = ValidCorpus.Replace("\"accept\": \"application/xhtml+xml\"",
+            "\"accept\": \"application/xhtml+xml\", \"previousUrls\": [\"https://www.cnil.fr/fr/fiche.pdf\"]");
+
+        var ex = Assert.Throws<InvalidDataException>(() => CorpusLoader.Parse(json));
+        Assert.Contains("déclaré deux fois", ex.Message);
+    }
+
+    [Fact]
     public void Parse_rejects_relative_url()
     {
         var json = ValidCorpus.Replace("https://www.cnil.fr/fr/fiche.pdf", "/fr/fiche.pdf");
@@ -105,6 +126,20 @@ public class CorpusLoaderTests
         var corpus = CorpusLoader.Load(path);
 
         Assert.NotEmpty(corpus.Sources.SelectMany(s => s.Documents));
+    }
+
+    /// <summary>
+    /// L'interface reconnaît la licence au début des conditions (ThreadAnswer.razor, Licence) : un avertissement ajouté
+    /// devant (ex. « version consolidée… ») remplacerait le lien vers la licence sans erreur visible.
+    /// </summary>
+    [Theory]
+    [InlineData("EUR-Lex", "Décision 2011/833/UE")]
+    [InlineData("CNIL", "CC-BY-ND 4.0")]
+    public void Repository_corpus_reuse_terms_start_with_the_licence(string source, string licence)
+    {
+        var corpus = CorpusLoader.Load(Path.Combine(RepositoryRoot(), "corpus.json"));
+
+        Assert.StartsWith(licence, corpus.Sources.Single(s => s.Name == source).ReuseTerms, StringComparison.Ordinal);
     }
 
     private static string RepositoryRoot()

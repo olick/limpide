@@ -142,6 +142,17 @@ public sealed class DocumentVersionStore(NpgsqlDataSource dataSource)
             """, ct,
             ("name", source.Name), ("base_url", source.BaseUrl), ("reuse_terms", source.ReuseTerms));
 
+        // Document renommé (corpus.json, previousUrls) : il garde son identifiant, donc ses versions et sa version
+        // publiée, au lieu qu'un second document apparaisse et que l'ancien reste servi. L'URL et le titre affichés
+        // changent dès ce passage, avant la publication de la nouvelle version.
+        if (document.PreviousUrls is { Count: > 0 } previousUrls)
+        {
+            await ExecuteAsync(connection, tx, """
+                UPDATE documents SET url = @url
+                WHERE url = ANY(@previous) AND NOT EXISTS (SELECT 1 FROM documents WHERE url = @url)
+                """, ct, ("url", document.Url), ("previous", previousUrls.ToArray()));
+        }
+
         var documentId = await ExecuteScalarAsync<Guid>(connection, tx, """
             INSERT INTO documents (source_id, url, title, content_type)
             VALUES (@source_id, @url, @title, @content_type)

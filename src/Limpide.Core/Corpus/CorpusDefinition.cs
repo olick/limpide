@@ -18,6 +18,8 @@ public sealed record SourceDefinition(
 /// Un document du corpus. <see cref="Url"/> identifie le document et sert aux citations ;
 /// <see cref="FetchUrl"/> permet de le télécharger ailleurs quand la page publique n'est pas
 /// accessible à un script (ex. EUR-Lex, protégé par un défi JavaScript).
+/// <see cref="PreviousUrls"/> : anciennes URL du même document (ex. Journal officiel, puis version consolidée) ;
+/// <c>fetch</c> renomme le document au lieu d'en créer un second, qui laisserait l'ancien en service.
 /// </summary>
 public sealed record DocumentDefinition(
     string Title,
@@ -25,7 +27,8 @@ public sealed record DocumentDefinition(
     DocumentFormat Format,
     string? FetchUrl = null,
     string? Accept = null,
-    string? AcceptLanguage = null)
+    string? AcceptLanguage = null,
+    IReadOnlyList<string>? PreviousUrls = null)
 {
     public string EffectiveFetchUrl => FetchUrl ?? Url;
 }

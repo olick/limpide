@@ -16,10 +16,16 @@ paths:
   (`CommandSummary`). Quarantaine = code 0, signalée par le résumé.
 - **Collecte polie** : `User-Agent` explicite (`Limpide/0.1 (+url du dépôt)`), pause d'1 à 2 s entre requêtes.
   `fetch` exige un `200` non vide et le bon type de contenu : un blocage ne crée jamais de version.
-- EUR-Lex bloque les scripts : l'AI Act vient de l'API CELLAR (`fetchUrl` dans `corpus.json`, XHTML Formex, pas la
-  page EUR-Lex). Pages CNIL : identifiants aléatoires dans le HTML → fausses nouvelles versions, écartées par
-  `TextFingerprint` (ADR-008).
+- EUR-Lex bloque les scripts : l'AI Act vient de l'API CELLAR (`fetchUrl` dans `corpus.json`, pas la page EUR-Lex),
+  en **version consolidée** (ADR-023 : format HTML propre, extracteur `eur-lex-consolide/1`, sans considérants).
+  `Extractors.For` choisit l'extracteur selon le format du fichier (JO ou consolidé). Nouvelle consolidation : date
+  dans `url`, `fetchUrl`, `title`, ancienne `url` dans `previousUrls` (renommage du document).
+- Pages CNIL : identifiants aléatoires dans le HTML → fausses nouvelles versions, écartées par `TextFingerprint`
+  (ADR-008).
 - **Extracteurs et découpeurs versionnés** (`cnil-html/2`, `ai-act/1`…) : changer la version relance l'étape.
+  Seule exception (validée par Alexandre le 2026-11-05, ADR-023) : pas d'incrément quand la sortie est **identique au
+  caractère près sur toutes les versions publiées**, vérifié en comparant aux passages en base et noté dans la PR ;
+  incrémenter redécouperait la version publiée et supprimerait ses vecteurs jusqu'à `embed`.
   Les extracteurs ne produisent que du texte présent dans la source (seuls les espaces sont normalisés).
 - **Découpage structurel** (ADR-010) : un passage par article pour l'AI Act (redécoupé par paragraphe si long), par
   titre de section pour la CNIL, 500 à 1 500 caractères, titre de rattachement dans `heading`.

@@ -84,7 +84,8 @@ public sealed partial class AiActChunker : IChunker
         public string? Group { get; set; }
     }
 
-    [GeneratedRegex(@"^art_\d+$")]
+    /// <summary>« art_4a » : article inséré (« Article 4 bis »), présent seulement dans une version consolidée.</summary>
+    [GeneratedRegex(@"^art_\d+[a-z]?$")]
     private static partial Regex ArticleId();
 
     [GeneratedRegex(@"^anx_[IVXLC]+$")]
