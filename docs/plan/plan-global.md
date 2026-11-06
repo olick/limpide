@@ -280,10 +280,24 @@ une clé exposée. Gitleaks, par `deploy/analyser-secrets.sh` :
 
 - ✔ **premier passage sur tout l'historique Git** (2026-11-06) : aucun constat sur 232 commits, toutes branches ; un
   secret trouvé est considéré comme compromis : le renouveler d'abord, réécrire l'historique ne suffit pas ;
-- ✔ **en CI, sur chaque PR** : job « Secrets » de `ci.yml` ; reste à l'ajouter aux contrôles requis de `main`, une fois
-  fusionné (Alexandre) ;
+- ✔ **en CI, sur chaque PR** : job « Secrets » de `ci.yml`, contrôle requis de `main` (vérifié par l'API) ;
 - **avant le commit sur le poste**, pour arrêter la clé avant qu'elle ne parte ; contournable, donc en plus de la CI ;
 - faux positifs dans `.gitleaksignore`, avec la raison et la date (aucun à ce jour).
+
+**Dispersion de la barrière de fidélité** (demandée le 2026-11-06) : sur un même commit, la PR #84 a donné 11, 11 et 7
+réponses jugées infidèles sur 36 (par un modèle, le juge), pour 10 tolérées (journal de la S9). Une barrière qui bloque
+au hasard finit ignorée ; la
+relancer jusqu'au vert revient à ne plus en avoir. Dans cet ordre :
+
+1. **Corriger d'abord** : relire le noyau stable (`j02`, `q01`, `q03`, `q07`, `q16`, `q21`) ; pour chaque question,
+   vraie erreur (consignes, passages) ou juge trop sévère (calibration, `eval/calibration/`) ;
+2. **Mesurer ensuite** : au moins 5 passes sur un même commit, environ 0,30 € chacune ; relever moyenne, minimum et
+   maximum, et les questions qui varient ;
+3. **Décider enfin, sur cette mesure** : garder 0,30 si le maximum reste en dessous, sinon recalibrer, en restant sous
+   les 0,41 de Small 4, que le seuil doit continuer à bloquer. Tout élargissement : un commit qui dit pourquoi, ADR-014
+   à jour. Règle à écrire aussi pour un blocage à une réponse près : qui relance, combien de fois, ce qu'on note.
+
+Relancer une passe bloquée n'est pas une mesure ; la règle ci-dessus existe pour ça.
 
 **Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
 projet) : **étude de migration vers un cloud souverain**, en
