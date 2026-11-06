@@ -68,9 +68,11 @@ Barrière `gate` : passée (rapport `eval/results/2026-11-05-2009-mistral-medium
 120 950 tokens, 0,012 €. `q05` donne désormais les dates de l'Omnibus. Les considérants devançaient souvent le bon
 article dans la recherche (`q15`, `q16`, `q18`, `q22`) : sans eux, l'article remonte en tête.
 
-**Régression** : `q06` (montant maximal des amendes) échoue (citation inventée, bloquée par le garde-fou) : l'article
-99, allongé par l'Omnibus, est découpé autrement, et le passage « 35 000 000 EUR » n'est plus parmi les 5 fournis.
-Point ouvert, pas une raison de garder un texte périmé.
+**Régression** : `q06` (montant maximal des amendes) échoue (citation inventée, signalée par le garde-fou) : le passage
+« 35 000 000 EUR » n'est plus parmi les 5 fournis. Il n'a pas changé (633 caractères, paragraphes 2 et 3 de l'article
+99) ; il commence par l'information de la Commission, et d'autres passages de l'article 99 le devancent. Le modèle écrit
+le montant de mémoire (constat du 2026-11-06, ADR-014, « Faits attendus »). Point ouvert, pas une raison de garder un
+texte périmé.
 
 ## Conséquences
 

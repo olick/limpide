@@ -341,7 +341,7 @@ annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre
   versions, nouvelle collecte « inchangée ».
 - **Mesure dans une copie de la base** (`rag_consolide`) : `fetch` → candidate → **quarantaine** (32 % de passages en
   moins : les 250 passages de considérants, absents d'une consolidation) → `release` → `embed` (0,012 €) → `publish`. Recherche :
-  17 → 21/30 en 1re position, MRR 0,72 → 0,80 ; réponses : 49/55 vérifiées, 1 échec (`q06`, article 99 redécoupé),
+  17 → 21/30 en 1re position, MRR 0,72 → 0,80 ; réponses : 49/55 vérifiées, 1 échec (`q06`, passage des 35 M€ devancé),
   `gate` passée. Considérants abandonnés (choix d'Alexandre).
 - **Interface** : avertissement de la version consolidée sous chaque extrait (conditions de réutilisation) et dans
   les mentions légales ; le lien de la carte garde le libellé « Texte officiel », avec un nom accessible propre à
@@ -354,5 +354,22 @@ annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre
   - `/sante` : 925 passages (1 130 avant), `missingEmbeddings` 0, empreinte `d1ab6824e180` ; la question sur la date
     du haut risque, posée à la démo, donne les nouvelles dates.
   Reste `deploy/exporter-corpus.sh --vps`, pour que la chaîne évalue le nouveau corpus.
-- **Points ouverts** : `q06` (passage des amendes hors des 5 fournis) ; l'évaluation ne vérifie pas une date ou un
-  montant dans la réponse (`q05`, ajouter une question sur l'article 4) ; veille des actes modificatifs, manuelle.
+- **Points ouverts** : `q06` (passage des amendes hors des 5 fournis) ; veille des actes modificatifs, manuelle.
+
+### Évaluation : faits attendus et chiffres sourcés (2026-11-06, hors plan)
+
+Suite de l'AI Act consolidé : l'évaluation contrôlait l'article cité, jamais ce que la réponse en dit. Mesure sur
+`rag_consolide`, rapport `2026-11-06-0816`. Décision : ADR-014, « Faits attendus ».
+
+- **Deux contrôles** : `expectedFacts` dans `questions.json` (fait absent = échec, seuil bloquant) et
+  `AnswerFigures` (date, montant, pourcentage ou durée absents des passages cités = à relire, seuil signalé).
+- **Vérification sur les rapports** : le contrôle des faits aurait échoué sur `q05` du 2026-10-28 ; celui des chiffres
+  relève les 35 M€ et les 7 % de `q06`, et aucune fausse alerte sur les autres réponses des deux dernières passes.
+- **Jeu `jeu/4`** : `q31` (date du haut risque), `q32` (article 4 réécrit), `q33` (date de la nouvelle interdiction de
+  l'article 5) ; faits ajoutés à `q05` et `q06`. **Tout est à relire par Alexandre** (rédigé par Claude).
+- **Mesure** : 51/58 vérifiées, 1 échec, 6 à relire, passage attendu cité 31/33, 8/36 jugées infidèles, `gate` passée.
+- **`q33` : vraie erreur trouvée.** La réponse dit l'interdiction applicable « sans délai supplémentaire », alors
+  qu'elle s'applique à partir du 2 décembre 2026 : l'article 113 n'est pas parmi les 5 passages fournis. Seuil à 1
+  pour elle, à ramener à 0.
+- **Points ouverts, à traiter avant la vidéo de la S9** : `q33` (la règle et sa date sont dans deux articles), puis
+  `expectedFactsMissing` à 0 ; `q06` (35 M€ de mémoire), puis `unsourcedFigures` bloquant.

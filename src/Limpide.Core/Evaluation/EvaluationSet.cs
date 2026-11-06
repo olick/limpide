@@ -7,12 +7,17 @@ public sealed record EvaluationSet(IReadOnlyList<EvaluationQuestion> Questions);
 /// <param name="Expected">Passages qui répondent à la question ; requis quand on attend une réponse.</param>
 /// <param name="Note">Pourquoi ce passage est attendu, ou ce que la question teste.</param>
 /// <param name="Behavior">Comportement attendu de l'assistant (par défaut : répondre en citant le passage attendu).</param>
+/// <param name="ExpectedFacts">
+/// Ce que la réponse doit dire, tiré du texte en vigueur (dates, montants) : le bon article cité ne suffit pas (ADR-023).
+/// « | » sépare les formulations acceptées. À revoir à chaque nouvelle version d'un texte.
+/// </param>
 public sealed record EvaluationQuestion(
     string Id,
     string Question,
     ExpectedPassage? Expected = null,
     string? Note = null,
-    ExpectedBehavior Behavior = ExpectedBehavior.Answer
+    ExpectedBehavior Behavior = ExpectedBehavior.Answer,
+    IReadOnlyList<string>? ExpectedFacts = null
 );
 
 public enum ExpectedBehavior

@@ -36,6 +36,8 @@ public static class PlainLanguage
             "metrics.failed" => ("Échecs du contrôle", "", false),
             "metrics.expectedPassageProvidedShare" => ("Passage attendu retrouvé par la recherche", "%", false),
             "metrics.expectedPassageCitedShare" => ("Passage attendu cité", "%", false),
+            "metrics.expectedFactsMissing" => ("Réponses où manque une information attendue (date, montant…)", "", true),
+            "metrics.unsourcedFigures" => ("Réponses avec un chiffre sans passage cité", "", true),
             "metrics.judge.unfaithfulShare" => ("Réponses jugées infidèles", "%", true),
             "metrics.judge.unreadable" => ("Verdicts du juge inexploitables", "", false),
             "metrics.costPerQuestionEur" => ("Coût de rédaction", "€", false),
@@ -60,7 +62,7 @@ public static class PlainLanguage
             (null, { } max) => $"au plus {Value(max)}",
             _ => "présente",
         };
-        return (label, rule.Blocking ? text : $"{text}, signalé sans bloquer");
+        return (label, rule.Blocking ? text : $"{text}, {(feminine ? "signalée" : "signalé")} sans bloquer");
     }
 
     /// <summary>Un garde-fou déclenché : ce qui s'est passé, et ce que le contrôle protège.</summary>

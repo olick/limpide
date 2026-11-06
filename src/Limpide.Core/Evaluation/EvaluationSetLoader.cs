@@ -38,6 +38,10 @@ public static class EvaluationSetLoader
             errors.Add($"identifiant en double : {id}");
         foreach (var q in set.Questions.Where(q => q.Behavior == ExpectedBehavior.Answer && (q.Expected?.IsEmpty ?? true)))
             errors.Add($"{q.Id} : aucun passage attendu");
+        foreach (var q in set.Questions.Where(q => q.ExpectedFacts is not null && q.Behavior != ExpectedBehavior.Answer))
+            errors.Add($"{q.Id} : des faits attendus sur une question sans réponse attendue");
+        foreach (var q in set.Questions.Where(q => q.ExpectedFacts?.Any(f => f.Split('|').Any(string.IsNullOrWhiteSpace)) == true))
+            errors.Add($"{q.Id} : fait attendu vide");
 
         if (errors.Count > 0)
             throw new InvalidDataException(

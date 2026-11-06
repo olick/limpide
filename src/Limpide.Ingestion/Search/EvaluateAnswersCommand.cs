@@ -118,6 +118,10 @@ public sealed class EvaluateAnswersCommand(
                 ExpectedPassageCited = answers.Count(c => c.CitesExpected == true),
                 // La recherche, mesurée dans la même passe : le passage attendu figure-t-il parmi ceux fournis au modèle ?
                 ExpectedPassageProvided = answers.Count(Provided),
+                // Ce que dit la réponse, pas seulement ce qu'elle cite (ADR-023) : questions, pas nombre de faits.
+                ExpectedFactsQuestions = checks.Count(c => c.Question.ExpectedFacts is { Count: > 0 }),
+                ExpectedFactsMissing = checks.Count(c => c.MissingFacts.Count > 0),
+                UnsourcedFigures = checks.Count(c => c.UnsourcedFigures.Count > 0),
                 AnswerQuestions = answers.Count,
                 // Proportions : le jeu grandira (retours des visiteurs) ; les seuils du gate ne doivent pas en dépendre.
                 ExpectedPassageCitedShare = Share(answers.Count(c => c.CitesExpected == true), answers.Count),
@@ -158,6 +162,8 @@ public sealed class EvaluateAnswersCommand(
                 Status = c.Status.ToString(),
                 c.Verdict,
                 c.CitesExpected,
+                c.MissingFacts,
+                c.UnsourcedFigures,
                 Guardrails = c.Result.Guardrails.Select(g => g.Code),
                 Cited = c.Result.CitedPassages.Select(p => p.Passage.Anchor ?? p.Passage.Heading),
                 Seconds = c.Result.Timings.Total.TotalSeconds,
@@ -187,6 +193,8 @@ public sealed class EvaluateAnswersCommand(
             + $" · échecs : {checks.Count(c => c.Status == CheckStatus.Failed)}"
             + $" · à relire : {checks.Count(c => c.Status == CheckStatus.ToReview)}",
             $"Passage attendu cité : {checks.Count(c => c.CitesExpected == true)}/{checks.Count(c => c.CitesExpected is not null)}",
+            $"Faits attendus absents : {Ids(checks, c => c.MissingFacts.Count > 0)}"
+            + $" · chiffres absents des passages cités : {Ids(checks, c => c.UnsourcedFigures.Count > 0)}",
             $"Coût total : {(costs.Any(c => c is null) ? "inconnu" : Cost(costs.Sum()))}"
             + $" · modèle appelé pour {called.Count}/{results.Count} questions",
             $"Durée totale par question : médiane {Seconds(Percentile(results.Select(r => r.Timings.Total).ToList(), 0.5))},"
@@ -207,6 +215,11 @@ public sealed class EvaluateAnswersCommand(
                     + $" · coût {(judgments.Values.Any(j => j.Usage.EstimatedCost is null) ? "inconnu" : Cost(judgments.Values.Sum(j => j.Usage.EstimatedCost)))}"
                 : "Juge de fidélité : désactivé");
     }
+
+    private static string Ids(List<AnswerCheck> checks, Func<AnswerCheck, bool> matches) =>
+        checks.Where(matches).Select(c => c.Question.Id).ToList() is { Count: > 0 } ids
+            ? $"{ids.Count} ({string.Join(", ", ids)})"
+            : "0";
 
     private string Report(List<AnswerCheck> checks, string summary)
     {
@@ -255,6 +268,8 @@ public sealed class EvaluateAnswersCommand(
                 .AppendLine($"- Passages cités : {(r.CitedPassages.Any() ? string.Join(" ; ", r.CitedPassages.Select(p => $"{p.Id} {p.Passage.Heading}")) : "aucun")}")
                 .AppendLine($"- Fournis, non cités : {(r.Passages.Any(p => !p.Cited) ? string.Join(" ; ", r.Passages.Where(p => !p.Cited).Select(p => $"{p.Id} {p.Passage.Heading}")) : "aucun")}")
                 .AppendLine($"- Garde-fous : {(r.Guardrails.Count == 0 ? "aucun" : string.Join(", ", r.Guardrails.Select(g => g.Code)))}")
+                .AppendLine($"- Faits attendus : {Facts(c)}")
+                .AppendLine($"- Chiffres absents des passages cités : {(c.UnsourcedFigures.Count == 0 ? "aucun" : string.Join(", ", c.UnsourcedFigures))}")
                 .AppendLine($"- Tokens : {r.Usage.InputTokens} / {r.Usage.OutputTokens} · coût {Cost(r.Usage.EstimatedCost)} · {Seconds(r.Timings.Total)}"
                     + $" (vectorisation {Seconds(r.Timings.Embedding)}, base {Seconds(r.Timings.Search)}, rédaction {Seconds(r.Timings.Generation)})");
             if (judgments.GetValueOrDefault(c.Question.Id) is { } judgment)
@@ -283,6 +298,12 @@ public sealed class EvaluateAnswersCommand(
 
         return text.ToString();
     }
+
+    private static string Facts(AnswerCheck check) => check.Question.ExpectedFacts is not { Count: > 0 } facts
+        ? "aucun"
+        : check.MissingFacts.Count == 0
+            ? $"{facts.Count}/{facts.Count} présents"
+            : $"{facts.Count - check.MissingFacts.Count}/{facts.Count} présents, absents : {string.Join(", ", check.MissingFacts)}";
 
     private string Judge(AnswerCheck check) =>
         judgments.GetValueOrDefault(check.Question.Id) is { } j ? JudgeLabel(j.Verdict) : "—";
