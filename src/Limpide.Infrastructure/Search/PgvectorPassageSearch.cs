@@ -93,11 +93,19 @@ public sealed class PgvectorPassageSearch(
         LIMIT @limit
         """;
 
-    public string Strategy => options.Strategy switch
+    /// <summary>Passages ajoutés par un renvoi (<see cref="SearchOptions.Follow"/>), dans l'ordre du texte.</summary>
+    private const string FollowSql = $"""
+        SELECT {Columns}
+        {Current}
+          AND c.anchor = ANY(@anchors)
+        ORDER BY c.anchor, c.ordinal
+        """;
+
+    public string Strategy => (options.Strategy switch
     {
         SearchStrategy.Hybrid => $"hybride : vectorielle ({embedding.Label}) + plein texte, fusion RRF (k = {options.RrfK})",
         _ => $"vectorielle ({embedding.Label})",
-    };
+    }) + (options.Follow.Count > 0 ? ", renvois suivis" : "");
 
     public async Task<SearchOutcome> SearchAsync(string question, int limit, CancellationToken ct)
     {
@@ -118,6 +126,25 @@ public sealed class PgvectorPassageSearch(
             command.Parameters.AddWithValue("k", options.RrfK);
         }
 
+        var results = await ReadAsync(command, ct);
+
+        var targets = results.Where(r => r.Anchor is not null && options.Follow.ContainsKey(r.Anchor))
+            .Select(r => options.Follow[r.Anchor!]).Distinct().ToArray();
+        if (targets.Length > 0)
+        {
+            await using var follow = dataSource.CreateCommand(FollowSql);
+            follow.Parameters.AddWithValue("query", new Vector(query));
+            follow.Parameters.AddWithValue("model", embedding.Label);
+            follow.Parameters.AddWithValue("anchors", targets);
+            var known = results.Select(r => r.Origin.ChunkId).ToHashSet();
+            results.AddRange((await ReadAsync(follow, ct)).Where(r => !known.Contains(r.Origin.ChunkId)));
+        }
+
+        return new SearchOutcome(results, embeddingDuration, watch.Elapsed);
+    }
+
+    private static async Task<List<RetrievedPassage>> ReadAsync(NpgsqlCommand command, CancellationToken ct)
+    {
         await using var reader = await command.ExecuteReaderAsync(ct);
         var results = new List<RetrievedPassage>();
         while (await reader.ReadAsync(ct))
@@ -129,6 +156,6 @@ public sealed class PgvectorPassageSearch(
                 new PassageOrigin(reader.GetGuid(9), reader.GetString(10), reader.GetString(11), reader.GetString(12))));
         }
 
-        return new SearchOutcome(results, embeddingDuration, watch.Elapsed);
+        return results;
     }
 }

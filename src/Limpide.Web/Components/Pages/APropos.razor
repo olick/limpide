@@ -89,7 +89,7 @@
                     <li><span class="etape-nom">1. Sens</span>Votre question est transformée en vecteur, une suite de
                         nombres qui représente son sens, @EmbeddingWhere.</li>
                     <li><span class="etape-nom">2. Recherche</span>Les @Generation.PassageCount passages les plus proches par
-                        le sens sont retrouvés dans les textes.</li>
+                        le sens sont retrouvés dans les textes. Si l'article 6 ou l'annexe III en fait partie, l'annexe III est ajoutée en entier, même si ses extraits sont moins proches.</li>
                     <li><span class="etape-nom">3. Sujet</span>Si même le plus proche est trop éloigné (proximité sous
                         @Generation.MinScore.ToString("0.00", French)), Limpide répond «&nbsp;je ne sais pas&nbsp;» sans appeler le
                         modèle.</li>

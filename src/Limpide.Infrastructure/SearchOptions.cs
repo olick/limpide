@@ -25,4 +25,11 @@ public sealed class SearchOptions
     /// plus k est grand, moins le premier rang d'une seule des deux recherches suffit à dominer.
     /// </summary>
     public int RrfK { get; set; } = 60;
+
+    /// <summary>
+    /// Renvois suivis (ancre trouvée → ancre ajoutée) : quand un passage de la clé remonte, tous les passages de la valeur
+    /// sont ajoutés après les résultats, dans l'ordre du texte. L'article 6 renvoie à l'annexe III, dont les extraits
+    /// utiles ne remontent pas toujours : q03, « tri de CV », 2026-11-06. Vide par défaut.
+    /// </summary>
+    public Dictionary<string, string> Follow { get; set; } = [];
 }

@@ -22,7 +22,8 @@
       "id": "q03",
       "question": "Mon logiciel qui trie automatiquement les CV des candidats est-il un système à haut risque ?",
       "expected": { "anchors": ["art_6", "anx_III"] },
-      "note": "Annexe III, point 4 (emploi) ; l'article 6 renvoie à l'annexe III."
+      "expectedFacts": ["recrutement ou la sélection|filtrer les candidatures"],
+      "note": "Annexe III, point 4 (emploi) ; l'article 6 renvoie à l'annexe III. N'importe quel extrait de l'annexe valide l'ancre : le fait attendu vérifie le bon (2026-11-06)."
     },
     {
       "id": "q04",

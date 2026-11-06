@@ -478,3 +478,20 @@ par version, comparées aux 3 essais de la PR #84. Verdicts d'un modèle ; compt
   renvoie : si non, suivre les renvois ne suffira pas.
 - **Points ouverts** : renvoi de l'article 6 vers l'annexe III (`q03`), `q16`, `q28`, `q33` ; à mesurer ensuite, Large 3 en
   rédaction et gpt-oss-120b comme juge.
+
+### Renvoi de l'article 6 vers l'annexe III : `q03` répond juste (2026-11-06, hors plan)
+
+Décision et mesures : ADR-024 (verdicts d'un modèle, pas d'un juriste ; phrases comptées par recherche de texte dans les
+rapports). `Search:Follow` ajoute toute l'annexe III quand l'article 6 ou l'annexe remonte. `q03` donne la
+bonne règle aux 3 passes, sans trancher le cas de la personne, et `q16` ne mêle plus l'annexe XIII et la CNIL (0/3). Infidèles
+sur 36 : 8, 5, 3, soit un écart de 5 : la stabilité de 6, 6, 5 n'était pas acquise, la mesure de dispersion (S10) reste à
+faire. `gate` passée aux trois, 0,0038 € par question, classement inchangé (23/33). Rapports `2026-11-06-2242`, `2248`, `2251`.
+
+- **Relecture d'Alexandre** : le point 4 de l'annexe III ne cite pas les CV, c'est implicite. La réponse s'en tient bien à la
+  règle (« analyser et filtrer les candidatures ») et renvoie à un professionnel.
+- **Latence** : 95e centile à 15 s sur la première passe, dû à la vectorisation chez OVHcloud (14 s, 2 s deux passes plus tard) ;
+  point ouvert de la S8, sans lien avec le renvoi.
+- **Effet de bord** : `t05` ajoute un paragraphe hors sujet sur la notation sociale.
+- **Points ouverts** : `t05`, `q28`, `q33` ; autres ancres sur de longs textes qui pourraient cacher un faux OK ; Large 3 en
+  rédaction et gpt-oss-120b comme juge, après la S9.
+
