@@ -7,6 +7,7 @@ public class LegalQualificationTests
     [Theory] // Phrases réelles de Mistral Medium (2026-10-05), qui tranchent la situation de la personne.
     [InlineData("Oui, votre logiciel qui trie automatiquement les CV des candidats est considéré comme un système d'IA à haut risque, car il est utilisé pour des questions liées à l'emploi [P3].")]
     [InlineData("Si votre logiciel ne relève pas de ces cas, il n'est pas interdit, mais il est **à haut risque** et doit se conformer aux exigences de l'AI Act [P2][P5].")]
+    [InlineData("Votre traitement est légal.")]
     [InlineData("En revanche, aucune disposition ne les interdit explicitement dans ce contexte. Vous n'êtes donc pas *en infraction* par principe.")]
     public void Flags_answers_that_decide_the_persons_situation(string answer)
     {
@@ -18,6 +19,9 @@ public class LegalQualificationTests
     [InlineData("Les systèmes d'IA utilisés pour le recrutement sont classés à haut risque [P2].")]
     [InlineData("Oui, vous devez prévenir les utilisateurs qu'ils interagissent avec un système d'IA, sauf si cela ressort clairement du contexte [P1].")]
     [InlineData("Pour savoir si votre système est conforme, un professionnel du droit peut apprécier votre situation.")]
+    [InlineData("- **Définir une base légale** pour votre propre traitement (ex.")] // q30, 2026-11-06
+    [InlineData("Vous avez une base légale.")] // limite assumée : « base légale » n'est jamais un verdict pour ce motif
+    [InlineData("- que le tiers qui vous a vendu les données ait lui-même respecté le RGPD (base légale, information des personnes, etc.) [P5] ;")]
     [InlineData("Le règlement n'interdit pas explicitement cette pratique, mais impose des obligations strictes [P5].")]
     public void Lets_through_rules_conditions_and_referrals(string answer)
     {

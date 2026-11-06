@@ -47,7 +47,8 @@ public static partial class LegalQualification
     private static partial Regex YesOrNo();
 
     [GeneratedRegex(
-        @"\b(en infraction|en règle|en conformité|non[- ]conformes?|conformes?|illégale?s?|illicites?|légale?s?"
+        // « base légale » est un terme du RGPD, pas un verdict : faux positif de q30 (2026-11-06).
+        @"\b(en infraction|en règle|en conformité|non[- ]conformes?|conformes?|illégale?s?|illicites?|(?<!\bbases?\s)légale?s?"
         + @"|interdite?s?|autorisée?s?|à haut risque|exemptée?s?|exonérée?s?|pas concernée?s?|hors du champ)\b",
         RegexOptions.IgnoreCase)]
     private static partial Regex Verdict();
