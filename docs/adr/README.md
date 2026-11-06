@@ -31,3 +31,4 @@ désignent par leur sujet (liste dans `docs/plan/plan-global.md`, « Registre de
 | [021](021-controle-de-la-question.md) | Contrôle de la question avant la recherche, par règles, qui bloque les injections probables | 2026-10-28 |
 | [022](022-fil-de-questions-sans-memoire.md) | Interface en fil de questions, sans mémoire de conversation | 2026-10-28 |
 | [023](023-version-consolidee-de-l-ai-act.md) | AI Act servi dans sa version consolidée (Omnibus 2026/1744), sans considérants ; extracteur choisi selon le format, document renommé | 2026-11-05 |
+| [024](024-renvois-suivis-dans-la-recherche.md) | Recherche : suivre le renvoi de l'article 6 vers l'annexe III | 2026-11-06 |

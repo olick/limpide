@@ -32,4 +32,6 @@ paths:
   0,50). Deux lignes de défense :
   le seuil pour le hors sujet, le « je ne sais pas » du modèle pour les questions proches sans réponse.
 - Recherche vectorielle seule ; l'hybride reste en option (`Search:Strategy=Hybrid`), mesurée moins bonne.
+- `Search:Follow` (ADR-024) : ancre trouvée → ancre ajoutée en entier, après les résultats (article 6 → annexe III). Table
+  écrite à la main ; toute entrée se mesure (coût, effets de bord).
 - Toute modification de la recherche : `evaluate` avant et après (voir `.claude/rules/evaluation.md`).
