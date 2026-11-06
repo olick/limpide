@@ -4,6 +4,8 @@
   // Formulées comme un utilisateur les poserait, sans reprendre les mots du titre du passage attendu.
   // expected.anchors : ancres de l'AI Act (art_N, rct_N, anx_X) ; expected.headings : morceau du titre
   // de rattachement, pour les fiches CNIL qui n'ont pas d'ancre. Un seul critère satisfait suffit.
+  // expectedFacts : ce que la réponse doit dire, tiré du texte en vigueur (« | » : formulations acceptées) ; absent de
+  // la réponse = échec. À revoir à chaque nouvelle version d'un texte (ADR-023).
   "questions": [
     {
       "id": "q01",
@@ -30,12 +32,14 @@
     {
       "id": "q05",
       "question": "À partir de quelle date les obligations du règlement s'appliquent-elles ?",
-      "expected": { "anchors": ["art_113"] }
+      "expected": { "anchors": ["art_113"] },
+      "expectedFacts": ["2 décembre 2027", "2 août 2028"]
     },
     {
       "id": "q06",
       "question": "Quel est le montant maximal des amendes en cas de non-respect des règles ?",
-      "expected": { "anchors": ["art_99"] }
+      "expected": { "anchors": ["art_99"] },
+      "expectedFacts": ["35 000 000|35 millions", "7 %"]
     },
     {
       "id": "q07",
@@ -191,6 +195,30 @@
       "question": "Ai-je le droit d'entraîner une IA avec un fichier de données acheté à une autre entreprise ?",
       "expected": { "headings": ["courtiers"] },
       "since": "jeu/2"
+    },
+    {
+      "id": "q31",
+      "question": "Quand les exigences prévues pour les systèmes d'IA à haut risque entrent-elles en application ?",
+      "expected": { "anchors": ["art_113"] },
+      "expectedFacts": ["2 décembre 2027", "2 août 2028"],
+      "note": "Dates reportées par l'Omnibus numérique (règlement 2026/1744, ADR-023).",
+      "since": "jeu/4"
+    },
+    {
+      "id": "q32",
+      "question": "Une entreprise qui utilise l'IA doit-elle former ses salariés à ces outils ?",
+      "expected": { "anchors": ["art_4"] },
+      "expectedFacts": ["favoriser"],
+      "note": "Article 4 réécrit par l'Omnibus : « favoriser » le développement de la maîtrise de l'IA, plus « garantir » un niveau suffisant.",
+      "since": "jeu/4"
+    },
+    {
+      "id": "q33",
+      "question": "À partir de quand est-il interdit de proposer une IA qui fabrique des images intimes d'une personne sans son accord ?",
+      "expected": { "anchors": ["art_5", "art_113"] },
+      "expectedFacts": ["2 décembre 2026"],
+      "note": "Article 5, paragraphe 1, point b bis), ajouté par l'Omnibus ; date à l'article 113, point a).",
+      "since": "jeu/4"
     },
 
     // Questions pièges (S2, session 5). Différentes de celles qui ont servi à calibrer le seuil de pertinence

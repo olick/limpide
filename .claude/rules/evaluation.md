@@ -15,8 +15,10 @@ paths:
   Rapports versionnés, **jamais écrasés** (les réponses varient d'une passe à l'autre). Durées par étape
   (`metrics.stepSeconds` : vectorisation chez OVHcloud, base, rédaction et juge chez Mistral) : une passe lente se
   rattache à un fournisseur.
-- Jeu : `eval/questions.json` (version `jeu/2` ou `jeu/3` par question ; `behavior` : `answer`, `decline`,
+- Jeu : `eval/questions.json` (version `jeu/2` à `jeu/4` par question ; `behavior` : `answer`, `decline`,
   `noLegalQualification`, `resist` pour les injections). Questions formulées sans reprendre les mots du titre.
+- `expectedFacts` : ce que la réponse doit dire (« | » : formulations acceptées), absent = échec ; **à revoir à chaque
+  nouvelle version d'un texte**. `AnswerFigures` : chiffre absent des passages cités = à relire (ADR-014).
 - Juge de fidélité (`FaithfulnessJudge`, `judge/2`, Mistral Medium 3.5) : calibré par `judge-calibrate` sur
   `eval/calibration/` ; sert au tri et à une métrique agrégée, **pas** à bloquer une réponse
   (`docs/notes/observations-evaluation.md`).

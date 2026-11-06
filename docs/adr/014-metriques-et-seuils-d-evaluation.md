@@ -70,6 +70,8 @@ absente compte comme un échec.
 | `versions.corpus.missingEmbeddings` | ≤ 0 | oui | passages servis sans vecteur du modèle évalué, donc absents de la recherche : sauvegarde du corpus à réexporter après `embed` (ADR-017, ajouté le 2026-10-18) |
 | `expectedPassageProvidedShare` | ≥ 0,90 | oui | recherche : 28/30 avec Qwen3-Embedding-8B (21/30 avec bge-m3, seuil 0,66 jusqu'au 2026-10-18) ; tolérance d'une question |
 | `expectedPassageCitedShare` | ≥ 0,86 | oui | 28/30 avec Qwen3-Embedding-8B (19/30 avec bge-m3, seuil 0,56) ; tolérance de deux questions |
+| `expectedFactsMissing` | ≤ 1 | oui | dates et montants du texte en vigueur ; 1 pour `q33`, défaut connu, à ramener à 0 (voir « Faits attendus ») |
+| `unsourcedFigures` | ≤ 0 | non | chiffre écrit sans passage cité ; signalé tant que `q06` n'est pas corrigée |
 | `judge.unfaithfulShare` | ≤ 0,30 | oui | **métrique agrégée** : 0,15 et 0,22 en référence, marge égale à leur écart ; Small : 0,41 |
 | `judge.unreadable` | ≤ 2 | oui | un juge qui ne répond plus ne mesure plus rien |
 | `costPerQuestionEur` | ≤ 0,0068 € | oui | plafond au double de la référence (consignes gonflées, modèle plus cher) ; `costPerQuestionUsd` ≤ 0,008 $ jusqu'au passage en euros (2026-10-20, ADR-004) |
@@ -119,3 +121,23 @@ Avec ce dispositif :
     référence ; les seuils en proportions restent applicables ;
   - **fausses alertes répétées** d'un seuil bloquant : l'élargir dans un commit qui dit pourquoi, jamais le
     désactiver.
+
+## Faits attendus (révision du 2026-11-06)
+
+Le contrôle automatique vérifiait l'article cité, le juge la fidélité aux passages fournis. Aucun des deux ne voit un
+texte périmé : `q05` passait avec le 2 août 2026 (ADR-023). Aucun ne voit non plus un chiffre écrit de mémoire : `q06`
+donne les 35 M€ sans le passage qui les contient.
+
+- **`expectedFacts`** (`eval/questions.json`) : ce que la réponse doit dire, tiré du texte en vigueur. Un fait absent
+  est un échec, et `metrics.expectedFactsMissing` est un seuil **bloquant**. Maximum 1 pour `q33`, défaut connu, à
+  ramener à 0 (effet cliquet). Ces faits sont à revoir à chaque nouvelle version d'un texte.
+- **`AnswerFigures`** : une date, un montant, un pourcentage ou une durée absent des passages cités met la réponse à
+  relire ; `metrics.unsourcedFigures` est **signalé** seulement, tant que `q06` n'est pas corrigée. Ce contrôle ne voit
+  ni un chiffre en toutes lettres, ni une affirmation sans chiffre (« sans délai supplémentaire », `q33`).
+
+Tant que `q33` échoue, une seconde question du même type bloque, mais une régression seule passe si `q33` est corrigée
+par hasard dans la même passe : la tolérance est un défaut à résorber, pas une marge. Les faits de `q31` à `q33` sont
+rédigés et vérifiés par un modèle, pas par un juriste.
+
+Le contrôle reste dans l'évaluation : il ne bloque aucune réponse de la démo. En faire un garde-fou de `AnswerService`
+est une autre décision, à mesurer.
