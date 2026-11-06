@@ -412,3 +412,38 @@ le **même commit** : 11/36, 11/36, 7/36. Le seuil de 0,30 tolère 10 réponses 
   le premier point, pas par ce vert.
 - **Non tranché** : le niveau tourne autour de 0,25, au-dessus des références de l'ADR-014 (0,15 et 0,22). Vrai recul,
   ou effet du corpus consolidé et des 6 passages ? Mesure de la dispersion en S10 (plan global).
+
+### Relecture du noyau stable : `q03` est une vraie erreur (2026-11-06, hors plan)
+
+Relecture des 6 réponses infidèles aux trois essais de la PR #84, contre les passages fournis. **Faite par un modèle, pas
+par un juriste : à valider par Alexandre.**
+
+| Question | Verdict | Constat |
+|---|---|---|
+| `q03` | Vraie erreur, grave | Dit le recrutement absent de l'annexe III ; il y est (point 4) |
+| `q16` | Vraie erreur | Range sous l'annexe XIII des risques tirés d'un passage de la CNIL sur l'intérêt légitime |
+| `q01` | Vraie erreur | Reprend « sans exception ni dérogation » de la question, la liste contient des exceptions |
+| `j02` | Faute légère | « Analyse d'impact » absente des passages fournis |
+| `q07` | Excès du juge | Détails (« en tant que de besoin ») |
+| `q21` | Excès du juge, surtout | L'article 16 dit bien de prouver la conformité sur demande ; « points 2 à 8 » non sourcé à l'essai 3 |
+
+- **`q03` : le contrôle automatique se trompe.** Aux trois essais, l'extrait fourni de l'annexe III est celui de la
+  biométrie, jamais celui du recrutement, et la question passe : l'ancre `anx_III` accepte n'importe quel morceau de
+  l'annexe. Le « passage attendu cité » (31/33) est peut-être surestimé pour les autres ancres sur de longs textes.
+- **Mesure de la recherche** (`rag_consolide`, 925 passages comme la chaîne, vecteurs calculés à part, base non modifiée) :
+  l'extrait doit passer le score du 6e passage.
+
+  | Question | 6e passage | Extrait actuel | Titre du point en tête | Extrait limité au point 4 |
+  |---|---|---|---|---|
+  | `q03` (« trie les CV ») | 0,774 | 0,723 (rang 41) | 0,714 (rang 55) | 0,729 (rang 35) |
+  | « outil d'IA utilisé pour le recrutement » | 0,776 | 0,810 (rang 2) | 0,808 (rang 2) | 0,838 (rang 1) |
+  | « sélectionne des candidats à l'embauche » | 0,810 | 0,766 (rang 35) | 0,762 (rang 41) | 0,796 (rang 17) |
+
+- **Lecture** : ajouter le titre du point n'aide pas. Découper par point aide, sans suffire. Le problème est surtout
+  l'écart de vocabulaire : avec le mot « recrutement », l'extrait arrive 2e ; avec « CV », 41e. L'article 6 occupe le haut
+  du classement dès que la question dit « haut risque ». Trois formulations seulement : indication, pas mesure du jeu.
+- **Points ouverts** : consignes `answer/8` (ne pas affirmer qu'un texte ne mentionne pas quelque chose quand seuls des
+  extraits sont fournis ; ne pas reprendre les présupposés de la question ; ne pas attribuer à un texte ce qu'un autre
+  dit) ; piste à mesurer pour `q03` : suivre le renvoi de l'article 6 vers l'annexe III ; `q07` et `q21` à ajouter à la
+  calibration du juge ; fait attendu sur le recrutement pour `q03`, à livrer avec la correction (il bloquerait la barrière).
+
