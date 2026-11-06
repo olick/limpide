@@ -71,7 +71,7 @@ absente compte comme un échec.
 | `expectedPassageProvidedShare` | ≥ 0,90 | oui | recherche : 28/30 avec Qwen3-Embedding-8B (21/30 avec bge-m3, seuil 0,66 jusqu'au 2026-10-18) ; tolérance d'une question |
 | `expectedPassageCitedShare` | ≥ 0,86 | oui | 28/30 avec Qwen3-Embedding-8B (19/30 avec bge-m3, seuil 0,56) ; tolérance de deux questions |
 | `expectedFactsMissing` | ≤ 1 | oui | dates et montants du texte en vigueur ; 1 pour `q33`, défaut connu, à ramener à 0 (voir « Faits attendus ») |
-| `unsourcedFigures` | ≤ 0 | non | chiffre écrit sans passage cité ; signalé tant que `q06` n'est pas corrigée |
+| `unsourcedFigures` | ≤ 0 | non | chiffre écrit sans passage cité ; signalé seulement : fausses alertes possibles (`q05`) |
 | `judge.unfaithfulShare` | ≤ 0,30 | oui | **métrique agrégée** : 0,15 et 0,22 en référence, marge égale à leur écart ; Small : 0,41 |
 | `judge.unreadable` | ≤ 2 | oui | un juge qui ne répond plus ne mesure plus rien |
 | `costPerQuestionEur` | ≤ 0,0068 € | oui | plafond au double de la référence (consignes gonflées, modèle plus cher) ; `costPerQuestionUsd` ≤ 0,008 $ jusqu'au passage en euros (2026-10-20, ADR-004) |
@@ -132,8 +132,9 @@ donne les 35 M€ sans le passage qui les contient.
   est un échec, et `metrics.expectedFactsMissing` est un seuil **bloquant**. Maximum 1 pour `q33`, défaut connu, à
   ramener à 0 (effet cliquet). Ces faits sont à revoir à chaque nouvelle version d'un texte.
 - **`AnswerFigures`** : une date, un montant, un pourcentage ou une durée absent des passages cités met la réponse à
-  relire ; `metrics.unsourcedFigures` est **signalé** seulement, tant que `q06` n'est pas corrigée. Ce contrôle ne voit
-  ni un chiffre en toutes lettres, ni une affirmation sans chiffre (« sans délai supplémentaire », `q33`).
+  relire ; `metrics.unsourcedFigures` est **signalé** seulement : une passe a alerté à tort sur « 20 jours », écrit
+  « vingtième jour » dans le texte (`q05`). Ce contrôle ne voit ni un chiffre en toutes lettres, ni une affirmation sans
+  chiffre (« sans délai supplémentaire », `q33`).
 
 Tant que `q33` échoue, une seconde question du même type bloque, mais une régression seule passe si `q33` est corrigée
 par hasard dans la même passe : la tolérance est un défaut à résorber, pas une marge. Les faits de `q31` à `q33` sont
@@ -141,3 +142,27 @@ rédigés et vérifiés par un modèle, pas par un juriste.
 
 Le contrôle reste dans l'évaluation : il ne bloque aucune réponse de la démo. En faire un garde-fou de `AnswerService`
 est une autre décision, à mesurer.
+
+**Correction mesurée** (2026-11-06, corpus `d1ab6824e180`, une passe par ligne) :
+
+| Configuration | `q06` | `q33` | Échecs | Infidèles | Coût par question |
+|---|---|---|---|---|---|
+| 5 passages, `answer/5` (`2026-11-06-0816`) | 35 M€ de mémoire | « sans délai supplémentaire » | 1 | 8/36 | 0,0030 € |
+| 6 passages, `answer/5` (`0833`) | sourcé | sans date | 2 | 7/36 | 0,0033 € |
+| 6 passages, `answer/6` (`0839`, écartée) | sourcé | « ne donnent pas de date » | 3 | 5/35 | 0,0034 € |
+| **6 passages, `answer/7`** (`0844`, retenue) | sourcé | « sans date précise indiquée » | 2 | 8/36 | 0,0034 € |
+
+- **6 passages** : le passage des 35 M€ arrive 6e ; le séparer du paragraphe 2 demanderait de changer `Packer`, donc tout
+  le découpage (ADR-010).
+- **`answer/6`** imposait de signaler une date absente : `q16` (« à partir de quand… » porte sur un seuil) a été refusée
+  et `q03` s'est conclue par « Je ne sais pas ». Fichier retiré, comme `answer/4`. Texte : « Une date, un délai ou un
+  montant ne s'écrit que s'il figure dans un passage fourni. Si la question porte sur une date, un délai ou un montant
+  que les passages ne donnent pas, dis-le […]. N'en déduis jamais qu'une règle s'applique immédiatement ou sans délai. »
+- **`answer/7`** garde seulement l'interdit de la dernière phrase.
+- **`q33` reste en échec, à dessein** : l'article 113 n'est pas dans les 25 premiers résultats, et la réponse dit encore
+  « s'applique […] dès que ces conditions sont remplies ». Admettre « sans date » comme fait attendu validerait cette
+  phrase. Corriger la question demande de relier une règle à sa date, un changement de recherche à mesurer.
+- **Plus aucune marge sur `failed`** : `q30` et `q33` font 2, le maximum. `q30` échoue sur `qualification-juridique`
+  (« vous pouvez entraîner […] à condition ») : réponse conditionnelle à relire, pas un simple faux positif.
+- **À surveiller** : ce garde-fou se déclenche sur `q30` et `t05` dans `0844`, sur `q30` dans `0833`, sur aucune dans
+  `0816` et `0839`. Une passe par configuration ne permet pas de conclure à un effet des 6 passages.

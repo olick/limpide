@@ -353,7 +353,7 @@ annonçait les obligations du haut risque au 2 août 2026 au lieu du 2 décembre
     120 950 tokens, ≈ 0,0121 € ; 2 versions collectées écartées (texte identique) ;
   - `/sante` : 925 passages (1 130 avant), `missingEmbeddings` 0, empreinte `d1ab6824e180` ; la question sur la date
     du haut risque, posée à la démo, donne les nouvelles dates.
-  Reste `deploy/exporter-corpus.sh --vps`, pour que la chaîne évalue le nouveau corpus.
+  Puis `deploy/exporter-corpus.sh --vps` : sauvegarde relue, 925 passages, même empreinte.
 - **Points ouverts** : `q06` (passage des amendes hors des 5 fournis) ; veille des actes modificatifs, manuelle.
 
 ### Évaluation : faits attendus et chiffres sourcés (2026-11-06, hors plan)
@@ -364,12 +364,18 @@ Suite de l'AI Act consolidé : l'évaluation contrôlait l'article cité, jamais
 - **Deux contrôles** : `expectedFacts` dans `questions.json` (fait absent = échec, seuil bloquant) et
   `AnswerFigures` (date, montant, pourcentage ou durée absents des passages cités = à relire, seuil signalé).
 - **Vérification sur les rapports** : le contrôle des faits aurait échoué sur `q05` du 2026-10-28 ; celui des chiffres
-  relève les 35 M€ et les 7 % de `q06`, et aucune fausse alerte sur les autres réponses des deux dernières passes.
+  relève les 35 M€ et les 7 % de `q06`. Une fausse alerte sur trois passes : « 20 jours », écrit « vingtième jour »
+  dans le texte (`q05`, passe de la chaîne de la PR #79).
 - **Jeu `jeu/4`** : `q31` (date du haut risque), `q32` (article 4 réécrit), `q33` (date de la nouvelle interdiction de
   l'article 5) ; faits ajoutés à `q05` et `q06`. **Tout est à relire par Alexandre** (rédigé par Claude).
 - **Mesure** : 51/58 vérifiées, 1 échec, 6 à relire, passage attendu cité 31/33, 8/36 jugées infidèles, `gate` passée.
 - **`q33` : vraie erreur trouvée.** La réponse dit l'interdiction applicable « sans délai supplémentaire », alors
   qu'elle s'applique à partir du 2 décembre 2026 : l'article 113 n'est pas parmi les 5 passages fournis. Seuil à 1
   pour elle, à ramener à 0.
-- **Points ouverts, à traiter avant la vidéo de la S9** : `q33` (la règle et sa date sont dans deux articles), puis
-  `expectedFactsMissing` à 0 ; `q06` (35 M€ de mémoire), puis `unsourcedFigures` bloquant.
+- **Correction le même jour** : 6 passages (35 M€ sourcés sur `q06`) et `answer/7` (ne plus conclure « sans délai »),
+  mesurés configuration par configuration (ADR-014) ; `answer/6`, trop large, écartée (`q16` refusée, `q03` ambiguë).
+  Rapport `2026-11-06-0844` : 51/58 vérifiées, 2 échecs (`q30`, `q33`), aucun chiffre sans passage cité, 8/36 infidèles.
+- **Points ouverts, à traiter avant la vidéo de la S9** : `q33` reste fausse à moitié (« s'applique dès que ces
+  conditions sont remplies », sans la date : la règle et sa date sont dans deux articles), `expectedFactsMissing` à
+  ramener à 0 ; aucune marge sur `failed` (`q30` et `q33`) ; `qualification-juridique` sur `q30` et `t05` dans `0844`,
+  à relire et à surveiller.

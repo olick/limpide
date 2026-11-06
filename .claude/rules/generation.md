@@ -15,7 +15,7 @@ paths:
   test) : nouveau texte = nouveau fichier, qui garde la consigne empêchant de trancher la situation de l'utilisateur.
 - Modèles épinglés par version datée ; tarifs **en euros** dans `Generation:Prices` (majoration UE comprise, depuis
   le 2026-10-20 : comme les factures), tarif absent = coût
-  « inconnu », jamais deviné. Température 0, 5 passages. Clé `Mistral:ApiKey` exigée seulement par les commandes qui
+  « inconnu », jamais deviné. Température 0, 6 passages. Clé `Mistral:ApiKey` exigée seulement par les commandes qui
   appellent un modèle (`ask`, `evaluate-answers`, `judge-calibrate`) ; `Generation:Endpoint` / `Generation:ApiKey`
   (et `Judge:ApiKey` pour le juge) pour un autre fournisseur compatible OpenAI (essais).
 - **Garde-fous** déterministes (`citation-inventee`, `sans-citation`, `reponse-tronquee`, `reponse-vide`,
