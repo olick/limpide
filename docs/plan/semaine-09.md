@@ -379,5 +379,14 @@ Suite de l'AI Act consolidé : l'évaluation contrôlait l'article cité, jamais
   conditions sont remplies », sans la date : la règle et sa date sont dans deux articles), `expectedFactsMissing` à
   ramener à 0.
 - **`q30` : faux positif corrigé.** `qualification-juridique` réagissait à « base légale » (terme du RGPD) dans une
-  phrase avec « votre » ou « vous » : ce n'était ni « vous pouvez… à condition », ni un effet des 6 passages. Marge
-  d'une question attendue sur `failed`, à confirmer par la passe de la chaîne.
+  phrase avec « votre » ou « vous » : ce n'était ni « vous pouvez… à condition », ni un effet des 6 passages. Passe de
+  la chaîne de la PR #81 : `q30` passe, mais `q01` est tronquée (`reponse-tronquee`), donc toujours 2 échecs : à mesurer,
+  `MaxOutputTokens` à relever si ça se confirme avec 6 passages.
+
+### Déploiement bloqué par une faille d'apt (2026-11-06, hors plan)
+
+Les déploiements des PR #79 et #80 ont échoué à l'analyse des images : CVE-2026-109518 (apt, élevée, correctif publié le
+2026-11-04), présente dans l'image Microsoft du 2026-11-05 (apt 2.8.3). L'attaque vise l'installation d'un paquet par
+apt ; aucune image ne lance apt, et elles tournent sans droits root. Exception datée dans `deploy/grype.yaml`, vérifiée
+par `deploy/analyser-images.sh` (2 exceptions, ✅). Rien ne rappelle l'échéance : **retirer l'exception au plus tard le
+2026-11-30**, dès qu'une image de base embarque apt 2.8.4ubuntu0.1.
