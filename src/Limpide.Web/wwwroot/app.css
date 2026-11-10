@@ -487,10 +487,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .separe > p { margin: 0; }
 .separe > p + p { margin-top: 0.4rem; } /* le filet court sur toute la largeur, le texte garde sa mesure */
 
-.etapes { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(7rem, 1fr)); gap: 1rem; }
-.etapes li { display: flex; flex-direction: column; gap: 0.35rem; padding-top: 0.75rem; border-top: 2px solid var(--band-step); font-size: 0.95rem; }
-.etapes .etape-nom { font-size: 0.8125rem; color: var(--band-muted); }
-
 .chiffres { margin: 1.4rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1.25rem; }
 .chiffres div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.25rem; padding-top: 0.75rem; border-top: 2px solid var(--text); }
 .chiffres dt { font-size: 0.95rem; color: var(--muted); }
@@ -499,6 +495,127 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .liste-filets { list-style: none; margin: 0; padding: 0; }
 .liste-filets li { padding: 0.6rem 0; border-top: 1px solid var(--border); }
 .couche-fond .liste-filets li { border-top-color: var(--band-rule); }
+
+/* Ce que fait Limpide, en une minute : le parcours d'une question (étapes ouvertes au clic), un aperçu d'une réponse,
+   ce que Limpide ne fait pas, trois chiffres, le reste replié. En colonne jusqu'à 64rem, en rangée au-delà. */
+.page:has(> .apropos) { max-width: 74rem; } /* six étapes de front : plus large que les autres pages en coupe */
+.apropos .titre-bloc { margin: 0 0 0.6rem; font-size: 1.375rem; font-weight: 800; }
+
+.parcours { margin-top: 2.5rem; }
+.parcours-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.15rem 0.9rem; margin-bottom: 1rem; }
+.parcours-tete .titre-bloc { margin: 0; }
+.parcours-tete p { margin: 0; font-size: 0.875rem; color: var(--muted); }
+.parcours-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
+.etape { position: relative; }
+/* Flèche vers l'étape suivante, dans l'intervalle : vers le bas en colonne, vers la droite en rangée. */
+.etape:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -0.875rem;
+    width: 22px;
+    height: 14px;
+    transform: translate(-50%, 50%) rotate(90deg);
+    background-color: var(--accent);
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
+    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+@media (forced-colors: active) { .etape:not(:last-child)::after { background-color: CanvasText; } }
+.etape-oui { position: absolute; left: calc(50% + 1rem); bottom: -0.875rem; transform: translateY(50%); font-size: 0.75rem; font-weight: 800; line-height: 1; color: var(--accent); }
+
+.etape-carte {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.8rem 0.9rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+.etape-carte:hover { border-color: var(--accent); }
+.etape-carte:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+.decision .etape-carte { background: var(--accent-soft); border: 1.5px dashed var(--control-border); }
+.etape-carte[aria-expanded="true"] { background: var(--accent-soft); border: 2px solid var(--accent); }
+.decision .etape-carte[aria-expanded="true"] { border-style: dashed; } /* reste une étape de tri, même ouverte */
+.etape-tete { align-self: stretch; display: flex; align-items: center; gap: 0.6rem; }
+.etape-num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 0.8125rem; font-weight: 800; }
+.etape-titre { font-weight: 800; line-height: 1.25; }
+.etape-chevron { flex: 0 0 auto; margin-left: auto; color: var(--accent); transition: transform 0.15s; }
+.etape-carte[aria-expanded="true"] .etape-chevron { transform: rotate(180deg); }
+.etape-resume { font-size: 0.9375rem; line-height: 1.4; }
+/* Où l'étape a lieu ; plein quand la question quitte le serveur de Limpide. */
+.repere { margin-top: auto; display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.1rem 0.5rem 0.1rem 0.4rem; border: 1px solid var(--border); border-radius: 0.6rem; color: var(--muted); font-size: 0.8125rem; font-weight: 600; line-height: 1.3; }
+.repere svg { flex: 0 0 auto; }
+.repere-sortie { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.etape-detail-ici { margin: 0.5rem 0 0; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 0.9375rem; }
+.etape-detail-dessous, .vers-reponse { display: none; }
+
+.apropos-bas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; margin-top: 2.25rem; }
+.ne-fait-pas { list-style: none; margin: 0; padding: 0; }
+.ne-fait-pas li { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-top: 1px solid var(--border); }
+.ne-fait-pas svg { flex: 0 0 auto; margin-top: 0.2rem; }
+
+/* Aperçu schématique d'une réponse : les trois couches, sans contenu réel. */
+.apercu { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 18px 40px rgba(20, 33, 43, 0.10); }
+.apercu > div { padding: 1rem 1.25rem 1.1rem; }
+.apercu p { margin: 0; font-weight: 800; }
+.apercu p span { font-weight: 400; color: var(--muted); }
+.apercu-reponse { background: var(--surface); }
+.apercu-textes { background: var(--source-bg); border-top: 1px solid var(--border); }
+.apercu-calcul { background: var(--band); color: var(--band-ink); }
+.apercu-calcul p span { color: var(--band-muted); }
+.apercu i { display: block; height: 0.5rem; border-radius: 0.25rem; background: var(--border); }
+.apercu-lignes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.apercu-ligne { display: flex; align-items: center; gap: 0.5rem; }
+.apercu-ligne i { width: 62%; }
+.apercu-ligne + .apercu-ligne i { width: 44%; }
+.apercu-ligne b { padding: 0 0.35rem; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-size: 0.75rem; }
+.apercu-extrait { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; padding-left: 0.85rem; border-left: 3px solid var(--source-rule); }
+.apercu-extrait i { width: 92%; }
+.apercu-extrait i:first-child { width: 40%; background: var(--source-rule); opacity: 0.55; } /* place de la source */
+.apercu-extrait i:last-child { width: 70%; }
+
+.chiffres-cles { list-style: none; margin: 2.75rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem 1.5rem; }
+.chiffres-cles li { display: flex; flex-direction: column; gap: 0.15rem; padding: 1rem 1.25rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.chiffres-cles strong { font-size: 2rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.chiffres-cles span { font-size: 0.9375rem; }
+.chiffres-cles a { align-self: flex-start; display: inline-flex; align-items: center; min-height: 2.75rem; margin-bottom: -0.5rem; font-size: 0.9375rem; font-weight: 600; }
+
+.plus-loin { margin-top: 2.75rem; }
+.plus-loin details { border-bottom: 1px solid var(--border); }
+.plus-loin details:first-of-type { border-top: 1px solid var(--border); }
+.plus-loin summary { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 3.25rem; padding: 0.4rem 0.25rem; font-weight: 800; list-style: none; cursor: pointer; }
+.plus-loin summary::-webkit-details-marker { display: none; }
+.plus-loin summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.plus-loin summary svg { flex: 0 0 auto; transition: transform 0.15s; }
+.plus-loin details[open] summary svg { transform: rotate(180deg); }
+.plus-loin details > :not(summary) { max-width: 72ch; margin: 0 0.25rem 0.9rem; }
+
+@media (prefers-reduced-motion: reduce) {
+    .etape-chevron, .plus-loin summary svg { transition: none; }
+}
+
+@media (min-width: 64rem) {
+    .parcours-etapes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1.75rem; }
+    .etape-carte { min-height: 9.5rem; }
+    .etape:not(:last-child)::after { left: auto; right: -0.875rem; top: 50%; bottom: auto; transform: translate(50%, -50%); }
+    .etape-oui { left: auto; right: -0.875rem; top: 50%; bottom: auto; transform: translate(50%, -1.4rem); }
+    /* Le détail dans l'étape reste lu par les lecteurs d'écran ; à l'œil, il s'affiche sous la rangée. */
+    .etape-detail-ici { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+    .etape-detail-dessous { display: grid; grid-template-columns: 13rem minmax(0, 1fr); gap: 1.5rem; margin-top: 1rem; padding: 1.15rem 1.5rem; border: 1.5px solid var(--accent); border-radius: 12px; background: var(--surface); }
+    .etape-detail-dessous p { margin: 0; max-width: 78ch; }
+    .etape-detail-titre { font-size: 1.125rem; font-weight: 800; line-height: 1.3; }
+    /* Flèche de la dernière étape vers l'aperçu de la réponse, sous la sixième colonne. */
+    .vers-reponse { display: flex; justify-content: center; width: calc((100% - 5 * 1.75rem) / 6); margin-left: auto; padding-top: 0.25rem; color: var(--accent); }
+    .apropos-bas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5rem; margin-top: 0.25rem; align-items: start; }
+}
 
 /* Chemin d'une question et mise à jour des textes : boîtes reliées par des flèches ; en colonne sur mobile. */
 .chemin { list-style: none; margin: 1.1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem 0; }
@@ -515,7 +632,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
 @media (forced-colors: active) { .chemin li:not(:last-child)::after { background-color: CanvasText; } }
-.chemin .boite { display: block; min-width: 7rem; padding: 0.5rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 0.875rem; }
+.chemin .boite { display: block; min-width: 7rem; max-width: 13rem; padding: 0.5rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 0.875rem; }
 .chemin .boite.controle { border-style: dashed; border-color: var(--control-border); }
 .chemin .boite strong { display: block; }
 .chemin .boite span { color: var(--muted); }

@@ -513,3 +513,21 @@ Flèche d'envoi tournée vers le haut. **Défilement** : le message d'état `.sr
 à la fenêtre ; au bout d'un long fil, toute la page défilait (double barre, en-tête hors écran), probablement aussi la
 cause du décalage après fermeture du clavier sur téléphone, à vérifier en production. `.thread { position: relative; }`.
 ADR-019 et ADR-022 amendés ; les écrans `F2-*` de la maquette ne sont pas à jour.
+
+### « Ce que fait Limpide » en une minute (2026-11-10)
+
+Retour d'Alexandre : la page `/a-propos` (≈ 900 mots en trois couches) ne se comprenait pas en moins d'une minute.
+Maquette d'abord (écrans `F3-a-propos` et `F3-a-propos-mobile` de la toile, qui remplacent `F2-a-propos`), deux
+itérations. **Parcours d'une question** en six étapes, en rangée sur ordinateur et en colonne sous 64rem : chaque carte
+porte un nom, trois ou quatre mots et un **repère de lieu** (« Serveur Limpide, France », plein quand la question sort :
+OVHcloud France pour la vectorisation, Mistral AI UE pour la rédaction) ; le détail s'ouvre au clic (une étape à la
+fois ; rendu dans l'étape pour les lecteurs d'écran, sous la rangée à l'œil sur ordinateur). Des dépliants dans chaque
+carte ont été écartés : la rangée se déformait, et des cartes réduites à leur nom ne s'expliquaient plus sans clic.
+Puis un aperçu schématique des trois couches d'une réponse (sans extrait ni source, même inventés), « Il ne fait pas »
+(« Il fait » doublait le parcours), trois chiffres et deux `<details>`. Environ 110 mots visibles au lieu de 900 ;
+chiffres toujours lus dans la configuration et le rapport servi. **Doublon avec « Comment il est construit »** : son
+« chemin d'une question » (8 boîtes) passe aux mêmes six étapes, vues par leurs briques et leurs décisions, avec un lien
+vers `/a-propos` ; le contrôle de la question (ADR-021), qu'il montrait seul, entre dans le détail de l'étape 1.
+Il présentait aussi les contrôles de la réponse comme bloquants : ils ne font que signaler (corrigé sur les deux pages).
+Relectures : conservation nuancée (renvoi à « Vos données », sauvegardes comprises), libellé « Au fond » comme dans une
+réponse, pas de Literata dans l'aperçu.
