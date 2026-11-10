@@ -11,6 +11,9 @@
 - **Précisé le 2026-11-01**, d'après la maquette finale (direction 2, « la réponse en coupe ») : en-tête réduit au
   nom, à la mention de l'article 50 et au menu ; « Reprendre cette question » à côté de « Donner mon avis » ;
   radiographie en direct ; « Mentions légales, sources et licences » en bas du panneau ; pages secondaires en coupe.
+- **Précisé les 2026-11-06 et 2026-11-10**, d'après la démo en ligne (retours d'Alexandre) : liens légaux dans le
+  menu seulement, « Vos données » porté par la durée de conservation sous le champ ; encarts de l'accueil retirés,
+  exemples en pastilles envoyées au clic ; flèche d'envoi vers le haut.
 
 ## Contexte
 
@@ -60,18 +63,20 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   Limpide, Comment il est construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert ; en bas, en
   petit, Mentions légales, sources et licences (une seule page : éditeur et hébergeur, licences du corpus, code et
   crédits) et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
-- **Accueil vide** : les trois encarts (« ce qu'il fait, ne fait pas, pourquoi il montre tout »), repliés sur leur
-  titre, texte complet d'origine déplié au clic (pas au survol, qui ne marche pas au tactile), et les exemples en
-  boutons. Ils disparaissent à la première question ; le même texte reste dans « Ce que fait Limpide ».
-  Pas de commande « / » : les visiteurs ne sont pas tous techniciens.
-- **Champ fixé en bas**, bouton flèche nommé « Poser la question » (icône seule, sablier pendant l'attente), texte
-  d'aide court (« Posez votre question » ; les exemples sont sur l'accueil), contour de focus visible sur le cadre du
-  champ. Sous le champ, visibles sans action avant l'envoi : « pas de donnée personnelle », durée de conservation,
-  case « Ne pas conserver ma question » (libellé de l'ADR-019), lien « Vos données ». Dès la première réponse,
-  au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
+- **Accueil vide** : une colonne centrée, le titre, la phrase d'accroche et trois exemples en pastilles sous un titre
+  visible, envoyés au clic ; ils disparaissent à la première question, qui montre les couches. Pas de commande « / » :
+  les visiteurs ne sont pas tous techniciens. Jusqu'au 2026-11-10, trois encarts repliés (« ce qu'il fait, ne fait
+  pas, pourquoi il montre tout », texte complet au clic, repris dans « Ce que fait Limpide ») occupaient la droite :
+  peu ouverts, ils prenaient le pas sur les exemples, et une légende fixe des trois couches a été essayée puis
+  écartée. Les exemples étaient recopiés dans le champ : ils passaient pour du texte et le clic semblait sans effet.
+- **Champ fixé en bas**, bouton flèche vers le haut nommé « Poser la question » (icône seule, sablier pendant
+  l'attente), texte d'aide court (« Posez votre question » ; les exemples sont sur l'accueil), contour de focus visible
+  sur le cadre du champ. Sous le champ, visibles sans action avant l'envoi : « pas de donnée personnelle », durée de
+  conservation, case « Ne pas conserver ma question » (libellé de l'ADR-019) ; la durée est le lien vers « Vos
+  données ». Dès la première réponse, au-dessus : « **Chaque question est traitée seule** : redonnez le contexte. »
   Sur téléphone (2026-11-02, le pied de page prenait plus du tiers d'un écran de 320 px), mêmes informations en
   version courte : « Gardée 30 jours : pas de donnée personnelle. », case « Ne pas garder ma question » sur la ligne
-  du lien, « **Question traitée seule** : redonnez le contexte. » Les pages qui renvoient à la case la décrivent sans
+  suivante, « **Question traitée seule** : redonnez le contexte. » Les pages qui renvoient à la case la décrivent sans
   citer son libellé.
 - **Chaque réponse est un bloc « en coupe »** à trois couches : en surface la réponse, dessous les textes cités,
   au fond le calcul (« Sous le capot », replié sur une ligne avec les étapes, la durée, le coût et les contrôles).
@@ -101,11 +106,15 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
 - **Information à deux niveaux (ADR-019)** : une ligne sous le champ, le détail dans `/confidentialite`, qui doit
   continuer à tout dire (durée, masquage, destinataires, opposition). Cette page change dans la même PR si la ligne
   courte renvoie à un détail qui n'y figure pas encore.
-- **Lien vers `/confidentialite`** : l'ADR-019 le place « en bas de chaque page ». Le pied de page disparaît ; le lien
-  est sous le champ (page des questions, sans ouvrir de menu) et dans le panneau latéral sur toutes les pages (menu
-  sur mobile). C'est le seul point de l'ADR-019 que cette décision modifie.
-- **Avertissement juridique** : il quitte le bas de chaque réponse pour la pastille de l'en-tête et l'encart « ne
-  juge pas votre cas ». Le garde-fou `qualification-juridique` reste affiché dans la réponse concernée.
+- **Lien vers `/confidentialite`** : l'ADR-019 le place « en bas de chaque page » ; c'est le seul point de l'ADR-019
+  que cette décision modifie. Le pied de page disparaît. Le lien est dans le panneau latéral sur toutes les pages
+  (menu sur mobile) et, sous le champ, porté par la durée de conservation (« gardée 30 jours »), sans ouvrir de menu.
+  Jusqu'au 2026-11-06, un lien « Vos données » distinct sous le champ et un pied de page de secours doublaient le
+  menu ; le pied de page ne subsiste qu'en `<noscript>`, seul accès aux pages légales quand le menu ne s'ouvre pas.
+- **Avertissement juridique** : il quitte le bas de chaque réponse pour la pastille de l'en-tête et l'encart « ne juge
+  pas votre cas ». Depuis le 2026-11-10, l'encart est retiré de l'accueil : la pastille de l'en-tête suffit, et la
+  phrase reste dans « Ce que fait Limpide ». Le garde-fou `qualification-juridique` reste affiché dans la réponse
+  concernée.
 - **Le fil vit dans la session Blazor** : perdu au rechargement de la page, jamais enregistré en plus de ce que
   `answer_log` et `question_log` gardent déjà. Le quota et le délai de 60 s par question ne changent pas.
 - **Pages nouvelles** : Ce que fait Limpide, Votre avis, Comment il est construit (`TechStack.razor`, toujours à

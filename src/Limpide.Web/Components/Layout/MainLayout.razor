@@ -22,18 +22,19 @@
         </button>
     </header>
 
-    @* Le pied de page est hors de <main> pour garder son rôle de repère (attribution du corpus), mais dans la zone
-       qui défile. *@
     <div class="thread">
         <main class="page">
             @Body
         </main>
 
-        <footer class="site-footer">
-            @* Liens de secours, accessibles sans le menu (Blazor déconnecté, script bloqué). Sources et licences du corpus :
-               page des mentions légales, et sous chaque extrait cité. *@
-            <p><a href="/mentions-legales">Mentions légales, sources et licences</a><span aria-hidden="true"> · </span><a href="/confidentialite">Vos données</a></p>
-        </footer>
+        @* Ces deux pages sont dans le menu, sur toutes les pages ; il s'ouvre par limpide.js, même Blazor déconnecté.
+           Script bloqué, ces liens restent le seul accès. Sources et licences du corpus : page des mentions légales,
+           et sous chaque extrait cité. *@
+        <noscript>
+            <footer class="site-footer">
+                <p><a href="/mentions-legales">Mentions légales, sources et licences</a><span aria-hidden="true"> · </span><a href="/confidentialite">Vos données</a></p>
+            </footer>
+        </noscript>
     </div>
 
     <SectionOutlet SectionName="composer" />

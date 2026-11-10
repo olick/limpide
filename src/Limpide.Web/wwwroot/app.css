@@ -111,7 +111,9 @@ a { color: var(--accent); }
 
 /* Gabarit : la fenêtre entière, en 100dvh pour suivre le clavier sur mobile ; seule la zone du fil défile. */
 .app { display: flex; flex-direction: column; height: 100vh; height: 100dvh; }
-.thread { flex: 1 1 auto; min-height: 0; overflow-y: auto; }
+/* position : les éléments masqués (.sr-only, en absolute) se placent dans le fil ; sans elle, ils se plaçaient par
+   rapport à la fenêtre et, au bout d'un long fil, faisaient défiler la page entière (double barre de défilement). */
+.thread { position: relative; flex: 1 1 auto; min-height: 0; overflow-y: auto; }
 
 .page, .site-footer, .composer form {
     max-width: 50rem;
@@ -316,8 +318,7 @@ h1, h2, h3 { line-height: 1.25; }
 .limites > :first-child { flex: 1 1 auto; }
 .compteur { font-variant-numeric: tabular-nums; }
 .conservation { display: flex; flex-wrap: wrap; align-items: center; gap: 0 1.1rem; font-size: 0.875rem; color: var(--muted); }
-.conservation a { display: inline-flex; align-items: center; min-height: 2.75rem; }
-.keep-choice { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; color: var(--text); cursor: pointer; }
+.keep-choice { display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem; margin-left: auto; color: var(--text); cursor: pointer; }
 .keep-choice input[type="checkbox"] { width: 1.125rem; height: 1.125rem; margin: 0; accent-color: var(--accent); cursor: pointer; }
 
 button { font: inherit; cursor: pointer; }
@@ -580,26 +581,33 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .avis-page .feedback textarea:focus-visible, .avis-page .feedback button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .avis-page .feedback button:disabled { opacity: 0.6; cursor: progress; }
 
-/* Accueil, fil vide (ADR-022, écran O1) : la promesse et les exemples, la coupe des trois couches à côté. */
+/* Accueil, fil vide (ADR-022, écran O1) : la promesse et les exemples, sur une colonne centrée (coupe des trois
+   couches retirée le 2026-11-10). */
 .page:has(> .intro), .page:has(> .fil) { max-width: 82rem; }
-.intro { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 37.5rem); gap: 4.5rem; align-items: center; padding-block: 1.5rem; }
-.intro h1 { margin: 0; max-width: 11ch; font-size: clamp(2.5rem, 5vw, 4.25rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance; }
-.intro .lede { margin: 1.4rem 0 0; max-width: 46ch; color: var(--muted); font-size: 1.125rem; }
-.exemples { margin-top: 1.75rem; display: flex; flex-direction: column; align-items: flex-start; gap: 0.25rem; }
-.exemple { min-height: 2.75rem; padding: 0.5rem 0; border: 0; border-bottom: 1px solid var(--border); background: none; color: var(--text); font: inherit; text-align: start; cursor: pointer; }
-@media (hover: hover) { .exemple:hover { color: var(--accent); border-bottom-color: currentColor; } }
-.strates { margin: 0; border-radius: 14px; overflow: hidden; box-shadow: 0 18px 40px rgba(20, 33, 43, 0.10); }
-.strate + .strate { border-top: 1px solid var(--border); }
-.strate.couche-fond { border-top-color: var(--band-rule); }
-.strate > button { width: 100%; display: grid; grid-template-columns: 6.5rem minmax(0, 1fr) auto; gap: 1rem; align-items: center; min-height: 5.5rem; padding: 1.25rem 1.5rem; border: 0; background: none; color: inherit; font: inherit; text-align: start; cursor: pointer; }
-.strate .couche-label { padding-top: 0; }
-.strate > button:focus-visible, .fond-ligne button:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; } /* à l'intérieur : le conteneur arrondi rogne ce qui dépasse */
-.strate-titre { display: flex; flex-direction: column; }
-.strate-titre strong { font-size: 1.25rem; font-weight: 800; line-height: 1.3; }
-.strate-titre span { color: var(--muted); }
-.couche-fond .strate-titre span { color: var(--band-muted); }
-.strate button[aria-expanded="true"] .chevron { transform: rotate(180deg); }
-.strate p { margin: 0; max-width: 60ch; padding: 0 1.5rem 1.4rem 9rem; }
+.intro { display: flex; flex-direction: column; align-items: center; max-width: 46rem; margin: 0 auto; padding-block: 3rem 1.5rem; text-align: center; }
+.intro .exemples { align-items: center; margin-inline: auto; }
+.intro .exemple { text-align: center; }
+.intro h1 { margin: 0 auto; max-width: 14ch; font-size: clamp(2.5rem, 5vw, 4.25rem); font-weight: 800; line-height: 1.02; letter-spacing: -0.035em; text-wrap: balance; }
+.intro .lede { margin: 1.4rem auto 0; max-width: 46ch; color: var(--muted); font-size: 1.125rem; }
+.exemples-titre { margin: 1.75rem 0 0.6rem; font-size: 0.875rem; font-weight: 600; color: var(--muted); }
+/* Exemples en pastilles discrètes, à la largeur de leur texte ; la cible garde ses 44 px de haut. Au survol (ou à
+   l'appui), le texte fonce, le contour et un voile prennent l'accent, la pastille glisse un peu vers la droite. */
+.exemples { display: flex; flex-direction: column; align-items: flex-start; gap: 0.4rem; max-width: 36rem; }
+.exemple { min-height: 2.75rem; padding: 0.4rem 1rem; border: 1px solid var(--border); border-radius: 1.375rem; background: transparent; color: var(--muted); font: inherit; font-size: 0.9375rem; line-height: 1.35; text-align: start; cursor: pointer; }
+.exemple:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; color: var(--text); }
+.exemple:active { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+@media (hover: hover) { .exemple:hover { color: var(--text); border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); } }
+@media (prefers-reduced-motion: no-preference) {
+    /* Arrivée échelonnée, puis réaction au survol et à l'appui. « backwards » : l'animation finie ne retient pas
+       transform, que le survol reprend. */
+    .exemple { animation: exemple-entree 0.45s ease-out backwards; transition: color 0.15s, border-color 0.15s, background-color 0.15s, transform 0.2s ease-out; }
+    .exemple:nth-child(2) { animation-delay: 0.1s; }
+    .exemple:nth-child(3) { animation-delay: 0.2s; }
+    .exemple:active { transform: scale(0.98); }
+    @media (hover: hover) { .exemple:hover { transform: translateX(4px); } }
+}
+@keyframes exemple-entree { from { opacity: 0; transform: translateY(6px); } }
+.fond-ligne button:focus-visible { outline: 2px solid currentColor; outline-offset: -4px; } /* à l'intérieur : le conteneur arrondi rogne ce qui dépasse */
 
 /* Fil de questions : chaque question en coupe, la réponse en surface, les textes cités dessous, le calcul au fond. */
 .fil { padding-block: 0.5rem 1rem; }
@@ -707,8 +715,8 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
 }
 
 @media (max-width: 62rem) {
-    /* l'accueil réserve 37,5rem à la coupe : en dessous, le titre se serrait sur une colonne d'une centaine de pixels */
-    .intro { grid-template-columns: minmax(0, 1fr); gap: 2rem; padding-block: 0.5rem; }
+    /* écran étroit : moins d'espace au-dessus du titre de l'accueil */
+    .intro { padding-block: 1.5rem 0.5rem; }
 }
 
 @media (max-width: 48rem) {
@@ -738,15 +746,13 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1rem; }
     .chiffres dd { font-size: 1.625rem; }
 
-    .strate > button, .fond-ligne button { grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; padding: 1rem; }
-    .strate .couche-label { grid-column: 1 / -1; }
-    .strate p { padding: 0 1rem 1.1rem; }
+    .fond-ligne button { grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; padding: 1rem; }
     .question > h2 { font-size: 1.5rem; }
     .question-actions { justify-content: stretch; }
     .question-actions .bouton-secondaire { flex: 1 1 100%; }
     .champ { gap: 0.5rem; padding: 0.25rem 0.25rem 0.25rem 0.75rem; }
     /* Pied de page compact, textes courts : le champ tient sur une ligne, l'information de conservation sur une autre,
-       la case et le lien sur la troisième. */
+       la case sur la troisième. */
     .libelle-long { display: none; }
     .libelle-court { display: inline; }
     /* Cartes des textes cités : le titre prend toute la largeur, l'action passe dessous (relecture de la PR #74 :
@@ -758,6 +764,7 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .seule, .limites, .conservation { font-size: 0.8125rem; line-height: 1.4; }
     .conservation { gap: 0 1rem; }
     .conservation-texte { flex: 1 1 100%; }
+    .keep-choice { margin-left: 0; } /* seule sur sa ligne : sous le texte, pas à l'opposé */
     /* La case d'opposition (ADR-019) garde sa cible de 44 px : un appui manqué vaut un choix non exercé. */
 
     /* Décisions d'architecture : la date passe sous le titre (trois colonnes ne tiennent pas, même en date courte). */
