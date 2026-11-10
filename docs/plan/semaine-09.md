@@ -495,3 +495,21 @@ faire. `gate` passée aux trois, 0,0038 € par question, classement inchangé (
 - **Points ouverts** : `t05`, `q28`, `q33` ; autres ancres sur de longs textes qui pourraient cacher un faux OK ; Large 3 en
   rédaction et gpt-oss-120b comme juge, après la S9.
 
+
+### Retouches de l'interface : liens, accueil, défilement (2026-11-06 et 10)
+
+Retours d'Alexandre sur la démo en ligne. **Liens** : « Vos données » et les mentions légales étaient en triple (pied de
+page, sous le champ, menu) ; ils ne restent que dans le menu, le pied de page subsiste en `<noscript>` (sans script, le
+menu ne s'ouvre pas). Sous le champ, c'est « gardée 30 jours » qui renvoie à `/confidentialite`, pour garder
+l'information à deux niveaux de l'ADR-019 au moment de la saisie ; case d'opposition alignée à droite sur ordinateur.
+**Exemples** : sans titre visible et soulignés d'un filet pâle, ils passaient pour du texte, et le clic les recopiait
+dans le champ en bas d'écran, loin du geste. Désormais pastilles discrètes sous « Essayez une de ces questions : »,
+apparues l'une après l'autre et qui réagissent au survol, envoyées au clic (même chemin que le champ : quota, case
+d'opposition, conservation ; le brouillon du champ reste). **Coupe de l'accueil** : les volets dépliables, avec leur
+ombre, attiraient plus l'œil que les exemples. Une légende fixe des trois couches a été essayée ; Alexandre a préféré
+l'accueil sans coupe, sur une colonne centrée : la première réponse montre les couches, et l'avertissement juridique
+reste dans l'en-tête. Accroche : « Limpide répond, vous montre les textes qu'il cite et le calcul derrière sa réponse. »
+Flèche d'envoi tournée vers le haut. **Défilement** : le message d'état `.sr-only` en fin de fil se plaçait par rapport
+à la fenêtre ; au bout d'un long fil, toute la page défilait (double barre, en-tête hors écran), probablement aussi la
+cause du décalage après fermeture du clavier sur téléphone, à vérifier en production. `.thread { position: relative; }`.
+ADR-019 et ADR-022 amendés ; les écrans `F2-*` de la maquette ne sont pas à jour.

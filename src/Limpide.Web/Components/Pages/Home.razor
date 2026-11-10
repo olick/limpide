@@ -78,7 +78,7 @@ else
                 }
                 else
                 {
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12l7 7 7-7" /></svg>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7" /></svg>
                     <span class="bouton-libelle">Poser la question</span>
                 }
             </button>
@@ -94,12 +94,11 @@ else
             <p class="error" role="alert">@error</p>
         }
         @* Conservation du texte (ADR-019), information à deux niveaux (ADR-022) : une ligne avant l'envoi, avec la case
-           d'opposition ; le détail (masquage, adresse IP, destinataires) dans « Vos données ». *@
+           d'opposition ; le détail (masquage, adresse IP, destinataires) dans « Vos données », où mène le lien de la durée. *@
         <div class="conservation">
-            @* Sur téléphone, la même information en une ligne, puis la case et le lien sur la suivante. *@
-            <span class="conservation-texte"><span class="libelle-long">N'y mettez pas de donnée personnelle, la question est gardée @KeptQuestion.Retention.Days jours.</span><span class="libelle-court">Gardée @KeptQuestion.Retention.Days jours : pas de donnée personnelle.</span></span>
+            @* Sur téléphone, la même information en une ligne, puis la case sur la suivante. *@
+            <span class="conservation-texte"><span class="libelle-long">N'y mettez pas de donnée personnelle, la question est <a href="/confidentialite">gardée @KeptQuestion.Retention.Days jours</a>.</span><span class="libelle-court"><a href="/confidentialite">Gardée @KeptQuestion.Retention.Days jours</a> : pas de donnée personnelle.</span></span>
             <label class="keep-choice"><input type="checkbox" @bind="doNotKeep" /> <span class="libelle-long">Ne pas conserver ma question</span><span class="libelle-court">Ne pas garder ma question</span></label>
-            <a href="/confidentialite">Vos données</a>
         </div>
     </form>
     </div>
@@ -168,11 +167,8 @@ else
         Navigation.NavigateTo("/", replace: true);
     }
 
-    private void PickExample(string example)
-    {
-        question = example;
-        focusField = fitField = true;
-    }
+    /// <summary>Exemple de l'accueil : envoyé tel quel, le brouillon éventuel du champ reste en place.</summary>
+    private Task PickExample(string example) => SendAsync(example, fromField: false);
 
     private void Resume(ThreadEntry entry)
     {
@@ -193,13 +189,15 @@ else
         feedbackFor = null;
     }
 
-    private async Task AskAsync()
+    private Task AskAsync() => SendAsync(question, fromField: true);
+
+    private async Task SendAsync(string input, bool fromField)
     {
         if (busy)
             return;
 
         // Bouton toujours actif, contrôle à l'envoi : un bouton grisé sans explication ne dit pas quoi faire.
-        var text = question.Trim();
+        var text = input.Trim();
         if (text.Length == 0)
         {
             error = "Écrivez d'abord votre question, ou choisissez un des exemples.";
@@ -236,8 +234,13 @@ else
         remainingUntil = DateTimeOffset.UtcNow + quota.WindowResetsIn; // passé ce délai, le quota du visiteur repart à zéro
         var entry = Thread.Add(text);
         var kept = doNotKeep ? null : KeptQuestion.From(text);
-        question = "";
-        fitField = true;
+        if (fromField)
+        {
+            question = "";
+            fitField = true;
+        }
+        else
+            focusEntry = entry.Id; // le bouton de l'exemple disparaît avec l'accueil : le focus va sur la question
         showEntry = entry.Id;
         status = "Recherche en cours, la réponse peut prendre plusieurs secondes.";
         busy = true;

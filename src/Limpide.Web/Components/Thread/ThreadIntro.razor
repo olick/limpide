@@ -1,58 +1,23 @@
-@* Accueil, fil vide (ADR-022, écran O1) : la promesse, des exemples, et la coupe des trois couches, repliées ; chaque
-   couche s'ouvre sur le texte complet de l'ancien accueil. *@
+@* Accueil, fil vide (ADR-022, écran O1) : la promesse et des exemples, centrés. La coupe des trois couches est retirée
+   le 2026-11-10 (elle prenait le pas sur les exemples) ; la première réponse la montre, et son texte complet est dans
+   « Ce que fait Limpide ». *@
 <div class="intro">
     <div>
         <h1>Une réponse, et tout ce qu'il y a dessous.</h1>
-        <p class="lede">Posez une question sur l'AI Act ou les fiches IA de la CNIL. Limpide répond, et vous laisse descendre
-            jusqu'aux textes et jusqu'au calcul.</p>
-        <div class="exemples" role="group" aria-label="Exemples de questions">
+        <p class="lede">Posez une question sur l'AI Act ou les fiches IA de la CNIL. Limpide répond, vous montre les textes qu'il cite
+            et le calcul derrière sa réponse.</p>
+        @* Titre visible et pastilles : sans eux, les exemples passaient pour du texte. *@
+        <p class="exemples-titre" id="exemples-titre">Essayez une de ces questions :</p>
+        <div class="exemples" role="group" aria-labelledby="exemples-titre">
             @foreach (var example in Examples)
             {
                 <button type="button" class="exemple" @onclick="() => OnExample.InvokeAsync(example)">@example</button>
             }
         </div>
     </div>
-
-    <figure class="strates" aria-label="Ce que fait Limpide, en coupe">
-        @foreach (var stratum in Strata)
-        {
-            var open = opened.Contains(stratum.Key);
-            <div class="strate @stratum.Css">
-                <button type="button" aria-expanded="@(open ? "true" : "false")" aria-controls="strate-@stratum.Key"
-                        @onclick="() => Toggle(stratum.Key)">
-                    <span class="couche-label">@stratum.Depth</span>
-                    <span class="strate-titre"><strong>@stratum.Title</strong><span>@stratum.Promise</span></span>
-                    <svg class="chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-                </button>
-                <div id="strate-@stratum.Key">
-                    @if (open)
-                    {
-                        <p>@stratum.Text</p>
-                    }
-                </div>
-            </div>
-        }
-    </figure>
 </div>
 
 @code {
-    private sealed record Stratum(string Key, string Depth, string Title, string Promise, string Text, string Css);
-
-    // Textes de l'ancien accueil, mot pour mot (repris aussi dans « Ce que fait Limpide »).
-    private static readonly Stratum[] Strata =
-    [
-        new("reponse", "En surface", "La réponse", "une formulation, pas un avis juridique",
-            "Il ne dit pas si votre situation est conforme : c'est le rôle d'un professionnel du droit. C'est une IA, qui "
-            + "peut se tromper : les textes cités font foi, pas sa formulation.", "couche-surface"),
-        new("textes", "Dessous", "Les textes officiels", "cités mot pour mot",
-            "Il cherche dans le règlement européen sur l'IA (AI Act) et les 17 fiches pratiques IA de la CNIL les passages "
-            + "qui répondent à votre question, et rédige une réponse qui renvoie à chacun d'eux.", "couche-dessous"),
-        new("calcul", "Au fond", "Le calcul", "chaque étape, chaque contrôle, son coût",
-            "Sous chaque réponse, la couche « Au fond » explique comment elle a été produite : quels textes ont été "
-            + "retenus, par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.", "couche-fond"),
-    ];
-
     public static readonly string[] Examples =
     [
         "Quelles utilisations de l'IA sont interdites en Europe ?",
@@ -60,15 +25,7 @@
         "Comment informer les personnes quand on entraîne un modèle sur des données collectées par webscraping ?",
     ];
 
-    /// <summary>Exemple choisi : recopié dans le champ, pas envoyé.</summary>
+    /// <summary>Exemple choisi : envoyé tout de suite (quota et conservation comme une question tapée).</summary>
     [Parameter]
     public EventCallback<string> OnExample { get; set; }
-
-    private readonly HashSet<string> opened = [];
-
-    private void Toggle(string key)
-    {
-        if (!opened.Remove(key))
-            opened.Add(key);
-    }
 }
