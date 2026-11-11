@@ -223,6 +223,8 @@
     @if (!Entry.Pending)
     {
         <div class="question-actions">
+            @* Entrée du fil de lecture (ADR-022) : un lien, puisqu'il change de page, à l'allure des deux boutons. *@
+            <a class="bouton-secondaire" href="/a-propos">Comment il a trouvé ça ?</a>
             <button type="button" class="bouton-secondaire" @onclick="() => OnResume.InvokeAsync(Entry)">Reprendre cette question</button>
             <button type="button" class="bouton-secondaire" @onclick="() => OnFeedback.InvokeAsync(Entry)">Donner mon avis sur cette réponse</button>
         </div>

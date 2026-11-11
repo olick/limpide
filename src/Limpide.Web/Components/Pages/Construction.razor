@@ -12,10 +12,6 @@
 @* Comment il est construit, en coupe (ADR-022) : l'essentiel et quatre choix, le chemin d'une question et la mise à
    jour des textes, puis les briques (TechStack.razor) et l'index des décisions, lu dans docs/adr/README.md. *@
 <div class="coupe-page">
-    <a class="back-link" href="/">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
-        Poser une question
-    </a>
     <h1>Comment il est construit</h1>
     <p class="lede">Chaque brique a été choisie, mesurée quand c'était possible, et documentée dans une décision
         d'architecture qu'on peut relire.</p>
@@ -33,7 +29,7 @@
                     <div><dt>GPU&nbsp;: modèles appelés par API</dt><dd>0</dd></div>
                     @if (Served is { } served)
                     {
-                        <div><dt>questions de test avant chaque mise en ligne</dt><dd>@served.Questions</dd></div>
+                        <div><dt>questions de test, rejouées dès qu'un changement peut modifier les réponses</dt><dd>@served.Questions</dd></div>
                     }
                 </dl>
 
@@ -48,7 +44,7 @@
                         France&nbsp;; rédaction par Mistral AI, hébergé dans l'Union européenne. Pas de modèle local, pas de GPU
                         à payer. <span class="muted">@Adr("004") et @Adr("012")</span></li>
                     <li><strong>Rien en ligne sans évaluation.</strong> Chaque modification passe la compilation et les
-                        tests&nbsp;; avant chaque mise en ligne, l'évaluation tourne dans un environnement jetable, et un seuil
+                        tests&nbsp;; avant chaque mise en ligne qui peut changer les réponses, l'évaluation tourne dans un environnement jetable, et un seuil
                         manqué la bloque. <span class="muted">@Adr("014"), @Adr("015") et @Adr("016")</span></li>
                 </ul>
             </div>
@@ -120,6 +116,9 @@
             </div>
         </section>
     </div>
+
+    @* Fil de lecture (ADR-022) : la question qu'on se pose après cette page, et le chemin pour y répondre. *@
+    <LaSuite Chapitre="2" />
 </div>
 
 @code {

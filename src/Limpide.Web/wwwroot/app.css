@@ -124,12 +124,13 @@ a { color: var(--accent); }
 .page { padding-block: 1.5rem 1rem; }
 .composer form { max-width: 58.75rem; } /* aligné sur les questions du fil */
 
-/* En-tête fixe : nom, mention de l'article 50, menu. Sur mobile, la mention passe sur sa propre ligne, entière. */
+/* En-tête fixe : nom, mention de l'article 50, retour aux questions (hors de leur écran), menu. Sur mobile, la
+   mention passe sur sa propre ligne, entière. */
 .site-header {
     flex: 0 0 auto;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-areas: "brand notice menu";
+    grid-template-columns: auto minmax(0, 1fr) auto auto;
+    grid-template-areas: "brand notice retour menu";
     align-items: center;
     gap: 0.25rem 0.75rem;
     padding: 0.5rem 1rem;
@@ -166,14 +167,41 @@ a { color: var(--accent); }
 
 @media (max-width: 40rem) {
     .site-header {
-        grid-template-columns: auto minmax(0, 1fr);
-        grid-template-areas: "menu brand" "notice notice";
+        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-areas: "menu brand retour" "notice notice notice";
         padding: 0.25rem 1rem 0.6rem;
     }
     .menu-button { width: 2.75rem; padding: 0; justify-content: center; border: 0; background: none; margin-left: -0.6rem; }
     .menu-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
     .brand { font-size: 1.25rem; }
     .ai-notice { font-size: 0.8125rem; }
+    .retour-questions { padding: 0 0.8rem; font-size: 0.9375rem; }
+}
+
+/* Fil de lecture (ADR-022) : le retour aux questions, toujours au même endroit, et le filet des quatre chapitres,
+   qui sert de bordure à l'en-tête (le chapitre en cours plein). */
+.retour-questions {
+    grid-area: retour;
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border: 2px solid transparent; /* visible en contraste élevé (forced-colors), où le fond disparaît */
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.retour-questions:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+.site-header.avec-filet { border-bottom: 0; }
+.fil-filet { flex: 0 0 auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; height: 3px; background: var(--bg); }
+.fil-filet span { background: var(--border); }
+.fil-filet .en-cours { background: var(--accent); }
+@media (forced-colors: active) {
+    .fil-filet span { background: GrayText; }
+    .fil-filet .en-cours { background: Highlight; }
 }
 
 /* Panneau du menu : <dialog> modal, à droite sur ordinateur, à gauche sur mobile. */
@@ -264,7 +292,6 @@ a { color: var(--accent); }
 .theme-hint { margin: 0.4rem 0 0; font-size: 0.8125rem; color: var(--muted); }
 .menu-foot { display: flex; flex-wrap: wrap; gap: 0 1.1rem; margin: 0.75rem 0 0; padding-top: 0.75rem; border-top: 1px solid var(--border); font-size: 0.82rem; }
 .menu-foot a { display: inline-flex; align-items: center; min-height: 2.75rem; color: var(--muted); }
-.menu-foot a[aria-current="page"] { color: var(--text); font-weight: 800; }
 
 /* Champ de question fixé en bas de la fenêtre. */
 .composer {
@@ -455,6 +482,22 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 /* Pages secondaires en coupe (ADR-022) : un bloc à trois couches, de l'essentiel au détail puis à la méthode.
    Le papier et le serif restent réservés aux textes officiels ; la bande du fond est la couche la plus profonde. */
 .page:has(> .coupe-page) { max-width: 65rem; }
+/* « La suite » (LaSuite.razor), en bas de chaque chapitre du fil : la question suivante, un vrai chiffre, un bouton. */
+.la-suite { margin-top: 4.5rem; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; padding: 1.5rem 1.25rem; border-radius: 16px; background: var(--accent-soft); }
+.la-suite-chapeau { margin: 0; font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.la-suite h2 { margin: 0.35rem 0 0; font-size: 1.6rem; font-weight: 800; line-height: 1.15; }
+.la-suite-accroche { margin: 0.75rem 0 0; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.25rem 0.75rem; }
+.la-suite-accroche strong { font-size: 2.25rem; font-weight: 800; line-height: 1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.la-suite-actions { display: flex; flex-direction: column; align-items: stretch; gap: 0.25rem; }
+.la-suite-actions a { display: inline-flex; align-items: center; justify-content: center; min-height: 2.75rem; font-weight: 600; }
+.la-suite-actions .la-suite-bouton { min-height: 3.25rem; padding: 0 1.5rem; border: 2px solid transparent; border-radius: 10px; background: var(--accent); color: var(--on-accent); font-size: 1.0625rem; font-weight: 800; text-decoration: none; }
+.la-suite-bouton:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+@media (min-width: 48rem) {
+    .la-suite { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 1.25rem 2.5rem; padding: 1.75rem 2rem; }
+    .la-suite h2 { font-size: 1.875rem; }
+    .la-suite-actions { align-items: flex-end; }
+}
+
 .back-link { display: inline-flex; align-items: center; gap: 0.35rem; min-height: 2.75rem; margin-left: -0.35rem; padding: 0 0.35rem; font-weight: 600; text-decoration: none; }
 .coupe-page h1 { margin: 0.4rem 0 0; font-size: 2.75rem; font-weight: 800; line-height: 1.08; letter-spacing: -0.03em; }
 .coupe-page .lede { margin: 0.75rem 0 0; max-width: 60ch; color: var(--muted); font-size: 1.125rem; }
@@ -787,6 +830,8 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .passages-fournis { font-size: 0.875rem; font-variant-numeric: tabular-nums; }
 .passages-fournis tr.est-cite td { font-weight: 600; }
 .question-actions { margin-top: 0.9rem; display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem; }
+a.bouton-secondaire { display: inline-flex; align-items: center; justify-content: center; text-decoration: none; }
+a.bouton-secondaire:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .bouton-secondaire { min-height: 2.75rem; padding: 0.5rem 1rem; border: 1.5px solid var(--control-border); border-radius: 8px; background: var(--surface); color: var(--text); font: inherit; font-size: 0.9375rem; font-weight: 600; cursor: pointer; }
 button.back-link { border: 0; background: none; color: var(--accent); font: inherit; font-weight: 600; cursor: pointer; }
 .seule { margin: 0; font-size: 0.875rem; }

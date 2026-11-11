@@ -539,3 +539,18 @@ cliquables étaient contre-intuitifs, et des liens dans les encarts court-circui
 chapitre par le menu, on avance par « La suite »). Restent trois chiffres clés sans lien : 2 textes, les questions de
 test du rapport servi, 30 jours de conservation. Le coût, les quotas et la liste des fiches quittent la page (coût dans
 « Au fond » et sur `/evaluation`, limites près du champ, liste dans `/mentions-legales`).
+
+### Fil de lecture entre les pages qui expliquent Limpide (2026-11-11)
+
+Demande d'Alexandre : naviguer d'une page à l'autre comme on lit, avec envie d'aller voir la suite, et revenir aux
+questions de partout. Maquette d'abord (écrans `F4-fil-*`, accueil compris), une dizaine d'allers-retours. Retenu :
+quatre chapitres, chacun répond à la question que pose le précédent (Ce que fait Limpide, « Avec quoi c'est fait ? »
+Comment il est construit, « Et ça marche vraiment ? » Résultats, « Et mes données ? » Vos données) ; en bas de chacun,
+une carte « La suite » avec un vrai chiffre lu en direct ; « Vos questions » dans l'en-tête hors de l'écran des
+questions (le fil vit dans le circuit, perdu seulement au rechargement) ; un filet de quatre segments en bordure de
+l'en-tête ; « Comment il a trouvé ça ? » à côté des deux boutons sous chaque réponse ; menu dans l'ordre du fil, avec
+les mentions légales en entrée normale (en petit en bas du panneau, on ne les voyait pas). Écartés en route : un
+sous-menu rangé sous l'en-tête et replié au défilement (hauteur, contenu qui bouge, navigation cachée), une rangée de
+chapitres en pastilles puis « Chapitre 1 sur 4 · voir les chapitres » (trop présents), des numéros dans le menu, un
+lien d'entrée sur l'accueil vide, des flèches sur les boutons, des liens dans les encarts (deux façons d'avancer qui
+ne mènent pas au même endroit). ADR-022 complétée.

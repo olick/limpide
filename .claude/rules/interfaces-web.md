@@ -34,3 +34,7 @@ paths:
   près du champ ; mention IA dans l'en-tête fixe ; conservation (ADR-019) sur une ligne sous le champ, détail dans
   `/confidentialite` ; « Sous le capot » et l'avis rattachés à chaque réponse. Envoyer l'historique au modèle est une
   autre décision, à mesurer par l'évaluation.
+- **Fil de lecture** (ADR-022, 2026-11-11) : quatre chapitres dans l'ordre de `MainLayout.Chapters` (filet sous
+  l'en-tête), reliés par `LaSuite.razor` (chiffres lus en direct) ; « Vos questions » dans l'en-tête hors de l'écran
+  des questions. Une seule façon d'avancer : pas de liens entre chapitres dans les pages, pas de flèche sur les
+  boutons. Une nouvelle page explicative entre dans le fil (chapitres, menu, `LaSuite`) ou reste hors du fil.
