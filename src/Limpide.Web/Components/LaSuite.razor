@@ -1,0 +1,97 @@
+@using System.Globalization
+@using Limpide.Infrastructure
+@inject ArchitectureDecisions Decisions
+@inject EvaluationReports Reports
+@inject GenerationSettings Generation
+@inject EmbeddingOptions Embedding
+@inject AnswerInstructions Instructions
+@inject QuestionThread Thread
+
+@* « La suite », en bas de chaque chapitre du fil de lecture (ADR-022) : pour titre, la question qu'on se pose après
+   la page ; un vrai chiffre, lu en direct ; un bouton vers le chapitre suivant. On avance par ici, on saute un
+   chapitre par le menu, on revient aux questions par l'en-tête. Le chapitre 4 ferme le fil. Maquette : F4-fil-*. *@
+<section class="la-suite" aria-labelledby="la-suite-titre">
+    <div>
+        <p class="la-suite-chapeau">@(Next is null ? "Fin du fil" : "La suite")</p>
+        <h2 id="la-suite-titre">@Title</h2>
+        @if (Figure is not null || Teaser is not null)
+        {
+            <p class="la-suite-accroche">
+                @if (Figure is { } figure)
+                {
+                    <strong>@figure</strong>
+                }
+                <span>@Teaser</span>
+            </p>
+        }
+    </div>
+    <div class="la-suite-actions">
+        @if (Next is { } next)
+        {
+            <a class="la-suite-bouton" href="@next.Href">@next.Label</a>
+        }
+        else
+        {
+            <a class="la-suite-bouton" href="/">@(Thread.Entries.Count > 0 ? "Vos questions" : "Poser une question")</a>
+            <a href="/avis">Donner votre avis</a>
+            <a href="https://github.com/olick/limpide" target="_blank" rel="noopener noreferrer">Voir le code<span class="sr-only"> (nouvel onglet)</span></a>
+        }
+    </div>
+</section>
+
+@code {
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    /// <summary>Chapitre de la page qui porte la carte : 1 Ce que fait Limpide, 2 Comment il est construit,
+    /// 3 Résultats d'évaluation, 4 Vos données (ordre du menu).</summary>
+    [Parameter, EditorRequired]
+    public int Chapitre { get; set; }
+
+    private sealed record Link(string Label, string Href);
+
+    private EvaluationRun? Served => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
+
+    private Link? Next => Chapitre switch
+    {
+        1 => new("Comment il est construit", "/construction"),
+        2 => new("Résultats d'évaluation", "/evaluation"),
+        3 => new("Vos données", "/confidentialite"),
+        _ => null,
+    };
+
+    private string Title => Chapitre switch
+    {
+        1 => "Avec quoi c'est fait ?",
+        2 => "Et ça marche vraiment ?",
+        3 => "Et mes données ?",
+        _ => "À vous.",
+    };
+
+    private string? Figure => Chapitre switch
+    {
+        1 when Decisions.All.Count > 0 => Decisions.All.Count.ToString(French),
+        2 when Served is { } served => served.Questions.ToString(French),
+        3 => $"{KeptQuestion.Retention.Days} jours",
+        _ => null,
+    };
+
+    private string? Teaser => Chapitre switch
+    {
+        1 when Decisions.All.Count > 0 => "décisions d'architecture écrites, chacune relisible. Et pas un seul GPU.",
+        1 => "Les briques, les choix et ce qui les ferait réviser.",
+        2 when Served is { } served => $"questions de test, rejouées dès qu'un changement peut modifier les réponses{Verdicts(served)}.",
+        2 => "Les questions de test, et ce qu'elles ne disent pas.",
+        3 => "de conservation de votre question, sauf si vous refusez\u00A0; hors sauvegardes.",
+        _ => "Posez une question, et regardez ce qu'il y a dessous.",
+    };
+
+    // « : 51 vérifiées, 6 à relire, 1 échec » d'après le rapport servi ; rien si le rapport ne les donne pas.
+    private static string Verdicts(EvaluationRun run)
+    {
+        if (run.Ok is not { } ok) return "";
+        var parts = new List<string> { $"{ok} vérifiée{(ok > 1 ? "s" : "")}" };
+        if (run.ToReview is { } review and > 0) parts.Add($"{review} à relire");
+        if (run.Failed is { } failed and > 0) parts.Add($"{failed} échec{(failed > 1 ? "s" : "")}");
+        return " : " + string.Join(", ", parts);
+    }
+}

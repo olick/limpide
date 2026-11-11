@@ -14,6 +14,9 @@
 - **Précisé les 2026-11-06 et 2026-11-10**, d'après la démo en ligne (retours d'Alexandre) : liens légaux dans le
   menu seulement, « Vos données » porté par la durée de conservation sous le champ ; encarts de l'accueil retirés,
   exemples en pastilles envoyées au clic ; flèche d'envoi vers le haut.
+- **Précisé le 2026-11-11**, d'après la maquette `F4-fil-*` (retours d'Alexandre) : fil de lecture entre les pages
+  qui expliquent Limpide (« La suite », filet de chapitre, « Vos questions » dans l'en-tête, « Comment il a trouvé
+  ça ? » sous chaque réponse), menu dans l'ordre du fil, mentions légales en entrée du menu.
 
 ## Contexte
 
@@ -58,11 +61,29 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
 
 - **En-tête fixe** : « Limpide », la mention « IA · Vous échangez avec une IA : elle peut se tromper, ce n'est pas
   un conseil juridique », visible en permanence (article 50), et le bouton « Menu ». Pas de raccourcis ni de
-  « Nouvelle question » dans l'en-tête, sur ordinateur comme sur mobile : le panneau suffit.
-- **Panneau latéral** (menu sur mobile, en fenêtre modale), icône et libellé : Nouvelle question, Ce que fait
-  Limpide, Comment il est construit, Résultats d'évaluation, Votre avis, Vos données, Projet ouvert ; en bas, en
-  petit, Mentions légales, sources et licences (une seule page : éditeur et hébergeur, licences du corpus, code et
-  crédits) et Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
+  « Nouvelle question » dans l'en-tête, sur ordinateur comme sur mobile : le panneau suffit. Seule exception depuis le
+  2026-11-11 : hors de l'écran des questions, « Vos questions » (« Poser une question » si le fil est vide) y ramène,
+  voir « Fil de lecture » plus bas.
+- **Panneau latéral** (menu sur mobile, en fenêtre modale), icône et libellé, dans l'ordre du fil de lecture depuis
+  le 2026-11-11 : Nouvelle question (« Vos questions » hors de l'écran des questions quand le fil en contient : on y
+  revient sans le vider), Ce que fait Limpide, Comment il est construit, Résultats d'évaluation, Vos données, Votre
+  avis, Mentions légales, sources et licences (une seule page : éditeur et hébergeur, licences du corpus, code et
+  crédits ; une entrée comme les autres depuis le 2026-11-11, auparavant en petit en bas du panneau, peu visible),
+  Projet ouvert ; en bas, Back office (réservé à l'administrateur). L'entrée de la page en cours est marquée.
+- **Fil de lecture (2026-11-11)**, d'après la maquette `F4-fil-*` : les quatre pages qui expliquent Limpide se lisent
+  comme des chapitres, chacun répondant à la question que pose le précédent (Ce que fait Limpide, « Avec quoi c'est
+  fait ? » Comment il est construit, « Et ça marche vraiment ? » Résultats d'évaluation, « Et mes données ? » Vos
+  données). En bas de chacun, une carte « La suite » : cette question en titre, un vrai chiffre lu en direct (nombre
+  de décisions, questions de test du rapport servi, durée de conservation) et un bouton vers le chapitre suivant ; le
+  dernier ferme le fil (« À vous. », retour aux questions, avis, code). Un filet de quatre segments sert de bordure à
+  l'en-tête des chapitres, le chapitre en cours plein : un repère, sans numéro ni « chapitre 2 sur 4 », jugés trop
+  présents. On avance par « La suite », on saute un chapitre par le menu, on revient aux questions par l'en-tête : une
+  seule façon de faire chaque chose, d'où des chiffres sans lien dans les pages. On entre dans le fil par
+  « Comment il a trouvé ça ? », à côté de « Reprendre cette question » et « Donner mon avis » sous chaque réponse (un
+  lien, à l'allure des boutons) ; rien sur l'accueil vide, fait pour poser des questions. Écartés : un sous-menu
+  rangé sous l'en-tête qui se replie au défilement (hauteur prise, surtout sur mobile, contenu qui bouge, navigation
+  cachée), des flèches sur les boutons. Les pages secondaires perdent leur lien « Poser une question » en haut :
+  l'en-tête le porte.
 - **Accueil vide** : une colonne centrée, le titre, la phrase d'accroche et trois exemples en pastilles sous un titre
   visible, envoyés au clic ; ils disparaissent à la première question, qui montre les couches. Pas de commande « / » :
   les visiteurs ne sont pas tous techniciens. Jusqu'au 2026-11-10, trois encarts repliés (« ce qu'il fait, ne fait
@@ -98,8 +119,9 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   fenêtre au clic (texte de référence caché, focus à gérer) et le panneau à droite (deux panneaux et le fil sur
   ordinateur, à refaire pour le mobile).
 - Compteur de caractères et quota affichés **à l'approche des limites** seulement (à partir de 400 caractères, à
-  partir de 3 questions restantes). Les limites restent écrites dans « Ce que fait Limpide », et le message de refus
-  quand elles sont atteintes ne change pas.
+  partir de 3 questions restantes). Le message de refus quand elles sont atteintes ne change pas. Les limites étaient
+  aussi écrites dans « Ce que fait Limpide » jusqu'au 2026-11-11 ; la page, ramenée à une minute de lecture, ne les
+  donne plus (le coût d'une réponse reste dans sa couche du fond et sur les résultats d'évaluation).
 
 ## Conséquences
 
