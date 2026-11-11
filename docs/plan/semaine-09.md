@@ -554,3 +554,10 @@ sous-menu rangé sous l'en-tête et replié au défilement (hauteur, contenu qui
 chapitres en pastilles puis « Chapitre 1 sur 4 · voir les chapitres » (trop présents), des numéros dans le menu, un
 lien d'entrée sur l'accueil vide, des flèches sur les boutons, des liens dans les encarts (deux façons d'avancer qui
 ne mènent pas au même endroit). ADR-022 complétée.
+
+- **Point ouvert, laissé ainsi par décision d'Alexandre (2026-11-11)** : depuis la #97, le plafond de la démo (10 € par
+  mois) et les quotas (10 questions par heure et par visiteur, 60 par jour pour le site) ne sont plus écrits nulle part
+  à l'avance ; le quota ne s'affiche près du champ qu'à partir de 3 questions restantes, le coût d'une réponse reste
+  dans sa couche du fond et sur les résultats d'évaluation. Pas d'affichage pour l'instant. Si on y revient : une
+  ligne dans « Comment il est construit », valeurs lues dans `QuotaOptions` (le plafond de 10 € est un réglage du
+  fournisseur, pas de l'application).
