@@ -59,18 +59,18 @@
             <div>
                 <h2 id="co-chemin">Le chemin d'une question</h2>
                 <ol class="chemin" role="list" aria-label="Le chemin d'une question, étape par étape">
-                    <li><span class="boite"><strong>Votre question</strong><span>navigateur</span></span></li>
-                    <li><span class="boite controle"><strong>Contrôle de la question</strong><span>règles, avant tout envoi</span></span></li>
-                    <li><span class="boite"><strong>Vectorisation</strong><span>OVHcloud AI Endpoints, France</span></span></li>
-                    <li><span class="boite"><strong>Recherche</strong><span>PostgreSQL + pgvector</span></span></li>
-                    <li><span class="boite controle"><strong>Seuil @Generation.MinScore.ToString("0.00", French)</strong><span>sinon «&nbsp;je ne sais pas&nbsp;»</span></span></li>
-                    <li><span class="boite"><strong>Rédaction</strong><span>Mistral AI, Union européenne</span></span></li>
-                    <li><span class="boite controle"><strong>Contrôles</strong><span>renvois, verdict, consignes</span></span></li>
-                    <li><span class="boite"><strong>Réponse</strong><span>et ce qu'il y a dessous</span></span></li>
+                    @* Mêmes six étapes que le parcours de « Ce que fait Limpide » (APropos.razor), vues par leurs briques. *@
+                    <li><span class="boite controle"><strong>1. Votre question</strong><span>contrôlée par règles, avant tout envoi, @Adr("021")</span></span></li>
+                    <li><span class="boite"><strong>2. Sens</strong><span>@Embedding.Model, @EmbeddingHost, @Adr("012")</span></span></li>
+                    <li><span class="boite"><strong>3. Recherche</strong><span>PostgreSQL + pgvector, par le sens seul, @Adr("001")</span></span></li>
+                    <li><span class="boite controle"><strong>4. Assez proches&nbsp;?</strong><span>seuil @Generation.MinScore.ToString("0.00", French), sinon «&nbsp;je ne sais pas&nbsp;», @Adr("005")</span></span></li>
+                    <li><span class="boite"><strong>5. Rédaction</strong><span>@PlainLanguage.ModelName(Generation.Model), Union européenne, @Adr("004")</span></span></li>
+                    <li><span class="boite"><strong>6. Contrôles</strong><span>renvois, verdict, consignes, signalés sous la réponse</span></span></li>
                 </ol>
-                <p class="muted">Le contrôle de la question, le seuil et les contrôles de la réponse peuvent arrêter la
-                    question (encadrés en pointillés). Chaque étape est mesurée (durée, coût, garde-fou) et affichée sous
-                    la réponse.</p>
+                <p class="muted">Les étapes 1 et 4 peuvent arrêter la question (encadrés en pointillés)&nbsp;; l'étape 6
+                    n'arrête rien, elle signale ce qu'elle trouve. La durée, le coût et les garde-fous déclenchés sont
+                    affichés sous la réponse. Le même parcours, expliqué simplement&nbsp;: <a href="/a-propos">ce que fait
+                    Limpide</a>.</p>
 
                 <h2 class="separe">La mise à jour des textes</h2>
                 <p>Chaque semaine, Airflow lance six commandes .NET, chacune dans son conteneur. Elles s'échangent leur
@@ -129,12 +129,19 @@
 
     private EvaluationRun? Served => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
 
+    // Même règle que APropos.razor et la couche « Au fond » d'une réponse : le lieu suit le réglage Embedding.
+    private string EmbeddingHost => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase)
+        ? "OVHcloud AI Endpoints, France"
+        : Embedding.Endpoint.Host;
+
     private RenderFragment Adr(string number) => builder =>
     {
         var decision = Decisions.All.FirstOrDefault(d => d.Number == number);
         builder.OpenElement(0, "a");
         builder.AddAttribute(1, "href", decision is null ? AdrBase : AdrBase + decision.File);
-        builder.AddContent(2, $"décision {number}");
+        // Nom accessible complet : hors de sa phrase (liste des liens d'un lecteur d'écran), « décision 012 » ne dit rien.
+        if (decision is not null) builder.AddAttribute(2, "aria-label", $"décision {number} : {decision.Title}");
+        builder.AddContent(3, $"décision {number}");
         builder.CloseElement();
     };
 }

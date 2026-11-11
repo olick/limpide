@@ -1,153 +1,149 @@
 @page "/a-propos"
 @using System.Globalization
-@using Limpide.Core.Protection
 @using Limpide.Infrastructure
 @inject GenerationSettings Generation
 @inject EmbeddingOptions Embedding
 @inject AnswerInstructions Instructions
-@inject QuotaOptions Quota
 @inject EvaluationReports Reports
 
 <PageTitle>Ce que fait Limpide</PageTitle>
 
-@* Ce que fait Limpide, en coupe (ADR-022) : les trois textes de l'ancien accueil, mot pour mot, puis les textes
-   consultés et le calcul. Chiffres lus dans la configuration et le rapport d'évaluation servi, jamais recopiés. *@
-<div class="coupe-page">
+@* Ce que fait Limpide, lisible en une minute : le parcours d'une question en six étapes (détail au clic), ce que
+   l'on voit sous chaque réponse (en pleine largeur), ce que Limpide ne fait pas, trois chiffres clés sans lien.
+   Maquette : écran F4-fil-a-propos de la toile de la refonte. Chiffres lus dans la configuration et le rapport
+   d'évaluation servi, sauf le corpus (2 textes, 17 fiches), écrit ici comme dans Confidentialite.razor. *@
+<div class="coupe-page apropos">
     <a class="back-link" href="/">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
         Poser une question
     </a>
     <h1>Ce que fait Limpide</h1>
-    <p class="lede">Posez une question sur l'AI Act ou les fiches IA de la CNIL. Limpide répond, vous montre les textes qu'il cite
-        et le calcul derrière sa réponse.</p>
+    <p class="lede">Il cherche la réponse à votre question dans deux textes officiels sur l'IA, vous les cite mot pour
+        mot, et vous montre comment il a répondu.</p>
 
-    <div class="coupe">
-        <section class="couche couche-surface" aria-labelledby="ap-reponse">
-            <span class="couche-label">En surface</span>
-            <div>
-                <h2 id="ap-reponse">La réponse</h2>
-                <p class="couche-promise">une formulation, pas un avis juridique</p>
-                <div class="colonnes">
-                    <div>
-                        <h3>Ce qu'il fait</h3>
-                        <p>Il cherche dans le règlement européen sur l'IA (AI Act) et les 17 fiches pratiques IA de la CNIL
-                            les passages qui répondent à votre question, et rédige une réponse qui renvoie à chacun d'eux.</p>
-                    </div>
-                    <div>
-                        <h3>Ce qu'il ne fait pas</h3>
-                        <p>Il ne dit pas si votre situation est conforme&nbsp;: c'est le rôle d'un professionnel du droit. C'est
-                            une IA, qui peut se tromper&nbsp;: les textes cités font foi, pas sa formulation.</p>
-                    </div>
-                    <div>
-                        <h3>Une question à la fois</h3>
-                        <p>Chaque question est traitée seule&nbsp;: Limpide ne se souvient pas des précédentes. Redonnez le
-                            contexte à chaque fois, quitte à reprendre une question pour la compléter.</p>
-                    </div>
+    <section class="parcours" aria-labelledby="ap-parcours">
+        <div class="parcours-tete">
+            <h2 id="ap-parcours" class="titre-bloc">Le parcours de votre question</h2>
+            <p>Touchez une étape pour le détail.</p>
+        </div>
+
+        @* Le détail est rendu deux fois : dans l'étape (lu juste après son bouton ; affiché sur mobile, réservé aux
+           lecteurs d'écran sur ordinateur) et sous la rangée (affiché sur ordinateur seulement, masqué aux lecteurs
+           d'écran pour qu'ils ne l'entendent pas deux fois). *@
+        <ol class="parcours-etapes" role="list">
+            @foreach (var step in Steps)
+            {
+                <li class="@(step.Decision ? "etape decision" : "etape")">
+                    <button type="button" class="etape-carte" aria-expanded="@(selected == step.Number ? "true" : "false")"
+                            @onclick="() => Toggle(step.Number)">
+                        <span class="etape-tete">
+                            <span class="etape-num" aria-hidden="true">@step.Number</span>
+                            <span class="etape-titre">@step.Name<span class="sr-only"> : </span></span>
+                            <svg class="etape-chevron" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                        </span>
+                        <span class="etape-resume">@step.Summary<span class="sr-only">. Où : </span></span>
+                        <span class="@(step.LeavesServer ? "repere repere-sortie" : "repere")">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z" /><circle cx="12" cy="10" r="2.5" /></svg>
+                            @step.Where
+                        </span>
+                    </button>
+                    @if (selected == step.Number)
+                    {
+                        <p class="etape-detail-ici">@step.Detail</p>
+                    }
+                    @if (step.Decision)
+                    {
+                        <span class="etape-oui" aria-hidden="true">oui</span>
+                    }
+                </li>
+            }
+        </ol>
+
+        @if (Selected is { } open)
+        {
+            <div class="etape-detail-dessous" aria-hidden="true">
+                <p class="etape-detail-titre">@open.Number. @open.Name</p>
+                <p>@open.Detail</p>
+            </div>
+        }
+        <div class="vers-reponse" aria-hidden="true">
+            <svg width="24" height="48" viewBox="0 0 24 48" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v42" /><path d="M5 37l7 7 7-7" /></svg>
+        </div>
+    </section>
+
+    @* Aperçu schématique d'une réponse, en pleine largeur : chaque couche avec son nom réel (ThreadAnswer.razor), ce
+       qu'elle contient, et des lignes factices masquées. Aucun extrait ni aucune source, même inventés : papier et filet
+       doré en légende, Literata réservée aux vrais textes. *@
+    <section class="apercu-bloc" aria-labelledby="ap-voit">
+        <h2 id="ap-voit" class="titre-bloc">Sous chaque réponse</h2>
+        <div class="apercu">
+            <div class="apercu-couche apercu-reponse">
+                <span class="apercu-label">En surface</span>
+                <p><strong>La réponse<span class="sr-only"> : </span></strong><span>une formulation de l'IA, qui renvoie aux textes</span></p>
+                <div class="apercu-lignes" aria-hidden="true">
+                    <span class="apercu-ligne"><i></i><b>P1</b></span>
+                    <span class="apercu-ligne"><i></i></span>
+                    <span class="apercu-ligne"><i></i><b>P2</b></span>
                 </div>
             </div>
-        </section>
-
-        <section class="couche couche-dessous" aria-labelledby="ap-textes">
-            <span class="couche-label">Dessous</span>
-            <div>
-                <h2 id="ap-textes">Les textes officiels</h2>
-                <p class="couche-promise">cités mot pour mot</p>
-                <div class="colonnes">
-                    <div>
-                        <h3>Ce qu'il connaît</h3>
-                        <ul class="liste-filets" role="list">
-                            <li><strong>Le règlement (UE) 2024/1689 sur l'intelligence artificielle</strong><br />
-                                <span class="muted">dit «&nbsp;AI Act&nbsp;», dans sa version française publiée sur EUR-Lex</span></li>
-                            <li><strong>Les 17 fiches pratiques IA de la CNIL</strong><br />
-                                <span class="muted">synthèse, introduction, fiches 1 à 13 (la 4 en deux parties) et fiche
-                                    focus sur le moissonnage</span></li>
-                        </ul>
-                        <p>Les extraits affichés sous une réponse sont reproduits à l'identique, avec leur source et leur
-                            licence. Chaque texte est relevé à sa source&nbsp;; une nouvelle version n'est servie qu'après des
-                            contrôles de qualité.</p>
-                    </div>
-                    <div>
-                        <h3>Ce qu'il ne connaît pas</h3>
-                        <p>Aucun autre texte&nbsp;: ni le RGPD en entier, ni les lignes directrices de la Commission européenne,
-                            ni la jurisprudence. Une question qui en relève peut recevoir un «&nbsp;je ne sais pas&nbsp;»&nbsp;: c'est
-                            voulu, plutôt qu'une réponse sans texte pour l'appuyer.</p>
-                        <p>Sources, licences et conditions de réutilisation&nbsp;:
-                            <a href="/mentions-legales">mentions légales, sources et licences</a>.</p>
-                    </div>
-                </div>
+            <div class="apercu-couche apercu-textes">
+                <span class="apercu-label">Dessous</span>
+                <p><strong>Les textes cités<span class="sr-only"> : </span></strong><span>mot pour mot, avec leur source et leur licence</span></p>
+                <div class="apercu-extrait" aria-hidden="true"><i></i><i></i><i></i></div>
             </div>
-        </section>
-
-        <section class="couche couche-fond" aria-labelledby="ap-calcul">
-            <span class="couche-label">Au fond</span>
-            <div>
-                <h2 id="ap-calcul">Le calcul</h2>
-                <p class="couche-promise">chaque étape, chaque contrôle, son coût</p>
-
-                <h3>Les cinq étapes d'une réponse</h3>
-                <ol class="etapes" role="list">
-                    <li><span class="etape-nom">1. Sens</span>Votre question est transformée en vecteur, une suite de
-                        nombres qui représente son sens, @EmbeddingWhere.</li>
-                    <li><span class="etape-nom">2. Recherche</span>Les @Generation.PassageCount passages les plus proches par
-                        le sens sont retrouvés dans les textes. Si l'article 6 ou l'annexe III en fait partie, l'annexe III est ajoutée en entier, même si ses extraits sont moins proches.</li>
-                    <li><span class="etape-nom">3. Sujet</span>Si même le plus proche est trop éloigné (proximité sous
-                        @Generation.MinScore.ToString("0.00", French)), Limpide répond «&nbsp;je ne sais pas&nbsp;» sans appeler le
-                        modèle.</li>
-                    <li><span class="etape-nom">4. Rédaction</span>@PlainLanguage.ModelName(Generation.Model) rédige une
-                        réponse à partir de ces passages seulement, en renvoyant à chacun.</li>
-                    <li><span class="etape-nom">5. Contrôles</span>Chaque renvoi doit désigner un passage fourni&nbsp;; la réponse
-                        ne doit ni trancher votre situation, ni divulguer ses consignes.</li>
-                </ol>
-                <div class="separe">
-                    <p>Sous chaque réponse, la couche «&nbsp;Au fond&nbsp;» explique comment elle a été produite&nbsp;: quels textes ont été
-                        retenus, par quels contrôles elle est passée, ce qu'elle a coûté. Pour que vous puissiez vérifier.</p>
-                </div>
-
-                <div class="colonnes separe">
-                    <div>
-                        <h3>Ce que ça coûte</h3>
-                        @if (Served?.CostPerQuestion is { } cost)
-                        {
-                            <p>@cost.ToString("0.0000", French) @Served.CostCurrency par réponse en moyenne sur les questions
-                                de test, payés par l'auteur. La démo est plafonnée pour rester sous 10 € par mois.</p>
-                        }
-                        else
-                        {
-                            <p>Quelques millièmes d'euro par réponse, payés par l'auteur. La démo est plafonnée pour
-                                rester sous 10 € par mois.</p>
-                        }
-                    </div>
-                    <div>
-                        <h3>Les limites</h3>
-                        <ul>
-                            <li>@Home.MaxLength caractères par question&nbsp;;</li>
-                            <li>@Quota.PerClientPerHour questions par heure et par visiteur&nbsp;;</li>
-                            <li>@Quota.GlobalPerDay questions par jour pour tout le site&nbsp;;</li>
-                            <li>une réponse abandonnée au-delà de @((int)Home.AnswerTimeout.TotalSeconds) secondes.</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h3>Comment on sait que ça marche</h3>
-                        <p>Chaque modification passe par @(Served?.Questions.ToString(French) ?? "un jeu de") questions de
-                            test avant d'être mise en ligne. <a href="/evaluation">Les résultats, et ce qu'ils ne disent
-                            pas</a>.</p>
-                    </div>
-                </div>
-
-                <div class="separe">
-                    <h3>Où part votre question</h3>
-                    <p>@EmbeddingDestination pour la vectoriser&nbsp;; puis chez Mistral AI, dans l'Union européenne, si des
-                        passages assez proches existent. Elle est gardée @KeptQuestion.Retention.Days jours pour améliorer
-                        Limpide, sauf si vous cochez, sous le champ, la case pour ne pas la conserver. <a href="/confidentialite">Vos
-                        données</a>.</p>
-                </div>
+            <div class="apercu-couche apercu-calcul">
+                <span class="apercu-label">Au fond</span>
+                <p><strong>Comment elle a été produite<span class="sr-only"> : </span></strong><span>les passages retenus, les contrôles, la durée et le coût</span></p>
+                <div class="apercu-etapes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
             </div>
-        </section>
-    </div>
+        </div>
+    </section>
+
+    <section class="ne-fait-pas-bloc" aria-labelledby="ap-pas">
+        <h2 id="ap-pas" class="titre-bloc">Il ne fait pas</h2>
+        <ul class="ne-fait-pas" role="list">
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Pas d'avis juridique<span class="sr-only"> : </span></strong>Votre situation relève d'un professionnel du droit.</span>
+            </li>
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Pas de mémoire<span class="sr-only"> : </span></strong>Chaque question est traitée seule.</span>
+            </li>
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Rien hors de ses deux textes<span class="sr-only"> : </span></strong>Ni RGPD en entier, ni jurisprudence.</span>
+            </li>
+        </ul>
+    </section>
+
+    @* Trois chiffres clés, sans lien : on avance par le fil de lecture, on saute une page par le menu (maquette F4). *@
+    <ul class="chiffres-cles" role="list" aria-label="En chiffres">
+        <li>
+            <strong>2 textes</strong>
+            <span>l'AI Act et les 17 fiches pratiques IA de la CNIL</span>
+        </li>
+        @if (Served is { } served)
+        {
+            <li>
+                <strong>@served.Questions.ToString(French)</strong>
+                <span>questions de test avant chaque mise en ligne</span>
+            </li>
+        }
+        <li>
+            <strong>@KeptQuestion.Retention.Days jours</strong>
+            <span>de conservation de la question, sauf si vous refusez&nbsp;; hors sauvegardes</span>
+        </li>
+    </ul>
 </div>
 
 @code {
     private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    // Étape dont le détail est ouvert ; 0 : aucune. Une seule à la fois.
+    private int selected;
+
+    private void Toggle(int number) => selected = selected == number ? 0 : number;
 
     private EvaluationRun? Served => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
 
@@ -156,5 +152,42 @@
 
     private string EmbeddingWhere => AtOvh ? "chez OVHcloud, en France" : $"chez {Embedding.Endpoint.Host}";
 
-    private string EmbeddingDestination => AtOvh ? "Chez OVHcloud, en France," : $"Chez {Embedding.Endpoint.Host},";
+    /// <summary>
+    /// Une étape du parcours. <paramref name="Where"/> : où elle a lieu ; <paramref name="LeavesServer"/> : la question
+    /// quitte le serveur de Limpide (VPS OVHcloud à Gravelines), repère mis en avant.
+    /// </summary>
+    private sealed record Step(int Number, string Name, string Summary, string Where, bool LeavesServer, bool Decision, string Detail);
+
+    // Écrits ici comme dans Confidentialite.razor (ADR-019) : changer d'hébergeur ou de fournisseur de modèle, de
+    // corpus (17 fiches, 2 textes) ou de renvoi suivi (Search:Follow, annexe III) impose de relire aussi cette page.
+    private const string OnServer = "Serveur Limpide, France";
+
+    private Step? Selected => Steps.FirstOrDefault(s => s.Number == selected);
+
+    private IReadOnlyList<Step> Steps =>
+    [
+        new(1, "Votre question", $"jusqu'à {Home.MaxLength} caractères", OnServer, false, false,
+            "Elle est d'abord contrôlée : une question adressée aux consignes de l'assistant s'arrête là, sans "
+            + "recherche ni modèle. Chaque question est traitée seule : Limpide ne se souvient pas des précédentes. Elle est gardée "
+            + $"{KeptQuestion.Retention.Days} jours pour améliorer Limpide, sauf si vous cochez, sous le champ, la case "
+            + "pour ne pas la conserver. Durées exactes, sauvegardes comprises : page « Vos données »."),
+        new(2, "Sens", "traduite en nombres", AtOvh ? "OVHcloud, France" : Embedding.Endpoint.Host, true, false,
+            $"Votre question est transformée en vecteur, une suite de nombres qui représente son sens, {EmbeddingWhere}. "
+            + "C'est ce qui permet de retrouver des passages qui en parlent, même avec d'autres mots."),
+        new(3, "Recherche", $"{Generation.PassageCount} passages, 2 textes", OnServer, false, false,
+            $"Les {Generation.PassageCount} passages les plus proches par le sens sont retrouvés dans l'AI Act et les "
+            + "17 fiches IA de la CNIL. Si l'article 6 ou l'annexe III en fait partie, l'annexe III est ajoutée en "
+            + "entier, même si ses extraits sont moins proches."),
+        new(4, "Assez proches ?", "sinon « je ne sais pas »", OnServer, false, true,
+            "Si même le passage le plus proche est trop éloigné (proximité sous "
+            + $"{Generation.MinScore.ToString("0.00", French)}), Limpide répond « je ne sais pas » sans appeler "
+            + "le modèle : plutôt pas de réponse qu'une réponse sans texte pour l'appuyer."),
+        new(5, "Rédaction", "à partir des passages seuls", "Mistral AI, UE", true, false,
+            $"{PlainLanguage.ModelName(Generation.Model)} rédige une réponse à partir de ces passages seulement, en "
+            + "renvoyant à chacun. Votre question n'est envoyée à Mistral AI que si des passages assez proches existent."),
+        new(6, "Contrôles", "renvois vérifiés, aucun avis", OnServer, false, false,
+            "La réponse est relue une fois rédigée : chaque renvoi doit désigner un passage fourni, et elle ne doit "
+            + "ni trancher votre situation, ni divulguer ses consignes. Ce contrôle n'arrête pas la réponse : ce "
+            + "qu'il trouve est signalé dessous."),
+    ];
 }
