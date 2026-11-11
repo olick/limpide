@@ -1,18 +1,17 @@
 @page "/a-propos"
 @using System.Globalization
-@using Limpide.Core.Protection
 @using Limpide.Infrastructure
 @inject GenerationSettings Generation
 @inject EmbeddingOptions Embedding
 @inject AnswerInstructions Instructions
-@inject QuotaOptions Quota
 @inject EvaluationReports Reports
 
 <PageTitle>Ce que fait Limpide</PageTitle>
 
 @* Ce que fait Limpide, lisible en une minute : le parcours d'une question en six étapes (détail au clic), ce que
-   l'on voit sous chaque réponse, ce que Limpide ne fait pas, trois chiffres ; le reste replié. Maquette : écrans F3-*
-   de la toile de la refonte. Chiffres lus dans la configuration et le rapport d'évaluation servi, jamais recopiés. *@
+   l'on voit sous chaque réponse (en pleine largeur), ce que Limpide ne fait pas, trois chiffres clés sans lien.
+   Maquette : écran F4-fil-a-propos de la toile de la refonte. Chiffres lus dans la configuration et le rapport
+   d'évaluation servi, sauf le corpus (2 textes, 17 fiches), écrit ici comme dans Confidentialite.razor. *@
 <div class="coupe-page apropos">
     <a class="back-link" href="/">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 6l-6 6 6 6" /></svg>
@@ -72,115 +71,70 @@
         </div>
     </section>
 
-    <div class="apropos-bas">
-        <section aria-labelledby="ap-pas">
-            <h2 id="ap-pas" class="titre-bloc">Il ne fait pas</h2>
-            <ul class="ne-fait-pas" role="list">
-                <li>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                    <span><strong>Pas d'avis juridique&nbsp;:</strong> votre situation relève d'un professionnel du droit.</span>
-                </li>
-                <li>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                    <span><strong>Pas de mémoire&nbsp;:</strong> chaque question est traitée seule.</span>
-                </li>
-                <li>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                    <span><strong>Rien hors de ses deux textes&nbsp;:</strong> ni RGPD en entier, ni jurisprudence.</span>
-                </li>
-            </ul>
-        </section>
-
-        @* Aperçu schématique d'une réponse : libellés lisibles, lignes de texte factices masquées. Aucun extrait ni
-           aucune source, même inventés : papier et filet doré en légende, Literata réservée aux vrais textes. *@
-        <section aria-labelledby="ap-voit">
-            <h2 id="ap-voit" class="titre-bloc">Sous chaque réponse</h2>
-            <div class="apercu">
-                <div class="apercu-reponse">
-                    <p>La réponse <span>: une formulation de l'IA</span></p>
-                    <div class="apercu-lignes" aria-hidden="true">
-                        <span class="apercu-ligne"><i></i><b>P1</b></span>
-                        <span class="apercu-ligne"><i></i><b>P2</b></span>
-                    </div>
-                </div>
-                <div class="apercu-textes">
-                    <p>Les textes cités <span>: mot pour mot</span></p>
-                    <div class="apercu-extrait" aria-hidden="true">
-                        <i></i><i></i><i></i>
-                    </div>
-                </div>
-                <div class="apercu-calcul">
-                    <p>Au fond <span>: passages, contrôles, coût</span></p>
+    @* Aperçu schématique d'une réponse, en pleine largeur : chaque couche avec son nom réel (ThreadAnswer.razor), ce
+       qu'elle contient, et des lignes factices masquées. Aucun extrait ni aucune source, même inventés : papier et filet
+       doré en légende, Literata réservée aux vrais textes. *@
+    <section class="apercu-bloc" aria-labelledby="ap-voit">
+        <h2 id="ap-voit" class="titre-bloc">Sous chaque réponse</h2>
+        <div class="apercu">
+            <div class="apercu-couche apercu-reponse">
+                <span class="apercu-label">En surface</span>
+                <p><strong>La réponse<span class="sr-only"> : </span></strong><span>une formulation de l'IA, qui renvoie aux textes</span></p>
+                <div class="apercu-lignes" aria-hidden="true">
+                    <span class="apercu-ligne"><i></i><b>P1</b></span>
+                    <span class="apercu-ligne"><i></i></span>
+                    <span class="apercu-ligne"><i></i><b>P2</b></span>
                 </div>
             </div>
-        </section>
-    </div>
+            <div class="apercu-couche apercu-textes">
+                <span class="apercu-label">Dessous</span>
+                <p><strong>Les textes cités<span class="sr-only"> : </span></strong><span>mot pour mot, avec leur source et leur licence</span></p>
+                <div class="apercu-extrait" aria-hidden="true"><i></i><i></i><i></i></div>
+            </div>
+            <div class="apercu-couche apercu-calcul">
+                <span class="apercu-label">Au fond</span>
+                <p><strong>Comment elle a été produite<span class="sr-only"> : </span></strong><span>les passages retenus, les contrôles, la durée et le coût</span></p>
+                <div class="apercu-etapes" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i></div>
+            </div>
+        </div>
+    </section>
 
+    <section class="ne-fait-pas-bloc" aria-labelledby="ap-pas">
+        <h2 id="ap-pas" class="titre-bloc">Il ne fait pas</h2>
+        <ul class="ne-fait-pas" role="list">
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Pas d'avis juridique<span class="sr-only"> : </span></strong>Votre situation relève d'un professionnel du droit.</span>
+            </li>
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Pas de mémoire<span class="sr-only"> : </span></strong>Chaque question est traitée seule.</span>
+            </li>
+            <li>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                <span><strong>Rien hors de ses deux textes<span class="sr-only"> : </span></strong>Ni RGPD en entier, ni jurisprudence.</span>
+            </li>
+        </ul>
+    </section>
+
+    @* Trois chiffres clés, sans lien : on avance par le fil de lecture, on saute une page par le menu (maquette F4). *@
     <ul class="chiffres-cles" role="list" aria-label="En chiffres">
+        <li>
+            <strong>2 textes</strong>
+            <span>l'AI Act et les 17 fiches pratiques IA de la CNIL</span>
+        </li>
         @if (Served is { } served)
         {
             <li>
                 <strong>@served.Questions.ToString(French)</strong>
                 <span>questions de test avant chaque mise en ligne</span>
-                <a href="/evaluation">Les résultats</a>
             </li>
-            @if (served.CostPerQuestion is { } cost)
-            {
-                <li>
-                    <strong>@cost.ToString("0.0000", French)&nbsp;@served.CostCurrency</strong>
-                    <span>par réponse, payés par l'auteur</span>
-                </li>
-            }
         }
         <li>
             <strong>@KeptQuestion.Retention.Days jours</strong>
-            <span>de conservation de la question</span>
-            <a href="/confidentialite">Le détail&nbsp;: vos données</a>
+            <span>de conservation de la question, sauf si vous refusez&nbsp;; hors sauvegardes</span>
         </li>
     </ul>
-
-    <section class="plus-loin" aria-labelledby="ap-plus">
-        <h2 id="ap-plus" class="titre-bloc">Pour aller plus loin</h2>
-        <details>
-            <summary>
-                Les textes qu'il connaît
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-            </summary>
-            <ul class="liste-filets" role="list">
-                <li><strong>Le règlement (UE) 2024/1689 sur l'intelligence artificielle</strong><br />
-                    <span class="muted">dit «&nbsp;AI Act&nbsp;», dans sa version française publiée sur EUR-Lex</span></li>
-                <li><strong>Les 17 fiches pratiques IA de la CNIL</strong><br />
-                    <span class="muted">synthèse, introduction, fiches 1 à 13 (la 4 en deux parties) et fiche focus sur
-                        le moissonnage</span></li>
-            </ul>
-            <p>Aucun autre texte&nbsp;: ni le RGPD en entier, ni les lignes directrices de la Commission européenne, ni la
-                jurisprudence. Chaque texte est relevé à sa source&nbsp;; une nouvelle version n'est servie qu'après des
-                contrôles de qualité.</p>
-            <p><a href="/mentions-legales">Mentions légales, sources et licences</a></p>
-        </details>
-        <details>
-            <summary>
-                Coût et limites de la démo
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
-            </summary>
-            @if (Served?.CostPerQuestion is { } average)
-            {
-                <p>@average.ToString("0.0000", French) @Served.CostCurrency par réponse en moyenne sur les questions de test,
-                    payés par l'auteur. La démo est plafonnée pour rester sous 10&nbsp;€ par mois.</p>
-            }
-            else
-            {
-                <p>Quelques millièmes d'euro par réponse, payés par l'auteur. La démo est plafonnée pour rester sous
-                    10&nbsp;€ par mois.</p>
-            }
-            <ul>
-                <li>@Home.MaxLength caractères par question&nbsp;;</li>
-                <li>@Quota.PerClientPerHour questions par heure et par visiteur&nbsp;;</li>
-                <li>@Quota.GlobalPerDay questions par jour pour tout le site&nbsp;;</li>
-                <li>une réponse abandonnée au-delà de @((int)Home.AnswerTimeout.TotalSeconds) secondes.</li>
-            </ul>
-        </details>
-    </section>
 </div>
 
 @code {

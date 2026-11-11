@@ -531,3 +531,11 @@ vers `/a-propos` ; le contrôle de la question (ADR-021), qu'il montrait seul, e
 Il présentait aussi les contrôles de la réponse comme bloquants : ils ne font que signaler (corrigé sur les deux pages).
 Relectures : conservation nuancée (renvoi à « Vos données », sauvegardes comprises), libellé « Au fond » comme dans une
 réponse, pas de Literata dans l'aperçu.
+
+Deuxième passe, le 2026-11-11, sur la maquette du fil de lecture (écrans `F4-fil-*` de la toile) : l'aperçu « Sous
+chaque réponse » passe en pleine largeur, une rangée par couche (nom réel, contenu, lignes factices) ; « Il ne fait
+pas » dessous, en trois colonnes. « Pour aller plus loin » disparaît : deux encarts dépliables à côté de deux encarts
+cliquables étaient contre-intuitifs, et des liens dans les encarts court-circuitaient le fil de lecture (on saute un
+chapitre par le menu, on avance par « La suite »). Restent trois chiffres clés sans lien : 2 textes, les questions de
+test du rapport servi, 30 jours de conservation. Le coût, les quotas et la liste des fiches quittent la page (coût dans
+« Au fond » et sur `/evaluation`, limites près du champ, liste dans `/mentions-legales`).

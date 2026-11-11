@@ -501,7 +501,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .page:has(> .apropos) { max-width: 74rem; } /* six étapes de front : plus large que les autres pages en coupe */
 .apropos .titre-bloc { margin: 0 0 0.6rem; font-size: 1.375rem; font-weight: 800; }
 
-.parcours { margin-top: 2.5rem; }
+.parcours { margin-top: 3.5rem; }
 .parcours-tete { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.15rem 0.9rem; margin-bottom: 1rem; }
 .parcours-tete .titre-bloc { margin: 0; }
 .parcours-tete p { margin: 0; font-size: 0.875rem; color: var(--muted); }
@@ -557,49 +557,46 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .etape-detail-ici { margin: 0.5rem 0 0; padding: 0.75rem 0.9rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface); font-size: 0.9375rem; }
 .etape-detail-dessous, .vers-reponse { display: none; }
 
-.apropos-bas { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem; margin-top: 2.25rem; }
-.ne-fait-pas { list-style: none; margin: 0; padding: 0; }
-.ne-fait-pas li { display: flex; gap: 0.75rem; padding: 0.75rem 0; border-top: 1px solid var(--border); }
-.ne-fait-pas svg { flex: 0 0 auto; margin-top: 0.2rem; }
-
-/* Aperçu schématique d'une réponse : les trois couches, sans contenu réel. */
+/* Aperçu schématique d'une réponse, en pleine largeur : une rangée par couche (nom réel, contenu, lignes factices). */
+.apercu-bloc { margin-top: 2.25rem; }
 .apercu { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; box-shadow: 0 18px 40px rgba(20, 33, 43, 0.10); }
-.apercu > div { padding: 1rem 1.25rem 1.1rem; }
-.apercu p { margin: 0; font-weight: 800; }
-.apercu p span { font-weight: 400; color: var(--muted); }
+.apercu-couche { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.5rem; padding: 1.1rem 1.25rem 1.25rem; }
+.apercu-label { font-size: 0.8125rem; color: var(--muted); }
+.apercu p { margin: 0; }
+.apercu p strong { display: block; font-size: 1.125rem; font-weight: 800; }
+.apercu p > span { color: var(--muted); }
 .apercu-reponse { background: var(--surface); }
 .apercu-textes { background: var(--source-bg); border-top: 1px solid var(--border); }
 .apercu-calcul { background: var(--band); color: var(--band-ink); }
-.apercu-calcul p span { color: var(--band-muted); }
+.apercu-calcul .apercu-label, .apercu-calcul p > span { color: var(--band-muted); }
 .apercu i { display: block; height: 0.5rem; border-radius: 0.25rem; background: var(--border); }
-.apercu-lignes { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; }
+.apercu-lignes { display: flex; flex-direction: column; gap: 0.55rem; }
 .apercu-ligne { display: flex; align-items: center; gap: 0.5rem; }
-.apercu-ligne i { width: 62%; }
-.apercu-ligne + .apercu-ligne i { width: 44%; }
+.apercu-ligne i { width: 66%; }
+.apercu-ligne:nth-child(2) i { width: 90%; }
+.apercu-ligne:nth-child(3) i { width: 48%; }
 .apercu-ligne b { padding: 0 0.35rem; border-radius: 4px; background: var(--accent-soft); color: var(--accent); font-size: 0.75rem; }
-.apercu-extrait { display: flex; flex-direction: column; gap: 0.5rem; margin-top: 0.75rem; padding-left: 0.85rem; border-left: 3px solid var(--source-rule); }
+.apercu-extrait { display: flex; flex-direction: column; gap: 0.55rem; padding-left: 0.85rem; border-left: 3px solid var(--source-rule); }
 .apercu-extrait i { width: 92%; }
 .apercu-extrait i:first-child { width: 40%; background: var(--source-rule); opacity: 0.55; } /* place de la source */
 .apercu-extrait i:last-child { width: 70%; }
+.apercu-etapes { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 0.5rem; }
+.apercu-etapes i { height: 0.375rem; background: var(--band-step); }
 
-.chiffres-cles { list-style: none; margin: 2.75rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem 1.5rem; }
-.chiffres-cles li { display: flex; flex-direction: column; gap: 0.15rem; padding: 1rem 1.25rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.ne-fait-pas-bloc { margin-top: 3rem; }
+.ne-fait-pas { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem; }
+.ne-fait-pas li { display: flex; gap: 0.75rem; padding-top: 0.9rem; border-top: 2px solid var(--text); }
+.ne-fait-pas svg { flex: 0 0 auto; margin-top: 0.15rem; }
+.ne-fait-pas strong { display: block; font-size: 1.0625rem; }
+
+/* Chiffres clés, sans lien : on avance par le fil de lecture, on saute une page par le menu. */
+.chiffres-cles { list-style: none; margin: 3rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); gap: 1rem 1.5rem; }
+.chiffres-cles li { display: flex; flex-direction: column; gap: 0.15rem; padding: 1.1rem 1.25rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
 .chiffres-cles strong { font-size: 2rem; font-weight: 800; line-height: 1.1; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 .chiffres-cles span { font-size: 0.9375rem; }
-.chiffres-cles a { align-self: flex-start; display: inline-flex; align-items: center; min-height: 2.75rem; margin-bottom: -0.5rem; font-size: 0.9375rem; font-weight: 600; }
-
-.plus-loin { margin-top: 2.75rem; }
-.plus-loin details { border-bottom: 1px solid var(--border); }
-.plus-loin details:first-of-type { border-top: 1px solid var(--border); }
-.plus-loin summary { display: flex; align-items: center; justify-content: space-between; gap: 0.75rem; min-height: 3.25rem; padding: 0.4rem 0.25rem; font-weight: 800; list-style: none; cursor: pointer; }
-.plus-loin summary::-webkit-details-marker { display: none; }
-.plus-loin summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.plus-loin summary svg { flex: 0 0 auto; transition: transform 0.15s; }
-.plus-loin details[open] summary svg { transform: rotate(180deg); }
-.plus-loin details > :not(summary) { max-width: 72ch; margin: 0 0.25rem 0.9rem; }
 
 @media (prefers-reduced-motion: reduce) {
-    .etape-chevron, .plus-loin summary svg { transition: none; }
+    .etape-chevron { transition: none; }
 }
 
 @media (min-width: 64rem) {
@@ -614,7 +611,11 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     .etape-detail-titre { font-size: 1.125rem; font-weight: 800; line-height: 1.3; }
     /* Flèche de la dernière étape vers l'aperçu de la réponse, sous la sixième colonne. */
     .vers-reponse { display: flex; justify-content: center; width: calc((100% - 5 * 1.75rem) / 6); margin-left: auto; padding-top: 0.25rem; color: var(--accent); }
-    .apropos-bas { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3.5rem; margin-top: 0.25rem; align-items: start; }
+    /* Plus d'air entre les blocs ; l'aperçu suit la flèche de la dernière étape. */
+    .apercu-bloc { margin-top: 0.25rem; }
+    .apercu-couche { grid-template-columns: 7rem minmax(0, 0.9fr) minmax(0, 1fr); gap: 2rem; align-items: center; padding: 1.5rem 2rem; }
+    .ne-fait-pas-bloc, .chiffres-cles { margin-top: 4.5rem; }
+    .ne-fait-pas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; }
 }
 
 /* Chemin d'une question et mise à jour des textes : boîtes reliées par des flèches ; en colonne sur mobile. */
