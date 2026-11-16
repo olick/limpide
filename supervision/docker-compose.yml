@@ -100,7 +100,7 @@ services:
 
   grafana:
     <<: *commun
-    image: grafana/grafana:13.2.4 # 13.2.3 : 21 failles élevées ou critiques corrigeables, 19 ici (Grype, 2026-10-19)
+    image: grafana/grafana:13.3.0 # 13.2.3 : 21 failles élevées ou critiques corrigeables, 19 ici (Grype, 2026-10-19)
     environment:
       GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:?mot de passe de Grafana absent (supervision/.env)}
       GF_USERS_ALLOW_SIGN_UP: "false"
