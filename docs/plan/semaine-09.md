@@ -555,14 +555,21 @@ chapitres en pastilles puis « Chapitre 1 sur 4 · voir les chapitres » (trop p
 lien d'entrée sur l'accueil vide, des flèches sur les boutons, des liens dans les encarts (deux façons d'avancer qui
 ne mènent pas au même endroit). ADR-022 complétée.
 
+- **Point ouvert, laissé ainsi par décision d'Alexandre (2026-11-11)** : depuis la #97, le plafond de la démo (10 € par
+  mois) et les quotas (10 questions par heure et par visiteur, 60 par jour pour le site) ne sont plus écrits nulle part
+  à l'avance ; le quota ne s'affiche près du champ qu'à partir de 3 questions restantes, le coût d'une réponse reste
+  dans sa couche du fond et sur les résultats d'évaluation. Pas d'affichage pour l'instant. Si on y revient : une
+  ligne dans « Comment il est construit », valeurs lues dans `QuotaOptions` (le plafond de 10 € est un réglage du
+  fournisseur, pas de l'application).
+
 ### « Comment il est construit » : les briques seules (2026-11-16)
 
 Demande d'Alexandre : n'y garder que les briques. Maquette d'abord (écrans `F5-*`). La page se réduit à trois chiffres
 (décisions, 1 serveur en France, 0 serveur GPU à louer) et aux briques en cartes groupées par rôle ; les « quatre choix
 qui comptent » passent dans leur brique, et 12 briques renvoient à leur décision (deux pour GitHub Actions : 015 et
-016 ; `DecisionLink.razor`). Le chemin
-d'une question part (doublon du parcours de « Ce que fait Limpide »), le tableau des décisions aussi (lien vers
-l'index sur GitHub ; Alexandre envisageait de les supprimer, gardées comme preuve de la démarche). Nouvelle page hors
+016 ; `DecisionLink.razor`). Le chemin d'une question part (doublon du parcours de « Ce que fait Limpide »), le
+tableau des décisions aussi (lien vers l'index sur GitHub ; Alexandre envisageait de les supprimer, gardées comme
+preuve de la démarche). Nouvelle page hors
 du fil, `/mise-a-jour-des-textes` : les six commandes et ce qui rend la chaîne sûre (ADR-007 à 010). Corrigé en
 route : « 0 GPU, modèles appelés par API » et « pas un seul GPU » étaient trompeurs (les modèles tournent sur les GPU
 d'OVHcloud et de Mistral) ; une teinte sur les quatre briques à choix, jugée peu claire, retirée. ADR-022 complétée.
