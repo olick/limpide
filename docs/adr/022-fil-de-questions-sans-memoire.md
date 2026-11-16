@@ -19,7 +19,8 @@
   ça ? » sous chaque réponse), menu dans l'ordre du fil, mentions légales en entrée du menu.
 - **Précisé le 2026-11-16**, d'après la maquette `F5-*` : « Comment il est construit » réduit aux briques, la mise à
   jour des textes dans une page hors du fil, l'index des décisions sur GitHub. Même jour, d'après la maquette `F6-*` : « Résultats
-  d'évaluation » en une minute, son détail dans une page hors du fil.
+  d'évaluation » en une minute, son détail dans une page hors du fil. Puis, d'après la maquette `F7-*` : « Vos données »
+  lisible, tout sur la même page.
 
 ## Contexte
 
@@ -101,6 +102,11 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   résultats » en tête, six cartes (résultat, attendu, ce que ça ne dit pas, en version courte), la méthode en quatre
   étapes et le moment où la barrière a bloqué une consigne dégradée. Le tableau complet, les seuils, les trois moments
   et l'historique passent dans `/evaluation/detail`, hors du fil et sans entrée de menu, lié depuis le chapitre.
+- **Vos données (2026-11-16)**, d'après la maquette `F7-*` : c'est la mention d'information de l'ADR-019, déjà le
+  second niveau (le premier est la ligne sous le champ) ; elle reste entière sur une seule page, sans dépliant ni page
+  de détail. Quatre chiffres et l'encadré « pas de donnée personnelle », le trajet de la question en trois étapes avec
+  les repères de lieu (la copie conservée est masquée, celle envoyée pour répondre ne l'est pas), six cartes « donnée
+  par donnée » (la durée en grand, puis l'usage et le fondement), droits et responsable, sept points de protection.
 - **Accueil vide** : une colonne centrée, le titre, la phrase d'accroche et trois exemples en pastilles sous un titre
   visible, envoyés au clic ; ils disparaissent à la première question, qui montre les couches. Pas de commande « / » :
   les visiteurs ne sont pas tous techniciens. Jusqu'au 2026-11-10, trois encarts repliés (« ce qu'il fait, ne fait

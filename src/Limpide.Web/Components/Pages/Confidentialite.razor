@@ -4,163 +4,164 @@
 
 <PageTitle>Vos données — Limpide</PageTitle>
 
-@* Mention d'information (RGPD, articles 13 et 21 ; S8, session 5, ADR-019), en coupe (ADR-022). Chaque durée est celle
-   du code ou de la configuration&nbsp;: la modifier ici ET là-bas (KeptQuestion, AnswerLogEntry, VisitorFeedback,
-   supervision/tempo.yaml pour les 14 jours de traces). Sauvegardes&nbsp;: 7 jours (deploy/backup-db.sh) + copie
-   quotidienne d'OVHcloud gardée 1 jour (deploy/README.md) = 8. Serveur en France&nbsp;: ADR-006&nbsp;; OVHcloud AI Endpoints à
-   Gravelines, Mistral en UE&nbsp;: ADR-012, ADR-004. Fondements encore à écrire pour l'envoi de la question, le journal,
-   les traces et l'adresse IP : docs/plan/semaine-09.md, points ouverts. *@
-<div class="coupe-page">
+@* Mention d'information (RGPD, articles 13 et 21 ; S8, session 5, ADR-019), chapitre 4 du fil de lecture (ADR-022).
+   Tout reste sur cette page, sans dépliant : c'est déjà le second niveau d'information (le premier est la ligne sous
+   le champ). Maquette : écrans F7-donnees de la toile. Chaque durée est celle du code ou de la configuration : la
+   modifier ici ET là-bas (KeptQuestion, AnswerLogEntry, VisitorFeedback, supervision/tempo.yaml pour les 14 jours de
+   traces). Sauvegardes : 7 jours (deploy/backup-db.sh) + copie quotidienne d'OVHcloud gardée 1 jour
+   (deploy/README.md) = 8. Serveur en France : ADR-006 ; OVHcloud AI Endpoints à Gravelines, Mistral en UE : ADR-012,
+   ADR-004. Masquage : la copie conservée seulement (KeptQuestion.From), la question part telle quelle pour la réponse
+   (Home.razor). Fondements encore à écrire pour l'envoi de la question, le journal, les traces et l'adresse IP :
+   docs/plan/semaine-09.md, points ouverts. *@
+<div class="coupe-page donnees-page">
     <h1>Vos données</h1>
     <p class="lede">Ce que Limpide fait de ce que vous lui écrivez, combien de temps il le garde, et comment vous y
         opposer.</p>
 
-    <div class="coupe">
-        <section class="couche couche-surface" aria-labelledby="vd-essentiel">
-            <span class="couche-label">En surface</span>
-            <div>
-                <h2 id="vd-essentiel">L'essentiel</h2>
-                <dl class="chiffres">
-                    <div><dt>conservation de votre question, sauf si vous cochez, sous le champ, la case pour ne pas la conserver</dt><dd>@KeptQuestion.Retention.Days jours</dd></div>
-                    <div><dt>reçoivent votre question pour y répondre&nbsp;: OVHcloud (France), puis Mistral AI (Union européenne)</dt><dd>2 services</dd></div>
-                    <div><dt>adresse IP écrite dans les journaux de l'application</dt><dd>Aucune</dd></div>
-                    <div><dt>cookie de mesure d'audience ou de publicité</dt><dd>Aucun</dd></div>
-                </dl>
-                <p class="separe-court"><strong>N'écrivez pas de donnée personnelle dans vos questions.</strong> Les
-                    adresses électroniques, IBAN, numéros de sécurité sociale et de téléphone sont masqués avant
-                    l'enregistrement&nbsp;; les noms et les adresses postales ne le sont pas.</p>
-                <div class="colonnes deux-colonnes separe-sans-filet">
-                    <div>
-                        <h3>Vos droits</h3>
-                        <p>Vous pouvez demander l'accès à vos données, leur effacement ou leur rectification, et vous
-                            opposer à la conservation de vos questions (la case suffit pour les prochaines). Limpide ne vous
-                            identifie pas&nbsp;: pour retrouver une question, écrivez à <a href="mailto:@Contact">@Contact</a>
-                            avec son texte et le jour où vous l'avez posée. Si vous estimez que vos droits ne sont pas
-                            respectés, vous pouvez adresser une réclamation à la
-                            <a href="https://www.cnil.fr/fr/adresser-une-plainte">CNIL</a>.</p>
-                    </div>
-                    <div>
-                        <h3>Qui est responsable</h3>
-                        <p>Limpide est une démonstration gratuite, publiée par Alexandre Leclerc - EURL, représentée par
-                            son gérant, Alexandre Leclerc&nbsp;: elle est responsable du traitement
-                            (<a href="/mentions-legales">mentions légales</a>). Contact, y compris pour exercer vos droits&nbsp;:
-                            <a href="mailto:@Contact">@Contact</a>.</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+    <section aria-labelledby="vd-essentiel">
+        <h2 id="vd-essentiel" class="titre-bloc">L'essentiel</h2>
+        <ul class="chiffres-cles" role="list" aria-label="L'essentiel en chiffres">
+            <li>
+                <strong>@KeptQuestion.Retention.Days jours</strong>
+                <span>de conservation de votre question, sauf si vous cochez, sous le champ, la case pour ne pas la
+                    conserver</span>
+            </li>
+            <li>
+                <strong>2 services</strong>
+                <span>reçoivent votre question pour y répondre&nbsp;: OVHcloud (France), puis Mistral AI (Union
+                    européenne)</span>
+            </li>
+            <li>
+                <strong>Aucune</strong>
+                <span>adresse IP écrite dans les journaux de l'application</span>
+            </li>
+            <li>
+                <strong>Aucun</strong>
+                <span>cookie de mesure d'audience ou de publicité</span>
+            </li>
+        </ul>
+        <p class="encadre-attention" role="note"><strong>N'écrivez pas de donnée personnelle dans vos questions.</strong>
+            Les adresses électroniques, IBAN, numéros de sécurité sociale et de téléphone sont masqués avant
+            l'enregistrement&nbsp;; les noms et les adresses postales ne le sont pas.</p>
+    </section>
 
-        <section class="couche couche-dessous" aria-labelledby="vd-donnees">
-            <span class="couche-label">Dessous</span>
-            <div>
-                <h2 id="vd-donnees">Donnée par donnée</h2>
-                <p class="couche-promise">Ce qui est gardé, pourquoi, et combien de temps.</p>
-                <table role="table" class="tableau tableau-empile donnees">
-                    <thead role="rowgroup">
-                        <tr role="row"><th role="columnheader" scope="col">Donnée</th><th role="columnheader" scope="col">À quoi elle sert</th><th role="columnheader" scope="col">Combien de temps</th></tr>
-                    </thead>
-                    <tbody role="rowgroup">
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Votre question, pour y répondre</th>
-                            <td role="cell" data-label="À quoi elle sert">Son texte est envoyé à OVHcloud AI Endpoints (France), qui le transforme en vecteur pour
-                                chercher les passages proches, puis, si des passages assez proches existent, à Mistral AI
-                                (API hébergée dans l'Union européenne), qui rédige la réponse. Chacun la traite selon ses
-                                propres conditions d'utilisation.</td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>Le temps de la réponse</strong><span class="muted">chez ces deux services&nbsp;: selon leurs conditions</span></td>
-                        </tr>
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Votre question, pour améliorer Limpide</th>
-                            <td role="cell" data-label="À quoi elle sert">Comprendre ce que demandent les visiteurs et écrire de nouvelles questions de test, relues
-                                par une personne. Ni la réponse ni votre adresse IP ne sont conservées avec la question.
-                                Seul l'administrateur y a accès, par un back office protégé.
-                                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à améliorer le service (RGPD, article
-                                    6.1.f).</span></td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@KeptQuestion.Retention.Days jours</strong><span class="muted">jusqu'à
-                                8 jours de plus dans les sauvegardes&nbsp;; rien si vous cochez la case, ni si la limite de
-                                questions est atteinte</span></td>
-                        </tr>
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Journal des réponses</th>
-                            <td role="cell" data-label="À quoi elle sert">Suivi du coût et de la qualité&nbsp;: date, issue (réponse, refus, hors sujet, erreur), score
-                                du meilleur passage, durées, coût, contrôles déclenchés, longueur de la question. Ni le
-                                texte de la question ni celui de la réponse.</td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@Months(AnswerLogEntry.Retention) mois</strong></td>
-                        </tr>
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Journaux techniques et traces</th>
-                            <td role="cell" data-label="À quoi elle sert">Les mêmes mesures, étape par étape, et un identifiant de visite tiré au hasard à
-                                l'ouverture de la page, qui ne vous suit pas d'une visite à l'autre (ni cookie, ni adresse
-                                IP).</td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>14 jours</strong></td>
-                        </tr>
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Adresse IP</th>
-                            <td role="cell" data-label="À quoi elle sert">Limiter le nombre de questions par heure et par visiteur. Elle n'est écrite dans aucun
-                                journal de l'application.</td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>En mémoire seulement</strong><span class="muted">effacée au
-                                redémarrage de l'application</span></td>
-                        </tr>
-                        <tr role="row">
-                            <th role="rowheader" scope="row">Votre avis</th>
-                            <td role="cell" data-label="À quoi elle sert">Améliorer Limpide et constituer ses questions de test. Une question et sa réponse n'y sont
-                                jointes que si vous cochez la case prévue, proposée seulement par «&nbsp;Donner mon avis sur cette réponse&nbsp;».
-                                <span class="fondement">Fondement&nbsp;: votre consentement, pour la question jointe.</span></td>
-                            <td role="cell" class="duree" data-label="Combien de temps"><strong>@Months(VisitorFeedback.Retention) mois</strong><span class="muted">sans
-                                adresse IP ni identifiant</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </section>
+    <section aria-labelledby="vd-trajet">
+        <h2 id="vd-trajet" class="titre-bloc">Le trajet de votre question</h2>
+        <ol class="commandes trajet" role="list">
+            <li>
+                <span class="commande-tete"><span class="commande-num" aria-hidden="true">1</span><span class="sr-only">Étape 1 : </span><strong>Votre question</strong></span>
+                <span>arrive sur le serveur de Limpide, qui la contrôle. La copie conservée est masquée&nbsp;; celle
+                    envoyée pour répondre ne l'est pas.</span>
+                <span class="repere">@Pin<span class="sr-only">Où : </span>Serveur Limpide, France</span>
+            </li>
+            <li>
+                <span class="commande-tete"><span class="commande-num" aria-hidden="true">2</span><span class="sr-only">Étape 2 : </span><strong>Vectorisation</strong></span>
+                <span>OVHcloud la transforme en nombres pour chercher les passages proches, le temps de la réponse.</span>
+                <span class="repere repere-sortie">@Pin<span class="sr-only">Où : </span>OVHcloud, France</span>
+            </li>
+            <li>
+                <span class="commande-tete"><span class="commande-num" aria-hidden="true">3</span><span class="sr-only">Étape 3 : </span><strong>Rédaction</strong></span>
+                <span>Mistral AI rédige la réponse, seulement si des passages assez proches existent.</span>
+                <span class="repere repere-sortie">@Pin<span class="sr-only">Où : </span>Mistral AI, UE</span>
+            </li>
+        </ol>
+        <h3 id="vd-reste" class="trajet-ensuite">Ensuite, ce qui reste</h3>
+        <ul class="principes reste" role="list" aria-labelledby="vd-reste">
+            <li><strong>La question</strong><span>@KeptQuestion.Retention.Days jours, sauf si vous refusez&nbsp;; hors
+                sauvegardes.</span></li>
+            <li><strong>Le journal des réponses</strong><span>@Months(AnswerLogEntry.Retention) mois, sans le texte de la
+                question ni de la réponse.</span></li>
+            <li><strong>Les traces techniques</strong><span>14 jours, avec un identifiant de visite tiré au hasard.</span></li>
+        </ul>
+    </section>
 
-        <section class="couche couche-fond" aria-labelledby="vd-protection">
-            <span class="couche-label">Au fond</span>
-            <div>
-                <h2 id="vd-protection">Comment c'est protégé</h2>
-                <div class="colonnes trois-colonnes">
-                    <div>
-                        <h3>Masquage avant l'enregistrement</h3>
-                        <p>Adresses électroniques, IBAN, numéros de sécurité sociale et de téléphone sont remplacés avant
-                            que la question soit écrite en base. Les noms et adresses postales ne sont pas détectés.</p>
-                    </div>
-                    <div>
-                        <h3>Effacement</h3>
-                        <p>Chaque nouvel enregistrement efface au passage les données qui ont dépassé leur durée. Sans
-                            nouvelle question pendant plusieurs jours, une question peut donc rester un peu au-delà des
-                            @KeptQuestion.Retention.Days jours, jusqu'à la suivante.</p>
-                    </div>
-                    <div>
-                        <h3>Accès</h3>
-                        <p>Seul l'administrateur lit les questions conservées et les avis, par un back office protégé.</p>
-                    </div>
-                    <div>
-                        <h3>Hébergement</h3>
-                        <p>Le site et sa base sont hébergés par OVHcloud, sur un serveur en France. Sauvegardes
-                            quotidiennes gardées 7 jours, plus une copie d'OVHcloud gardée 1 jour.</p>
-                    </div>
-                    <div>
-                        <h3>Cookies et stockage</h3>
-                        <p>Seulement les cookies nécessaires au fonctionnement de la page (protection des formulaires),
-                            aucun de mesure d'audience ni de publicité. Si vous choisissez une apparence (clair ou sombre)
-                            dans le menu, ce choix est gardé dans votre navigateur (stockage local) et n'est jamais envoyé
-                            au serveur&nbsp;; revenir à «&nbsp;Automatique&nbsp;» l'efface.</p>
-                    </div>
-                    <div>
-                        <h3>Le fil de vos questions</h3>
-                        <p>Vos questions et leurs réponses restent affichées le temps de la visite&nbsp;: gardées en mémoire
-                            sur le serveur pour cela seulement, jamais envoyées au modèle avec la question suivante, et
-                            effacées peu après la fermeture de la page ou par «&nbsp;Nouvelle question&nbsp;».</p>
-                    </div>
-                    <div>
-                        <h3>Une question refusée</h3>
-                        <p>Une question refusée parce que la limite de questions est atteinte n'est pas conservée.</p>
-                    </div>
-                </div>
-            </div>
+    <section aria-labelledby="vd-donnees">
+        <h2 id="vd-donnees" class="titre-bloc">Donnée par donnée</h2>
+        <p class="donnees-chapeau">Combien de temps, puis pourquoi.</p>
+        <ul class="donnees-cartes" role="list">
+            <li>
+                <h3 class="donnee-titre">Votre question, pour y répondre</h3>
+                <strong class="donnee-duree">Le temps de la réponse</strong>
+                <span class="muted">Chez ces deux services&nbsp;: selon leurs conditions.</span>
+                <span>Envoyée à OVHcloud AI Endpoints (France) pour la vectoriser, puis, si des passages assez proches
+                    existent, à Mistral AI (UE), qui rédige la réponse. Chacun la traite selon ses propres conditions
+                    d'utilisation.</span>
+            </li>
+            <li>
+                <h3 class="donnee-titre">Votre question, pour améliorer Limpide</h3>
+                <strong class="donnee-duree">@KeptQuestion.Retention.Days jours</strong>
+                <span>Comprendre ce que demandent les visiteurs et écrire de nouvelles questions de test, relues par une
+                    personne. Ni la réponse ni l'adresse IP ne sont gardées avec elle&nbsp;; seul l'administrateur y a accès.</span>
+                <span class="muted">Jusqu'à 8 jours de plus dans les sauvegardes&nbsp;; rien si vous cochez la case, ni si
+                    la limite de questions est atteinte.</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à améliorer le service (RGPD, article 6.1.f).</span>
+            </li>
+            <li>
+                <h3 class="donnee-titre">Journal des réponses</h3>
+                <strong class="donnee-duree">@Months(AnswerLogEntry.Retention) mois</strong>
+                <span>Suivi du coût et de la qualité&nbsp;: date, issue (réponse, refus, hors sujet, erreur), score du meilleur passage, durées, coût, contrôles
+                    déclenchés, longueur de la question. Ni le texte de la question ni celui de la réponse.</span>
+            </li>
+            <li>
+                <h3 class="donnee-titre">Journaux techniques et traces</h3>
+                <strong class="donnee-duree">14 jours</strong>
+                <span>Les mêmes mesures, étape par étape, et un identifiant de visite tiré au hasard à
+                    l'ouverture de la page, qui ne vous suit pas
+                    d'une visite à l'autre (ni cookie, ni adresse IP).</span>
+            </li>
+            <li>
+                <h3 class="donnee-titre">Adresse IP</h3>
+                <strong class="donnee-duree">En mémoire seulement</strong>
+                <span>Limiter le nombre de questions par heure et par visiteur. Elle n'est écrite dans aucun journal de
+                    l'application.</span>
+                <span class="muted">Effacée au redémarrage de l'application.</span>
+            </li>
+            <li>
+                <h3 class="donnee-titre">Votre avis</h3>
+                <strong class="donnee-duree">@Months(VisitorFeedback.Retention) mois</strong>
+                <span>Améliorer Limpide et constituer ses questions de test. Une question et sa réponse n'y sont jointes que
+                    si vous cochez la case prévue, proposée seulement par «&nbsp;Donner mon avis sur cette réponse&nbsp;».</span>
+                <span class="muted">Sans adresse IP ni identifiant.</span>
+                <span class="fondement">Fondement&nbsp;: votre consentement, pour la question jointe.</span>
+            </li>
+        </ul>
+    </section>
+
+    <div class="droits">
+        <section aria-labelledby="vd-droits">
+            <h2 id="vd-droits" class="titre-bloc">Vos droits</h2>
+            <p>Vous pouvez demander l'accès à vos données, leur effacement ou leur rectification, et vous opposer à la
+                conservation de vos questions (la case suffit pour les prochaines). Limpide ne vous identifie pas&nbsp;: pour
+                retrouver une question, écrivez à <a href="mailto:@Contact">@Contact</a> avec son texte et le jour où vous
+                l'avez posée. Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à
+                la <a href="https://www.cnil.fr/fr/adresser-une-plainte">CNIL</a>.</p>
+        </section>
+        <section aria-labelledby="vd-responsable">
+            <h2 id="vd-responsable" class="titre-bloc">Qui est responsable</h2>
+            <p>Limpide est une démonstration gratuite, publiée par Alexandre Leclerc - EURL, représentée par son gérant,
+                Alexandre Leclerc&nbsp;: elle est responsable du traitement (<a href="/mentions-legales">mentions
+                légales</a>). Contact, y compris pour exercer vos droits&nbsp;: <a href="mailto:@Contact">@Contact</a>.</p>
         </section>
     </div>
 
-    @* Fil de lecture (ADR-022) : la question qu'on se pose après cette page, et le chemin pour y répondre. *@
+    <section aria-labelledby="vd-protection">
+        <h2 id="vd-protection" class="titre-bloc">Comment c'est protégé</h2>
+        <ul class="principes protection" role="list">
+            <li><strong>Masquage avant l'enregistrement</strong><span>Adresses électroniques, IBAN, numéros de sécurité sociale et de téléphone sont remplacés avant l'écriture en base. Les noms et les adresses postales ne sont pas détectés.</span></li>
+            <li><strong>Effacement</strong><span>Chaque nouvel enregistrement efface ce qui a dépassé sa durée&nbsp;: sans nouvelle question pendant plusieurs jours, une question peut rester un peu au-delà des @KeptQuestion.Retention.Days jours.</span></li>
+            <li><strong>Accès</strong><span>Seul l'administrateur lit les questions conservées et les avis, par un back
+                office protégé.</span></li>
+            <li><strong>Hébergement</strong><span>Le site et sa base sont chez OVHcloud, sur un serveur en France. Sauvegardes quotidiennes gardées 7 jours, plus une copie d'OVHcloud gardée 1 jour.</span></li>
+            <li><strong>Cookies et stockage</strong><span>Seulement les cookies nécessaires au fonctionnement (protection des formulaires), aucun de mesure d'audience ni de publicité. Le choix d'apparence reste dans votre navigateur (stockage local), jamais envoyé au serveur&nbsp;; «&nbsp;Automatique&nbsp;» l'efface.</span></li>
+            <li><strong>Le fil de vos questions</strong><span>Vos questions et leurs réponses restent affichées le temps de la visite&nbsp;: gardées en mémoire sur le
+                serveur pour cela seulement, jamais envoyées au modèle avec la question suivante, effacées peu après la
+                fermeture de la page ou par «&nbsp;Nouvelle question&nbsp;».</span></li>
+            <li><strong>Une question refusée</strong><span>Une question refusée parce que la limite de questions est atteinte
+                n'est pas conservée.</span></li>
+        </ul>
+    </section>
+
+    @* Fil de lecture (ADR-022) : le dernier chapitre ferme le fil. *@
     <LaSuite Chapitre="4" />
 </div>
 
@@ -168,4 +169,10 @@
     private const string Contact = "contact@limpide-ia.fr";
 
     private static int Months(TimeSpan retention) => (int)retention.TotalDays / 30;
+
+    // Repère de lieu, comme le parcours de « Ce que fait Limpide ».
+    private static readonly RenderFragment Pin = builder => builder.AddMarkupContent(0,
+        "<svg width=\"13\" height=\"13\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" "
+        + "stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 "
+        + "4.8-7 11-7 11z\" /><circle cx=\"12\" cy=\"10\" r=\"2.5\" /></svg>");
 }
