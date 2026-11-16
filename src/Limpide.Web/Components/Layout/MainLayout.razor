@@ -173,15 +173,35 @@
 
     private string CurrentPath => "/" + Navigation.ToBaseRelativePath(Navigation.Uri).Split('?', '#')[0];
 
-    protected override void OnInitialized() => Navigation.LocationChanged += OnLocationChanged;
+    // Chemin de la page affichée, pour distinguer un changement de page d'un lien vers une ancre de la même page.
+    private string shownPath = "";
 
-    /// <summary>Un lien du menu suivi : le panneau se ferme et l'entrée de la page en cours change.</summary>
+    protected override void OnInitialized()
+    {
+        shownPath = CurrentPath;
+        Navigation.LocationChanged += OnLocationChanged;
+    }
+
+    /// <summary>
+    /// Un lien suivi : le panneau se ferme et l'entrée de la page en cours change. Sur une autre page, on repart du
+    /// haut : la zone qui défile (.thread) est commune à toutes les pages, la navigation de Blazor ne la remonte pas.
+    /// </summary>
     private async void OnLocationChanged(object? sender, LocationChangedEventArgs e)
     {
         try
         {
+            var path = CurrentPath;
+            var otherPage = path != shownPath;
+            shownPath = path;
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("limpide.closeMenu");
+            // L'écran des questions place lui-même son arrivée (bas du fil), une fois le fil affiché (Home.razor).
+            if (otherPage && path != "/")
+            {
+                // Un limpide.js plus ancien (cache) n'a pas pageTop : la page reste où elle est, la navigation continue.
+                try { await JS.InvokeVoidAsync("limpide.pageTop"); }
+                catch (JSException) { }
+            }
         }
         catch (JSDisconnectedException)
         {

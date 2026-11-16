@@ -102,6 +102,24 @@ window.limpide = {
         if (dialog && dialog.open) dialog.close();
     },
 
+    // Changement de page (gabarit) : la zone qui défile est commune à toutes les pages et garderait sa position ; on
+    // repart du haut. Fenêtre basse (moins de 34rem, zoom fort) : .thread ne défile plus, c'est la fenêtre ; on agit
+    // sur les deux. Saut sans animation (aucun scroll-behavior).
+    pageTop() {
+        document.querySelector(".thread")?.scrollTo({ top: 0 });
+        window.scrollTo({ top: 0 });
+    },
+
+    // Retour sur l'écran des questions (Home) : le bas du fil, là où on l'avait laissé. À l'image suivante, après la
+    // mise en page du champ (qui réduit la zone) et le focus posé sur le titre par Blazor (qui ferait remonter).
+    threadEnd() {
+        requestAnimationFrame(() => {
+            const thread = document.querySelector(".thread");
+            thread?.scrollTo({ top: thread.scrollHeight });
+            window.scrollTo({ top: document.documentElement.scrollHeight });
+        });
+    },
+
     // Fil de questions (ADR-022) : place une question en haut de la zone qui défile (sous l'en-tête fixe, grâce à
     // scroll-margin), sans animation si le visiteur a demandé moins de mouvement.
     showQuestion(id) {
