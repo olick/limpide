@@ -1,0 +1,148 @@
+@page "/evaluation/detail"
+@using System.Globalization
+@using Limpide.Core.Evaluation
+@using Limpide.Infrastructure
+@using static Limpide.Web.EvaluationText
+@inject EvaluationReports Reports
+@inject AnswerInstructions Instructions
+@inject GenerationSettings Generation
+@inject EmbeddingOptions Embedding
+@inject EvaluationGateOptions Gate
+
+<PageTitle>Le détail des évaluations — Limpide</PageTitle>
+
+@* Hors du fil de lecture et du menu (ADR-022) : on y arrive depuis « Résultats d'évaluation ». Mesure par mesure (textes
+   complets), les seuils de la barrière (EvaluationGate, appsettings.shared.json), trois moments et l'historique des
+   rapports versionnés (eval/results/). Maquette : écrans F6-evaluation-detail de la toile. *@
+<div class="coupe-page evaluation-detail">
+    <h1>Le détail des évaluations</h1>
+    <p class="lede">Mesure par mesure, les seuils de la barrière, trois moments, et toutes les évaluations versionnées
+        dans le dépôt.</p>
+    @* Règle de .claude/rules/evaluation.md : le dire partout où l'on cite un résultat. *@
+    <p class="avertissement-juriste" role="note"><strong>Aucun juriste n'a relu ces résultats.</strong> Les contrôles et
+        les relectures sont faits par des modèles.</p>
+
+    @if (Current is null)
+    {
+        <p class="warning">Aucune évaluation publiée ne correspond encore à la version en ligne (consignes
+            <code>@Instructions.Version</code>, modèle <code>@Generation.Model</code>, recherche
+            <code>@Embedding.Label</code>) : son rapport n'a pas encore été ajouté au dépôt. Seuils, moments et
+            historique ci-dessous restent ceux des versions précédentes.</p>
+    }
+    @if (Current is { } served)
+    {
+        <section aria-labelledby="det-mesures">
+            <h2 id="det-mesures" class="titre-bloc">Mesure par mesure</h2>
+            <p class="detail-chapeau">Version en ligne, évaluée le @Day(served.Date)&nbsp;: consignes
+                <code>@served.Prompt</code>, @PlainLanguage.ModelName(served.Model), recherche
+                @PlainLanguage.EmbeddingName(served.Embedding). <a href="@ReportUrl(served)">Rapport complet, réponse par
+                réponse</a></p>
+            <table role="table" class="tableau tableau-empile mesures">
+                <thead role="rowgroup">
+                    <tr role="row"><th role="columnheader" scope="col">Questions</th><th role="columnheader" scope="col">Attendu</th><th role="columnheader" scope="col">Résultat</th><th role="columnheader" scope="col">Ce que ça ne dit pas</th></tr>
+                </thead>
+                <tbody role="rowgroup">
+                    @foreach (var m in Measures(served))
+                    {
+                        <tr role="row">
+                            <th role="rowheader" scope="row">@m.Questions</th>
+                            <td role="cell" data-label="Attendu">@m.Expected</td>
+                            <td role="cell" data-label="Résultat"><strong>@m.Result</strong> <span class="muted">@m.Detail</span></td>
+                            <td role="cell" data-label="Ce que ça ne dit pas">@m.Limit</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </section>
+    }
+
+    <section aria-labelledby="det-seuils">
+        <h2 id="det-seuils" class="titre-bloc">La barrière&nbsp;: @Gate.Rules.Count seuils</h2>
+        <p class="detail-chapeau">@Gate.Rules.Count(r => r.Blocking) bloquent la mise en ligne s'ils ne sont pas tenus&nbsp;;
+            @Gate.Rules.Count(r => !r.Blocking) la signalent seulement. Chaque modification qui peut changer les réponses
+            (consignes, modèle, recherche, jeu de questions) relance l'évaluation@(PassCost is { } cost ? $", pour environ {cost.ToString("0.00", French)} € la passe" : "").
+            Seuils et raisons&nbsp;: <DecisionLink Number="014" />.</p>
+        <table class="tableau seuils">
+            <caption class="sr-only">Seuils de la barrière</caption>
+            <tbody>
+                @foreach (var rule in Gate.Rules)
+                {
+                    var (metric, text) = PlainLanguage.GateRule(rule, French);
+                    <tr><th scope="row">@metric</th><td>@text</td></tr>
+                }
+            </tbody>
+        </table>
+    </section>
+
+    <section aria-labelledby="det-moments">
+        <h2 id="det-moments" class="titre-bloc">Trois moments</h2>
+        <ol class="moments" role="list">
+            @foreach (var moment in Moments(Reports.Runs))
+            {
+                <li>
+                    <span class="moment-date">@moment.Date</span>
+                    <strong>@moment.Title</strong>
+                    <span>@moment.Text</span>
+                    @if (moment.Href is { } href)
+                    {
+                        <a href="@href">@moment.LinkText</a>
+                    }
+                </li>
+            }
+        </ol>
+    </section>
+
+    <section aria-labelledby="ev-historique-titre">
+        <h2 id="ev-historique-titre" class="titre-bloc">Historique</h2>
+        <p class="detail-chapeau">Les @Reports.Runs.Count évaluations versionnées dans le dépôt, de la plus récente à la plus
+            ancienne. Celles que la chaîne lance à chaque modification n'y figurent pas, sauf celle de la consigne bloquée
+            du 18 octobre. «&nbsp;—&nbsp;»&nbsp;: mesure ajoutée à l'outil après cette évaluation. Avant le 28 octobre, les
+            coûts étaient relevés en dollars. Les rapports reproduisent les extraits cités à l'identique&nbsp;: AI Act
+            (EUR-Lex, décision 2011/833/UE) et fiches de la CNIL (CC-BY-ND 4.0).</p>
+        <div class="table-scroll" tabindex="0" role="region" aria-labelledby="ev-historique-titre">
+            <table role="table" class="tableau historique">
+                <caption class="sr-only">Historique des évaluations</caption>
+                <thead role="rowgroup">
+                    <tr role="row">
+                        <th role="columnheader" scope="col">Date</th><th role="columnheader" scope="col">Configuration</th><th role="columnheader" scope="col">Vérifiées</th>
+                        <th role="columnheader" scope="col">Échecs</th><th role="columnheader" scope="col">À relire</th><th role="columnheader" scope="col">Passage cité</th>
+                        <th role="columnheader" scope="col">Infidèles</th><th role="columnheader" scope="col">Coût / question</th><th role="columnheader" scope="col">Rapport</th>
+                    </tr>
+                </thead>
+                <tbody role="rowgroup">
+                    @foreach (var r in Reports.Runs)
+                    {
+                        var tag = Tag(r, Current);
+                        <tr role="row" class="@(r == Current ? "en-ligne" : null)">
+                            <td role="cell">@ShortDay(r.Date)<br /><span class="muted">@r.Date.ToString("HH:mm", French)</span></td>
+                            <td role="cell">
+                                <code>@r.Prompt</code> · @PlainLanguage.ModelName(r.Model) · @PlainLanguage.EmbeddingName(r.Embedding)
+                                @if (tag is not null)
+                                {
+                                    <br /><span class="@(r == Current ? "etiquette" : "muted")">@tag</span>
+                                }
+                            </td>
+                            <td role="cell" data-label="Vérifiées">@Fraction(r.Ok, r.Questions)</td>
+                            <td role="cell" data-label="Échecs">@Count(r.Failed)</td>
+                            <td role="cell" data-label="À relire">@Count(r.ToReview)</td>
+                            <td role="cell" data-label="Passage cité">@Fraction(r.ExpectedPassageCited, r.AnswerQuestions)</td>
+                            <td role="cell" data-label="Infidèles">@Fraction(r.Unfaithful, r.Judged)</td>
+                            <td role="cell" data-label="Coût / question">@Cost(r.CostPerQuestion, r.CostCurrency)</td>
+                            <td role="cell"><a href="@ReportUrl(r)" aria-label="Rapport du @Day(r.Date) à @r.Date.ToString("HH:mm", French)">Rapport</a></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <p class="detail-retour">Retour au chapitre&nbsp;: <a href="/evaluation">Résultats d'évaluation</a></p>
+</div>
+
+@code {
+    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
+
+    private EvaluationRun? Current => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
+
+    private double? PassCost => Current?.PassCost ?? Reports.Runs.FirstOrDefault(r => r.PassCost is not null)?.PassCost;
+}

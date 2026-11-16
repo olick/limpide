@@ -18,7 +18,8 @@
   qui expliquent Limpide (« La suite », filet de chapitre, « Vos questions » dans l'en-tête, « Comment il a trouvé
   ça ? » sous chaque réponse), menu dans l'ordre du fil, mentions légales en entrée du menu.
 - **Précisé le 2026-11-16**, d'après la maquette `F5-*` : « Comment il est construit » réduit aux briques, la mise à
-  jour des textes dans une page hors du fil, l'index des décisions sur GitHub.
+  jour des textes dans une page hors du fil, l'index des décisions sur GitHub. Même jour, d'après la maquette `F6-*` : « Résultats
+  d'évaluation » en une minute, son détail dans une page hors du fil.
 
 ## Contexte
 
@@ -95,6 +96,11 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   dans sa propre page, `/mise-a-jour-des-textes`, hors du fil et sans entrée de menu : on y arrive depuis le groupe
   « Données et pipeline » des briques, un 5e chapitre aurait allongé le fil pour tout le monde. « 0 GPU » devient
   « 0 serveur GPU à louer » : les modèles tournent sur les GPU de leurs fournisseurs.
+- **Résultats d'évaluation (2026-11-16)**, d'après la maquette `F6-*` : les mêmes chiffres y paraissaient trois fois
+  (phrase de synthèse, quatre chiffres, tableau). Le chapitre 3 garde l'avertissement « aucun juriste n'a relu ces
+  résultats » en tête, six cartes (résultat, attendu, ce que ça ne dit pas, en version courte), la méthode en quatre
+  étapes et le moment où la barrière a bloqué une consigne dégradée. Le tableau complet, les seuils, les trois moments
+  et l'historique passent dans `/evaluation/detail`, hors du fil et sans entrée de menu, lié depuis le chapitre.
 - **Accueil vide** : une colonne centrée, le titre, la phrase d'accroche et trois exemples en pastilles sous un titre
   visible, envoyés au clic ; ils disparaissent à la première question, qui montre les couches. Pas de commande « / » :
   les visiteurs ne sont pas tous techniciens. Jusqu'au 2026-11-10, trois encarts repliés (« ce qu'il fait, ne fait
