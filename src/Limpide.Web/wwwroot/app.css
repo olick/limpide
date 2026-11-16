@@ -454,8 +454,10 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
    couleur du texte (lisibles en clair comme en sombre). Sous une brique, le choix qui compte et sa décision. */
 /* Plus spécifique que .page:has(> .coupe-page) (65rem), écrite plus loin : ces deux pages sont aussi en .coupe-page. */
 .page:has(> .construction.coupe-page), .page:has(> .mise-a-jour.coupe-page),
-.page:has(> .evaluation.coupe-page), .page:has(> .evaluation-detail.coupe-page) { max-width: 74rem; }
-.construction .titre-bloc, .mise-a-jour .titre-bloc, .evaluation .titre-bloc, .evaluation-detail .titre-bloc { margin: 0; font-size: 1.375rem; font-weight: 800; }
+.page:has(> .evaluation.coupe-page), .page:has(> .evaluation-detail.coupe-page),
+.page:has(> .donnees-page.coupe-page) { max-width: 74rem; }
+.construction .titre-bloc, .mise-a-jour .titre-bloc, .evaluation .titre-bloc, .evaluation-detail .titre-bloc,
+.donnees-page .titre-bloc { margin: 0; font-size: 1.375rem; font-weight: 800; }
 .construction .chiffres-cles { margin-top: 2.5rem; }
 .briques-bloc { margin-top: 4rem; }
 .briques-chapeau { margin: 0.25rem 0 0; font-size: 0.9375rem; color: var(--muted); }
@@ -558,10 +560,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .separe > p { margin: 0; }
 .separe > p + p { margin-top: 0.4rem; } /* le filet court sur toute la largeur, le texte garde sa mesure */
 
-.chiffres { margin: 1.4rem 0 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr)); gap: 1.25rem; }
-.chiffres div { display: flex; flex-direction: column-reverse; justify-content: flex-end; gap: 0.25rem; padding-top: 0.75rem; border-top: 2px solid var(--text); }
-.chiffres dt { font-size: 0.95rem; color: var(--muted); }
-.chiffres dd { margin: 0; font-size: 2.5rem; font-weight: 800; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
 
 .liste-filets { list-style: none; margin: 0; padding: 0; }
 .liste-filets li { padding: 0.6rem 0; border-top: 1px solid var(--border); }
@@ -706,8 +704,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .mesures th:nth-child(2) { width: 15%; }
 .mesures th:nth-child(3) { width: 30%; }
 .historique td:first-child { white-space: nowrap; }
-.donnees th:nth-child(1) { width: 18%; }
-.donnees th:nth-child(3) { width: 24%; }
 .seuils { margin: 0.75rem 0; }
 .seuils th { padding-block: 0.45rem; font-weight: 400; vertical-align: top; }
 .seuils td { font-weight: 800; }
@@ -717,8 +713,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .historique a { display: inline-flex; align-items: center; min-height: 2.75rem; }
 .etiquette { display: inline-block; margin-top: 0.25rem; padding: 0 0.5rem; border-radius: 4px; background: var(--accent-soft); color: var(--text); font-size: 0.8125rem; font-weight: 800; }
 
-.separe-court { margin: 1.4rem 0 0; }
-.trois-colonnes { margin-top: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
 .moments { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); gap: 1.25rem 2.5rem; }
 .moments li { display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.9rem; border-top: 2px solid var(--text); font-size: 0.95rem; }
 .moments a { align-self: flex-start; display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
@@ -727,7 +721,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 /* Résultats d'évaluation, en une minute (Evaluation.razor) : l'avertissement, six cartes de mesure, la méthode en
    quatre étapes (.commandes de la mise à jour des textes), le moment où la barrière a servi. */
 .version-evaluee { margin: 0.6rem 0 0; font-size: 0.875rem; color: var(--muted); }
-.avertissement-juriste { margin: 1.75rem 0 0; padding: 0.9rem 1.1rem; border: 1px solid var(--warn-border); border-radius: 12px; background: var(--warn-bg); }
+.avertissement-juriste, .encadre-attention { margin: 1.75rem 0 0; padding: 0.9rem 1.1rem; border: 1px solid var(--warn-border); border-radius: 12px; background: var(--warn-bg); }
 /* Enfants directs : « La suite » (une section aussi) garde ses 4,5rem, comme dans les autres chapitres. */
 .evaluation > section, .evaluation-detail > section { margin-top: 3.5rem; }
 .mesures-cartes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr)); gap: 1rem 1.25rem; }
@@ -742,6 +736,29 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .moment-cle p { max-width: 72ch; }
 .moment-cle a, .lien-detail a, .detail-retour a { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
 .lien-detail { margin: 2.5rem 0 0; color: var(--muted); }
+
+/* Vos données (Confidentialite.razor), lisible, tout sur la page (mention d'information, ADR-019) : l'essentiel, le
+   trajet de la question (étapes de .commandes, repères de lieu du parcours), donnée par donnée, droits, protection. */
+.donnees-page > section, .donnees-page > .droits { margin-top: 3.5rem; }
+.donnees-page .chiffres-cles { margin-top: 1rem; } /* juste sous son titre, malgré l'écart des autres pages */
+.trajet .repere { align-self: flex-start; }
+@media (forced-colors: active) { .repere-sortie { border-width: 2px; } } /* sans fond, la sortie se distingue encore */
+.trajet-ensuite { margin: 1.75rem 0 0; font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.principes.reste { margin-top: 0.5rem; }
+.donnees-chapeau { margin: 0.25rem 0 0; font-size: 0.9375rem; color: var(--muted); }
+.donnees-cartes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr)); gap: 1rem 1.25rem; align-items: start; }
+.donnees-cartes li { display: flex; flex-direction: column; gap: 0.3rem; padding: 1rem 1.1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 0.9375rem; line-height: 1.45; }
+/* Le titre vient d'abord dans le code (lecteurs d'écran, navigation par titres) ; la durée s'affiche en premier. */
+.donnee-duree { order: -1; font-size: 1.625rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
+.donnee-titre { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.4; }
+.donnees-cartes .fondement { margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
+.droits { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem 3rem; }
+.droits p { margin: 0.5rem 0 0; }
+@media (min-width: 48rem) { .droits { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64rem) {
+    .commandes.trajet { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .principes.reste, .principes.protection { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
 .detail-chapeau { margin: 0.25rem 0 0.75rem; max-width: 80ch; font-size: 0.9375rem; color: var(--muted); }
 .detail-retour { margin: 3rem 0 0; color: var(--muted); }
 
@@ -926,8 +943,6 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .fiche dd { margin-bottom: 0.5rem; }
     .couche { padding: 1.1rem 1rem 1.25rem; }
     .couche h2 { font-size: 1.35rem; }
-    .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1rem; }
-    .chiffres dd { font-size: 1.625rem; }
 
     .fond-ligne button { grid-template-columns: minmax(0, 1fr) auto; gap: 0.15rem 0.75rem; padding: 1rem; }
     .question > h2 { font-size: 1.5rem; }

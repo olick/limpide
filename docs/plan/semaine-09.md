@@ -589,3 +589,14 @@ consigne dégradée bloquée le 18 octobre. Le tableau complet, les seuils, les 
 `/evaluation/detail`, hors du fil. Logique partagée dans `EvaluationText.cs` ; nombre de seuils bloquants lu dans la
 configuration de la barrière.
 
+### « Vos données » lisible, sur une seule page (2026-11-16)
+
+Demande d'Alexandre, après les autres chapitres. Pas de page de détail ici : c'est la mention d'information (ADR-019),
+déjà le second niveau, elle doit rester entière et accessible directement. Maquette d'abord (écrans `F7-*`) : quatre
+chiffres et l'encadré « pas de donnée personnelle », le trajet de la question en trois étapes avec les repères de lieu,
+six cartes « donnée par donnée » au lieu du tableau (la durée en grand), droits et responsable côte à côte, sept points
+de protection raccourcis (le masquage n'est plus expliqué deux fois). Phrase nouvelle, vérifiée dans le code
+(`KeptQuestion.From` dans `Home.razor`, `AskAsync` avec le texte brut) : la copie conservée est masquée, celle envoyée
+pour répondre ne l'est pas. Aucune information de l'ancienne page ne disparaît ; fondements encore à écrire (envoi de
+la question, journal, traces, adresse IP) : toujours ouverts.
+
