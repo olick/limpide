@@ -289,6 +289,13 @@ else
     /// </summary>
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        // Arrivée sur l'écran des questions (le gabarit ne le remonte pas, MainLayout) : on retrouve le bas du fil, là
+        // où on l'avait laissé ; fil vide, le haut. Un limpide.js plus ancien (cache) n'a pas ces fonctions : sans effet.
+        if (firstRender)
+        {
+            try { await JS.InvokeVoidAsync(Thread.Entries.Count > 0 ? "limpide.threadEnd" : "limpide.pageTop"); }
+            catch (Exception ex) when (ex is JSException or JSDisconnectedException) { } // circuit fermé : rien à placer
+        }
         if (showEntry is { } shown)
         {
             showEntry = null;

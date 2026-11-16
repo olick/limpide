@@ -516,7 +516,8 @@ ADR-019 et ADR-022 amendés ; les écrans `F2-*` de la maquette ne sont pas à j
 Complément du 2026-11-16 (retour d'Alexandre) : en changeant de page, on gardait la position de défilement de la
 précédente, parce que la zone qui défile (`.thread`) est commune à toutes les pages et que la navigation de Blazor ne
 remonte que la fenêtre. Le gabarit appelle `limpide.pageTop()` quand le chemin change (pas pour une ancre de la même
-page) : on repart du haut, sur toutes les pages, écran des questions compris.
+page) : on repart du haut. Sauf l'écran des questions, qui, à son premier affichage, place le bas du fil (le haut si
+le fil est vide) : on y revient pour retrouver sa dernière réponse (retour d'Alexandre).
 
 ### « Ce que fait Limpide » en une minute (2026-11-10)
 

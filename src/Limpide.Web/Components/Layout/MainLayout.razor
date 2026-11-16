@@ -195,7 +195,8 @@
             shownPath = path;
             await InvokeAsync(StateHasChanged);
             await JS.InvokeVoidAsync("limpide.closeMenu");
-            if (otherPage)
+            // L'écran des questions place lui-même son arrivée (bas du fil), une fois le fil affiché (Home.razor).
+            if (otherPage && path != "/")
             {
                 // Un limpide.js plus ancien (cache) n'a pas pageTop : la page reste où elle est, la navigation continue.
                 try { await JS.InvokeVoidAsync("limpide.pageTop"); }
