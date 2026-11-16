@@ -1,7 +1,7 @@
 @page "/evaluation"
-@using System.Globalization
 @using Limpide.Core.Evaluation
 @using Limpide.Infrastructure
+@using static Limpide.Web.EvaluationText
 @inject EvaluationReports Reports
 @inject AnswerInstructions Instructions
 @inject GenerationSettings Generation
@@ -10,299 +10,96 @@
 
 <PageTitle>Résultats d'évaluation — Limpide</PageTitle>
 
-@* Résultats d'évaluation, en coupe (ADR-022). Chaque chiffre est lu dans les rapports versionnés (eval/results/) ou
-   dans les seuils de la barrière (EvaluationGate, appsettings.shared.json), jamais recopié&nbsp;; seuls restent écrits à
-   la main les faits de calibration du juge (eval/calibration/, ADR-016) et la lenteur mesurée en ligne (S8). *@
-<div class="coupe-page">
+@* Résultats d'évaluation, chapitre 3 du fil de lecture (ADR-022), lisible en une minute : six cartes (résultat, attendu,
+   ce que ça ne dit pas), la méthode en quatre étapes, le moment où la barrière a servi. Le détail (tableau complet,
+   seuils, moments, historique) est dans EvaluationDetail.razor. Chiffres lus dans les rapports (EvaluationText.cs) et
+   la configuration de la barrière, jamais recopiés. Maquette : écrans F6-evaluation de la toile. *@
+<div class="coupe-page evaluation">
     <h1>Résultats d'évaluation</h1>
     <p class="lede">Comment on mesure la qualité des réponses de Limpide, ce que donnent les mesures, et ce qu'elles ne
         disent pas.</p>
+    @if (Current is { } run)
+    {
+        <p class="version-evaluee">Version en ligne, évaluée le @Day(run.Date)&nbsp;: consignes <code>@run.Prompt</code>,
+            @PlainLanguage.ModelName(run.Model), recherche @PlainLanguage.EmbeddingName(run.Embedding).</p>
+    }
+    else
+    {
+        <p class="warning">
+            Aucune évaluation publiée ne correspond encore à la version en ligne (consignes
+            <code>@Instructions.Version</code>, modèle <code>@Generation.Model</code>, recherche
+            <code>@Embedding.Label</code>) : son rapport n'a pas encore été ajouté au dépôt. Les évaluations des versions
+            précédentes sont dans <a href="/evaluation/detail">le détail</a>.
+        </p>
+    }
 
-    <div class="coupe">
-        <section class="couche couche-surface" aria-labelledby="ev-bref">
-            <span class="couche-label">En surface</span>
-            <div>
-                <h2 id="ev-bref" class="sr-only">En bref</h2>
-                @if (Current is { } run)
+    <p class="avertissement-juriste" role="note"><strong>Aucun juriste n'a relu ces résultats.</strong> Les contrôles et
+        les relectures sont faits par des modèles.</p>
+
+    @if (Current is { } served)
+    {
+        <section class="mesures-bloc" aria-labelledby="ev-mesures">
+            <h2 id="ev-mesures" class="titre-bloc">Ce que donnent les mesures</h2>
+            <ul class="mesures-cartes" role="list">
+                @foreach (var m in Measures(served))
                 {
-                    <p class="muted">Version en ligne, évaluée le @Day(run.Date)&nbsp;: consignes <code>@run.Prompt</code>,
-                        @PlainLanguage.ModelName(run.Model), recherche @PlainLanguage.EmbeddingName(run.Embedding),
-                        @run.Questions questions de test.</p>
-                    <p class="resume">@Summary(run)</p>
-                    <dl class="chiffres">
-                        <div><dt>réponses qui citent le texte attendu</dt><dd>@Fraction(run.ExpectedPassageCited, run.AnswerQuestions)</dd></div>
-                        <div><dt>refus attendus obtenus</dt><dd>@Fraction(run.CorrectDeclines, run.DeclineQuestions)</dd></div>
-                        <div><dt>détournements de consignes obéis</dt><dd>@Fraction(run.InjectionsFailed, run.InjectionQuestions)</dd></div>
-                        <div><dt>réponses jugées infidèles aux textes</dt><dd>@Fraction(run.Unfaithful, run.Judged)</dd></div>
-                    </dl>
-                    <p class="separe-court"><strong>Aucun juriste n'a relu ces résultats</strong> : les contrôles et les
-                        relectures sont faits par des modèles. <a href="@ReportUrl(run)">Rapport complet, réponse par
-                        réponse</a></p>
+                    <li>
+                        @* Ponctuation cachée : un lecteur d'écran lit la carte en phrases distinctes, la limite comprise. *@
+                        <span class="mesure-questions">@m.Questions<span class="sr-only">. </span></span>
+                        <strong class="mesure-resultat">@m.Result<span class="sr-only">. </span></strong>
+                        <span>Attendu&nbsp;: @m.Expected<span class="sr-only">. </span></span>
+                        <span class="mesure-limite"><span class="mesure-limite-titre">Ce que ça ne dit pas<span class="sr-only"> : </span></span>@m.Short</span>
+                    </li>
                 }
-                else
-                {
-                    <p class="warning">
-                        Aucune évaluation publiée ne correspond encore à la version en ligne (consignes
-                        <code>@Instructions.Version</code>, modèle <code>@Generation.Model</code>, recherche
-                        <code>@Embedding.Label</code>) : son rapport n'a pas encore été ajouté au dépôt. Les résultats
-                        plus bas sont ceux des versions précédentes.
-                    </p>
-                }
-            </div>
+            </ul>
         </section>
+    }
 
-        @if (Current is { } served)
-        {
-            <section class="couche couche-dessous" aria-labelledby="ev-mesures">
-                <span class="couche-label">Dessous</span>
-                <div>
-                    <h2 id="ev-mesures">Mesure par mesure</h2>
-                    <p class="couche-promise">Chaque chiffre, avec ce qu'il ne dit pas.</p>
-                    <table role="table" class="tableau tableau-empile mesures">
-                        <thead role="rowgroup">
-                            <tr role="row"><th role="columnheader" scope="col">Questions</th><th role="columnheader" scope="col">Attendu</th><th role="columnheader" scope="col">Résultat</th><th role="columnheader" scope="col">Ce que ça ne dit pas</th></tr>
-                        </thead>
-                        <tbody role="rowgroup">
-                            @foreach (var m in Measures(served))
-                            {
-                                <tr role="row">
-                                    <th role="rowheader" scope="row">@m.Questions</th>
-                                    <td role="cell" data-label="Attendu">@m.Expected</td>
-                                    <td role="cell" data-label="Résultat"><strong>@m.Result</strong> <span class="muted">@m.Detail</span></td>
-                                    <td role="cell" data-label="Ce que ça ne dit pas">@m.Limit</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        }
+    <section aria-labelledby="ev-comment">
+        <h2 id="ev-comment" class="titre-bloc">Comment on mesure</h2>
+        <ol class="commandes etapes-mesure" role="list">
+            @for (var i = 0; i < Steps.Length; i++)
+            {
+                var (title, text) = Steps[i];
+                <li>
+                    <span class="commande-tete"><span class="commande-num" aria-hidden="true">@(i + 1)</span><span class="sr-only">Étape @(i + 1) : </span><strong>@title</strong></span>
+                    <span>@text</span>
+                </li>
+            }
+        </ol>
+    </section>
 
-        <section class="couche couche-fond" aria-labelledby="ev-methode">
-            <span class="couche-label">Au fond</span>
-            <div>
-                <h2 id="ev-methode">Comment on mesure</h2>
-                <p>Les @(QuestionCount is { } n ? $"{n} " : "")questions de test passent par la même
-                    chaîne que la démo. Chaque réponse reçoit un verdict automatique&nbsp;: <strong>vérifiée</strong> (le
-                    passage attendu est cité, ou le refus attendu a eu lieu), <strong>échec</strong> (un garde-fou s'est
-                    déclenché, une consigne n'a pas été suivie) ou <strong>à relire</strong> (le contrôle ne sait pas
-                    trancher). Un second modèle, le juge de fidélité, signale les réponses qui déforment les textes
-                    cités&nbsp;; il sert au tri, pas à décider seul.</p>
-
-                <div class="colonnes deux-colonnes separe-sans-filet">
-                    <div>
-                        <h3>La barrière</h3>
-                        <p>Chaque modification qui peut changer les réponses (consignes, modèle, recherche, jeu de
-                            questions) relance l'évaluation@(PassCost is { } cost ? $", pour environ {cost.ToString("0.00", French)} € la passe" : ""). Si un
-                            seuil bloquant n'est pas tenu, la modification ne peut pas être mise en ligne.</p>
-                        <table class="tableau-fond seuils">
-                            <caption class="sr-only">Seuils de la barrière</caption>
-                            <tbody>
-                                @foreach (var rule in Gate.Rules)
-                                {
-                                    var (metric, text) = PlainLanguage.GateRule(rule, French);
-                                    <tr><th scope="row">@metric</th><td>@text</td></tr>
-                                }
-                            </tbody>
-                        </table>
-                        <p>Seuils et raisons&nbsp;:
-                            <a href="https://github.com/olick/limpide/blob/main/docs/adr/014-metriques-et-seuils-d-evaluation.md">décision d'architecture n°&nbsp;14</a>.</p>
-                    </div>
-                    <div>
-                        <h3>Trois moments</h3>
-                        <ol class="moments" role="list">
-                            @foreach (var moment in Moments())
-                            {
-                                <li>
-                                    <span class="moment-date">@moment.Date</span>
-                                    <strong>@moment.Title</strong>
-                                    <span>@moment.Text</span>
-                                    @if (moment.Href is { } href)
-                                    {
-                                        <a href="@href">@moment.LinkText</a>
-                                    }
-                                </li>
-                            }
-                        </ol>
-                    </div>
-                </div>
-
-                <h3 class="separe">Historique</h3>
-                <p>Les @Reports.Runs.Count évaluations versionnées dans le dépôt, de la plus récente à la
-                    plus ancienne. Celles que la chaîne lance à chaque modification n'y figurent pas, sauf celle de la consigne bloquée du 18 octobre. «&nbsp;—&nbsp;»&nbsp;: mesure
-                    ajoutée à l'outil après cette évaluation. Avant le 28 octobre, les coûts étaient relevés en dollars.
-                    Les rapports reproduisent les extraits cités à l'identique&nbsp;: AI Act (EUR-Lex, décision 2011/833/UE) et
-                    fiches de la CNIL (CC-BY-ND 4.0).</p>
-                <div class="table-scroll" tabindex="0" role="region" aria-labelledby="ev-historique">
-                    <table role="table" class="tableau-fond historique">
-                        <caption id="ev-historique" class="sr-only">Historique des évaluations</caption>
-                        <thead role="rowgroup">
-                            <tr role="row">
-                                <th role="columnheader" scope="col">Date</th><th role="columnheader" scope="col">Configuration</th><th role="columnheader" scope="col">Vérifiées</th>
-                                <th role="columnheader" scope="col">Échecs</th><th role="columnheader" scope="col">À relire</th><th role="columnheader" scope="col">Passage cité</th>
-                                <th role="columnheader" scope="col">Infidèles</th><th role="columnheader" scope="col">Coût / question</th><th role="columnheader" scope="col">Rapport</th>
-                            </tr>
-                        </thead>
-                        <tbody role="rowgroup">
-                            @foreach (var r in Reports.Runs)
-                            {
-                                var tag = Tag(r);
-                                <tr role="row" class="@(r == Current ? "en-ligne" : null)">
-                                    <td role="cell">@ShortDay(r.Date)<br /><span class="muted">@r.Date.ToString("HH:mm", French)</span></td>
-                                    <td role="cell">
-                                        <code>@r.Prompt</code> · @PlainLanguage.ModelName(r.Model) · @PlainLanguage.EmbeddingName(r.Embedding)
-                                        @if (tag is not null)
-                                        {
-                                            <br /><span class="@(r == Current ? "etiquette" : "muted")">@tag</span>
-                                        }
-                                    </td>
-                                    <td role="cell" data-label="Vérifiées">@Fraction(r.Ok, r.Questions)</td>
-                                    <td role="cell" data-label="Échecs">@Count(r.Failed)</td>
-                                    <td role="cell" data-label="À relire">@Count(r.ToReview)</td>
-                                    <td role="cell" data-label="Passage cité">@Fraction(r.ExpectedPassageCited, r.AnswerQuestions)</td>
-                                    <td role="cell" data-label="Infidèles">@Fraction(r.Unfaithful, r.Judged)</td>
-                                    <td role="cell" data-label="Coût / question">@Cost(r.CostPerQuestion, r.CostCurrency)</td>
-                                    <td role="cell"><a href="@ReportUrl(r)" aria-label="Rapport du @Day(r.Date) à @r.Date.ToString("HH:mm", French)">Rapport</a></td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+    @if (BlockedChange(Reports.Runs) is { } moment)
+    {
+        <section class="moment-cle" aria-labelledby="ev-moment">
+            <p class="moment-chapeau">La barrière a servi · @moment.Date</p>
+            <h2 id="ev-moment">@moment.Title</h2>
+            <p>@moment.Text</p>
+            @if (moment.Href is { } href)
+            {
+                <a href="@href">@moment.LinkText</a>
+            }
         </section>
-    </div>
+    }
+
+    <p class="lien-detail"><a href="/evaluation/detail">Le détail des évaluations</a>&nbsp;: mesure par mesure, les
+        @Gate.Rules.Count seuils de la barrière, l'historique des @Reports.Runs.Count évaluations.</p>
 
     @* Fil de lecture (ADR-022) : la question qu'on se pose après cette page, et le chemin pour y répondre. *@
     <LaSuite Chapitre="3" />
 </div>
 
 @code {
-    private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
-
-    private sealed record Measure(string Questions, string Expected, string Result, string Detail, string Limit);
-
-    private sealed record Moment(string Date, string Title, string Text, string? Href = null, string? LinkText = null);
-
     private EvaluationRun? Current => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
 
     private int? QuestionCount => Current?.Questions ?? Reports.Runs.FirstOrDefault()?.Questions;
 
-    private double? PassCost => Current?.PassCost ?? Reports.Runs.FirstOrDefault(r => r.PassCost is not null)?.PassCost;
-
-    // Annotations de l'historique : ce que le rapport ne dit pas de lui-même (ses versions ne distinguent pas les
-    // garde-fous, d'où la passe de 19 h 02, même configuration déclarée que celle en ligne).
-    private static readonly Dictionary<string, string> Notes = new()
-    {
-        ["2026-10-28-1902-mistral-medium-2604"] = "avant le contrôle de la question",
-        ["2026-10-18-1239-mistral-medium-2604"] = "bloquée par la barrière",
-    };
-
-    private string? Tag(EvaluationRun run) => run == Current ? "version en ligne" : Notes.GetValueOrDefault(run.Name);
-
-    private static string Summary(EvaluationRun r)
-    {
-        var declines = r.CorrectDeclines == r.DeclineQuestions
-            ? $"refuse les {r.DeclineQuestions} questions auxquelles il ne doit pas répondre"
-            : $"refuse {r.CorrectDeclines} des {r.DeclineQuestions} questions auxquelles il ne doit pas répondre";
-        var injections = r.InjectionsFailed == 0
-            ? $"n'obéit à aucune des {r.InjectionQuestions} tentatives de détournement"
-            : $"obéit à {r.InjectionsFailed} des {r.InjectionQuestions} tentatives de détournement";
-        var judge = r.Unfaithful is > 0
-            ? $" Un second modèle juge pourtant {r.Unfaithful} réponses sur {r.Judged} infidèles aux textes qu'elles citent."
-            : "";
-        return $"Sur {r.Questions} questions de test, Limpide cite le texte attendu {r.ExpectedPassageCited} fois sur "
-            + $"{r.AnswerQuestions}, {declines} et {injections}.{judge}";
-    }
-
-    private static IEnumerable<Measure> Measures(EvaluationRun r)
-    {
-        var answers = r.Answers.Where(a => a.Behavior == "Answer").ToList();
-        var declines = r.Answers.Where(a => a.Behavior == "Decline").ToList();
-        var qualification = r.Answers.Where(a => a.Behavior == "NoLegalQualification").ToList();
-        var resist = r.Answers.Where(a => a.Behavior == "Resist").ToList();
-
-        var toReview = answers.Where(a => a.Status == "ToReview").Select(a => a.Id).ToList();
-        yield return new($"{answers.Count} dont la réponse est dans les textes", "citer le passage attendu",
-            $"{r.ExpectedPassageCited}/{answers.Count} cités",
-            toReview.Count > 0 ? $"{toReview.Count} à relire ({string.Join(", ", toReview)})\u00A0: un autre passage, peut-être pertinent." : "",
-            "Ne dit pas si la réponse est juste en droit.");
-
-        var byThreshold = declines.Count(a => a.Status == "Ok" && a.Has("hors-perimetre"));
-        var byModel = declines.Count(a => a.Status == "Ok") - byThreshold;
-        yield return new($"{declines.Count} hors du sujet ou sans réponse dans les textes", "refuser de répondre",
-            $"{r.CorrectDeclines}/{declines.Count} refusées",
-            $"{byThreshold} par le seuil de proximité, sans appeler le modèle\u00A0; {byModel} par le modèle.",
-            $"Un échantillon de {declines.Count} questions, pas une garantie.");
-
-        var qualificationToReview = qualification.Count(a => a.Status == "ToReview");
-        yield return new($"{qualification.Count} qui l'invitent à juger une situation", "indiquer les textes, sans trancher",
-            $"{qualificationToReview}/{qualification.Count} à relire",
-            "Le contrôle automatique les met toujours en relecture\u00A0: le détecteur de Limpide ne repère que des "
-            + "formules typiques («\u00A0Oui, vous devez…\u00A0»).",
-            $"C'est la règle la plus importante de Limpide, et aucun juriste n'a relu {Plural(qualification.Count, "cette réponse", $"ces {qualification.Count} réponses")}.");
-
-        var blocked = resist.Count(a => a.Has("injection-suspectee"));
-        var refused = resist.Count(a => a.Status == "Ok" && !a.Has("injection-suspectee"));
-        yield return new($"{resist.Count} tentatives de détourner ses consignes", "ne pas obéir",
-            $"{r.InjectionsFailed}/{resist.Count} obéies",
-            $"{blocked} {Plural(blocked, "bloquée", "bloquées")} avant la recherche, {refused} {Plural(refused, "refusée", "refusées")} par le modèle.",
-            $"{resist.Count} tentatives écrites par un modèle\u00A0: d'autres techniques existent.");
-
-        var unfaithful = r.Answers.Where(a => a.Judge == "infidèle").Select(a => a.Id).ToList();
-        yield return new($"{r.Judged} réponses relues par un second modèle", "ne pas déformer les textes cités",
-            $"{r.Unfaithful}/{r.Judged} jugées infidèles",
-            unfaithful.Count > 0 ? string.Join(", ", unfaithful) + "." : "",
-            "Un modèle qui juge un modèle\u00A0: calibré sur 37 réponses relues, elles aussi, par un modèle, il a repéré "
-            + "8 des 9 erreurs connues, avec 1 à 2 fausses alertes sur 13 réponses fidèles. 9 erreurs, c'est peu, et sur une "
-            + "passe précédente, la relecture de ses 7 alertes n'a trouvé aucune erreur grave.");
-
-        yield return new($"Les {r.Questions}", "coût et temps",
-            $"{Cost(r.CostPerQuestion, r.CostCurrency)} par question",
-            $"Durée médiane {Seconds(r.MedianSeconds)}, 95ᵉ centile {Seconds(r.P95Seconds)}.",
-            "Coût de la rédaction seule"
-            + (r.JudgeCost is { } judge ? $"\u00A0: le juge a coûté {judge.ToString("0.000", French)} € pour la passe." : ".")
-            + " Le soir même, en ligne, une question a pris 15\u00A0s (lenteur passagère de la vectorisation chez OVHcloud).");
-    }
-
-    // Trois passes qui montrent l'évaluation à l'œuvre ; chiffres lus dans leurs rapports, moment omis s'il manque.
-    private IEnumerable<Moment> Moments()
-    {
-        if (Run("2026-10-28-1902-mistral-medium-2604") is { } before && Run("2026-10-28-1905-mistral-medium-2604") is { } after
-            && Reports.Runs.FirstOrDefault(r => r.Date < before.Date && r.InjectionQuestions is not null) is { } older)
-            yield return new("28 octobre 2026", "Une faille trouvée, puis corrigée",
-                $"Avec {before.InjectionQuestions - older.InjectionQuestions} nouvelles tentatives de détournement, "
-                + $"{before.InjectionsFailed} des {before.InjectionQuestions} sont "
-                + "obéies\u00A0: la barrière bloque. Après l'ajout d'un contrôle de la question avant la recherche, "
-                + $"{after.InjectionsFailed} sur {after.InjectionQuestions}.");
-        if (Run("2026-10-18-1239-mistral-medium-2604") is { } degraded)
-            yield return new("18 octobre 2026", "Une consigne dégradée, bloquée",
-                $"Sans la règle qui oblige à citer les textes, le passage attendu n'est plus cité que "
-                + $"{degraded.ExpectedPassageCited} fois sur {degraded.AnswerQuestions}, avec {degraded.Failed} échecs\u00A0: la "
-                + "modification ne peut pas être mise en ligne.",
-                "https://github.com/olick/limpide/pull/16", "La modification bloquée (PR n°\u00A016)");
-        if (Run("2026-10-15-2230-mistral-medium-2604") is { } bge && Run("2026-10-15-2233-mistral-medium-2604") is { } qwen)
-            yield return new("15 octobre 2026", "Un autre modèle de vectorisation",
-                $"Même jeu de questions\u00A0: en passant de bge-m3 à Qwen3-Embedding-8B, le passage attendu est cité "
-                + $"{qwen.ExpectedPassageCited} fois sur {qwen.AnswerQuestions} au lieu de {bge.ExpectedPassageCited}.");
-    }
-
-    private EvaluationRun? Run(string name) => Reports.Runs.FirstOrDefault(r => r.Name == name);
-
-    private static string Plural(int n, string one, string many) => n == 1 ? one : many;
-
-    private static string ReportUrl(EvaluationRun run) =>
-        $"https://github.com/olick/limpide/blob/main/eval/results/{Uri.EscapeDataString(run.Name)}.md";
-
-    private static string Day(DateTimeOffset date) => date.ToString("d MMMM yyyy", French);
-
-    private static string ShortDay(DateTimeOffset date) => date.ToString("d MMM yyyy", French);
-
-    private static string Count(int? value) => value?.ToString(French) ?? "—";
-
-    private static string Fraction(int? value, int? total) => value is { } v && total is > 0 ? $"{v}/{total}" : "—";
-
-    private static string Cost(double? value, string currency) =>
-        value is { } v ? $"{v.ToString("0.0000", French)} {currency}" : "—";
-
-    private static string Seconds(double? value) => value is { } v ? v.ToString("0.0", French) + " s" : "—";
+    private (string Title, string Text)[] Steps =>
+    [
+        (QuestionCount is { } n ? $"{n} questions de test" : "Des questions de test",
+            "Rejouées dès qu'un changement peut modifier les réponses, par la même chaîne que la démo."),
+        ("Un verdict automatique", "Vérifiée, échec, ou à relire quand le contrôle ne sait pas trancher."),
+        ("Un second modèle relit", "Il signale les réponses qui déforment les textes cités : il trie, il ne décide pas seul."),
+        ("La barrière", $"{Gate.Rules.Count(r => r.Blocking)} seuils bloquants : un seul manqué, et la modification ne part pas en ligne."),
+    ];
 }

@@ -453,8 +453,9 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 /* Comment il est construit : les briques (TechStack.razor), en cartes groupées par rôle ; icônes en masque, dans la
    couleur du texte (lisibles en clair comme en sombre). Sous une brique, le choix qui compte et sa décision. */
 /* Plus spécifique que .page:has(> .coupe-page) (65rem), écrite plus loin : ces deux pages sont aussi en .coupe-page. */
-.page:has(> .construction.coupe-page), .page:has(> .mise-a-jour.coupe-page) { max-width: 74rem; }
-.construction .titre-bloc, .mise-a-jour .titre-bloc { margin: 0; font-size: 1.375rem; font-weight: 800; }
+.page:has(> .construction.coupe-page), .page:has(> .mise-a-jour.coupe-page),
+.page:has(> .evaluation.coupe-page), .page:has(> .evaluation-detail.coupe-page) { max-width: 74rem; }
+.construction .titre-bloc, .mise-a-jour .titre-bloc, .evaluation .titre-bloc, .evaluation-detail .titre-bloc { margin: 0; font-size: 1.375rem; font-weight: 800; }
 .construction .chiffres-cles { margin-top: 2.5rem; }
 .briques-bloc { margin-top: 4rem; }
 .briques-chapeau { margin: 0.25rem 0 0; font-size: 0.9375rem; color: var(--muted); }
@@ -486,7 +487,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .lien-decisions { margin: 1.75rem 0 0; }
 
 /* Comment les textes restent à jour (MiseAJour.razor) : les six commandes en chaîne, puis ce qui la rend sûre. */
-.mise-a-jour section { margin-top: 3rem; }
+.mise-a-jour > section { margin-top: 3rem; }
 .commandes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
 .commandes li { position: relative; display: flex; flex-direction: column; gap: 0.35rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 0.9375rem; line-height: 1.4; }
 .commande-tete { display: flex; align-items: center; gap: 0.6rem; }
@@ -500,6 +501,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 @media (min-width: 48rem) { .principes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 64rem) {
     .commandes { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .commandes.etapes-mesure { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .commandes li { min-height: 7.5rem; }
 }
 
@@ -707,20 +709,41 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .donnees th:nth-child(1) { width: 18%; }
 .donnees th:nth-child(3) { width: 24%; }
 .seuils { margin: 0.75rem 0; }
-.seuils th { padding-block: 0.45rem; border-top: 1px solid var(--band-rule); color: var(--band-ink); vertical-align: top; }
+.seuils th { padding-block: 0.45rem; font-weight: 400; vertical-align: top; }
 .seuils td { font-weight: 800; }
 .historique td { font-variant-numeric: tabular-nums; }
 .historique td:nth-child(n+3) { white-space: nowrap; }
 .historique tr.en-ligne td { font-weight: 600; }
-.etiquette { display: inline-block; margin-top: 0.25rem; padding: 0 0.5rem; border-radius: 4px; background: var(--band-ink); color: var(--band); font-size: 0.8125rem; font-weight: 800; }
+.historique a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+.etiquette { display: inline-block; margin-top: 0.25rem; padding: 0 0.5rem; border-radius: 4px; background: var(--accent-soft); color: var(--text); font-size: 0.8125rem; font-weight: 800; }
 
-.resume { margin: 0.6rem 0 0; font-size: 1.125rem; }
 .separe-court { margin: 1.4rem 0 0; }
 .trois-colonnes { margin-top: 1.1rem; grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr)); }
-.moments { list-style: none; margin: 0; padding: 0; }
-.moments li { display: flex; flex-direction: column; gap: 0.2rem; padding: 0.75rem 0; border-top: 1px solid var(--band-rule); font-size: 0.95rem; }
-.moments li:first-child { border-top: 0; padding-top: 0; }
-.moment-date { font-size: 0.8125rem; color: var(--band-muted); }
+.moments { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(min(18rem, 100%), 1fr)); gap: 1.25rem 2.5rem; }
+.moments li { display: flex; flex-direction: column; gap: 0.2rem; padding-top: 0.9rem; border-top: 2px solid var(--text); font-size: 0.95rem; }
+.moments a { align-self: flex-start; display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
+.moment-date { font-size: 0.8125rem; color: var(--muted); }
+
+/* Résultats d'évaluation, en une minute (Evaluation.razor) : l'avertissement, six cartes de mesure, la méthode en
+   quatre étapes (.commandes de la mise à jour des textes), le moment où la barrière a servi. */
+.version-evaluee { margin: 0.6rem 0 0; font-size: 0.875rem; color: var(--muted); }
+.avertissement-juriste { margin: 1.75rem 0 0; padding: 0.9rem 1.1rem; border: 1px solid var(--warn-border); border-radius: 12px; background: var(--warn-bg); }
+/* Enfants directs : « La suite » (une section aussi) garde ses 4,5rem, comme dans les autres chapitres. */
+.evaluation > section, .evaluation-detail > section { margin-top: 3.5rem; }
+.mesures-cartes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(19rem, 100%), 1fr)); gap: 1rem 1.25rem; }
+.mesures-cartes li { display: flex; flex-direction: column; gap: 0.25rem; padding: 1rem 1.1rem 0.9rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.mesure-questions { font-size: 0.8125rem; color: var(--muted); }
+.mesure-resultat { font-size: 1.875rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.mesure-limite { margin-top: auto; padding-top: 0.65rem; border-top: 1px solid var(--border); font-size: 0.875rem; line-height: 1.45; }
+.mesure-limite-titre { display: block; font-size: 0.75rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.evaluation > section.moment-cle { padding: 1.25rem 1.5rem 0.5rem; border: 1.5px solid var(--accent); border-radius: 14px; background: var(--surface); }
+.moment-chapeau { margin: 0; font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.moment-cle h2 { margin: 0.35rem 0 0; font-size: 1.375rem; font-weight: 800; }
+.moment-cle p { max-width: 72ch; }
+.moment-cle a, .lien-detail a, .detail-retour a { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
+.lien-detail { margin: 2.5rem 0 0; color: var(--muted); }
+.detail-chapeau { margin: 0.25rem 0 0.75rem; max-width: 80ch; font-size: 0.9375rem; color: var(--muted); }
+.detail-retour { margin: 3rem 0 0; color: var(--muted); }
 
 
 /* Fiches d'identité (mentions légales) : libellé, valeur. */
@@ -871,7 +894,7 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
        libellé (data-label), lu une seule fois : l’en-tête de colonne suffit. */
     .historique thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
     .historique td[data-label]::before { content: attr(data-label) " : " / ""; font-weight: 600; }
-    .historique tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.2rem 1rem; padding: 0.75rem 0; border-top: 1px solid var(--band-rule); }
+    .historique tr { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.2rem 1rem; padding: 0.75rem 0; border-top: 1px solid var(--border); }
     .historique td { padding: 0; border: 0; white-space: normal; }
     .historique td:nth-child(-n+2), .historique td:last-child { grid-column: 1 / -1; }
     .historique td:nth-child(n+3) { white-space: normal; }

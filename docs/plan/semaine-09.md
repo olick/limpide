@@ -578,3 +578,14 @@ preuve de la démarche). Nouvelle page hors
 du fil, `/mise-a-jour-des-textes` : les six commandes et ce qui rend la chaîne sûre (ADR-007 à 010). Corrigé en
 route : « 0 GPU, modèles appelés par API » et « pas un seul GPU » étaient trompeurs (les modèles tournent sur les GPU
 d'OVHcloud et de Mistral) ; une teinte sur les quatre briques à choix, jugée peu claire, retirée. ADR-022 complétée.
+
+### « Résultats d'évaluation » en une minute (2026-11-16)
+
+Demande d'Alexandre : la page était longue et complexe. Les mêmes chiffres y paraissaient trois fois (phrase, quatre
+chiffres, tableau de six mesures), puis venaient 13 seuils, trois moments et un historique de 22 lignes sur neuf
+colonnes. Maquette d'abord (écrans `F6-*`). Le chapitre 3 garde l'avertissement « aucun juriste n'a relu » en tête, six
+cartes (résultat, attendu, ce que ça ne dit pas en version courte), la méthode en quatre étapes et un seul moment, la
+consigne dégradée bloquée le 18 octobre. Le tableau complet, les seuils, les moments et l'historique passent dans
+`/evaluation/detail`, hors du fil. Logique partagée dans `EvaluationText.cs` ; nombre de seuils bloquants lu dans la
+configuration de la barrière.
+
