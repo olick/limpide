@@ -102,6 +102,14 @@ window.limpide = {
         if (dialog && dialog.open) dialog.close();
     },
 
+    // Changement de page (gabarit) : la zone qui défile est commune à toutes les pages et garderait sa position ; on
+    // repart du haut, sur toutes les pages, écran des questions compris. Fenêtre basse (moins de 34rem, zoom fort) :
+    // .thread ne défile plus, c'est la fenêtre ; on remonte les deux. Saut sans animation (aucun scroll-behavior).
+    pageTop() {
+        document.querySelector(".thread")?.scrollTo({ top: 0 });
+        window.scrollTo({ top: 0 });
+    },
+
     // Fil de questions (ADR-022) : place une question en haut de la zone qui défile (sous l'en-tête fixe, grâce à
     // scroll-margin), sans animation si le visiteur a demandé moins de mouvement.
     showQuestion(id) {

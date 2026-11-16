@@ -513,6 +513,10 @@ Flèche d'envoi tournée vers le haut. **Défilement** : le message d'état `.sr
 à la fenêtre ; au bout d'un long fil, toute la page défilait (double barre, en-tête hors écran), probablement aussi la
 cause du décalage après fermeture du clavier sur téléphone, à vérifier en production. `.thread { position: relative; }`.
 ADR-019 et ADR-022 amendés ; les écrans `F2-*` de la maquette ne sont pas à jour.
+Complément du 2026-11-16 (retour d'Alexandre) : en changeant de page, on gardait la position de défilement de la
+précédente, parce que la zone qui défile (`.thread`) est commune à toutes les pages et que la navigation de Blazor ne
+remonte que la fenêtre. Le gabarit appelle `limpide.pageTop()` quand le chemin change (pas pour une ancre de la même
+page) : on repart du haut, sur toutes les pages, écran des questions compris.
 
 ### « Ce que fait Limpide » en une minute (2026-11-10)
 
