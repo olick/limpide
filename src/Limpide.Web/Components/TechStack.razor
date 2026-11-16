@@ -1,29 +1,52 @@
 @* Les technologies utilisées par Limpide, groupées par rôle. À compléter à chaque technologie ajoutée au projet
-   (icônes : wwwroot/tech, Simple Icons, CC0). *@
-
-@* Affichée dans la couche du fond de « Comment il est construit », qui porte le titre et le renvoi aux décisions. *@
-<div class="stack">
-    @foreach (var (group, items) in Groups)
+   (icônes : wwwroot/tech, Simple Icons, CC0). Une brique porte, au plus, le choix qui compte et la décision qui
+   l'explique (maquette F5-construction). Affichée dans « Comment il est construit », qui porte le titre. *@
+<div class="briques">
+    @for (var g = 0; g < Groups.Length; g++)
     {
-        <div class="stack-group">
-        <h3>@group</h3>
-        <ul>
-            @foreach (var tech in items)
+        var (group, items) = Groups[g];
+        var id = $"briques-{g}";
+        <section class="briques-groupe" aria-labelledby="@id">
+            <h3 id="@id">@group</h3>
+            <ul class="briques-liste" role="list">
+                @foreach (var tech in items)
+                {
+                    <li class="brique">
+                        @if (tech.Icon is { } icon)
+                        {
+                            <span class="icon" style="--icon: url('tech/@(icon).svg')" aria-hidden="true"></span>
+                        }
+                        else
+                        {
+                            <span class="icon text" aria-hidden="true">@tech.Name[..1]</span>
+                        }
+                        <span class="brique-texte">
+                            <strong>@tech.Name</strong>
+                            <span class="role">@tech.Role</span>
+                            @if (tech.Choice is { } choice)
+                            {
+                                <span class="brique-choix"><strong>@choice.Lead</strong> @choice.Text</span>
+                            }
+                            @if (tech.Decisions is { Length: > 0 } decisions)
+                            {
+                                <span class="brique-decisions">
+                                    @foreach (var decision in decisions)
+                                    {
+                                        <DecisionLink Number="@decision" Class="brique-decision" />
+                                    }
+                                </span>
+                            }
+                        </span>
+                    </li>
+                }
+            </ul>
+            @if (group == Pipeline)
             {
-                <li>
-                    @if (tech.Icon is { } icon)
-                    {
-                        <span class="icon" style="--icon: url('tech/@(icon).svg')" aria-hidden="true"></span>
-                    }
-                    else
-                    {
-                        <span class="icon text" aria-hidden="true">@tech.Name[..1]</span>
-                    }
-                    <span><strong>@tech.Name</strong> <span class="role">@tech.Role</span></span>
-                </li>
+                @* Page hors du fil de lecture, sans entrée de menu : on y arrive d'ici. *@
+                <p class="briques-plus"><a href="/mise-a-jour-des-textes">Comment les textes restent à jour</a>&nbsp;: les
+                    six commandes, chaque semaine.</p>
             }
-        </ul>
-        </div>
+        </section>
     }
 
     <p class="legal">Logos : Simple Icons (CC0). Les marques citées appartiennent à leurs propriétaires ; leur présence
@@ -31,8 +54,13 @@
 </div>
 
 @code {
-    private sealed record Tech(string Name, string Role, string? Icon);
+    private sealed record Choice(string Lead, string Text);
 
+    private sealed record Tech(string Name, string Role, string? Icon, Choice? Choice = null, string[]? Decisions = null);
+
+    private const string Pipeline = "Données et pipeline";
+
+    // Les quatre choix qui comptent (ancien bloc de « Comment il est construit ») sont versés dans leur brique.
     private static readonly (string Group, Tech[] Items)[] Groups =
     [
         ("Application", [
@@ -40,24 +68,27 @@
             new("Blazor", "interface web, rendue sur le serveur", "blazor"),
         ]),
         ("Recherche et IA", [
-            new("PostgreSQL", "base de données", "postgresql"),
-            new("pgvector", "recherche par le sens, dans PostgreSQL", null),
-            new("Qwen3-Embedding-8B", "modèle multilingue à poids ouverts qui transforme un texte en vecteur", null),
-            new("OVHcloud AI Endpoints", "fait tourner Qwen3-Embedding en France, à la demande", "ovh"),
-            new("Ollama", "fait tourner bge-m3, l'ancien modèle, sur le poste de développement hors ligne", "ollama"),
-            new("Mistral AI", "rédaction des réponses (Medium 3.5), hébergé en Europe", "mistralai"),
+            new("PostgreSQL", "base de données", "postgresql",
+                new("Une seule base.", "PostgreSQL avec pgvector plutôt qu'une base vectorielle dédiée : une de moins à opérer, sauvegarder et sécuriser."), ["001"]),
+            new("pgvector", "recherche par le sens, dans PostgreSQL", null,
+                new("Mesurer avant de compliquer.", "La recherche hybride a été mesurée : elle n'améliorait pas les résultats."), ["005"]),
+            new("Qwen3-Embedding-8B", "modèle multilingue à poids ouverts qui transforme un texte en vecteur", null, Decisions: ["017"]),
+            new("OVHcloud AI Endpoints", "fait tourner Qwen3-Embedding en France, à la demande", "ovh",
+                new("Des modèles en France et en Europe.", "Pas de modèle local en production, pas de serveur GPU à louer."), ["012"]),
+            new("Ollama", "fait tourner bge-m3, l'ancien modèle, sur le poste de développement hors ligne", "ollama", Decisions: ["002"]),
+            new("Mistral AI", "rédaction des réponses (Medium 3.5), hébergé en Europe", "mistralai", Decisions: ["004"]),
         ]),
-        ("Données et pipeline", [
-            new("Apache Airflow", "mise à jour hebdomadaire des textes", "apacheairflow"),
-            new("Python", "description du pipeline", "python"),
+        (Pipeline, [
+            new("Apache Airflow", "mise à jour hebdomadaire des textes", "apacheairflow", Decisions: ["007"]),
+            new("Python", "description du pipeline, sans code métier", "python"),
             new("Docker", "chaque composant dans son conteneur", "docker"),
-            new("DbUp", "évolutions du schéma de la base", null),
+            new("DbUp", "évolutions du schéma de la base", null, Decisions: ["008"]),
         ]),
         ("Hébergement et sécurité", [
-            new("OVHcloud", "serveur en France", "ovh"),
+            new("OVHcloud", "serveur en France", "ovh", Decisions: ["006"]),
             new("Debian", "système du serveur", "debian"),
             new("Terraform", "infrastructure décrite en code : zone DNS, environnements Azure", "terraform"),
-            new("Microsoft Azure", "vitrine recréée à la demande : Container Apps, PostgreSQL géré, Key Vault, sans aucun mot de passe", null),
+            new("Microsoft Azure", "vitrine recréée à la demande : Container Apps, PostgreSQL géré, Key Vault, sans aucun mot de passe", null, Decisions: ["011"]),
             new("Caddy", "serveur web, HTTPS automatique", "caddy"),
             new("Let's Encrypt", "certificats HTTPS", "letsencrypt"),
             new("OpenID Connect", "connexion au back office (Microsoft Entra ID)", "openid"),
@@ -65,12 +96,13 @@
         ]),
         ("Supervision", [
             new("OpenTelemetry", "mesure chaque question, étape par étape, sans jamais garder son texte", "opentelemetry"),
-            new("Grafana", "traces (Tempo), journaux (Loki), tableaux de bord et alertes, sur le serveur", "grafana"),
+            new("Grafana", "traces (Tempo), journaux (Loki), tableaux de bord et alertes, sur le serveur", "grafana", Decisions: ["018"]),
             new("Prometheus", "métriques dans le temps : latence, erreurs, mémoire du serveur", "prometheus"),
         ]),
         ("Code", [
             new("GitHub", "dépôt public, sous licence Apache 2.0 ; registre des images Docker", "github"),
-            new("GitHub Actions", "vérifie chaque modification (compilation, tests), puis la met en ligne après validation", "githubactions"),
+            new("GitHub Actions", "vérifie chaque modification (compilation, tests), puis la met en ligne après validation", "githubactions",
+                new("Évaluer avant de mettre en ligne.", "Dès qu'un changement peut modifier les réponses, l'évaluation tourne dans un environnement jetable ; un seuil manqué bloque la mise en ligne."), ["015", "016"]),
             new("Grype", "cherche les failles connues dans les images, avant chaque mise en ligne et chaque semaine", null),
             new("Gitleaks", "cherche les mots de passe et les clés dans tout l'historique du code, à chaque modification", null),
         ]),

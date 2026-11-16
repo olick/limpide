@@ -1,0 +1,70 @@
+@page "/mise-a-jour-des-textes"
+
+<PageTitle>Comment les textes restent à jour — Limpide</PageTitle>
+
+@* Hors du fil de lecture et du menu (ADR-022) : on y arrive depuis le groupe « Données et pipeline » des briques
+   (TechStack.razor). Les six commandes d'ingestion, dans l'ordre, et ce qui rend la chaîne sûre (ADR-007 à 010).
+   Maquette : écrans F5-mise-a-jour de la toile. *@
+<div class="coupe-page mise-a-jour">
+    <h1>Comment les textes restent à jour</h1>
+    <p class="lede">Chaque semaine, Limpide relève l'AI Act et les fiches IA de la CNIL à leur source. Une nouvelle
+        version n'est servie qu'après des contrôles de qualité.</p>
+
+    <section aria-labelledby="maj-commandes">
+        <h2 id="maj-commandes" class="titre-bloc">Les six commandes, dans l'ordre</h2>
+        <ol class="commandes" role="list">
+            @for (var i = 0; i < Commands.Length; i++)
+            {
+                var (name, text) = Commands[i];
+                <li>
+                    <span class="commande-tete"><span class="commande-num" aria-hidden="true">@(i + 1)</span><span class="sr-only">Étape @(i + 1) : </span><code>@name</code></span>
+                    <span>@text</span>
+                </li>
+            }
+        </ol>
+    </section>
+
+    <section aria-labelledby="maj-principes">
+        <h2 id="maj-principes" class="titre-bloc">Ce qui la rend sûre</h2>
+        <ul class="principes" role="list">
+            <li>
+                <strong>Six commandes, chacune dans son conteneur</strong>
+                <span>Airflow les lance ; elles s'échangent leur travail par le stockage, jamais en mémoire, et chacune
+                    peut être relancée sans effet de bord.</span>
+                <DecisionLink Number="007" />
+            </li>
+            <li>
+                <strong>Rien ne bouge sans raison</strong>
+                <span>Une empreinte du texte relevé : même empreinte, rien à faire. Un texte modifié repasse par toute
+                    la chaîne, chaque semaine.</span>
+                <DecisionLink Number="009" />
+            </li>
+            <li>
+                <strong>Candidate, puis publiée</strong>
+                <span>Une nouvelle version reste candidate tant qu'elle n'a pas passé les contrôles de qualité ; la
+                    version publiée continue d'être servie jusque-là.</span>
+                <DecisionLink Number="008" />
+            </li>
+            <li>
+                <strong>Découpé selon la structure</strong>
+                <span>Par article, considérant ou section, plutôt qu'en morceaux de taille fixe : le choix a été
+                    mesuré.</span>
+                <DecisionLink Number="010" />
+            </li>
+        </ul>
+    </section>
+
+    <p class="maj-retour">Les autres briques&nbsp;: <a href="/construction">Comment il est construit</a></p>
+</div>
+
+@code {
+    private static readonly (string Name, string Text)[] Commands =
+    [
+        ("fetch", "relève le texte à sa source"),
+        ("extract", "en tire le contenu"),
+        ("chunk", "le découpe par article, considérant, section"),
+        ("validate", "contrôles de qualité"),
+        ("embed", "vectorise chaque passage"),
+        ("publish", "sert la nouvelle version"),
+    ];
+}

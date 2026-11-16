@@ -17,6 +17,8 @@
 - **Précisé le 2026-11-11**, d'après la maquette `F4-fil-*` (retours d'Alexandre) : fil de lecture entre les pages
   qui expliquent Limpide (« La suite », filet de chapitre, « Vos questions » dans l'en-tête, « Comment il a trouvé
   ça ? » sous chaque réponse), menu dans l'ordre du fil, mentions légales en entrée du menu.
+- **Précisé le 2026-11-16**, d'après la maquette `F5-*` : « Comment il est construit » réduit aux briques, la mise à
+  jour des textes dans une page hors du fil, l'index des décisions sur GitHub.
 
 ## Contexte
 
@@ -84,6 +86,15 @@ façons d'afficher les textes cités). Détail de la présentation retenue :
   rangé sous l'en-tête qui se replie au défilement (hauteur prise, surtout sur mobile, contenu qui bouge, navigation
   cachée), des flèches sur les boutons. Les pages secondaires perdent leur lien « Poser une question » en haut :
   l'en-tête le porte.
+- **Comment il est construit (2026-11-16)**, d'après la maquette `F5-*` : le chapitre 2 se réduit à trois chiffres
+  et aux briques (`TechStack.razor`), en cartes groupées par rôle ; les « quatre choix qui comptent » sont versés
+  dans leur brique (une phrase en gras, sans couleur à décoder), et une brique renvoie à la décision qui l'explique
+  (`DecisionLink.razor`, titre complet pour les lecteurs d'écran). Le chemin d'une question part (c'est le parcours
+  de « Ce que fait Limpide »), le tableau des décisions aussi (un lien vers l'index sur GitHub, plus rien à tenir à
+  jour dans le site ; les supprimer aurait retiré la preuve que la page annonce). La mise à jour des textes passe
+  dans sa propre page, `/mise-a-jour-des-textes`, hors du fil et sans entrée de menu : on y arrive depuis le groupe
+  « Données et pipeline » des briques, un 5e chapitre aurait allongé le fil pour tout le monde. « 0 GPU » devient
+  « 0 serveur GPU à louer » : les modèles tournent sur les GPU de leurs fournisseurs.
 - **Accueil vide** : une colonne centrée, le titre, la phrase d'accroche et trois exemples en pastilles sous un titre
   visible, envoyés au clic ; ils disparaissent à la première question, qui montre les couches. Pas de commande « / » :
   les visiteurs ne sont pas tous techniciens. Jusqu'au 2026-11-10, trois encarts repliés (« ce qu'il fait, ne fait
