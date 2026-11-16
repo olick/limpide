@@ -1,0 +1,23 @@
+@using Limpide.Core.Documentation
+@inject ArchitectureDecisions Decisions
+
+@* Lien vers une décision d'architecture, lue dans l'index (docs/adr/README.md) : « décision 001 » à l'écran, le titre
+   complet pour les lecteurs d'écran (hors de sa phrase, « décision 001 » ne dit rien). Décision absente de l'index :
+   rien n'est affiché, plutôt qu'un lien cassé. *@
+@if (Decision is { } decision)
+{
+    <a class="@Class" href="@(Base + decision.File)" aria-label="décision @decision.Number : @decision.Title">décision @decision.Number</a>
+}
+
+@code {
+    private const string Base = "https://github.com/olick/limpide/blob/main/docs/adr/";
+
+    /// <summary>Numéro sur trois chiffres, tel que dans l'index (« 001 »).</summary>
+    [Parameter, EditorRequired]
+    public string Number { get; set; } = "";
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    private ArchitectureDecision? Decision => Decisions.All.FirstOrDefault(d => d.Number == Number);
+}

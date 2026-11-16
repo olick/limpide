@@ -1,146 +1,50 @@
 @page "/construction"
 @using System.Globalization
-@using Limpide.Infrastructure
 @inject ArchitectureDecisions Decisions
-@inject EvaluationReports Reports
-@inject GenerationSettings Generation
-@inject EmbeddingOptions Embedding
-@inject AnswerInstructions Instructions
 
 <PageTitle>Comment il est construit — Limpide</PageTitle>
 
-@* Comment il est construit, en coupe (ADR-022) : l'essentiel et quatre choix, le chemin d'une question et la mise à
-   jour des textes, puis les briques (TechStack.razor) et l'index des décisions, lu dans docs/adr/README.md. *@
-<div class="coupe-page">
+@* Comment il est construit, chapitre 2 du fil de lecture (ADR-022) : trois chiffres, puis les briques (TechStack.razor),
+   certaines avec le choix qui compte et la décision qui l'explique. Le chemin d'une question est dans « Ce que fait
+   Limpide », la mise à jour des textes dans sa propre page (MiseAJour.razor), l'index des décisions sur GitHub.
+   Maquette : écrans F5-construction de la toile. *@
+<div class="coupe-page construction">
     <h1>Comment il est construit</h1>
-    <p class="lede">Chaque brique a été choisie, mesurée quand c'était possible, et documentée dans une décision
-        d'architecture qu'on peut relire.</p>
+    <p class="lede">Chaque brique a été choisie, mesurée quand c'était possible ; les choix qui comptent sont
+        documentés dans une décision qu'on peut relire.</p>
 
-    <div class="coupe">
-        <section class="couche couche-surface" aria-labelledby="co-bref">
-            <span class="couche-label">En surface</span>
-            <div>
-                <h2 id="co-bref">En bref</h2>
-                <p>Une application .NET sur un serveur en France. La recherche par le sens se fait dans PostgreSQL, la
-                    rédaction chez Mistral AI, et rien n'est mis en ligne sans passer l'évaluation.</p>
-                <dl class="chiffres">
-                    <div><dt>décisions d'architecture écrites</dt><dd>@Decisions.All.Count</dd></div>
-                    <div><dt>serveur, en France</dt><dd>1</dd></div>
-                    <div><dt>GPU&nbsp;: modèles appelés par API</dt><dd>0</dd></div>
-                    @if (Served is { } served)
-                    {
-                        <div><dt>questions de test, rejouées dès qu'un changement peut modifier les réponses</dt><dd>@served.Questions</dd></div>
-                    }
-                </dl>
+    <ul class="chiffres-cles" role="list" aria-label="En chiffres">
+        @if (Decisions.All.Count > 0)
+        {
+            <li>
+                <strong>@Decisions.All.Count.ToString(French)</strong>
+                <span>décisions d'architecture écrites, chacune relisible</span>
+            </li>
+        }
+        <li>
+            <strong>1</strong>
+            <span>serveur, en France</span>
+        </li>
+        @* Les modèles tournent sur les GPU de leurs fournisseurs : Limpide n'en loue aucun (ADR-012). *@
+        <li>
+            <strong>0</strong>
+            <span>serveur GPU à louer&nbsp;: les modèles tournent chez OVHcloud et Mistral, payés à l'usage</span>
+        </li>
+    </ul>
 
-                <h3 class="separe">Quatre choix qui comptent</h3>
-                <ul class="liste-filets deux-colonnes" role="list">
-                    <li><strong>Une seule base.</strong> PostgreSQL avec pgvector plutôt qu'une base vectorielle dédiée&nbsp;:
-                        une base de moins à opérer, sauvegarder et sécuriser. <span class="muted">@Adr("001")</span></li>
-                    <li><strong>Mesurer avant de compliquer.</strong> La recherche hybride a été mesurée&nbsp;: elle
-                        n'améliorait pas les résultats, Limpide garde la recherche par le sens seule. Même méthode pour le
-                        découpage des textes. <span class="muted">@Adr("005") et @Adr("010")</span></li>
-                    <li><strong>Des modèles en France et en Europe.</strong> Vectorisation chez OVHcloud AI Endpoints, en
-                        France&nbsp;; rédaction par Mistral AI, hébergé dans l'Union européenne. Pas de modèle local, pas de GPU
-                        à payer. <span class="muted">@Adr("004") et @Adr("012")</span></li>
-                    <li><strong>Rien en ligne sans évaluation.</strong> Chaque modification passe la compilation et les
-                        tests&nbsp;; avant chaque mise en ligne qui peut changer les réponses, l'évaluation tourne dans un environnement jetable, et un seuil
-                        manqué la bloque. <span class="muted">@Adr("014"), @Adr("015") et @Adr("016")</span></li>
-                </ul>
-            </div>
-        </section>
-
-        <section class="couche couche-dessous" aria-labelledby="co-chemin">
-            <span class="couche-label">Dessous</span>
-            <div>
-                <h2 id="co-chemin">Le chemin d'une question</h2>
-                <ol class="chemin" role="list" aria-label="Le chemin d'une question, étape par étape">
-                    @* Mêmes six étapes que le parcours de « Ce que fait Limpide » (APropos.razor), vues par leurs briques. *@
-                    <li><span class="boite controle"><strong>1. Votre question</strong><span>contrôlée par règles, avant tout envoi, @Adr("021")</span></span></li>
-                    <li><span class="boite"><strong>2. Sens</strong><span>@Embedding.Model, @EmbeddingHost, @Adr("012")</span></span></li>
-                    <li><span class="boite"><strong>3. Recherche</strong><span>PostgreSQL + pgvector, par le sens seul, @Adr("001")</span></span></li>
-                    <li><span class="boite controle"><strong>4. Assez proches&nbsp;?</strong><span>seuil @Generation.MinScore.ToString("0.00", French), sinon «&nbsp;je ne sais pas&nbsp;», @Adr("005")</span></span></li>
-                    <li><span class="boite"><strong>5. Rédaction</strong><span>@PlainLanguage.ModelName(Generation.Model), Union européenne, @Adr("004")</span></span></li>
-                    <li><span class="boite"><strong>6. Contrôles</strong><span>renvois, verdict, consignes, signalés sous la réponse</span></span></li>
-                </ol>
-                <p class="muted">Les étapes 1 et 4 peuvent arrêter la question (encadrés en pointillés)&nbsp;; l'étape 6
-                    n'arrête rien, elle signale ce qu'elle trouve. La durée, le coût et les garde-fous déclenchés sont
-                    affichés sous la réponse. Le même parcours, expliqué simplement&nbsp;: <a href="/a-propos">ce que fait
-                    Limpide</a>.</p>
-
-                <h2 class="separe">La mise à jour des textes</h2>
-                <p>Chaque semaine, Airflow lance six commandes .NET, chacune dans son conteneur. Elles s'échangent leur
-                    travail par le stockage, jamais en mémoire, et chacune peut être relancée sans effet de bord.</p>
-                <ol class="chemin" role="list" aria-label="Les six commandes de mise à jour">
-                    <li><span class="boite"><strong><code>fetch</code></strong><span>relève le texte à sa source</span></span></li>
-                    <li><span class="boite"><strong><code>extract</code></strong><span>en tire le contenu</span></span></li>
-                    <li><span class="boite"><strong><code>chunk</code></strong><span>le découpe par article, considérant, section</span></span></li>
-                    <li><span class="boite"><strong><code>validate</code></strong><span>contrôles de qualité</span></span></li>
-                    <li><span class="boite"><strong><code>embed</code></strong><span>vectorise chaque passage</span></span></li>
-                    <li><span class="boite"><strong><code>publish</code></strong><span>sert la nouvelle version</span></span></li>
-                </ol>
-                <p class="muted">Une nouvelle version d'un texte reste candidate tant qu'elle n'a pas passé les contrôles de
-                    qualité&nbsp;; la version publiée continue d'être servie jusque-là.</p>
-            </div>
-        </section>
-
-        <section class="couche couche-fond" aria-labelledby="co-briques">
-            <span class="couche-label">Au fond</span>
-            <div>
-                <h2 id="co-briques">Les briques</h2>
-                <TechStack />
-
-                <h2 class="separe" id="co-decisions">Les décisions</h2>
-                <p class="couche-promise">Une décision par fichier&nbsp;: le contexte, les options envisagées, la décision, ses
-                    conséquences et ce qui la ferait réviser.</p>
-                <div class="table-scroll" tabindex="0" role="region" aria-labelledby="co-decisions">
-                    @* role explicites : la date passe sous le titre sur téléphone (display: grid), sans que le tableau cesse d'en être un. *@
-                    <table role="table" class="tableau-fond decisions" aria-labelledby="co-decisions">
-                        <thead role="rowgroup"><tr role="row"><th role="columnheader" scope="col">N°</th><th role="columnheader" scope="col">Décision</th><th role="columnheader" scope="col">Date</th></tr></thead>
-                        <tbody role="rowgroup">
-                            @foreach (var d in Decisions.All)
-                            {
-                                <tr role="row">
-                                    <td role="cell"><a href="@(AdrBase + d.File)" aria-label="Décision @d.Number : @d.Title">@d.Number</a></td>
-                                    <td role="cell">@d.Title</td>
-                                    <td role="cell">@d.Date.ToString("d MMM yyyy", French)</td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
-                </div>
-                <div class="separe">
-                    <p>Tout le code est public, sous licence Apache 2.0&nbsp;:
-                        <a href="https://github.com/olick/limpide">github.com/olick/limpide</a>.</p>
-                </div>
-            </div>
-        </section>
-    </div>
+    <section class="briques-bloc" aria-labelledby="co-briques">
+        <h2 id="co-briques" class="titre-bloc">Les briques</h2>
+        <p class="briques-chapeau">Groupées par rôle ; sous les choix qui comptent, la décision qui les explique.</p>
+        <TechStack />
+        <p class="lien-decisions"><a href="https://github.com/olick/limpide/blob/main/docs/adr/README.md">Les
+            @(Decisions.All.Count > 0 ? Decisions.All.Count.ToString(French) + " " : "")décisions d'architecture, sur
+            GitHub</a></p>
+    </section>
 
     @* Fil de lecture (ADR-022) : la question qu'on se pose après cette page, et le chemin pour y répondre. *@
     <LaSuite Chapitre="2" />
 </div>
 
 @code {
-    private const string AdrBase = "https://github.com/olick/limpide/blob/main/docs/adr/";
-
     private static readonly CultureInfo French = CultureInfo.GetCultureInfo("fr-FR");
-
-    private EvaluationRun? Served => Reports.Latest(Instructions.Version, Generation.Model, Embedding.Label);
-
-    // Même règle que APropos.razor et la couche « Au fond » d'une réponse : le lieu suit le réglage Embedding.
-    private string EmbeddingHost => Embedding.Endpoint.Host.EndsWith(".ovh.net", StringComparison.OrdinalIgnoreCase)
-        ? "OVHcloud AI Endpoints, France"
-        : Embedding.Endpoint.Host;
-
-    private RenderFragment Adr(string number) => builder =>
-    {
-        var decision = Decisions.All.FirstOrDefault(d => d.Number == number);
-        builder.OpenElement(0, "a");
-        builder.AddAttribute(1, "href", decision is null ? AdrBase : AdrBase + decision.File);
-        // Nom accessible complet : hors de sa phrase (liste des liens d'un lecteur d'écran), « décision 012 » ne dit rien.
-        if (decision is not null) builder.AddAttribute(2, "aria-label", $"décision {number} : {decision.Title}");
-        builder.AddContent(3, $"décision {number}");
-        builder.CloseElement();
-    };
 }

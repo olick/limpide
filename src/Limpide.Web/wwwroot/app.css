@@ -450,32 +450,58 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     font-weight: 600;
 }
 
-/* Technologies utilisées : icônes en masque, dans la couleur du texte (lisibles en clair comme en sombre). */
-.stack {
-    margin-top: 2rem;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 1rem 1.25rem;
-}
-.stack h2 { margin-top: 0; }
-.stack h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); margin: 1.2rem 0 0.5rem; }
-.stack .hint { font-size: 0.88rem; color: var(--muted); }
-.stack ul { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 0.6rem 1.2rem; }
-.stack li { display: flex; gap: 0.6rem; align-items: flex-start; font-size: 0.9rem; }
-.stack .role { display: block; color: var(--muted); font-size: 0.82rem; }
-.stack .icon {
-    flex: 0 0 1.4rem; height: 1.4rem; margin-top: 0.1rem;
+/* Comment il est construit : les briques (TechStack.razor), en cartes groupées par rôle ; icônes en masque, dans la
+   couleur du texte (lisibles en clair comme en sombre). Sous une brique, le choix qui compte et sa décision. */
+/* Plus spécifique que .page:has(> .coupe-page) (65rem), écrite plus loin : ces deux pages sont aussi en .coupe-page. */
+.page:has(> .construction.coupe-page), .page:has(> .mise-a-jour.coupe-page) { max-width: 74rem; }
+.construction .titre-bloc, .mise-a-jour .titre-bloc { margin: 0; font-size: 1.375rem; font-weight: 800; }
+.construction .chiffres-cles { margin-top: 2.5rem; }
+.briques-bloc { margin-top: 4rem; }
+.briques-chapeau { margin: 0.25rem 0 0; font-size: 0.9375rem; color: var(--muted); }
+.briques { display: flex; flex-direction: column; gap: 2.5rem; margin-top: 1.5rem; }
+.briques-groupe h3 { margin: 0 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 1px solid var(--border); font-size: 0.8125rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.briques-liste { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr)); gap: 1rem 1.25rem; }
+.brique { display: flex; gap: 0.75rem; align-items: flex-start; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+.brique-texte { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.brique .role { color: var(--muted); font-size: 0.875rem; line-height: 1.45; }
+.brique-choix { margin-top: 0.35rem; font-size: 0.875rem; line-height: 1.45; }
+/* Décisions côte à côte (cibles de 44 px sans chevauchement) ; la marge négative, sur le conteneur, rend l'air du bas. */
+.brique-decisions { display: flex; flex-wrap: wrap; gap: 0 1rem; margin-bottom: -0.6rem; }
+.brique-decision { display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.875rem; font-weight: 600; }
+.brique .icon {
+    flex: 0 0 1.75rem; height: 1.75rem; margin-top: 0.05rem;
     background-color: var(--text);
     -webkit-mask: var(--icon) center / contain no-repeat;
     mask: var(--icon) center / contain no-repeat;
 }
-.stack .icon.text {
+.brique .icon.text {
     background: none; -webkit-mask: none; mask: none;
     display: inline-flex; align-items: center; justify-content: center;
-    border: 1.5px solid var(--text); border-radius: 4px; font-weight: 800; font-size: 0.8rem;
+    border: 1.5px solid var(--border); border-radius: 50%; color: var(--muted); font-weight: 800; font-size: 0.8125rem;
 }
-.stack .legal { font-size: 0.75rem; color: var(--muted); margin: 1.2rem 0 0; }
+@media (forced-colors: active) { .brique .icon { background-color: CanvasText; } }
+.briques-plus { margin: 0.75rem 0 0; font-size: 0.9375rem; color: var(--muted); }
+.briques-plus a, .lien-decisions a, .maj-retour a { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
+.briques .legal { margin: 0; font-size: 0.8125rem; color: var(--muted); }
+.lien-decisions { margin: 1.75rem 0 0; }
+
+/* Comment les textes restent à jour (MiseAJour.razor) : les six commandes en chaîne, puis ce qui la rend sûre. */
+.mise-a-jour section { margin-top: 3rem; }
+.commandes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.75rem; }
+.commandes li { position: relative; display: flex; flex-direction: column; gap: 0.35rem; padding: 0.9rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); font-size: 0.9375rem; line-height: 1.4; }
+.commande-tete { display: flex; align-items: center; gap: 0.6rem; }
+.commande-num { flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; width: 1.6rem; height: 1.6rem; border-radius: 50%; background: var(--accent); color: var(--on-accent); font-size: 0.8125rem; font-weight: 800; }
+.commandes code { font-size: 1rem; font-weight: 700; }
+.principes { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; grid-template-columns: minmax(0, 1fr); gap: 1.25rem 2.5rem; }
+.principes li { display: flex; flex-direction: column; gap: 0.25rem; padding-top: 0.9rem; border-top: 2px solid var(--text); }
+.principes strong { font-size: 1.0625rem; }
+.principes a { align-self: flex-start; display: inline-flex; align-items: center; min-height: 2.75rem; font-size: 0.875rem; font-weight: 600; }
+.maj-retour { margin: 3rem 0 0; color: var(--muted); }
+@media (min-width: 48rem) { .principes { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 64rem) {
+    .commandes { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .commandes li { min-height: 7.5rem; }
+}
 
 .site-footer { padding-block: 1rem 2rem; font-size: 0.82rem; color: var(--muted); border-top: 1px solid var(--border); }
 
@@ -551,7 +577,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .parcours-etapes { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1.75rem; }
 .etape { position: relative; }
 /* Flèche vers l'étape suivante, dans l'intervalle : vers le bas en colonne, vers la droite en rangée. */
-.etape:not(:last-child)::after {
+.etape:not(:last-child)::after, .commandes li:not(:last-child)::after {
     content: "";
     position: absolute;
     left: 50%;
@@ -563,7 +589,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
     mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
 }
-@media (forced-colors: active) { .etape:not(:last-child)::after { background-color: CanvasText; } }
+@media (forced-colors: active) { .etape:not(:last-child)::after, .commandes li:not(:last-child)::after { background-color: CanvasText; } }
 .etape-oui { position: absolute; left: calc(50% + 1rem); bottom: -0.875rem; transform: translateY(50%); font-size: 0.75rem; font-weight: 800; line-height: 1; color: var(--accent); }
 
 .etape-carte {
@@ -645,7 +671,7 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 @media (min-width: 64rem) {
     .parcours-etapes { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1.75rem; }
     .etape-carte { min-height: 9.5rem; }
-    .etape:not(:last-child)::after { left: auto; right: -0.875rem; top: 50%; bottom: auto; transform: translate(50%, -50%); }
+    .etape:not(:last-child)::after, .commandes li:not(:last-child)::after { left: auto; right: -0.875rem; top: 50%; bottom: auto; transform: translate(50%, -50%); }
     .etape-oui { left: auto; right: -0.875rem; top: 50%; bottom: auto; transform: translate(50%, -1.4rem); }
     /* Le détail dans l'étape reste lu par les lecteurs d'écran ; à l'œil, il s'affiche sous la rangée. */
     .etape-detail-ici { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
@@ -661,25 +687,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
     .ne-fait-pas { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2.5rem; }
 }
 
-/* Chemin d'une question et mise à jour des textes : boîtes reliées par des flèches ; en colonne sur mobile. */
-.chemin { list-style: none; margin: 1.1rem 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.6rem 0; }
-.chemin li { display: flex; align-items: center; }
-/* Flèche décorative, dessinée en masque dans la couleur du texte secondaire, sans contenu à lire. */
-.chemin li:not(:last-child)::after {
-    content: "";
-    flex: 0 0 auto;
-    width: 26px;
-    height: 16px;
-    margin: 0 0.25rem;
-    background-color: var(--muted);
-    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
-    mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 16' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 8h19M16 3l6 5-6 5'/%3E%3C/svg%3E") center / contain no-repeat;
-}
-@media (forced-colors: active) { .chemin li:not(:last-child)::after { background-color: CanvasText; } }
-.chemin .boite { display: block; min-width: 7rem; max-width: 13rem; padding: 0.5rem 0.75rem; border: 1.5px solid var(--border); border-radius: 8px; background: var(--surface); font-size: 0.875rem; }
-.chemin .boite.controle { border-style: dashed; border-color: var(--control-border); }
-.chemin .boite strong { display: block; }
-.chemin .boite span { color: var(--muted); }
 
 /* Tableaux : .tableau sur fond clair, .tableau-fond dans la bande du fond. */
 .tableau, .tableau-fond { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
@@ -715,13 +722,6 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .moments li:first-child { border-top: 0; padding-top: 0; }
 .moment-date { font-size: 0.8125rem; color: var(--band-muted); }
 
-.couche-fond .stack { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1.6rem 2rem; margin: 1rem 0 0; padding: 0; background: none; border: 0; }
-.couche-fond .stack .legal { grid-column: 1 / -1; margin: 0; }
-.couche-fond .stack ul { grid-template-columns: 1fr; gap: 0.35rem; }
-.couche-fond .stack h3 { margin: 0 0 0.5rem; padding-bottom: 0.4rem; border-bottom: 1px solid var(--band-rule); color: var(--band-ink); font-size: 0.95rem; font-weight: 800; text-transform: none; letter-spacing: 0; }
-.couche-fond .stack .role, .couche-fond .stack .legal { color: var(--band-muted); }
-.couche-fond .stack .icon { background-color: var(--band-ink); }
-.couche-fond .stack .icon.text { background: none; border-color: var(--band-ink); }
 
 /* Fiches d'identité (mentions légales) : libellé, valeur. */
 .fiche { margin: 0.75rem 0 0; display: grid; grid-template-columns: minmax(7rem, auto) minmax(0, 1fr); gap: 0.45rem 1rem; font-size: 0.95rem; }
@@ -903,9 +903,6 @@ button.back-link { border: 0; background: none; color: var(--accent); font: inhe
     .fiche dd { margin-bottom: 0.5rem; }
     .couche { padding: 1.1rem 1rem 1.25rem; }
     .couche h2 { font-size: 1.35rem; }
-    .chemin { flex-direction: column; align-items: stretch; }
-    .chemin li { flex-direction: column; align-items: stretch; }
-    .chemin li:not(:last-child)::after { margin: 0.2rem 0 0.2rem 1rem; transform: rotate(90deg); }
     .chiffres { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.1rem 1rem; }
     .chiffres dd { font-size: 1.625rem; }
 

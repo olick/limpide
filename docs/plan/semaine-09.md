@@ -561,3 +561,15 @@ ne mènent pas au même endroit). ADR-022 complétée.
   dans sa couche du fond et sur les résultats d'évaluation. Pas d'affichage pour l'instant. Si on y revient : une
   ligne dans « Comment il est construit », valeurs lues dans `QuotaOptions` (le plafond de 10 € est un réglage du
   fournisseur, pas de l'application).
+
+### « Comment il est construit » : les briques seules (2026-11-16)
+
+Demande d'Alexandre : n'y garder que les briques. Maquette d'abord (écrans `F5-*`). La page se réduit à trois chiffres
+(décisions, 1 serveur en France, 0 serveur GPU à louer) et aux briques en cartes groupées par rôle ; les « quatre choix
+qui comptent » passent dans leur brique, et 12 briques renvoient à leur décision (deux pour GitHub Actions : 015 et
+016 ; `DecisionLink.razor`). Le chemin d'une question part (doublon du parcours de « Ce que fait Limpide »), le
+tableau des décisions aussi (lien vers l'index sur GitHub ; Alexandre envisageait de les supprimer, gardées comme
+preuve de la démarche). Nouvelle page hors
+du fil, `/mise-a-jour-des-textes` : les six commandes et ce qui rend la chaîne sûre (ADR-007 à 010). Corrigé en
+route : « 0 GPU, modèles appelés par API » et « pas un seul GPU » étaient trompeurs (les modèles tournent sur les GPU
+d'OVHcloud et de Mistral) ; une teinte sur les quatre briques à choix, jugée peu claire, retirée. ADR-022 complétée.
