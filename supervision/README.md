@@ -39,8 +39,13 @@ Grafana : affiche et relie le tout (d'une trace à ses messages, d'un message à
   **visite** tiré au hasard à l'ouverture de la page (ni IP, ni cookie, il meurt avec elle) et, pour une question,
   le `trace_id`. Dans Grafana : `{service_name="limpide-web"} | visite="7f3a1c2e"` pour suivre une visite.
 
-**Jamais le texte des questions ni des réponses** : ni dans les traces (contenu des appels aux modèles désactivé dans
-le code), ni dans les messages, ni dans la base. Seulement des mesures et des codes.
+**Jamais le texte des questions ni des réponses dans la supervision** : ni dans les traces (contenu des appels aux
+modèles désactivé dans le code), ni dans les messages (le collecteur vide les messages d'erreur,
+`transform/messages-d-erreur`), ni dans `answer_log`. Seulement des mesures et des codes. En base, le texte d'une
+question n'existe qu'à deux endroits, hors de portée de Grafana (aucun droit pour `lecture_supervision`) :
+`question_log` (ADR-019, migration 0009 : 30 jours, masqué, sauf opposition du visiteur ; lu par le back office
+seulement) et `feedback`, quand le visiteur joint lui-même sa question et la réponse à un retour (migration 0002 :
+12 mois).
 
 ## Démarrer en local
 
