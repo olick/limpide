@@ -21,7 +21,10 @@ Les traiter dans cet ordre :
      (radiographie, ADR-022) ; reste le texte qui s'affiche au fil de la génération, avec « vérification des
      citations… » tant que les garde-fous n'ont pas vu la réponse complète ;
    - **tableaux de bord du back office** : coût par jour et par modèle, quota consommé, garde-fous déclenchés, taux
-     de « je ne sais pas », latences (Grafana, ADR-018).
+     de « je ne sais pas », latences (Grafana, ADR-018) ;
+   - **réponse rédigée plutôt qu'un « je ne sais pas » sec** aux messages qui ne sont pas des questions sur les textes
+     (« bonjour », « que sais-tu faire ? ») : mesurer, comparer règles fixes et appel au modèle, décider par un ADR
+     (plan global, S10).
 
 Ce qui ne peut pas être terminé devient une **limite documentée** dans le README, avec la raison et la piste de solution.
 Une limite assumée vaut mieux qu'une fonctionnalité bâclée.
