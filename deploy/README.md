@@ -102,6 +102,54 @@ supervision/compte-lecture.sh limpide-prod-postgres-1
 docker compose -f supervision/docker-compose.yml up -d --wait --force-recreate grafana
 ```
 
+## Sauvegarde du corpus
+
+`deploy/exporter-corpus.sh [--vps]` (depuis le poste) : sauvegarde du corpus seul (liste blanche `TABLES_CORPUS`,
+aucune donnée de visiteur) déposée dans le conteneur `corpus` du socle Azure, où l'évaluation de la chaîne la lit
+(ADR-016). À relancer après chaque publication d'une nouvelle version du corpus.
+
+**Anciennes versions.** Le compte garde chaque version remplacée **sans limite de durée** (versionnage,
+`etat/creer-socle.sh`, aucune règle de cycle de vie). Une version supprimée reste récupérable **30 jours** (suppression
+réversible), puis disparaît : supprimer n'efface donc pas tout de suite. Le verrou « suppression impossible » du compte
+ne protège pas les versions : il ne vaut que pour le compte lui-même, pas pour les fichiers qu'il contient.
+
+Supprimer une version précise demande `deleteBlobVersion/action`, que « Storage Blob Data Contributor » (le rôle
+d'Alexandre sur le conteneur) n'a pas : attribuer « Storage Blob Data Owner » sur le seul conteneur `corpus`, le temps
+de la suppression. `az` 2.93 ne sait pas supprimer une version : API REST du stockage.
+
+```bash
+COMPTE=stlimpidetf024b1e9f
+# Versions du fichier (la courante : True) ; « vm » : versions et métadonnées (sans « m », date et source vides)
+az storage blob list --auth-mode login --account-name $COMPTE --container-name corpus --include vm \
+  --query "[].{version:versionId, courante:isCurrentVersion, date:metadata.date, source:metadata.source}" -o table
+
+# Droit temporaire, limité au conteneur (quelques minutes pour s'appliquer)
+PORTEE="$(az storage account show --name $COMPTE --query id -o tsv)/blobServices/default/containers/corpus"
+MOI="$(az ad signed-in-user show --query id -o tsv)"
+az role assignment create --assignee-object-id "$MOI" --assignee-principal-type User \
+  --role "Storage Blob Data Owner" --scope "$PORTEE" --output none
+
+# Une version à la fois, copiée de la liste. Garde-fou : 1 seulement si elle existe ET n'est pas la courante
+# (supprimer la courante fait disparaître corpus.dump : l'évaluation de la chaîne échoue)
+VERSION="<versionId copié de la liste>"
+ancienne=$(az storage blob list --auth-mode login --account-name $COMPTE --container-name corpus --include v \
+  --query "length([?versionId=='$VERSION' && isCurrentVersion!=\`true\`])" -o tsv)
+if [[ "$ancienne" == 1 ]]; then
+  az rest --method delete --resource https://storage.azure.com --headers x-ms-version=2021-08-06 \
+    --url "https://$COMPTE.blob.core.windows.net/corpus/corpus.dump?versionid=$VERSION"
+else
+  echo "Arrêt : version courante ou introuvable ($VERSION)"
+fi
+
+# Retirer le droit temporaire
+az role assignment delete --assignee "$MOI" --role "Storage Blob Data Owner" --scope "$PORTEE"
+```
+
+Relevé du 2026-11-19 : parmi les versions déposées depuis la production (`source` = `vps`) avant le réexport du
+2026-11-19, seules les deux du 2026-11-06 sont postérieures à `answer_log` et `question_log` (migrations 0006 et 0009) ;
+elles contiennent le texte masqué de questions de visiteurs, à supprimer (`docs/gouvernance/rgpd.md`, « Écarts et
+points ouverts »).
+
 ## Mémoire : swap de secours
 
 Le VPS n'avait pas de swap : si la mémoire manque vraiment (par exemple une construction d'image .NET pendant que
