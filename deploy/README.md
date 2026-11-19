@@ -111,7 +111,9 @@ aucune donnée de visiteur) déposée dans le conteneur `corpus` du socle Azure,
 **Anciennes versions.** Le compte garde chaque version remplacée **sans limite de durée** (versionnage,
 `etat/creer-socle.sh`, aucune règle de cycle de vie). Une version supprimée reste récupérable **30 jours** (suppression
 réversible), puis disparaît : supprimer n'efface donc pas tout de suite. Le verrou « suppression impossible » du compte
-ne protège pas les versions : il ne vaut que pour le compte lui-même, pas pour les fichiers qu'il contient.
+ne protège pas les versions : il ne vaut que pour le compte lui-même, pas pour les fichiers qu'il contient. En revanche,
+il bloque le retrait d'une attribution de rôle posée sur le compte ou en dessous (`ScopeLocked`) : le lever le temps de
+retirer le droit temporaire, puis le remettre à l'identique (dernière étape ci-dessous).
 
 Supprimer une version précise demande `deleteBlobVersion/action`, que « Storage Blob Data Contributor » (le rôle
 d'Alexandre sur le conteneur) n'a pas : attribuer « Storage Blob Data Owner » sur le seul conteneur `corpus`, le temps
@@ -123,7 +125,8 @@ COMPTE=stlimpidetf024b1e9f
 az storage blob list --auth-mode login --account-name $COMPTE --container-name corpus --include vm \
   --query "[].{version:versionId, courante:isCurrentVersion, date:metadata.date, source:metadata.source}" -o table
 
-# Droit temporaire, limité au conteneur (quelques minutes pour s'appliquer)
+# Droit temporaire, limité au conteneur. Actif après quelques minutes (1 min 30 le 2026-11-19) ; avant, le DELETE répond 403
+# « OperationNotAllowedOnAutomaticSnapshot », au nom trompeur : attendre et relancer
 PORTEE="$(az storage account show --name $COMPTE --query id -o tsv)/blobServices/default/containers/corpus"
 MOI="$(az ad signed-in-user show --query id -o tsv)"
 az role assignment create --assignee-object-id "$MOI" --assignee-principal-type User \
@@ -141,14 +144,35 @@ else
   echo "Arrêt : version courante ou introuvable ($VERSION)"
 fi
 
-# Retirer le droit temporaire
-az role assignment delete --assignee "$MOI" --role "Storage Blob Data Owner" --scope "$PORTEE"
+# Retirer le droit temporaire. Le verrou du compte bloque ce retrait (ScopeLocked) : le lever, retirer le droit, le
+# remettre. Lever un verrou demande d'être propriétaire de l'abonnement (Alexandre) ; l'identité de la chaîne,
+# Contributeur, ne le peut pas (etat/creer-socle.sh). Sous-shell : le verrou est remis quoi qu'il arrive (erreur,
+# Ctrl+C), sans fermer le terminal. Nom, type et note : ceux de etat/creer-socle.sh, qui fait foi ; les garder alignés.
+(
+  set -euo pipefail
+  : "${COMPTE:?}" "${MOI:?}" "${PORTEE:?}"   # terminal neuf : relancer d'abord les lignes qui les définissent
+  VERROU=(--name socle-ne-pas-supprimer --resource-group rg-limpide-tfstate --resource "$COMPTE"
+          --resource-type Microsoft.Storage/storageAccounts)
+  remettre_verrou() {
+    az lock create "${VERROU[@]}" --lock-type CanNotDelete \
+      --notes "Etat Terraform et sauvegarde du corpus de Limpide" --output none || true
+    if [[ "$(az lock show "${VERROU[@]}" --query level -o tsv)" == CanNotDelete ]]; then echo "Verrou remis"
+    else echo "ALERTE : verrou absent, le recréer (etat/creer-socle.sh)"; fi
+  }
+  trap remettre_verrou EXIT
+  trap 'exit 130' INT TERM
+  az lock delete "${VERROU[@]}"
+  az role assignment delete --assignee "$MOI" --role "Storage Blob Data Owner" --scope "$PORTEE" || true
+  restant=$(az role assignment list --assignee "$MOI" --role "Storage Blob Data Owner" --scope "$PORTEE" \
+    --query 'length(@)' -o tsv)
+  if [[ "$restant" == 0 ]]; then echo "Droit temporaire retiré"; else echo "ALERTE : droit Owner toujours présent"; fi
+)
 ```
 
 Relevé du 2026-11-19 : parmi les versions déposées depuis la production (`source` = `vps`) avant le réexport du
 2026-11-19, seules les deux du 2026-11-06 sont postérieures à `answer_log` et `question_log` (migrations 0006 et 0009) ;
-elles contiennent le texte masqué de questions de visiteurs, à supprimer (`docs/gouvernance/rgpd.md`, « Écarts et
-points ouverts »).
+elles contenaient le texte masqué de questions de visiteurs. **Supprimées le 2026-11-19 à 19 h 40 UTC** par cette procédure,
+effacées définitivement vers le 2026-12-19 (`docs/gouvernance/rgpd.md`, « Écarts et points ouverts »).
 
 ## Mémoire : swap de secours
 
