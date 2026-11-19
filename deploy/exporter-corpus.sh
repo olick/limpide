@@ -4,9 +4,11 @@
 # À relancer après chaque publication d'une nouvelle version du corpus : l'évaluation porte sur cette sauvegarde, pas
 # sur la base de la production. Son empreinte (versions, passages, hachage) figure dans chaque rapport d'évaluation.
 #
-# Contenu : schéma et données, journal des migrations compris (l'évaluation applique ensuite les migrations du code
-# évalué, comme un déploiement) ; tables feedback et admin_actions vides (questions et retours des visiteurs, journal
-# des décisions du back office).
+# Contenu : schéma de toutes les tables ; données des seules tables du corpus et du journal des migrations
+# (TABLES_CORPUS : l'évaluation applique ensuite les migrations du code évalué, comme un déploiement). Toute autre
+# table part vide, y compris une table créée après ce script : liste blanche, pas liste noire. Jusqu'au 2026-11-19, une
+# liste noire (feedback, admin_actions) laissait passer answer_log et question_log (docs/gouvernance/rgpd.md).
+# Vérifié après coup sur la sauvegarde elle-même : une table hors de la liste avec des données fait échouer l'export.
 # Le dépôt écrase la sauvegarde précédente, qui reste récupérable 30 jours (historique des versions du compte).
 #
 # Usage : deploy/exporter-corpus.sh [--vps]
@@ -21,6 +23,9 @@ CONTENEUR="corpus"
 BLOB="corpus.dump"
 VPS="debian@57.129.175.88"
 IMAGE_PG="pgvector/pgvector:0.8.7-pg17-bookworm" # celle des deux bases : fournit pg_restore pour la vérification
+# Seules tables dont les données partent dans la sauvegarde. En ajouter une : vérifier d'abord qu'elle ne contient
+# aucune donnée de visiteur ni du back office (docs/gouvernance/classification-des-donnees.md).
+TABLES_CORPUS="sources documents document_versions chunks chunk_embeddings schemaversions"
 
 SOURCE="locale"
 case "${1:-}" in
@@ -60,11 +65,41 @@ vecteurs="$(dans_postgres "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -v O
 [[ -n "$vecteurs" ]] || { echo "Aucun vecteur pour les passages servis : lancer embed avant d'exporter" >&2; exit 1; }
 echo "Vecteurs servis (sur $passages passages) : $vecteurs"
 
-dans_postgres "pg_dump -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -Fc --no-owner --no-privileges \
-  --exclude-table-data=feedback --exclude-table-data=admin_actions" > "$TMP/$BLOB"
+# Tables de la base hors de TABLES_CORPUS : leurs données sont exclues (schéma gardé).
+SQL="SELECT string_agg(tablename, chr(32) ORDER BY tablename) FROM pg_tables WHERE schemaname = current_schema()"
+tables="$(dans_postgres "psql -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -v ON_ERROR_STOP=1 -tA -c \"$SQL\"")"
+exclusions=""
+for table in $tables; do
+  case " $TABLES_CORPUS " in
+    *" $table "*) ;;
+    *) exclusions+=" --exclude-table-data=$table" ;;
+  esac
+done
+echo "Tables exportées vides :${exclusions//--exclude-table-data=/}"
+
+dans_postgres "pg_dump -U \"\$POSTGRES_USER\" -d \"\$POSTGRES_DB\" -Fc --no-owner --no-privileges$exclusions" \
+  > "$TMP/$BLOB"
 # Une sauvegarde jamais relue n'est pas une sauvegarde (comme deploy/backup-db.sh).
-docker run --rm -i "$IMAGE_PG" pg_restore --list < "$TMP/$BLOB" > /dev/null
+docker run --rm -i "$IMAGE_PG" pg_restore --list < "$TMP/$BLOB" > "$TMP/liste"
 echo "Sauvegarde : $(du -h "$TMP/$BLOB" | cut -f1), relue par pg_restore"
+
+# Contrôle sur la sauvegarde elle-même, pas sur la commande : des données hors du corpus ne partent jamais.
+# Entrées de données, en « schéma.nom » : tables, et vues matérialisées (absentes de pg_tables, donc jamais exclues).
+donnees="$(awk '$4 == "TABLE" && $5 == "DATA" { print $6 "." $7 }
+               $4 == "MATERIALIZED" && $5 == "VIEW" && $6 == "DATA" { print $7 "." $8 }' "$TMP/liste")"
+# Contrôle positif : une liste illisible (format de pg_restore changé) ne doit pas passer pour une liste propre.
+[[ $'\n'"$donnees"$'\n' == *$'\n'"public.chunks"$'\n'* ]] \
+  || { echo "Liste de la sauvegarde illisible (public.chunks introuvable), rien n'est déposé" >&2; exit 1; }
+autorisees=" $(for t in $TABLES_CORPUS; do printf 'public.%s ' "$t"; done)"
+hors_corpus=""
+for entree in $donnees; do
+  [[ "$autorisees" == *" $entree "* ]] || hors_corpus+=" $entree"
+done
+if [[ -n "$hors_corpus" ]]; then
+  echo "Données hors du corpus dans la sauvegarde, rien n'est déposé :$hors_corpus" >&2
+  exit 1
+fi
+echo "Données exportées : ${donnees//$'\n'/ }"
 
 az storage blob upload --auth-mode login --account-name "$COMPTE" --container-name "$CONTENEUR" --name "$BLOB" \
   --file "$TMP/$BLOB" --overwrite --no-progress --output none \
