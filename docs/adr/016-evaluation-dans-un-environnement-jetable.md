@@ -2,7 +2,8 @@
 
 - **Statut** : accepté
 - **Date** : 2026-10-17
-- **Révision** : 2026-10-18, espace de travail Mistral séparé pour l'évaluation (« Conséquences »)
+- **Révision** : 2026-10-18, espace de travail Mistral séparé pour l'évaluation (« Conséquences ») ; 2026-11-19, la
+  sauvegarde du corpus exportée par liste blanche (« Conséquences »)
 
 ## Contexte
 
@@ -44,7 +45,7 @@ réponses.** Le même script se lance depuis le poste.
 |---|---|
 | Déclenchement | `evaluation.yml` à chaque PR. `deploy/evaluation-requise.sh` compare la PR à sa base : consignes, `appsettings.shared.json`, `Limpide.Core`, `Limpide.Infrastructure`, `Limpide.Ingestion` (dont les seuils de `gate`), jeu de questions, versions des paquets, l'évaluation elle-même |
 | Clés d'API | lues dans le coffre du socle par l'identité `id-limpide-ci-evaluation`, masquées dans les journaux |
-| Données | `corpus.dump`, conteneur `corpus` du socle : `pg_dump` du corpus sans donnée de visiteur, journal des migrations compris |
+| Données | `corpus.dump`, conteneur `corpus` du socle : `pg_dump` du corpus sans donnée de visiteur, journal des migrations compris ; données des seules tables du corpus, par liste blanche vérifiée sur la sauvegarde (depuis le 2026-11-19) |
 | Base | conteneur pgvector jetable, même étiquette que la production (`0.8.7-pg17-bookworm` le 2026-10-22) ; sauvegarde restaurée, puis `migrate` du code de la PR, comme un déploiement |
 | Évaluation | `evaluate-answers` (jeu complet, juge de fidélité), configuration du dépôt seulement (ni user-secrets ni réglages du poste), questions vectorisées par OVHcloud AI Endpoints comme en production |
 | Décision | `gate` : code 1 si un seuil bloquant est franchi ; tableau dans le résumé de l'exécution, rapports en artefact (90 jours) |
@@ -82,7 +83,12 @@ sur l'abonnement.
   libellé : avec ceux de bge-m3 seuls, elle ne trouverait rien. Il faudra donc calculer les vecteurs Qwen en
   production (deuxième colonne, à concevoir avec la bascule sans interruption), puis exporter, puis ouvrir la PR.
 - **La sauvegarde contient le texte des documents** (CNIL en CC-BY-ND, EUR-Lex) dans un conteneur privé : copie de
-  travail, jamais redistribuée. Elle ne contient ni les retours des visiteurs ni le journal du back office.
+  travail, jamais redistribuée. Elle ne devait contenir aucune donnée de visiteur ni le journal du back office ;
+  c'est vrai depuis le 2026-11-19 seulement. **Révision du 2026-11-19** : la liste noire du script (`feedback`, `admin_actions`) laissait passer `answer_log` et
+  `question_log`, apparues après lui (migrations 0006 et 0009). La sauvegarde déposée le 2026-11-06 depuis la
+  production les contenait, et chaque évaluation l'a restaurée sur une machine de GitHub. Le script exporte désormais
+  par liste blanche (`TABLES_CORPUS`), et vérifie la sauvegarde avant de la déposer. Réexport et purge de l'historique
+  du fichier : `docs/gouvernance/rgpd.md`, « Écarts et points ouverts ».
 - **Coût Mistral** : environ 0,29 $ à chaque push sur une PR concernée (un nouveau push annule l'exécution en
   cours). Jusqu'au 2026-10-18, le plafond de 10 € par mois était **partagé avec la démo**, dont le quota peut à lui
   seul consommer environ 9 € : des évaluations nombreuses pouvaient couper la démo en fin de mois.
