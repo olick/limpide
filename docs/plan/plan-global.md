@@ -299,6 +299,27 @@ relancer jusqu'au vert revient à ne plus en avoir. Dans cet ordre :
 
 Relancer une passe bloquée n'est pas une mesure ; la règle ci-dessus existe pour ça.
 
+**Une réponse rédigée plutôt qu'un « je ne sais pas » sec** (demandée le 2026-11-18) : sous le seuil de pertinence,
+tout message reçoit la même phrase fixe (`AnswerPrompt.OutOfScope`), qu'il s'agisse d'une vraie question hors sujet
+(« la météo demain ») ou d'un message qui n'est pas une question sur les textes : « bonjour », « merci », « que
+sais-tu faire ? », « d'où viennent tes sources ? ». Pour ces derniers, un « je ne sais pas » paraît obtus. Piste à
+itérer : y répondre par un texte rédigé (ce que fait Limpide, sur quels textes, une ou deux questions d'exemple),
+sans jamais répondre sur le fond hors corpus ni qualifier la situation de l'utilisateur. Dans cet ordre :
+
+1. **Mesurer, puis écrire les cas de test** : compter, parmi les refus `hors-perimetre` d'`answer_log`, ceux qui sont
+   de ce type, en lisant leur texte dans `question_log` (30 jours, masqué, sauf opposition : ADR-019) ; en tirer 5 à
+   10 cas de test (aucun dans le jeu : `t01` à `t05` sont du vrai hors sujet), avec le comportement attendu, **avant**
+   le code ;
+2. **Comparer les options** : textes fixes choisis par des règles étroites (salutation, remerciement, question sur
+   Limpide), comme `PromptInjection`, sans modèle ni coût ; ou appel au modèle avec une consigne dédiée (coût,
+   latence, risque qu'il réponde sur le fond : à mesurer sur `t01` à `t05`) ; ou seulement une phrase fixe plus utile ;
+3. **Décider sur cette mesure**, par un ADR. Aujourd'hui, la règle veut la réponse hors périmètre **fixe, jamais
+   générée** (`.claude/rules/generation.md`) : la changer est une décision, pas une retouche. Garde-fous : zéro faux
+   positif sur les questions légitimes du jeu, aucun hors sujet qui obtient une réponse sur le fond, issue distincte
+   dans `answer_log` pour ne pas fausser le taux de « je ne sais pas » (dérive, ADR-018), texte présenté comme une
+   formulation de l'assistant, jamais comme un extrait des sources. Si le modèle est appelé : nouveau fichier de
+   consignes et `evaluate-answers` avant et après (`.claude/rules/generation.md`).
+
 **Piste, si le temps le permet** (demandée le 2026-10-12 ; elle prépare l'étape « Migration cloud », après le
 projet) : **étude de migration vers un cloud souverain**, en
 partant du comparatif de coûts de la S6 (alternative la moins chère qui tient les exigences de la démo).
