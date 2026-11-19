@@ -9,7 +9,9 @@
 # table part vide, y compris une table créée après ce script : liste blanche, pas liste noire. Jusqu'au 2026-11-19, une
 # liste noire (feedback, admin_actions) laissait passer answer_log et question_log (docs/gouvernance/rgpd.md).
 # Vérifié après coup sur la sauvegarde elle-même : une table hors de la liste avec des données fait échouer l'export.
-# Le dépôt écrase la sauvegarde précédente, qui reste récupérable 30 jours (historique des versions du compte).
+# Le dépôt remplace la sauvegarde courante ; la précédente reste en ancienne version, **sans limite de durée**
+# (versionnage du compte, etat/creer-socle.sh). Une version supprimée reste récupérable 30 jours (suppression
+# réversible). Lister et supprimer les anciennes versions : deploy/README.md, « Sauvegarde du corpus ».
 #
 # Usage : deploy/exporter-corpus.sh [--vps]
 #   (défaut) base locale du poste (docker compose)
