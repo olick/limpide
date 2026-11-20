@@ -11,8 +11,10 @@
    traces). Sauvegardes : 7 jours (deploy/backup-db.sh) + copie quotidienne d'OVHcloud gardée 1 jour
    (deploy/README.md) = 8. Serveur en France : ADR-006 ; OVHcloud AI Endpoints à Gravelines, Mistral en UE : ADR-012,
    ADR-004. Masquage : la copie conservée seulement (KeptQuestion.From), la question part telle quelle pour la réponse
-   (Home.razor). Fondements encore à écrire pour l'envoi de la question, le journal, les traces et l'adresse IP :
-   docs/plan/semaine-09.md, points ouverts. *@
+   (Home.razor). Fondements, intérêt nommé et réponse à l'opposition, traitement par traitement : registre de
+   docs/gouvernance/rgpd.md (T1 à T7) ; un fondement qui change là change ici. Opposition présentée à part (article
+   21.4). OVHcloud : conservation nulle annoncée, pas contractuelle ; Mistral : entraînement refusé par le réglage de
+   la console depuis le 2026-11-19 (rgpd.md, écarts). *@
 <div class="coupe-page donnees-page">
     <h1>Vos données</h1>
     <p class="lede">Ce que Limpide fait de ce que vous lui écrivez, combien de temps il le garde, et comment vous y
@@ -56,7 +58,8 @@
             </li>
             <li>
                 <span class="commande-tete"><span class="commande-num" aria-hidden="true">2</span><span class="sr-only">Étape 2 : </span><strong>Vectorisation</strong></span>
-                <span>OVHcloud la transforme en nombres pour chercher les passages proches, le temps de la réponse.</span>
+                <span>OVHcloud la transforme en nombres pour chercher les passages proches, et annonce ne pas la
+                    conserver.</span>
                 <span class="repere repere-sortie">@Pin<span class="sr-only">Où : </span>OVHcloud, France</span>
             </li>
             <li>
@@ -77,15 +80,19 @@
 
     <section aria-labelledby="vd-donnees">
         <h2 id="vd-donnees" class="titre-bloc">Donnée par donnée</h2>
-        <p class="donnees-chapeau">Combien de temps, puis pourquoi.</p>
+        <p class="donnees-chapeau">Combien de temps, pourquoi, et sur quel fondement du RGPD (article 6.1).</p>
         <ul class="donnees-cartes" role="list">
             <li>
                 <h3 class="donnee-titre">Votre question, pour y répondre</h3>
                 <strong class="donnee-duree">Le temps de la réponse</strong>
-                <span class="muted">Chez ces deux services&nbsp;: selon leurs conditions.</span>
-                <span>Envoyée à OVHcloud AI Endpoints (France) pour la vectoriser, puis, si des passages assez proches
-                    existent, à Mistral AI (UE), qui rédige la réponse. Chacun la traite selon ses propres conditions
-                    d'utilisation.</span>
+                <span class="muted">Chez Limpide&nbsp;; chez les deux services, voir ci-dessous.</span>
+                <span>Envoyée telle quelle à OVHcloud AI Endpoints (France) pour la vectoriser, puis, si des passages
+                    assez proches existent, à Mistral AI (UE), qui rédige la réponse.</span>
+                <span class="muted">OVHcloud annonce ne garder que ce qui sert à la facturation. Mistral AI peut garder
+                    la question pour ses propres besoins (détection des abus)&nbsp;; Limpide a refusé, le
+                    19&nbsp;novembre 2026, qu'il s'en serve pour entraîner ses modèles.</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à rendre le service que vous
+                    demandez.</span>
             </li>
             <li>
                 <h3 class="donnee-titre">Votre question, pour améliorer Limpide</h3>
@@ -94,13 +101,16 @@
                     personne. Ni la réponse ni l'adresse IP ne sont gardées avec elle&nbsp;; seul l'administrateur y a accès.</span>
                 <span class="muted">Jusqu'à 8 jours de plus dans les sauvegardes&nbsp;; rien si vous cochez la case, ni si
                     la limite de questions est atteinte.</span>
-                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à améliorer le service (RGPD, article 6.1.f).</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à améliorer le service.</span>
             </li>
             <li>
                 <h3 class="donnee-titre">Journal des réponses</h3>
                 <strong class="donnee-duree">@Months(AnswerLogEntry.Retention) mois</strong>
                 <span>Suivi du coût et de la qualité&nbsp;: date, issue (réponse, refus, hors sujet, erreur), score du meilleur passage, durées, coût, contrôles
-                    déclenchés, longueur de la question. Ni le texte de la question ni celui de la réponse.</span>
+                    déclenchés, longueur de la question, identifiant de trace (il relie la ligne aux traces techniques,
+                    effacées en 14 jours). Ni le texte de la question ni celui de la réponse.</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à maîtriser le coût et la qualité des
+                    réponses.</span>
             </li>
             <li>
                 <h3 class="donnee-titre">Journaux techniques et traces</h3>
@@ -108,6 +118,8 @@
                 <span>Les mêmes mesures, étape par étape, et un identifiant de visite tiré au hasard à
                     l'ouverture de la page, qui ne vous suit pas
                     d'une visite à l'autre (ni cookie, ni adresse IP).</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à faire fonctionner et sécuriser le
+                    service.</span>
             </li>
             <li>
                 <h3 class="donnee-titre">Adresse IP</h3>
@@ -115,6 +127,8 @@
                 <span>Limiter le nombre de questions par heure et par visiteur. Elle n'est écrite dans aucun journal de
                     l'application.</span>
                 <span class="muted">Effacée au redémarrage de l'application.</span>
+                <span class="fondement">Fondement&nbsp;: l'intérêt légitime à protéger le service et son budget des
+                    abus.</span>
             </li>
             <li>
                 <h3 class="donnee-titre">Votre avis</h3>
@@ -122,7 +136,8 @@
                 <span>Améliorer Limpide et constituer ses questions de test. Une question et sa réponse n'y sont jointes que
                     si vous cochez la case prévue, proposée seulement par «&nbsp;Donner mon avis sur cette réponse&nbsp;».</span>
                 <span class="muted">Sans adresse IP ni identifiant.</span>
-                <span class="fondement">Fondement&nbsp;: votre consentement, pour la question jointe.</span>
+                <span class="fondement">Fondement&nbsp;: votre consentement, pour la question jointe&nbsp;;
+                    l'intérêt légitime à améliorer Limpide, pour le reste de l'avis, que vous envoyez vous-même.</span>
             </li>
         </ul>
     </section>
@@ -130,11 +145,17 @@
     <div class="droits">
         <section aria-labelledby="vd-droits">
             <h2 id="vd-droits" class="titre-bloc">Vos droits</h2>
-            <p>Vous pouvez demander l'accès à vos données, leur effacement ou leur rectification, et vous opposer à la
-                conservation de vos questions (la case suffit pour les prochaines). Limpide ne vous identifie pas&nbsp;: pour
-                retrouver une question, écrivez à <a href="mailto:@Contact">@Contact</a> avec son texte et le jour où vous
-                l'avez posée. Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à
-                la <a href="https://www.cnil.fr/fr/adresser-une-plainte">CNIL</a>.</p>
+            <p>Vous pouvez demander l'accès à vos données, leur effacement ou leur rectification. Limpide ne vous
+                identifie pas&nbsp;: pour retrouver une question, écrivez à <a href="mailto:@Contact">@Contact</a> avec
+                son texte et le jour où vous l'avez posée. Limpide répond sous un mois.</p>
+            <h3 id="vd-opposition" class="donnee-titre droits-opposition">Vous opposer</h3>
+            <p>Vous pouvez vous opposer aux traitements fondés sur l'intérêt légitime (RGPD, article 21). Pour la
+                conservation de vos questions, la case sous le champ suffit, pour les suivantes. Pour le reste, écrivez
+                à <a href="mailto:@Contact">@Contact</a>&nbsp;: Limpide examine chaque demande, et peut maintenir un
+                traitement pour un motif impérieux, comme la sécurité du service (traces, limite de questions). L'envoi
+                de la question aux deux services ne peut pas être évité&nbsp;: sans lui, pas de réponse.</p>
+            <p class="droits-opposition">Si vous estimez que vos droits ne sont pas respectés, vous pouvez adresser une réclamation à la
+                <a href="https://www.cnil.fr/fr/adresser-une-plainte">CNIL</a>.</p>
         </section>
         <section aria-labelledby="vd-responsable">
             <h2 id="vd-responsable" class="titre-bloc">Qui est responsable</h2>

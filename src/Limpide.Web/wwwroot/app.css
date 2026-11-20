@@ -752,8 +752,10 @@ section h2 { font-size: 1.15rem; margin: 0 0 0.6rem; display: flex; flex-wrap: w
 .donnee-duree { order: -1; font-size: 1.625rem; font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; }
 .donnee-titre { margin: 0; font-size: 1rem; font-weight: 700; line-height: 1.4; }
 .donnees-cartes .fondement { margin-top: 0.25rem; padding-top: 0.5rem; border-top: 1px solid var(--border); }
-.droits { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem 3rem; }
+.droits { display: grid; grid-template-columns: minmax(0, 1fr); gap: 2rem 3rem; align-items: start; }
 .droits p { margin: 0.5rem 0 0; }
+/* Opposition présentée à part (RGPD, article 21.4) : filet avant et après, sous son propre titre. */
+.droits .droits-opposition { margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border); }
 @media (min-width: 48rem) { .droits { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (min-width: 64rem) {
     .commandes.trajet { grid-template-columns: repeat(3, minmax(0, 1fr)); }
