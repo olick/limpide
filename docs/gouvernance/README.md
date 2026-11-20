@@ -12,10 +12,14 @@ démo : un fichier, une migration, une ADR, un contrôle de la chaîne. Une règ
 | [Registre des sources](registre-des-sources.md) | Que permettent les licences du corpus, et comment le système les respecte-t-il ? |
 | [Données personnelles (RGPD)](rgpd.md) | Registre des traitements, fondements, droits, sous-traitants, écarts |
 
-## Partie IA (S9, session 2, à venir)
+## Partie IA (S9, session 2, 2026-11-20)
 
-Classification de Limpide au regard de l'AI Act, registre des risques IA, fiche descriptive du système, procédure
-d'incident.
+| Document | Ce qu'il répond |
+|---|---|
+| [Classification AI Act](classification-ai-act.md) | Quel rôle, quelle catégorie de risque, quelles obligations, articles à l'appui ? |
+| [Registre des risques IA](registre-des-risques-ia.md) | Qu'est-ce qui peut mal tourner dans la réponse, qu'est-ce qui le limite, où le vérifier ? |
+| [Fiche descriptive du système](fiche-systeme.md) | Modèles, données, usage prévu et exclu, mesures, limites connues |
+| [Procédure d'incident](procedure-incident.md) | Détecter, qualifier, corriger, communiquer, retenir ; incidents déjà survenus |
 
 ## Documents liés
 

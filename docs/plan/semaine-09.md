@@ -600,3 +600,36 @@ de protection raccourcis (le masquage n'est plus expliqué deux fois). Phrase no
 pour répondre ne l'est pas. Aucune information de l'ancienne page ne disparaît ; fondements encore à écrire (envoi de
 la question, journal, traces, adresse IP) : toujours ouverts.
 
+
+### Session 1 : gouvernance, partie données (2026-11-19 et 20)
+
+`docs/gouvernance/` : classification des données, RACI, registre des sources, RGPD (PR #108, puis #110, #111, #112).
+
+- **Fondements** : intérêt légitime nommé pour chaque traitement (choix d'Alexandre, PR #110), droit d'opposition
+  traitement par traitement ; écrits sur la page « Vos données » avec l'opposition sous son propre titre (PR #112).
+- **Fuite trouvée en rédigeant** : `deploy/exporter-corpus.sh` envoyait `question_log` et `answer_log` de la
+  production dans la sauvegarde du corpus (Azure, puis machines de GitHub à chaque évaluation). Export par liste
+  blanche vérifié sur la sauvegarde elle-même (PR #109), réexport propre, versions du 2026-11-06 supprimées ; verrou du
+  compte levé puis remis, procédure corrigée pour qu'il soit remis même sur interruption (PR #111).
+- **Mistral** : le réglage d'entraînement de l'API était actif ; désactivé par Alexandre dans les deux espaces le
+  2026-11-19. Relevé en production (lecture seule) : 66 questions envoyées à Mistral sur 83 depuis le 2026-10-19.
+- **OVHcloud AI Endpoints** : conservation nulle annoncée sur la page du produit, pas lue dans un contrat.
+
+### Session 2 : gouvernance, partie IA (2026-11-20)
+
+Quatre documents dans `docs/gouvernance/` : classification AI Act, registre des risques IA (13 risques), fiche
+descriptive du système, procédure d'incident. Articles lus dans la version consolidée (copie locale `rag_consolide`,
+la base locale `rag` sert encore le texte de 2024).
+
+- **Classification** : fournisseur (et fournisseur en aval du modèle de Mistral), ni pratique interdite ni haut
+  risque ; annexe III, point 8 a) écarté (pas une autorité judiciaire), avec ce qui ferait basculer.
+- **Écart trouvé** : article 50.2, marquage **lisible par machine** du texte généré, applicable depuis le 2 août 2026 ;
+  la démo, en ligne depuis le 2026-10-06, n'a pas droit au délai de l'article 111.4. Rien ne le fait aujourd'hui :
+  mesure proposée, à décider (risque R13).
+- **Constat** : les garde-fous après rédaction signalent, ils ne bloquent pas ; écrit tel quel dans le registre.
+- **Incidents passés qualifiés** : AI Act périmé (comportement, majeur) ; questions dans la sauvegarde du corpus
+  (violation sans risque, donc sans notification, documentée : RGPD, articles 33.1 et 33.5) ; entraînement chez
+  Mistral (défaut d'information, article 13, choix d'interprétation écrit comme tel).
+
+**Points ouverts** : marquage de l'article 50.2 ; accord de traitement d'OVHcloud pour AI Endpoints ; durée de
+`admin_actions` et purge de `trace_id` à 14 jours (`rgpd.md`) ; veille des actes modificatifs, manuelle.
