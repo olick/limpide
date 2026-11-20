@@ -37,7 +37,7 @@ R : réalise. A : décide et en répond (un seul par ligne). C : consulté avant
 | Ajouter un traitement de données personnelles ou un destinataire | A | C | C | R | visiteurs : I | page « Vos données » mise à jour dans la même PR (`.claude/rules/interfaces-web.md`) ; `rgpd.md` mis à jour |
 | Répondre à une demande d'exercice des droits | A, R | | | | visiteur : I | délai d'un mois (RGPD, article 12.3) ; suppression d'une question dans le back office, notée sans son texte |
 | Relire les questions conservées et les retours | A, R | C | | | | purge automatique (30 jours, 12 mois) ; aucun versement automatique dans le jeu d'évaluation (ADR-019) |
-| Traiter un incident (sécurité, données, réponse dangereuse) | C | A si comportement | A si sécurité ou données | R | CNIL : I sous 72 h en cas de violation de données à risque (article 33) ; visiteurs : I si risque élevé (article 34) ; sous-traitant concerné : I | alertes Grafana et Discord (ADR-018) ; procédure d'incident (session 2 de la S9) |
+| Traiter un incident (sécurité, données, réponse dangereuse) | C | A si comportement | A si sécurité ou données | R | CNIL : I sous 72 h en cas de violation de données à risque (article 33) ; visiteurs : I si risque élevé (article 34) ; sous-traitant concerné : I | alertes Grafana et Discord (ADR-018) ; procédure d'incident (`procedure-incident.md`) |
 | Renouveler un secret | | | A, R | | | échéances des secrets clients Microsoft (2027-10-12) ; Gitleaks en CI |
 
 ## Ce qui change avec une seconde personne

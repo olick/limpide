@@ -103,8 +103,9 @@ réalisation) : **toujours lire celui de la semaine en cours**.
 
 S1–S8 faites (POC, démo, Airflow, versions, back office, Terraform, évaluation en CI et chaîne jusqu'au VPS ;
 S8 le 2026-10-28 : observabilité, coûts, sécurité, garde-fous v2, ADR-018 à 021).
-**Prochaine : S9** (gouvernance, documentation, démonstration), avec la refonte de l'interface **avant** le script
-de la vidéo (fil de questions sans mémoire, ADR-022), puis S10 (marge).
+**En cours : S9** (gouvernance, documentation, démonstration). Refonte de l'interface faite ; dossier de gouvernance
+fait (sessions 1 et 2, `docs/gouvernance/`, 2026-11-20). **Prochaine : session 3** (ADR et README), puis le script
+de la vidéo, la diffusion, et S10 (marge). Écart ouvert : marquage lisible par machine (AI Act, article 50.2).
 
 Points ouverts de la S8 : tableau en tête de `semaine-08.md` (dont la lenteur de la vectorisation chez OVHcloud,
 15 s par question le 2026-10-28 au soir, à remesurer).
